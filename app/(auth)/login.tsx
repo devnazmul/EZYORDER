@@ -1,7 +1,8 @@
 import InputField from "@/components/InputField";
 import ENV from "@/config/env";
-import authStore from "@/utils/authStore";
+import { useAuth } from "@/context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { router, Stack } from "expo-router";
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import {
 
 const Login = () => {
   const API_BASE_URL = ENV.API_BASE_URL;
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -27,7 +29,6 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
@@ -83,12 +84,9 @@ const Login = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-
-    try {
+  // React Query login mutation hook
+  const loginMutation = useMutation({
+    mutationFn: async () => {
       const response = await axios.post(
         `${API_BASE_URL}/auth`,
         {
@@ -103,18 +101,27 @@ const Login = () => {
           validateStatus: () => true,
         },
       );
-
+      return response;
+    },
+    onSuccess: async (response) => {
       const data = response.data;
+      console.log("User details:", data);
 
       if (response.status >= 200 && response.status < 300) {
+        const userType = (data?.type || data?.user?.type || "").toLowerCase().trim();
+        const allowedRoles = ["restaurant_owner", "owner"];
+
+        if (!allowedRoles.includes(userType)) {
+          setErrorBanner(
+            "Access Denied. This application is restricted to Restaurant Owners and Business Administrators.",
+          );
+          return;
+        }
+
         showToast("User logged in successfully", "success");
 
-        // Save token details internally
-        console.log("Token:", data?.token);
-        console.log("User details:", data);
-
         if (data?.token) {
-          await authStore.saveSession(data.token, data);
+          await login(data.token, data);
         }
 
         router.replace("/(tabs)/home");
@@ -135,12 +142,18 @@ const Login = () => {
         }
         setErrorBanner(errorMessage);
       }
-    } catch (error: any) {
+    },
+    onError: (error) => {
       console.error(error);
       setErrorBanner("Network connection error. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const isLoading = loginMutation.isPending;
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+    loginMutation.mutate();
   };
 
   const handleForgotPassword = () => {
@@ -181,10 +194,10 @@ const Login = () => {
         >
           {/* Header Branding */}
           <View className="items-center text-center mt-8 mb-6">
-            <View className="w-16 h-16 bg-primary rounded-full items-center justify-center shadow-lg mb-4">
+            <View className="w-16 h-16 bg-primary rounded-lg items-center justify-center shadow-lg mb-4">
               <MaterialIcons name="restaurant" size={36} color="white" />
             </View>
-            <Text className="text-2xl font-bold text-neutral">Gourmet Express</Text>
+            <Text className="text-2xl font-bold text-neutral">EZYORDER</Text>
             <Text className="text-sm text-accent mt-1">Manage your restaurant, anywhere</Text>
           </View>
 
