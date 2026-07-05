@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useAuth } from "@/context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
+import React, { useState } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface AppHeaderProps {
   showBackButton?: boolean;
@@ -45,7 +45,10 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
       {/* Left side: Back Button & Restaurant Name */}
       <View className="flex-row items-center gap-2">
         {showBackButton && (
-          <TouchableOpacity onPress={() => router.back()} className="p-1.5 hover:bg-base-200 rounded-full mr-1">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="p-1.5 hover:bg-base-200 rounded-full mr-1"
+          >
             <MaterialIcons name="arrow-back" size={24} color="#DC2D2A" />
           </TouchableOpacity>
         )}
@@ -55,10 +58,10 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
       {/* Right side: Notification Button & Profile Avatar Dropdown */}
       <View className="flex-row items-center gap-4">
         {/* Notification Bell */}
-        <TouchableOpacity className="relative p-2 rounded-full hover:bg-base-200">
+        {/* <TouchableOpacity className="relative p-2 rounded-full hover:bg-base-200">
           <MaterialIcons name="notifications-none" size={24} color="#DC2D2A" />
           <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-primary rounded-full border-2 border-base-300" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Profile Avatar Button */}
         <TouchableOpacity
@@ -67,7 +70,11 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
           className="w-10 h-10 rounded-full bg-primary items-center justify-center shadow-sm overflow-hidden border border-base-200"
         >
           {user?.image ? (
-            <Image source={{ uri: user.image }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+            <Image
+              source={{ uri: user.image }}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
+            />
           ) : (
             <Text className="text-white font-bold text-sm">{initials}</Text>
           )}

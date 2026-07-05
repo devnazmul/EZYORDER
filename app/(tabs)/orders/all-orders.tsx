@@ -1,23 +1,18 @@
+import AppHeader from "@/components/AppHeader";
+import OrderCard from "@/components/OrderCard";
+import OrderDetailsModal from "@/components/OrderDetailsModal";
+import EmptyState from "@/components/reuseable/EmptyState";
+import FilterChips from "@/components/reuseable/FilterChips";
+import LoadingScreen from "@/components/reuseable/LoadingScreen";
+import ToggleBar from "@/components/reuseable/ToggleBar";
 import ENV from "@/config/env";
 import { useAuth } from "@/context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, RefreshControl, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AppHeader from "@/components/AppHeader";
 
 interface AllOrdersProps {
   initialTab?: "live" | "historical";
@@ -67,7 +62,6 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
           headers,
           validateStatus: () => true,
         });
-        console.log("Response from live orders endpoint: ", response.data);
         if (response.status === 200 && response.data) {
           const rawData = response.data.data || response.data;
           let flattenedOrders: any[] = [];
@@ -89,8 +83,6 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
           params: { per_page: 50, page: 1 },
           validateStatus: () => true,
         });
-
-        console.log("Response from historical orders endpoint: ", response.data);
 
         if (response.status === 200 && response.data) {
           const rawData = response.data.data || response.data;
@@ -132,155 +124,30 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  // Helper to extract items description
-  const getOrderItemsText = (order: any) => {
-    if (!order) return "";
-    if (order.items_summary) return order.items_summary;
-    const detailList = order.detail || order.details;
-    if (Array.isArray(detailList) && detailList.length > 0) {
-      return detailList
-        .map((d: any) => `${d.qty || d.quantity || 1}x ${d.dish?.name || d.dish_name || "Item"}`)
-        .join(", ");
-    }
-    return order.description || "";
+  const handleViewDetails = (order: any) => {
+    setSelectedOrder(order);
+    setShowDetailsModal(true);
   };
 
-  // Helper to safely format time from string
-  const getOrderTimeStr = (createdAtStr: string) => {
-    if (!createdAtStr) return "--:--";
-    const parts = createdAtStr.split(" ");
-    if (parts.length > 1) {
-      const timePart = parts[1]; // "18:23:25"
-      if (timePart) {
-        const timeSubParts = timePart.split(":");
-        if (timeSubParts.length > 1) {
-          return `${timeSubParts[0]}:${timeSubParts[1]}`; // "18:23"
-        }
-      }
-    }
-    return createdAtStr;
-  };
+  const statusChips = [
+    { id: "all", label: "All" },
+    { id: "new", label: "New" },
+    { id: "preparing", label: "Preparing" },
+    { id: "completed", label: "Completed" },
+    { id: "unpaid", label: "Unpaid" },
+  ];
 
-  // Status Badge Colors Config
-  const getStatusBadgeConfig = (status: string) => {
-    const s = (status || "").toLowerCase().trim();
-    switch (s) {
-      case "new":
-      case "pending":
-        return {
-          style: { backgroundColor: "#EFF6FF", borderColor: "#DBEAFE" },
-          textStyle: { color: "#1E40AF" },
-          label: "New",
-          icon: "fiber-new",
-        };
-      case "kitchen":
-      case "preparing":
-        return {
-          style: { backgroundColor: "#FFF7ED", borderColor: "#FFEDD5" },
-          textStyle: { color: "#C2410C" },
-          label: "Preparing",
-          icon: "restaurant",
-        };
-      case "completed":
-      case "complete":
-        return {
-          style: { backgroundColor: "#F0FDF4", borderColor: "#DCFCE7" },
-          textStyle: { color: "#166534" },
-          label: "Completed",
-          icon: "check-circle",
-        };
-      case "unpaid":
-        return {
-          style: { backgroundColor: "#FDF2F8", borderColor: "#FCE7F3" },
-          textStyle: { color: "#9D174D" },
-          label: "Unpaid",
-          icon: "payment",
-        };
-      default:
-        return {
-          style: { backgroundColor: "#F5F5F5", borderColor: "#E5E5E5" },
-          textStyle: { color: "#404040" },
-          label: status || "Unknown",
-          icon: "help-outline",
-        };
-    }
-  };
+  const typeChips = [
+    { id: "all", label: "All" },
+    { id: "eat_in", label: "Eat In" },
+    { id: "delivery", label: "Delivery" },
+    { id: "take_away", label: "Take Away" },
+    { id: "walk_in", label: "Walk In" },
+  ];
 
-  const renderOrderCard = ({ item }: { item: any }) => {
-    const configBadge = getStatusBadgeConfig(item.status);
-    const orderTime = getOrderTimeStr(item.created_at);
-
-    return (
-      <View className="bg-base-300 rounded-xl border border-base-200 overflow-hidden shadow-sm mb-4">
-        <View className="p-4 gap-y-3">
-          <View className="flex-row justify-between items-start">
-            <View className="gap-y-1">
-              <View className="flex-row items-center gap-2">
-                <Text className="text-md font-bold text-neutral">#{item.id}</Text>
-                <View className="bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                  <Text className="text-[9px] font-bold text-blue-700 uppercase tracking-wider">
-                    {item.type || "Delivery"}
-                  </Text>
-                </View>
-              </View>
-              <Text className="text-sm font-semibold text-neutral">
-                {item.customer_name ||
-                  item.user?.first_Name ||
-                  (item.table_number && parseFloat(item.table_number) > 0
-                    ? `Table ${parseFloat(item.table_number)}`
-                    : "Walk-in Customer")}
-              </Text>
-            </View>
-
-            <View className="items-end gap-y-1">
-              <View
-                className="flex-row items-center px-2.5 py-1 rounded-full border"
-                style={configBadge.style}
-              >
-                <MaterialIcons
-                  name={configBadge.icon as any}
-                  size={12}
-                  color={configBadge.textStyle.color}
-                  style={{ marginRight: 4 }}
-                />
-                <Text className="text-[10px] font-bold" style={configBadge.textStyle}>
-                  {configBadge.label}
-                </Text>
-              </View>
-              <Text className="text-xs text-accent">{orderTime}</Text>
-            </View>
-          </View>
-
-          {/* Items Summary bubble */}
-          <View className="bg-base-100 rounded-lg p-3">
-            <Text className="text-xs text-accent font-medium leading-4" numberOfLines={2}>
-              {getOrderItemsText(item)}
-            </Text>
-          </View>
-
-          {/* Price & Actions Row */}
-          <View className="flex-row justify-between items-center pt-1">
-            <Text className="text-md font-bold text-neutral">
-              £{parseFloat(item.amount || item.final_price || "0").toFixed(2)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Buttons drawer */}
-        <View className="px-4 pb-4">
-          <TouchableOpacity
-            onPress={() => {
-              setSelectedOrder(item);
-              setShowDetailsModal(true);
-            }}
-            className="w-full bg-primary py-3 rounded-lg flex-row items-center justify-center gap-2 shadow-sm"
-          >
-            <Text className="text-white font-bold text-xs">View Details</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
+  if (isLoading) {
+    return <LoadingScreen message="Loading orders..." />;
+  }
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-base-100">
@@ -289,40 +156,19 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
       {/* Main Body */}
       <View className="flex-1 px-4 py-4">
         {/* Toggle between Live and Historical */}
-        <View className="flex-row p-1 bg-base-200 rounded-xl mb-4">
-          <TouchableOpacity
-            onPress={() => {
-              setActiveTab("live");
-              setActiveStatusChip("all");
-              setActiveTypeChip("all");
-            }}
-            className="flex-1 py-2.5 items-center justify-center rounded-lg"
-            style={activeTab === "live" ? { backgroundColor: "#DC2D2A" } : undefined}
-          >
-            <Text
-              className="text-xs font-semibold"
-              style={{ color: activeTab === "live" ? "#FFFFFF" : "#6E6E6E" }}
-            >
-              Today's Orders
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setActiveTab("historical");
-              setActiveStatusChip("all");
-              setActiveTypeChip("all");
-            }}
-            className="flex-1 py-2.5 items-center justify-center rounded-lg"
-            style={activeTab === "historical" ? { backgroundColor: "#DC2D2A" } : undefined}
-          >
-            <Text
-              className="text-xs font-semibold"
-              style={{ color: activeTab === "historical" ? "#FFFFFF" : "#6E6E6E" }}
-            >
-              All Orders
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <ToggleBar
+          options={[
+            { id: "live", label: "Today's Orders" },
+            { id: "historical", label: "All Orders" },
+          ]}
+          activeId={activeTab}
+          onSelect={(id) => {
+            setActiveTab(id);
+            setActiveStatusChip("all");
+            setActiveTypeChip("all");
+          }}
+          containerClassName="mb-4"
+        />
 
         {/* Filters Panel Container */}
         <View className="gap-y-3 mb-4">
@@ -343,194 +189,41 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
             )}
           </View>
 
-          {/* Status Chips Scrollable Row */}
-          <View>
-            {activeTab === "live" ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ flexDirection: "row", paddingRight: 16 }}
-              >
-                {[
-                  { id: "all", label: "All" },
-                  { id: "new", label: "New" },
-                  { id: "preparing", label: "Preparing" },
-                  { id: "completed", label: "Completed" },
-                  { id: "unpaid", label: "Unpaid" },
-                ].map((chip) => (
-                  <TouchableOpacity
-                    key={chip.id}
-                    onPress={() => setActiveStatusChip(chip.id)}
-                    className="px-4 py-2 rounded-full mr-2 border border-base-200 bg-base-300 items-center justify-center"
-                    style={
-                      activeStatusChip === chip.id
-                        ? { backgroundColor: "#0D0D0D", borderColor: "#0D0D0D" }
-                        : undefined
-                    }
-                  >
-                    <Text
-                      numberOfLines={1}
-                      className="text-xs font-bold text-center"
-                      style={{ color: activeStatusChip === chip.id ? "#FFFFFF" : "#6E6E6E", flexShrink: 0 }}
-                    >
-                      {chip.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ flexDirection: "row", paddingRight: 16 }}
-              >
-                {[
-                  { id: "all", label: "All" },
-                  { id: "eat_in", label: "Eat In" },
-                  { id: "delivery", label: "Delivery" },
-                  { id: "take_away", label: "Take Away" },
-                  { id: "walk_in", label: "Walk In" },
-                ].map((chip) => (
-                  <TouchableOpacity
-                    key={chip.id}
-                    onPress={() => setActiveTypeChip(chip.id)}
-                    className="px-4 py-2 rounded-full mr-2 border border-base-200 bg-base-300 items-center justify-center"
-                    style={
-                      activeTypeChip === chip.id
-                        ? { backgroundColor: "#0D0D0D", borderColor: "#0D0D0D" }
-                        : undefined
-                    }
-                  >
-                    <Text
-                      numberOfLines={1}
-                      className="text-xs font-bold text-center"
-                      style={{ color: activeTypeChip === chip.id ? "#FFFFFF" : "#6E6E6E", flexShrink: 0 }}
-                    >
-                      {chip.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-          </View>
+          {/* Status/Type Chips */}
+          <FilterChips
+            chips={activeTab === "live" ? statusChips : typeChips}
+            selectedId={activeTab === "live" ? activeStatusChip : activeTypeChip}
+            onSelect={activeTab === "live" ? setActiveStatusChip : setActiveTypeChip}
+          />
         </View>
 
         {/* FlatList display */}
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#DC2D2A" />
-            <Text className="mt-4 text-xs font-semibold text-accent">Loading orders...</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={filteredOrders}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={renderOrderCard}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            refreshControl={
-              <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={["#DC2D2A"]} />
-            }
-            ListEmptyComponent={
-              <View className="flex-1 items-center justify-center py-20">
-                <MaterialIcons name="assignment-late" size={48} color="#A3A3A3" />
-                <Text className="mt-4 text-sm font-semibold text-neutral">No Orders Found</Text>
-                <Text className="mt-1 text-xs text-accent text-center px-6">
-                  Try modifying your filters or checking back later.
-                </Text>
-              </View>
-            }
-          />
-        )}
+        <FlatList
+          data={filteredOrders}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => <OrderCard item={item} onViewDetails={() => handleViewDetails(item)} />}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={["#DC2D2A"]} />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon="assignment-late"
+              title="No Orders Found"
+              description="Try modifying your filters or checking back later."
+              pyClassName="py-20"
+            />
+          }
+        />
       </View>
 
       {/* Order Details Modal (View Details) */}
-      <Modal
+      <OrderDetailsModal
         visible={showDetailsModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowDetailsModal(false)}
-      >
-        <View className="flex-1 justify-end bg-neutral/50">
-          <View className="bg-base-300 rounded-t-3xl p-6 max-h-[80%] border-t border-base-200 shadow-2xl gap-y-4">
-            <View className="flex-row justify-between items-center border-b border-base-200 pb-3">
-              <View className="gap-y-1">
-                <Text className="text-lg font-bold text-neutral">Order #{selectedOrder?.id}</Text>
-                <Text className="text-xs text-accent">
-                  Type: <Text className="font-bold uppercase text-primary">{selectedOrder?.type}</Text>
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => setShowDetailsModal(false)}
-                className="p-1 hover:bg-base-200 rounded-full"
-              >
-                <MaterialIcons name="close" size={24} color="#6E6E6E" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} className="gap-y-4">
-              {/* Customer Information */}
-              <View className="gap-y-2">
-                <Text className="text-xs font-bold text-accent uppercase tracking-wider">
-                  Customer Details
-                </Text>
-                <View className="bg-base-100 rounded-xl p-4 gap-y-2 border border-base-200">
-                  <View className="flex-row justify-between">
-                    <Text className="text-xs text-accent">Name:</Text>
-                    <Text className="text-xs font-bold text-neutral">
-                      {selectedOrder?.customer_name ||
-                        selectedOrder?.user?.first_Name ||
-                        (selectedOrder?.table_number && parseFloat(selectedOrder.table_number) > 0
-                          ? `Table ${parseFloat(selectedOrder.table_number)}`
-                          : "Walk-in Customer")}
-                    </Text>
-                  </View>
-                  {(selectedOrder?.customer_phone || selectedOrder?.user?.phone) && (
-                    <View className="flex-row justify-between">
-                      <Text className="text-xs text-accent">Phone:</Text>
-                      <Text className="text-xs font-bold text-neutral">
-                        {selectedOrder.customer_phone || selectedOrder.user.phone}
-                      </Text>
-                    </View>
-                  )}
-                  <View className="flex-row justify-between">
-                    <Text className="text-xs text-accent">Time:</Text>
-                    <Text className="text-xs font-bold text-neutral">
-                      {selectedOrder?.created_at || "--:--"}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Items details list */}
-              <View className="gap-y-2 mt-4">
-                <Text className="text-xs font-bold text-accent uppercase tracking-wider">Order Items</Text>
-                <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-3">
-                  <View className="border-b border-base-200 pb-2">
-                    <Text className="text-xs text-neutral leading-5 font-semibold">
-                      {getOrderItemsText(selectedOrder)}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between items-center pt-1">
-                    <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
-                    <Text className="text-md font-bold text-primary">
-                      £{parseFloat(selectedOrder?.amount || selectedOrder?.final_price || "0").toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </ScrollView>
-
-            {/* Bottom Modal Actions */}
-            <TouchableOpacity
-              onPress={() => setShowDetailsModal(false)}
-              className="w-full bg-primary py-3 rounded-lg items-center justify-center mt-2 shadow-sm"
-            >
-              <Text className="text-white font-bold text-xs">Close Details</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        order={selectedOrder}
+        onClose={() => setShowDetailsModal(false)}
+      />
     </SafeAreaView>
   );
 }

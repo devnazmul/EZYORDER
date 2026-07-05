@@ -1,4 +1,4 @@
-import InputField from "@/components/InputField";
+import InputField from "@/components/reuseable/InputField";
 import ENV from "@/config/env";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";

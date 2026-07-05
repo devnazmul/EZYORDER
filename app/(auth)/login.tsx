@@ -1,4 +1,5 @@
-import InputField from "@/components/InputField";
+import Button from "@/components/reuseable/Button";
+import InputField from "@/components/reuseable/InputField";
 import ENV from "@/config/env";
 import { useAuth } from "@/context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -7,7 +8,6 @@ import axios from "axios";
 import { router, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -105,7 +105,6 @@ const Login = () => {
     },
     onSuccess: async (response) => {
       const data = response.data;
-      console.log("User details:", data);
 
       if (response.status >= 200 && response.status < 300) {
         const userType = (data?.type || data?.user?.type || "").toLowerCase().trim();
@@ -193,7 +192,7 @@ const Login = () => {
           showsVerticalScrollIndicator={false}
         >
           {/* Header Branding */}
-          <View className="items-center text-center mt-8 mb-6">
+          <View className="items-center mt-8 mb-6">
             <View className="w-16 h-16 bg-primary rounded-lg items-center justify-center shadow-lg mb-4">
               <MaterialIcons name="restaurant" size={36} color="white" />
             </View>
@@ -270,19 +269,7 @@ const Login = () => {
             </View>
 
             {/* Primary Action Button */}
-            <TouchableOpacity
-              onPress={handleSubmit}
-              disabled={isLoading}
-              className={`w-full h-12 bg-primary rounded-lg items-center justify-center shadow-md mt-6 ${
-                isLoading ? "opacity-80" : ""
-              }`}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text className="text-white text-sm font-bold">Log In</Text>
-              )}
-            </TouchableOpacity>
+            <Button label="Log In" onPress={handleSubmit} isLoading={isLoading} containerClassName="mt-6" />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
