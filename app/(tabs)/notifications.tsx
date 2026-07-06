@@ -148,7 +148,7 @@ export default function Notifications() {
     .map(([title, data]) => ({ title, data }));
 
   return (
-    <SafeAreaView key="loaded" edges={["top"]} className="flex-1 bg-base-100">
+    <SafeAreaView key="loaded" edges={["left", "right"]} className="flex-1 bg-base-100">
       <AppHeader />
 
       <SectionList

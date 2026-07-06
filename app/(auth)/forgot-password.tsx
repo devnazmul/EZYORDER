@@ -1,11 +1,10 @@
+import Button from "@/components/reuseable/Button";
 import InputField from "@/components/reuseable/InputField";
-import ENV from "@/config/env";
+import { useForgotPasswordMutation } from "@/hooks/useAuthQueries";
 import { MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -17,10 +16,7 @@ import {
 } from "react-native";
 
 export default function ForgotPassword() {
-  const API_BASE_URL = ENV.API_BASE_URL;
-
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [errors, setErrors] = useState<{ email?: string }>({});
   const [cooldown, setCooldown] = useState(0);
@@ -69,29 +65,9 @@ export default function ForgotPassword() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/v1.0/forget-password`,
-        {
-          email: email.trim(),
-          client_site: "dashboard",
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          validateStatus: () => true,
-        },
-      );
-
+  const forgotPasswordMutation = useForgotPasswordMutation(
+    async (response) => {
       const data = response.data;
-      console.log("Response Data:", data);
 
       if (response.status >= 200 && response.status < 300) {
         showToast("Password reset link sent to your email.", "success");
@@ -117,12 +93,18 @@ export default function ForgotPassword() {
         }
         setErrorBanner(errorMessage);
       }
-    } catch (error: any) {
+    },
+    (error) => {
       console.error(error);
       setErrorBanner("Network connection error. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  );
+
+  const isLoading = forgotPasswordMutation.isPending;
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+    forgotPasswordMutation.mutate(email.trim());
   };
 
   const handleInputChange = (val: string) => {
@@ -221,23 +203,12 @@ export default function ForgotPassword() {
                 />
 
                 {/* Send Button */}
-                <TouchableOpacity
+                <Button
+                  label="Send Reset Link"
                   onPress={handleSubmit}
-                  disabled={isLoading}
-                  className={`w-full h-12 bg-primary rounded-lg flex items-center justify-center shadow-md mt-6 flex-row gap-2 ${
-                    isLoading ? "opacity-80" : ""
-                  }`}
-                  activeOpacity={0.9}
-                >
-                  {isLoading ? (
-                    <ActivityIndicator color="white" />
-                  ) : (
-                    <>
-                      <Text className="text-white text-sm font-bold">Send Reset Link </Text>
-                      <MaterialIcons name="send" size={16} color="white" />
-                    </>
-                  )}
-                </TouchableOpacity>
+                  isLoading={isLoading}
+                  containerClassName="mt-6"
+                />
 
                 {/* Footer Link */}
                 <View className="mt-6 pt-6 border-t border-base-200 flex-row items-center justify-center gap-1">
@@ -251,7 +222,6 @@ export default function ForgotPassword() {
               {/* Decorative elements */}
               <View className="flex-row items-center justify-center gap-2 opacity-30">
                 <View className="w-2 h-2 rounded-full bg-primary" />
-                <View className="w-2 h-2 rounded-full bg-accent" />
                 <View className="w-2 h-2 rounded-full bg-accent" />
               </View>
             </View>

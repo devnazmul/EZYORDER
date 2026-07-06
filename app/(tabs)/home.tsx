@@ -34,7 +34,7 @@ export default function Home() {
   };
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-base-100">
+    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       <AppHeader />
 
       <ScrollView

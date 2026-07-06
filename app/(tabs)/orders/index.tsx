@@ -1,10 +1,10 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import AppHeader from "@/components/AppHeader";
+import MenuCard from "@/components/reuseable/MenuCard";
+import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "@/context/AuthContext";
-import AppHeader from "@/components/AppHeader";
 
 export default function OrdersHub() {
   const { user } = useAuth();
@@ -41,7 +41,7 @@ export default function OrdersHub() {
   ];
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-base-100">
+    <SafeAreaView edges={["bottom", "left", "right"]} className="flex-1 bg-base-100">
       <AppHeader />
 
       {/* Main Content Scroll View */}
@@ -59,28 +59,13 @@ export default function OrdersHub() {
         {/* Action Cards Grid */}
         <View className="gap-y-4">
           {menuOptions.map((option) => (
-            <TouchableOpacity
+            <MenuCard
               key={option.id}
+              title={option.title}
+              description={option.description}
+              iconName={option.icon as any}
               onPress={() => router.push(option.route)}
-              activeOpacity={0.7}
-              className="flex-row items-center p-5 bg-base-300 rounded-xl border border-base-200 shadow-sm"
-            >
-              {/* Icon Circular Wrapper */}
-              <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center mr-4">
-                <MaterialIcons name={option.icon as any} size={24} color="#DC2D2A" />
-              </View>
-
-              {/* Text Information */}
-              <View className="flex-1 pr-2">
-                <Text className="text-md font-bold text-neutral mb-0.5">{option.title}</Text>
-                <Text className="text-xs text-accent leading-5" numberOfLines={2}>
-                  {option.description}
-                </Text>
-              </View>
-
-              {/* Chevron Right indicator */}
-              <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
-            </TouchableOpacity>
+            />
           ))}
         </View>
       </ScrollView>

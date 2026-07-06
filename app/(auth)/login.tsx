@@ -1,24 +1,14 @@
 import Button from "@/components/reuseable/Button";
 import InputField from "@/components/reuseable/InputField";
-import ENV from "@/config/env";
 import { useAuth } from "@/context/AuthContext";
+import { useLoginMutation } from "@/hooks/useAuthQueries";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { router, Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Login = () => {
-  const API_BASE_URL = ENV.API_BASE_URL;
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -85,25 +75,8 @@ const Login = () => {
   };
 
   // React Query login mutation hook
-  const loginMutation = useMutation({
-    mutationFn: async () => {
-      const response = await axios.post(
-        `${API_BASE_URL}/auth`,
-        {
-          email: formData.email.trim(),
-          password: formData.password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          validateStatus: () => true,
-        },
-      );
-      return response;
-    },
-    onSuccess: async (response) => {
+  const loginMutation = useLoginMutation(
+    async (response) => {
       const data = response.data;
 
       if (response.status >= 200 && response.status < 300) {
@@ -142,17 +115,17 @@ const Login = () => {
         setErrorBanner(errorMessage);
       }
     },
-    onError: (error) => {
+    (error) => {
       console.error(error);
       setErrorBanner("Network connection error. Please try again.");
     },
-  });
+  );
 
   const isLoading = loginMutation.isPending;
 
   const handleSubmit = () => {
     if (!validateForm()) return;
-    loginMutation.mutate();
+    loginMutation.mutate({ email: formData.email.trim(), password: formData.password });
   };
 
   const handleForgotPassword = () => {

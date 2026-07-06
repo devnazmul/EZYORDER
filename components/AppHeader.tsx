@@ -3,6 +3,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface AppHeaderProps {
   showBackButton?: boolean;
@@ -11,6 +12,7 @@ interface AppHeaderProps {
 export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const insets = useSafeAreaInsets();
 
   // Compute initials fallback
   const getInitials = () => {
@@ -41,7 +43,10 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
   const initials = getInitials();
 
   return (
-    <View className="flex-row justify-between items-center h-16 px-4 bg-base-300 border-b border-base-200 z-50 relative">
+    <View
+      style={{ paddingTop: insets.top + 12 }}
+      className="flex-row justify-between items-center pb-3 px-4 bg-base-300 border-b border-base-200 z-50 relative"
+    >
       {/* Left side: Back Button & Restaurant Name */}
       <View className="flex-row items-center gap-2">
         {showBackButton && (
@@ -83,7 +88,10 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
 
       {/* Dropdown Logout Menu overlay */}
       {showDropdown && (
-        <View className="absolute right-4 top-16 bg-base-300 border border-base-200 rounded-xl shadow-lg p-2 z-50 min-w-[130px]">
+        <View
+          style={{ top: insets.top + 56 }}
+          className="absolute right-4 bg-base-300 border border-base-200 rounded-xl shadow-lg p-2 z-50 min-w-[130px]"
+        >
           <TouchableOpacity
             onPress={handleLogout}
             className="flex-row items-center gap-2 p-2 hover:bg-base-200 rounded-lg w-full"

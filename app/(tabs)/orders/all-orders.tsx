@@ -150,7 +150,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
   }
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-base-100">
+    <SafeAreaView edges={["bottom", "left", "right"]} className="flex-1 bg-base-100">
       <AppHeader showBackButton={true} />
 
       {/* Main Body */}
