@@ -19,18 +19,42 @@ export function getInitials(name?: string): string {
 export function formatDateTime(date?: string, time?: string): string {
   if (!date) return "";
   try {
-    const d = new Date(date);
-    const month = d.toLocaleString("en-US", { month: "short" });
+    let d: Date;
+    // Standardize parsing to avoid Hermes engine/timezone parsing bugs
+    const cleanDateStr = date.split("T")[0];
+    const parts = cleanDateStr.split("-");
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        // YYYY-MM-DD
+        d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      } else if (parts[2].length === 4) {
+        // DD-MM-YYYY
+        d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+      } else {
+        d = new Date(date);
+      }
+    } else {
+      d = new Date(date);
+    }
+
+    if (isNaN(d.getTime())) return date;
+
+    const MONTH_NAMES = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    const month = MONTH_NAMES[d.getMonth()];
     const day = d.getDate();
+    const year = d.getFullYear();
 
     if (time) {
       const [h, m] = time.split(":");
       const hour = parseInt(h, 10);
       const ampm = hour >= 12 ? "PM" : "AM";
       const hour12 = hour % 12 || 12;
-      return `${month} ${day}, ${hour12}:${m} ${ampm}`;
+      return `${month} ${day} ${year}, ${hour12}:${m} ${ampm}`;
     }
-    return `${month} ${day}`;
+    return `${month} ${day} ${year}`;
   } catch {
     return date;
   }
