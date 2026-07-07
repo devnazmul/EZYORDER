@@ -59,6 +59,10 @@ export default function MoreSettingsHub() {
       router.push("/tables-and-reservations");
       return;
     }
+    if (title === "User Management") {
+      router.push("/user-management");
+      return;
+    }
     Alert.alert(
       "Feature Coming Soon",
       `The "${title}" module is currently under development and will be available in the next app update.`,

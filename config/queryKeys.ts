@@ -7,4 +7,8 @@ export const QUERY_KEYS = {
   // Reservation keys
   RESERVATIONS: "reservations",
   SINGLE_RESERVATION: "single_reservation",
+
+  // User keys
+  USERS: "users",
+  SINGLE_USER: "single_user",
 } as const;
