@@ -55,6 +55,10 @@ export default function MoreSettingsHub() {
       router.push("/menu");
       return;
     }
+    if (title === "Tables & Reservations") {
+      router.push("/tables-and-reservations");
+      return;
+    }
     Alert.alert(
       "Feature Coming Soon",
       `The "${title}" module is currently under development and will be available in the next app update.`,
