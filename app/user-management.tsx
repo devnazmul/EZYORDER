@@ -6,8 +6,8 @@ import SearchBar from "@/components/reuseable/SearchBar";
 import UserCard from "@/components/user-management/UserCard";
 import UserDetailModal from "@/components/user-management/UserDetailModal";
 import { useAuth } from "@/context/AuthContext";
-import { useUsersQuery } from "@/hooks/useUserQueries";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useUsersQuery } from "@/hooks/useUserQueries";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
@@ -27,7 +27,11 @@ export default function UserManagementScreen() {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Fetch users from API with server side filters
-  const { data: usersResponse, isLoading, refetch } = useUsersQuery(token || "", {
+  const {
+    data: usersResponse,
+    isLoading,
+    refetch,
+  } = useUsersQuery(token || "", {
     search_key: debouncedSearchQuery.trim() || undefined,
     role: filterValues.role !== "all" ? filterValues.role : undefined,
   });
