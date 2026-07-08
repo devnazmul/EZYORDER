@@ -73,50 +73,58 @@ export default function MenuManagement() {
           </View>
         </View>
 
-        {/* Search Field */}
+        {/* Stats KPIs Summary*/}
+        <View className="mb-6">
+          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-3">
+            Menu Stats
+          </Text>
+          <View className="flex-row flex-wrap gap-3">
+            <View className="flex-1 min-w-[45%]">
+              <KpiCard
+                title="Total Menu"
+                value={String(matrixData?.total_menu ?? 0)}
+                iconName="restaurant-menu"
+                variant="dark"
+                gradientColors={["#2d3e56", "#1b283c"]}
+              />
+            </View>
+            <View className="flex-1 min-w-[45%]">
+              <KpiCard
+                title="Total Dishes"
+                value={String(matrixData?.total_dishes ?? 0)}
+                iconName="restaurant"
+                variant="dark"
+                gradientColors={["#1e4f43", "#11322b"]}
+              />
+            </View>
+            <View className="flex-1 min-w-[45%]">
+              <KpiCard
+                title="Dish Options"
+                value={String(matrixData?.total_dish_option ?? 0)}
+                iconName="trending-up"
+                variant="dark"
+                gradientColors={["#4c3590", "#2e1e5c"]}
+              />
+            </View>
+            <View className="flex-1 min-w-[45%]">
+              <KpiCard
+                title="Total Deals"
+                value={String(matrixData?.total_deal ?? 0)}
+                iconName="local-offer"
+                variant="dark"
+                gradientColors={["#6d242b", "#3d1115"]}
+              />
+            </View>
+          </View>
+        </View>
 
+        {/* Search Field */}
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder="Search categories here..."
           containerClassName="mb-6"
         />
-        {/* Stats KPIs Summary*/}
-        <View className="mb-6">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-3">
-            Menu Stats
-          </Text>
-          <View className="gap-3">
-            <KpiCard
-              title="Total Menu"
-              value={String(matrixData?.total_menu ?? 0)}
-              iconName="restaurant-menu"
-              variant="dark"
-              gradientColors={["#162032", "#0a1220"]}
-            />
-            <KpiCard
-              title="Total Dishes"
-              value={String(matrixData?.total_dishes ?? 0)}
-              iconName="restaurant"
-              variant="dark"
-              gradientColors={["#0d2b24", "#061510"]}
-            />
-            <KpiCard
-              title="Total Dish Options"
-              value={String(matrixData?.total_dish_option ?? 0)}
-              iconName="trending-up"
-              variant="dark"
-              gradientColors={["#2b1a5e", "#1a0d3a"]}
-            />
-            <KpiCard
-              title="Total Deals"
-              value={String(matrixData?.total_deal ?? 0)}
-              iconName="local-offer"
-              variant="dark"
-              gradientColors={["#3a0d12", "#1a0608"]}
-            />
-          </View>
-        </View>
 
         {/* Categories Section */}
         <View className="flex-1">

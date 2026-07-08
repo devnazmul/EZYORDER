@@ -7,7 +7,7 @@ import DatePickerModal from "./DatePickerModal";
 export interface FilterField {
   id: string;
   label: string;
-  type: "chips" | "date-range" | "number-range";
+  type: "chips" | "date-range" | "number-range" | "text" | "date";
   options?: { id: string; label: string }[]; // For chips type
 }
 
@@ -27,12 +27,12 @@ export default function FilterDrawer({
   triggerClassName = "",
 }: FilterDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
-
+  
   // Local scratch state to modify before applying
   const [localValues, setLocalValues] = useState<Record<string, any>>(values);
   const [activeDatePicker, setActiveDatePicker] = useState<{
     fieldId: string;
-    type: "start" | "end";
+    type: "start" | "end" | "single";
   } | null>(null);
 
   // Sync local values when drawer opens
@@ -68,16 +68,23 @@ export default function FilterDrawer({
     if (!activeDatePicker) return;
     const { fieldId, type } = activeDatePicker;
 
-    setLocalValues((prev) => {
-      const currentRange = prev[fieldId] || { start: "", end: "" };
-      return {
+    if (type === "single") {
+      setLocalValues((prev) => ({
         ...prev,
-        [fieldId]: {
-          ...currentRange,
-          [type]: dateStr,
-        },
-      };
-    });
+        [fieldId]: dateStr,
+      }));
+    } else {
+      setLocalValues((prev) => {
+        const currentRange = prev[fieldId] || { start: "", end: "" };
+        return {
+          ...prev,
+          [fieldId]: {
+            ...currentRange,
+            [type]: dateStr,
+          },
+        };
+      });
+    }
     setActiveDatePicker(null);
   };
 
@@ -90,6 +97,10 @@ export default function FilterDrawer({
         cleared[f.id] = { start: "", end: "" };
       } else if (f.type === "number-range") {
         cleared[f.id] = { min: "", max: "" };
+      } else if (f.type === "text") {
+        cleared[f.id] = "";
+      } else if (f.type === "date") {
+        cleared[f.id] = "";
       }
     });
     setLocalValues(cleared);
@@ -260,6 +271,56 @@ export default function FilterDrawer({
                     );
                   }
 
+                  if (field.type === "text") {
+                    const textVal = localValues[field.id] || "";
+                    return (
+                      <View key={field.id}>
+                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
+                          {field.label}
+                        </Text>
+                        <View className="bg-base-100 border border-base-200 rounded-xl p-3">
+                          <TextInput
+                            keyboardType="numeric"
+                            placeholder="Enter value..."
+                            placeholderTextColor="#6E6E6E"
+                            value={textVal}
+                            onChangeText={(text) => {
+                              setLocalValues((prev) => ({
+                                ...prev,
+                                [field.id]: text,
+                              }));
+                            }}
+                            className="text-xs font-semibold text-neutral p-0"
+                          />
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  if (field.type === "date") {
+                    const dateVal = localValues[field.id] || "";
+                    return (
+                      <View key={field.id}>
+                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
+                          {field.label}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => setActiveDatePicker({ fieldId: field.id, type: "single" })}
+                          activeOpacity={0.8}
+                          className="flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3"
+                        >
+                          <View>
+                            <Text className="text-[8px] font-bold text-accent uppercase">Selected Date</Text>
+                            <Text className="text-xs font-semibold text-neutral mt-0.5">
+                              {formatDateLabel(dateVal)}
+                            </Text>
+                          </View>
+                          <MaterialIcons name="calendar-today" size={16} color="#DC2D2A" />
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  }
+
                   return null;
                 })}
               </View>
@@ -291,8 +352,8 @@ export default function FilterDrawer({
         <DatePickerModal
           visible={true}
           onClose={() => setActiveDatePicker(null)}
-          title={`Select ${activeDatePicker.type === "start" ? "Start" : "End"} Date`}
-          selectedDate={localValues[activeDatePicker.fieldId]?.[activeDatePicker.type]}
+          title={`Select Date`}
+          selectedDate={localValues[activeDatePicker.fieldId]}
           onSelectDate={handleDateSelect}
         />
       )}
