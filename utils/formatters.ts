@@ -65,9 +65,10 @@ export function formatDateTime(date?: string, time?: string): string {
 
 /**
  * Formats a numeric amount or numeric string to a currency representation.
- * e.g. 250 → "250.00", "15.5" → "15.50"
+ * e.g. (250, "$") → "$250.00", "15.5" → "15.50"
  */
-export function formatAmount(amount?: number | string): string {
+export function formatAmount(amount?: number | string, symbol?: string): string {
   const amt = Number(amount || 0);
-  return `${amt.toFixed(2)}`;
+  const formatted = amt.toFixed(2);
+  return symbol ? `${symbol}${formatted}` : formatted;
 }

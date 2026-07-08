@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/formatters";
 import React from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -98,7 +99,7 @@ export default function OrderDetailsModal({
                 <View className="flex-row justify-between items-center pt-1">
                   <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
                   <Text className="text-md font-bold text-primary">
-                    £{parseFloat(order.amount || order.final_price || "0").toFixed(2)}
+                    {formatAmount(order.amount || order.final_price || "0")}
                   </Text>
                 </View>
               </View>

@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/formatters";
 import React from "react";
 import { Text, View } from "react-native";
 import StatusBadge from "./reuseable/StatusBadge";
@@ -14,7 +15,7 @@ export default function RecentOrderRow({ order, index }: RecentOrderRowProps) {
     (order.table_number && parseFloat(order.table_number) > 0
       ? `Table ${parseFloat(order.table_number)}`
       : "Walk-in Customer");
-  
+
   const orderPrice = order.amount || order.final_price || "0.00";
 
   return (
@@ -26,9 +27,7 @@ export default function RecentOrderRow({ order, index }: RecentOrderRowProps) {
         </Text>
       </View>
       <View className="flex-row items-center gap-4">
-        <Text className="text-xs font-bold text-neutral">
-          £{parseFloat(orderPrice).toFixed(2)}
-        </Text>
+        <Text className="text-xs font-bold text-neutral">{formatAmount(orderPrice)}</Text>
         <StatusBadge status={order.status} />
       </View>
     </View>

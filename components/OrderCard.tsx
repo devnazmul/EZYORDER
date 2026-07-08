@@ -1,7 +1,8 @@
+import { formatAmount } from "@/utils/formatters";
 import React from "react";
 import { Text, View } from "react-native";
-import StatusBadge from "./reuseable/StatusBadge";
 import Button from "./reuseable/Button";
+import StatusBadge from "./reuseable/StatusBadge";
 
 interface OrderCardProps {
   item: any;
@@ -78,7 +79,7 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
         {/* Price Row */}
         <View className="flex-row justify-between items-center pt-1">
           <Text className="text-md font-bold text-neutral">
-            £{parseFloat(item.amount || item.final_price || "0").toFixed(2)}
+            {formatAmount(item.amount || item.final_price || "0")}
           </Text>
         </View>
       </View>

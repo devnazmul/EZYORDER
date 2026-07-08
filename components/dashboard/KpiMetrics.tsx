@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardMetric } from "@/hooks/useDashboardQueries";
+import { formatAmount } from "@/utils/formatters";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -30,9 +31,6 @@ export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
     );
   }
 
-  const revenueVal = parseFloat(metrics?.revenue || "0").toFixed(2);
-  const avgOrderVal = parseFloat(metrics?.avgOrder || "0").toFixed(2);
-
   return (
     <View key="loaded" className="gap-y-4 mb-6">
       {/* Revenue Dark Panel Card */}
@@ -42,7 +40,9 @@ export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
             <Text className="text-[10px] font-bold text-accent tracking-widest uppercase">
               {filterBy === "this_week" ? "THIS WEEK REVENUE" : "THIS MONTH REVENUE"}
             </Text>
-            <Text className="text-3xl font-extrabold text-white mt-1">£{revenueVal}</Text>
+            <Text className="text-3xl font-extrabold text-white mt-1">
+              {formatAmount(metrics?.revenue || "0")}
+            </Text>
           </View>
           <View className="bg-green-500/10 p-2.5 rounded-xl border border-green-500/20">
             <MaterialIcons name="trending-up" size={22} color="#22c55e" />
@@ -75,7 +75,9 @@ export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
           <Text className="text-[10px] font-bold text-yellow-600 tracking-wider uppercase">
             AVERAGE ORDER
           </Text>
-          <Text className="text-2xl font-extrabold text-neutral mt-1">£{avgOrderVal}</Text>
+          <Text className="text-2xl font-extrabold text-neutral mt-1">
+            {formatAmount(metrics?.avgOrder || "0")}
+          </Text>
           <Text className="text-[10px] text-yellow-600/70 mt-1">Avg size</Text>
         </View>
       </View>
@@ -112,7 +114,7 @@ export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
         >
           <MaterialIcons name="payments" size={16} color="white" />
           <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-            SALES (£{parseFloat(metrics?.todaySales || "0").toFixed(2)})
+            SALES ({formatAmount(metrics?.todaySales || "0")})
           </Text>
         </TouchableOpacity>
       </ScrollView>
