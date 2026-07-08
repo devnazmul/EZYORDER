@@ -19,4 +19,8 @@ export const QUERY_KEYS = {
   // Expense keys
   EXPENSES: "expenses",
   EXPENSE_TYPES: "expense_types",
+
+  // Partner keys
+  PARTNERS: "partners",
+  DAILY_ORDER_PARTNER_SALES: "daily_order_partner_sales",
 } as const;

@@ -21,7 +21,13 @@ export function formatDateTime(date?: string, time?: string): string {
   try {
     let d: Date;
     // Standardize parsing to avoid Hermes engine/timezone parsing bugs
-    const cleanDateStr = date.split("T")[0];
+    const timeParts = date.split(/[ T]/);
+    const cleanDateStr = timeParts[0];
+    let timeVal = time;
+    if (!timeVal && timeParts.length > 1) {
+      timeVal = timeParts[1];
+    }
+
     const parts = cleanDateStr.split("-");
     if (parts.length === 3) {
       if (parts[0].length === 4) {
@@ -39,16 +45,13 @@ export function formatDateTime(date?: string, time?: string): string {
 
     if (isNaN(d.getTime())) return date;
 
-    const MONTH_NAMES = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    ];
+    const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const month = MONTH_NAMES[d.getMonth()];
     const day = d.getDate();
     const year = d.getFullYear();
 
-    if (time) {
-      const [h, m] = time.split(":");
+    if (timeVal) {
+      const [h, m] = timeVal.split(":");
       const hour = parseInt(h, 10);
       const ampm = hour >= 12 ? "PM" : "AM";
       const hour12 = hour % 12 || 12;
@@ -62,9 +65,9 @@ export function formatDateTime(date?: string, time?: string): string {
 
 /**
  * Formats a numeric amount or numeric string to a currency representation.
- * e.g. 250 → "$250.00", "15.5" → "$15.50"
+ * e.g. 250 → "250.00", "15.5" → "15.50"
  */
 export function formatAmount(amount?: number | string): string {
   const amt = Number(amount || 0);
-  return `$${amt.toFixed(2)}`;
+  return `${amt.toFixed(2)}`;
 }

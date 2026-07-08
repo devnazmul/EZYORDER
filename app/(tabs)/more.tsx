@@ -71,6 +71,10 @@ export default function MoreSettingsHub() {
       router.push("/expenses");
       return;
     }
+    if (title === "Partners") {
+      router.push("/partners");
+      return;
+    }
     Alert.alert(
       "Feature Coming Soon",
       `The "${title}" module is currently under development and will be available in the next app update.`,
