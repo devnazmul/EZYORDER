@@ -5,11 +5,9 @@ import EmptyState from "@/components/reuseable/EmptyState";
 import FilterChips from "@/components/reuseable/FilterChips";
 import LoadingScreen from "@/components/reuseable/LoadingScreen";
 import ToggleBar from "@/components/reuseable/ToggleBar";
-import ENV from "@/config/env";
 import { useAuth } from "@/context/AuthContext";
+import { useAllOrdersQuery, useTodayOrdersQuery } from "@/hooks/useOrderQueries";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FlatList, RefreshControl, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,7 +17,6 @@ interface AllOrdersProps {
 }
 
 export default function AllOrders({ initialTab = "historical" }: AllOrdersProps) {
-  const API_BASE_URL = ENV.API_BASE_URL;
   const { token, user } = useAuth();
 
   const restaurantId =
@@ -42,67 +39,13 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     setActiveTab(initialTab);
   }, [initialTab]);
 
-  // React Query call to retrieve orders lists
-  const {
-    data: orders = [],
-    isLoading,
-    isRefetching,
-    refetch,
-  } = useQuery({
-    queryKey: ["orders", activeTab, restaurantId],
-    queryFn: async () => {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      };
+  const isLive = activeTab === "live";
 
-      if (activeTab === "live") {
-        // Today's Live Orders
-        const response = await axios.get(`${API_BASE_URL}/order/All/order/today/${restaurantId}`, {
-          headers,
-          validateStatus: () => true,
-        });
-        if (response.status === 200 && response.data) {
-          const rawData = response.data.data || response.data;
-          let flattenedOrders: any[] = [];
-          if (Array.isArray(rawData)) {
-            flattenedOrders = rawData;
-          } else if (typeof rawData === "object" && rawData !== null) {
-            Object.keys(rawData).forEach((key) => {
-              if (Array.isArray(rawData[key])) {
-                flattenedOrders = [...flattenedOrders, ...rawData[key]];
-              }
-            });
-          }
-          return flattenedOrders;
-        }
-      } else {
-        // Historical All Orders (Using v3.0 pagination endpoint)
-        const response = await axios.get(`${API_BASE_URL}/v3.0/order/All/order/every/${restaurantId}`, {
-          headers,
-          params: { per_page: 50, page: 1 },
-          validateStatus: () => true,
-        });
+  // Call both query hooks at the top level to adhere to react hook rules
+  const todayQuery = useTodayOrdersQuery(token || "", restaurantId, { enabled: isLive });
+  const allQuery = useAllOrdersQuery(token || "", restaurantId, { enabled: !isLive });
 
-        if (response.status === 200 && response.data) {
-          const rawData = response.data.data || response.data;
-          let flattenedOrders: any[] = [];
-          if (Array.isArray(rawData)) {
-            flattenedOrders = rawData;
-          } else if (typeof rawData === "object" && rawData !== null) {
-            Object.keys(rawData).forEach((key) => {
-              if (Array.isArray(rawData[key])) {
-                flattenedOrders = [...flattenedOrders, ...rawData[key]];
-              }
-            });
-          }
-          return flattenedOrders;
-        }
-      }
-      return [];
-    },
-    enabled: !!token && !!restaurantId,
-  });
+  const { data: orders = [], isLoading, isRefetching, refetch } = isLive ? todayQuery : allQuery;
 
   // Filtered list
   const filteredOrders = orders.filter((order) => {
@@ -150,7 +93,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
   }
 
   return (
-    <SafeAreaView edges={["bottom", "left", "right"]} className="flex-1 bg-base-100">
+    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       <AppHeader showBackButton={true} />
 
       {/* Main Body */}
@@ -163,7 +106,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
           ]}
           activeId={activeTab}
           onSelect={(id) => {
-            setActiveTab(id);
+            setActiveTab(id as "live" | "historical");
             setActiveStatusChip("all");
             setActiveTypeChip("all");
           }}

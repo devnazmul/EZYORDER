@@ -23,4 +23,7 @@ export const QUERY_KEYS = {
   // Partner keys
   PARTNERS: "partners",
   DAILY_ORDER_PARTNER_SALES: "daily_order_partner_sales",
+
+  // Order keys
+  ORDERS: "orders",
 } as const;
