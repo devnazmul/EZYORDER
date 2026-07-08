@@ -15,4 +15,8 @@ export const QUERY_KEYS = {
   // Discount keys
   COUPONS: "coupons",
   CAMPAIGNS: "campaigns",
+
+  // Expense keys
+  EXPENSES: "expenses",
+  EXPENSE_TYPES: "expense_types",
 } as const;

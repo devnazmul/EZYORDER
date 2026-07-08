@@ -1,11 +1,12 @@
 import AppHeader from "@/components/AppHeader";
 import KpiCard from "@/components/reports/KpiCard";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
+import SearchBar from "@/components/reuseable/SearchBar";
 import { useAuth } from "@/context/AuthContext";
 import { useMenuAllQuery, useMenuMatrixQuery } from "@/hooks/useMenuQueries";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MenuManagement() {
@@ -58,37 +59,28 @@ export default function MenuManagement() {
         contentContainerStyle={{ paddingBottom: 80 }}
       >
         {/* Header Title Area inside ScrollView */}
-        <View className="mb-4 flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2">
-            <View className="bg-primary-container/10 p-1.5 rounded-lg">
-              <MaterialIcons name="restaurant" size={18} color="#DC2D2A" />
-            </View>
-            <View className="flex-row items-center gap-2">
-              <Text className="text-lg font-black text-neutral uppercase tracking-tight">ALL MENU</Text>
-              {filteredMenuList.length > 0 && (
-                <View className="bg-primary px-2.5 py-0.5 rounded-full items-center justify-center">
-                  <Text className="text-white text-xs font-black">{filteredMenuList.length}</Text>
-                </View>
-              )}
-            </View>
+        <View className="flex-row items-center gap-2 mb-4">
+          <View className="bg-primary-container/10 p-1.5 rounded-lg">
+            <MaterialIcons name="restaurant" size={18} color="#DC2D2A" />
           </View>
-          <Text className="text-[10px] font-black tracking-widest text-accent uppercase">
-            Restaurant Management
-          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="text-lg font-black text-neutral uppercase tracking-tight">ALL MENU</Text>
+            {filteredMenuList.length > 0 && (
+              <View className="bg-primary px-2.5 py-0.5 rounded-full items-center justify-center">
+                <Text className="text-white text-xs font-black">{filteredMenuList.length}</Text>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Search Field */}
-        <View className="flex-row items-center bg-base-300 border border-base-200 rounded-full px-4 py-3 mb-6">
-          <MaterialIcons name="search" size={22} color="#6E6E6E" />
-          <TextInput
-            className="flex-1 ml-2 text-sm text-neutral font-medium p-0"
-            placeholder="Search categories here..."
-            placeholderTextColor="#8C8C8C"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
 
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search categories here..."
+          containerClassName="mb-6"
+        />
         {/* Stats KPIs Summary*/}
         <View className="mb-6">
           <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-3">

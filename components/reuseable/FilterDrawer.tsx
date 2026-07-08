@@ -1,13 +1,13 @@
 import FilterChips from "@/components/reuseable/FilterChips";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DatePickerModal from "./DatePickerModal";
 
 export interface FilterField {
   id: string;
   label: string;
-  type: "chips" | "date-range";
+  type: "chips" | "date-range" | "number-range";
   options?: { id: string; label: string }[]; // For chips type
 }
 
@@ -27,7 +27,7 @@ export default function FilterDrawer({
   triggerClassName = "",
 }: FilterDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // Local scratch state to modify before applying
   const [localValues, setLocalValues] = useState<Record<string, any>>(values);
   const [activeDatePicker, setActiveDatePicker] = useState<{
@@ -49,7 +49,7 @@ export default function FilterDrawer({
       const val = values[key];
       if (val === "all") return;
       if (typeof val === "object" && val !== null) {
-        if (val.start || val.end) count++;
+        if (val.start || val.end || val.min || val.max) count++;
       } else if (val) {
         count++;
       }
@@ -88,6 +88,8 @@ export default function FilterDrawer({
         cleared[f.id] = "all";
       } else if (f.type === "date-range") {
         cleared[f.id] = { start: "", end: "" };
+      } else if (f.type === "number-range") {
+        cleared[f.id] = { min: "", max: "" };
       }
     });
     setLocalValues(cleared);
@@ -195,6 +197,64 @@ export default function FilterDrawer({
                             </View>
                             <MaterialIcons name="calendar-today" size={16} color="#DC2D2A" />
                           </TouchableOpacity>
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  if (field.type === "number-range") {
+                    const range = localValues[field.id] || { min: "", max: "" };
+                    return (
+                      <View key={field.id}>
+                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
+                          {field.label}
+                        </Text>
+                        <View className="flex-row items-center gap-3">
+                          {/* Min Amount */}
+                          <View className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3">
+                            <View className="flex-1">
+                              <Text className="text-[8px] font-bold text-accent uppercase">Min Amount</Text>
+                              <TextInput
+                                keyboardType="numeric"
+                                placeholder="0.00"
+                                placeholderTextColor="#6E6E6E"
+                                value={range.min}
+                                onChangeText={(text) => {
+                                  setLocalValues((prev) => ({
+                                    ...prev,
+                                    [field.id]: {
+                                      ...(prev[field.id] || { min: "", max: "" }),
+                                      min: text,
+                                    },
+                                  }));
+                                }}
+                                className="text-xs font-semibold text-neutral mt-0.5 p-0"
+                              />
+                            </View>
+                          </View>
+
+                          {/* Max Amount */}
+                          <View className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3">
+                            <View className="flex-1">
+                              <Text className="text-[8px] font-bold text-accent uppercase">Max Amount</Text>
+                              <TextInput
+                                keyboardType="numeric"
+                                placeholder="0.00"
+                                placeholderTextColor="#6E6E6E"
+                                value={range.max}
+                                onChangeText={(text) => {
+                                  setLocalValues((prev) => ({
+                                    ...prev,
+                                    [field.id]: {
+                                      ...(prev[field.id] || { min: "", max: "" }),
+                                      max: text,
+                                    },
+                                  }));
+                                }}
+                                className="text-xs font-semibold text-neutral mt-0.5 p-0"
+                              />
+                            </View>
+                          </View>
                         </View>
                       </View>
                     );

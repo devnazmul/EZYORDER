@@ -59,3 +59,12 @@ export function formatDateTime(date?: string, time?: string): string {
     return date;
   }
 }
+
+/**
+ * Formats a numeric amount or numeric string to a currency representation.
+ * e.g. 250 → "$250.00", "15.5" → "$15.50"
+ */
+export function formatAmount(amount?: number | string): string {
+  const amt = Number(amount || 0);
+  return `$${amt.toFixed(2)}`;
+}
