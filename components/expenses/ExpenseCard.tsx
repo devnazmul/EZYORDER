@@ -1,4 +1,6 @@
 import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import { useData } from "@/context/context/DataContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -19,6 +21,13 @@ interface ExpenseCardProps {
 }
 
 export default function ExpenseCard({ expense, expenseTypes, onPress }: ExpenseCardProps) {
+  const { settings } = useData();
+
+  // Resolve currency symbol
+  const currencySymbol = useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
+
   // Map category type details
   const categoryDetails = useMemo(() => {
     const typeId = String(expense.expense_type);
@@ -41,10 +50,11 @@ export default function ExpenseCard({ expense, expenseTypes, onPress }: ExpenseC
     return formatDateTime(rawDate);
   }, [expense.payment_date]);
 
-  // Format amount using the formatAmount utility
+  // Format amount using the formatAmount utility with dynamic symbol
   const formattedAmount = useMemo(() => {
-    return formatAmount(expense.amount);
-  }, [expense.amount]);
+    return formatAmount(expense.amount, currencySymbol);
+  }, [expense.amount, currencySymbol]);
+
 
   // Heading displays the expense type (category) name
   const titleDisplay = categoryDetails.name;

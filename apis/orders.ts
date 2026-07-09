@@ -42,7 +42,7 @@ export const getAllOrders = async (token: string, restaurantId: string | number)
     params: { per_page: 50, page: 1 },
     validateStatus: () => true,
   });
-
+  console.log(response.data);
   if (response.status === 200 && response.data) {
     return flattenOrders(response.data.data || response.data);
   }

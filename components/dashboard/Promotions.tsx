@@ -1,9 +1,10 @@
-import React from "react";
-import { ScrollView, Text, View } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardPromotions } from "@/hooks/useDashboardQueries";
+import { router } from "expo-router";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import EmptyState from "../reuseable/EmptyState";
-import PromotionCard from "../PromotionCard";
+import StatusBadge from "../reuseable/StatusBadge";
 
 export default function Promotions() {
   const { token } = useAuth();
@@ -22,16 +23,48 @@ export default function Promotions() {
 
   return (
     <View className="mb-6 gap-y-3">
+      {/* Title Header */}
       <Text className="text-base font-bold text-neutral">Promotions &amp; Menu</Text>
-      {promotions.length === 0 ? (
-        <EmptyState description="No active promotions" pyClassName="py-8" />
-      ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-4">
-          {promotions.map((promo: any, idx: number) => (
-            <PromotionCard key={idx} promo={promo} />
-          ))}
-        </ScrollView>
-      )}
+
+      {/* Promotions List View */}
+      <View className="bg-base-300 rounded-xl overflow-hidden border border-base-200 shadow-sm">
+        {promotions.length === 0 ? (
+          <EmptyState description="No active promotions" pyClassName="py-8" />
+        ) : (
+          <View className="divide-y divide-base-200">
+            {promotions.map((promo: any, idx: number) => (
+              <View key={idx} className="p-4 flex-row items-center justify-between">
+                <View className="flex-1 mr-4">
+                  <Text className="text-xs font-bold text-neutral">{promo.name}</Text>
+                  <Text className="text-[9px] text-accent uppercase font-bold mt-1">
+                    Code: {promo.code} • {promo.discount_type || "Discount"}
+                    {promo.impact && promo.impact !== "-" ? ` • Impact: ${promo.impact}` : ""}
+                  </Text>
+                  {promo.alert ? (
+                    <Text className="text-[9px] text-red-500/80 font-bold mt-1 uppercase">
+                      Alert: {promo.alert}
+                    </Text>
+                  ) : null}
+                </View>
+
+                <View className="flex-row items-center gap-4">
+                  <Text className="text-xs font-bold text-neutral">{promo.usage}</Text>
+                  <StatusBadge status={promo.status} />
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Bottom Manage All Action Button */}
+        <TouchableOpacity
+          onPress={() => router.push("/discounts-and-campaigns")}
+          activeOpacity={0.7}
+          className="w-full py-4 items-center justify-center border-t border-base-200"
+        >
+          <Text className="text-xs font-bold text-primary uppercase">MANAGE ALL</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

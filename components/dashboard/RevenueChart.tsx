@@ -1,9 +1,12 @@
 import { useAuth } from "@/context/AuthContext";
+import { useData } from "@/context/context/DataContext";
 import { useDashboardRevenueChart } from "@/hooks/useDashboardQueries";
+import { formatAmount } from "@/utils/formatters";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
-import React from "react";
-import { Text, View } from "react-native";
-import Svg, { G, Line, Rect, Text as SvgText } from "react-native-svg";
+import React, { useMemo } from "react";
+import { Dimensions, Text, View } from "react-native";
+import { BarChart } from "react-native-gifted-charts";
 import EmptyState from "../reuseable/EmptyState";
 
 interface RevenueChartProps {
@@ -12,91 +15,166 @@ interface RevenueChartProps {
 
 export default function RevenueChart({ filterBy }: RevenueChartProps) {
   const { token } = useAuth();
+  const { settings } = useData();
   const { data: revenueChart = [], isLoading } = useDashboardRevenueChart(token || "", filterBy);
+
+  console.log("Revenue data", revenueChart);
+
+  // Resolve currency symbol
+  const currencySymbol = useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
+
+  // Calculate total revenue
+  const totalRevenue = useMemo(() => {
+    return revenueChart.reduce((sum: number, d: any) => sum + (parseFloat(d.value) || 0), 0);
+  }, [revenueChart]);
 
   if (isLoading) {
     return (
-      <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[160px] justify-center items-center">
+      <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[200px] justify-center items-center">
         <Text className="text-xs text-accent">Loading revenue...</Text>
       </View>
     );
   }
 
-  // Dimensions
-  const chartWidth = 310;
-  const chartHeight = 130;
-  const paddingBottom = 20;
-  const paddingTop = 10;
-  const paddingLeft = 10;
-  const paddingRight = 10;
+  // Dimension helpers
+  const screenWidth = Dimensions.get("window").width;
+  const chartHeight = 210;
+  const isMonthFilter = revenueChart.length > 7;
+  const chartWidth = isMonthFilter ? screenWidth - 32 : screenWidth - 60;
 
-  const drawableHeight = chartHeight - paddingTop - paddingBottom;
-  const drawableWidth = chartWidth - paddingLeft - paddingRight;
+  // Dynamically compute bar width to fit the container width
+  const barWidth = useMemo(() => {
+    const spacing = isMonthFilter ? 4 : 16;
+    const count = revenueChart.length || 1;
+    const availableWidth = chartWidth + 70; // deduct margins and Y-axis text space
+    const computed = (availableWidth - spacing * (count - 1)) / count;
+    return Math.max(4, Math.min(24, computed));
+  }, [revenueChart.length, isMonthFilter, chartWidth]);
 
-  const maxVal =
-    revenueChart.length > 0 ? Math.max(...revenueChart.map((d: any) => parseFloat(d.value) || 0), 1) : 1;
+  // Prepare chart data mapped for react-native-gifted-charts
+  const data = useMemo(() => {
+    return revenueChart.map((d: any) => {
+      const val = parseFloat(d.value) || 0;
+      const item: any = {
+        value: val,
+        frontColor: "#DC2D2A",
+        name: d.name, // keep reference of full name for tooltips
+      };
 
-  const barWidth = Math.max(12, Math.min(24, drawableWidth / (revenueChart.length || 1) - 8));
-  const stepX = drawableWidth / (revenueChart.length || 1);
+      if (isMonthFilter) {
+        // Use custom labelComponent for rotated labels in month view
+        item.labelComponent = () => (
+          <View style={{ width: barWidth, alignItems: "center", marginTop: 24 }}>
+            <Text
+              style={{
+                fontSize: 7,
+                color: "#6E6E6E",
+                fontWeight: "bold",
+                borderColor: "#000000",
+                borderWidth: 0,
+                minWidth: 50,
+                transform: [{ rotate: "-75deg" }],
+                marginTop: 10,
+                marginBottom: 0,
+                marginLeft: 20,
+                marginRight: 0,
+              }}
+            >
+              {d.name}
+            </Text>
+          </View>
+        );
+      } else {
+        item.label = d.name;
+      }
+
+      return item;
+    });
+  }, [revenueChart, isMonthFilter, barWidth]);
+
+  // Compute maximum value in dataset to prevent tooltip clipping at the top
+  const maxDataValue = useMemo(() => {
+    return Math.max(...data.map((d: any) => d.value), 0);
+  }, [data]);
 
   return (
     <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm">
+      {/* Header with Title and Total Value */}
       <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-xs font-bold text-accent tracking-widest uppercase">
-          Revenue {filterBy === "this_week" ? "This Week" : "This Month"}
-        </Text>
+        <View>
+          <Text className="text-[10px] font-bold text-accent tracking-widest uppercase">
+            Revenue {filterBy === "this_week" ? "This Week" : "This Month"}
+          </Text>
+          <Text className="text-base font-extrabold text-neutral mt-0.5">
+            Total: {formatAmount(totalRevenue, currencySymbol)}
+          </Text>
+        </View>
         <MaterialIcons name="show-chart" size={20} color="#6E6E6E" />
       </View>
 
       {revenueChart.length === 0 ? (
         <EmptyState description="No revenue data available" pyClassName="py-8" />
       ) : (
-        <View style={{ height: 130, alignItems: "center", justifyContent: "center" }}>
-          <Svg width={chartWidth} height={chartHeight}>
-            {/* Horizontal baseline */}
-            <Line
-              x1={paddingLeft}
-              y1={chartHeight - paddingBottom}
-              x2={chartWidth - paddingRight}
-              y2={chartHeight - paddingBottom}
-              stroke="#E5E7EB"
-              strokeWidth="1"
-            />
-            {revenueChart.map((d: any, idx: number) => {
-              const val = parseFloat(d.value) || 0;
-              const barHeight = (val / maxVal) * drawableHeight;
-
-              // Coordinates
-              const x = paddingLeft + idx * stepX + (stepX - barWidth) / 2;
-              const y = chartHeight - paddingBottom - barHeight;
+        <View style={{ height: chartHeight, alignItems: "center", justifyContent: "center" }}>
+          <BarChart
+            data={data}
+            width={chartWidth - 70}
+            height={chartHeight - 85}
+            maxValue={maxDataValue > 0 ? maxDataValue * 1.2 : undefined}
+            barWidth={barWidth}
+            spacing={isMonthFilter ? 8 : 16}
+            initialSpacing={10}
+            noOfSections={4}
+            rulesColor="#E5E7EB"
+            rulesType="solid"
+            yAxisThickness={0}
+            xAxisThickness={1}
+            xAxisColor="#E5E7EB"
+            yAxisTextStyle={{ color: "#6E6E6E", fontSize: 8 }}
+            xAxisLabelTextStyle={{
+              color: "#6E6E6E",
+              fontSize: 8,
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+            xAxisLabelsHeight={isMonthFilter ? 60 : 20}
+            activeOpacity={1}
+            isAnimated={true}
+            focusedBarConfig={{
+              color: "#000000ff",
+            }}
+            renderTooltip={(item: any, index: number) => {
+              const tooltipText = `${item.name}: ${formatAmount(item.value, currencySymbol)}`;
+              // Estimate tooltip width: ~5.5px per char at fontSize 9 + 16px horizontal padding
+              const estimatedTooltipWidth = tooltipText.length * 5.5 + 16;
+              // Center tooltip over the bar
+              const centerOffset = -(estimatedTooltipWidth / 2) + barWidth / 2;
 
               return (
-                <G key={idx}>
-                  {/* Revenue Bar */}
-                  <Rect
-                    x={x}
-                    y={y}
-                    width={barWidth}
-                    height={Math.max(2, barHeight)}
-                    fill="#DC2D2A"
-                    rx={2}
-                    ry={2}
-                  />
-                  {/* X Axis Label */}
-                  <SvgText
-                    x={x + barWidth / 2}
-                    y={chartHeight - 4}
-                    fill="#6E6E6E"
-                    fontSize="8"
-                    fontWeight="bold"
-                    textAnchor="middle"
-                  >
-                    {d.label}
-                  </SvgText>
-                </G>
+                <View
+                  style={{
+                    backgroundColor: "#1F2937",
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 4,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 6,
+                    transform: [{ translateX: centerOffset }],
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 1.5,
+                    elevation: 3,
+                  }}
+                >
+                  <Text style={{ color: "white", fontSize: 9, fontWeight: "bold" }}>{tooltipText}</Text>
+                </View>
               );
-            })}
-          </Svg>
+            }}
+          />
         </View>
       )}
     </View>

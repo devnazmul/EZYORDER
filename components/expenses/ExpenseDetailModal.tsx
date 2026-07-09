@@ -1,8 +1,10 @@
 import ENV from "@/config/env";
-import { formatDateTime, formatAmount } from "@/utils/formatters";
+import { useData } from "@/context/context/DataContext";
+import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
-import { Image, Modal, ScrollView, Text, TouchableOpacity, View, Share, Alert } from "react-native";
+import { Alert, Image, Modal, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
 
 interface ExpenseDetailModalProps {
   visible: boolean;
@@ -28,7 +30,13 @@ export default function ExpenseDetailModal({
   expense,
   expenseTypes,
 }: ExpenseDetailModalProps) {
+  const { settings } = useData();
   const [previewImageUri, setPreviewImageUri] = useState<string | null>(null);
+
+  // Resolve currency symbol
+  const currencySymbol = useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
 
   // Map category details
   const categoryName = useMemo(() => {
@@ -76,29 +84,20 @@ export default function ExpenseDetailModal({
 
   if (!expense) return null;
 
-  const formattedAmount = formatAmount(expense.amount);
+  const formattedAmount = formatAmount(expense.amount, currencySymbol);
+
   const formattedDate = expense.payment_date ? formatDateTime(expense.payment_date.split(" ")[0]) : "N/A";
   const receiptsList = expense.reciepts || [];
 
   return (
     <>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={visible}
-        onRequestClose={onClose}
-      >
+      <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
         <View className="flex-1 justify-end bg-black/50">
           {/* Backdrop clickable to close */}
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={onClose}
-            className="absolute inset-0"
-          />
+          <TouchableOpacity activeOpacity={1} onPress={onClose} className="absolute inset-0" />
 
           {/* Modal Bottom Sheet Content Container */}
           <View className="bg-base-100 rounded-t-lg p-6 max-h-[80%] border-t border-base-200">
-            
             {/* Header Bar */}
             <View className="flex-row justify-between items-center mb-6">
               <View className="flex-row items-center gap-2">
@@ -118,9 +117,7 @@ export default function ExpenseDetailModal({
                 <Text className="text-xs font-bold text-accent uppercase tracking-widest mb-1">
                   Amount Paid
                 </Text>
-                <Text className="text-3xl font-black text-primary">
-                  {formattedAmount}
-                </Text>
+                <Text className="text-3xl font-black text-primary">{formattedAmount}</Text>
               </View>
 
               {/* Information Grid Section */}
@@ -136,25 +133,19 @@ export default function ExpenseDetailModal({
                 {/* Expense Type / Category */}
                 <View className="flex-row justify-between py-2.5 border-b border-base-200">
                   <Text className="text-xs font-bold text-accent">Category</Text>
-                  <Text className="text-xs font-bold text-neutral text-right">
-                    {categoryName}
-                  </Text>
+                  <Text className="text-xs font-bold text-neutral text-right">{categoryName}</Text>
                 </View>
 
                 {/* Payment Date */}
                 <View className="flex-row justify-between py-2.5 border-b border-base-200">
                   <Text className="text-xs font-bold text-accent">Payment Date</Text>
-                  <Text className="text-xs font-bold text-neutral text-right">
-                    {formattedDate}
-                  </Text>
+                  <Text className="text-xs font-bold text-neutral text-right">{formattedDate}</Text>
                 </View>
 
                 {/* Payment Method */}
                 <View className="flex-row justify-between py-2.5 border-b border-base-200">
                   <Text className="text-xs font-bold text-accent">Payment Method</Text>
-                  <Text className="text-xs font-bold text-neutral text-right">
-                    {paymentMethodLabel}
-                  </Text>
+                  <Text className="text-xs font-bold text-neutral text-right">{paymentMethodLabel}</Text>
                 </View>
 
                 {/* Share Receipt Link */}
@@ -206,11 +197,7 @@ export default function ExpenseDetailModal({
                           activeOpacity={0.8}
                           className="mr-3 rounded-lg overflow-hidden border border-base-200 bg-base-300"
                         >
-                          <Image
-                            source={{ uri }}
-                            className="w-24 h-24"
-                            resizeMode="cover"
-                          />
+                          <Image source={{ uri }} className="w-24 h-24" resizeMode="cover" />
                         </TouchableOpacity>
                       );
                     })}
@@ -218,7 +205,6 @@ export default function ExpenseDetailModal({
                 </View>
               ) : null}
             </ScrollView>
-
           </View>
         </View>
       </Modal>
@@ -237,11 +223,7 @@ export default function ExpenseDetailModal({
             className="absolute inset-0"
           />
           {previewImageUri ? (
-            <Image
-              source={{ uri: previewImageUri }}
-              className="w-[90%] h-[80%]"
-              resizeMode="contain"
-            />
+            <Image source={{ uri: previewImageUri }} className="w-[90%] h-[80%]" resizeMode="contain" />
           ) : null}
           <TouchableOpacity
             onPress={() => setPreviewImageUri(null)}

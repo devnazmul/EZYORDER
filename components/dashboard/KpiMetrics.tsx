@@ -1,9 +1,11 @@
 import { useAuth } from "@/context/AuthContext";
+import { useData } from "@/context/context/DataContext";
 import { useDashboardMetric } from "@/hooks/useDashboardQueries";
 import { formatAmount } from "@/utils/formatters";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 interface KpiMetricsProps {
@@ -12,8 +14,14 @@ interface KpiMetricsProps {
 
 export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
   const { token } = useAuth();
+  const { settings } = useData();
   const { data: metrics = {}, isLoading } = useDashboardMetric(token || "", filterBy);
   const [pulseOpacity, setPulseOpacity] = useState(1);
+
+  // Resolve currency symbol
+  const currencySymbol = useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
 
   // Toggle green live-data pulse dot
   useEffect(() => {
@@ -41,8 +49,9 @@ export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
               {filterBy === "this_week" ? "THIS WEEK REVENUE" : "THIS MONTH REVENUE"}
             </Text>
             <Text className="text-3xl font-extrabold text-white mt-1">
-              {formatAmount(metrics?.revenue || "0")}
+              {formatAmount(metrics?.revenue || "0", currencySymbol)}
             </Text>
+
           </View>
           <View className="bg-green-500/10 p-2.5 rounded-xl border border-green-500/20">
             <MaterialIcons name="trending-up" size={22} color="#22c55e" />
@@ -76,7 +85,7 @@ export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
             AVERAGE ORDER
           </Text>
           <Text className="text-2xl font-extrabold text-neutral mt-1">
-            {formatAmount(metrics?.avgOrder || "0")}
+            {formatAmount(metrics?.avgOrder || "0", currencySymbol)}
           </Text>
           <Text className="text-[10px] text-yellow-600/70 mt-1">Avg size</Text>
         </View>
@@ -114,10 +123,11 @@ export default function KpiMetrics({ filterBy }: KpiMetricsProps) {
         >
           <MaterialIcons name="payments" size={16} color="white" />
           <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-            SALES ({formatAmount(metrics?.todaySales || "0")})
+            SALES ({formatAmount(metrics?.todaySales || "0", currencySymbol)})
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
     </View>
   );
 }

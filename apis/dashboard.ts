@@ -1,5 +1,5 @@
-import axios from "axios";
 import ENV from "@/config/env";
+import axios from "axios";
 
 const API_BASE_URL = ENV.API_BASE_URL;
 
@@ -31,7 +31,31 @@ export const getDashboardRevenueChart = async (token: string, filterBy: string) 
     params: { date_filter: filterBy },
     validateStatus: () => true,
   });
-  return response.status === 200 && response.data?.success ? response.data.data || [] : [];
+
+  // Temporary mock data for UI testing since API is sending empty values
+  const mockWeek = [
+    { name: "Mon", value: 120 },
+    { name: "Tue", value: 150 },
+    { name: "Wed", value: 80 },
+    { name: "Thu", value: 220 },
+    { name: "Fri", value: 310 },
+    { name: "Sat", value: 450 },
+    { name: "Sun", value: 380 },
+  ];
+
+  const mockMonth = Array.from({ length: 31 }, (_, i) => ({
+    name: `${String(i + 1).padStart(2, "0")} Jul`,
+    value: Math.floor(Math.sin((i + 1) * 0.5) * 150) + 250,
+  }));
+
+  const apiData = response.status === 200 && response.data?.success ? response.data.data || [] : [];
+
+  // If the API data is empty or all values are 0, use mock data temporarily
+  const hasData = apiData.some((d: any) => parseFloat(d.value) > 0);
+  if (!hasData) {
+    return filterBy === "this_week" ? mockWeek : mockMonth;
+  }
+  return apiData;
 };
 
 export const getDashboardOrdersByType = async (token: string, filterBy: string) => {
@@ -56,20 +80,8 @@ export const getDashboardCouponUsages = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
-  if (response.status === 200 && response.data?.success) {
-    const fallbackImages = [
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCZq67zMRRvi6j_fuggIGKbSOxgSe48RWATeoaI6NVBw0kwpS_FsPcSBEjMcsNLddNrpuMUwyLIxlRX6VA35rdXcmQXT9dO4Ux9xGfWxwlw1d0MoyFlVS2IIPLbZq8pYJocnZ9Dl4R8TwuiM8xXY0aZH1Pzwc_mWKpElWazEeVl2nVExqe1O8rpMIk7kMzZ4yK9cITcRhwgHyj3h-tiA3LC0XRHMSVNr_qPB4-qKKrfiX00fPu9AW1CllxA_nCFNttYuw1HuQOK3MsH",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCv9KVyFd23JV6Vd-_gMR-pfU326LNeoFOosLYmrU8M0Q2BvY8emZ7Lj2HEwLf3flLmbtTlotJiCujkWI2l4b5PIbGJnTb8xvX7QhRe3QH4cA4IZM23n2YzBKIq70Nn5dfHdAyE8WbgjVfepBMrgA4rZ56NdcTnmpCglI2Tp2bjD2nWvXcyK5joXPfVhLNSkfx6PikNFFkDHwcXVKLaBpgtHHtc0n-Owof7dFs8u0eL_bc-0doGJGiMgFvbeQQLndVsC0qBToF6ZMvZ",
-    ];
-    return (response.data.data || []).map((promo: any, idx: number) => ({
-      ...promo,
-      image:
-        promo.image && promo.image.startsWith("http")
-          ? promo.image
-          : fallbackImages[idx % fallbackImages.length],
-    }));
-  }
-  return [];
+  console.log(response.data);
+  return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
 
 export const getDashboardRecentOrders = async (token: string) => {
@@ -77,6 +89,7 @@ export const getDashboardRecentOrders = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
+  console.log(response.data);
   return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
 

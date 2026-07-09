@@ -26,4 +26,10 @@ export const QUERY_KEYS = {
 
   // Order keys
   ORDERS: "orders",
+
+  // Restaurant/DataProvider keys
+  COMBINE_DATA: "combineData",
+  RESTAURANT: "restaurant",
+  BUSINESS_TIMING: "businessTiming",
 } as const;
+

@@ -1,5 +1,7 @@
-import { formatAmount } from "@/utils/formatters";
-import React from "react";
+import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import { useData } from "@/context/context/DataContext";
+import React, { useMemo } from "react";
 import { Text, View } from "react-native";
 import StatusBadge from "./reuseable/StatusBadge";
 
@@ -9,25 +11,40 @@ interface RecentOrderRowProps {
 }
 
 export default function RecentOrderRow({ order, index }: RecentOrderRowProps) {
-  const customerName =
-    order.customer_name ||
-    order.user?.first_Name ||
-    (order.table_number && parseFloat(order.table_number) > 0
-      ? `Table ${parseFloat(order.table_number)}`
-      : "Walk-in Customer");
+  const { settings } = useData();
 
-  const orderPrice = order.amount || order.final_price || "0.00";
+  const currencySymbol = useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
+
+  const customerName = order.customer;
+
+  const formattedPrice = formatAmount(order.price, currencySymbol);
+
+  const orderTime = useMemo(() => {
+    if (order.created_at) {
+      return formatDateTime(order.created_at);
+    }
+    return order.time || "";
+  }, [order.created_at, order.time]);
+
 
   return (
     <View className="p-4 flex-row items-center justify-between">
-      <View>
+      <View className="flex-1 mr-4">
         <Text className="text-xs font-bold text-neutral">#{order.id}</Text>
         <Text className="text-[9px] text-accent uppercase font-bold mt-1">
           {customerName} • {order.type || "Order"}
+          {orderTime ? ` • ${orderTime}` : ""}
         </Text>
+        {order.items ? (
+          <Text className="text-[10px] text-accent/80 font-medium mt-0.5 truncate" numberOfLines={1}>
+            {order.items}
+          </Text>
+        ) : null}
       </View>
       <View className="flex-row items-center gap-4">
-        <Text className="text-xs font-bold text-neutral">{formatAmount(orderPrice)}</Text>
+        <Text className="text-xs font-bold text-neutral">{formattedPrice}</Text>
         <StatusBadge status={order.status} />
       </View>
     </View>
