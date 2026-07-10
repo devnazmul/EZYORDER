@@ -75,6 +75,14 @@ export default function MoreSettingsHub() {
       router.push("/partners");
       return;
     }
+    if (title === "Business Settings") {
+      router.push("/business-settings");
+      return;
+    }
+    if (title === "Profile") {
+      router.push("/profile");
+      return;
+    }
     Alert.alert(
       "Feature Coming Soon",
       `The "${title}" module is currently under development and will be available in the next app update.`,
@@ -244,34 +252,6 @@ export default function MoreSettingsHub() {
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
               </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => handleItemPress("Settings")}
-                activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 border-b border-base-200/50"
-              >
-                <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-base-200 items-center justify-center">
-                    <MaterialIcons name="tune" size={20} color="#6E6E6E" />
-                  </View>
-                  <Text className="text-sm font-bold text-neutral">Settings</Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => handleItemPress("Change Password")}
-                activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4"
-              >
-                <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-base-200 items-center justify-center">
-                    <MaterialIcons name="lock" size={20} color="#6E6E6E" />
-                  </View>
-                  <Text className="text-sm font-bold text-neutral">Change Password</Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
-              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -281,15 +261,11 @@ export default function MoreSettingsHub() {
           <TouchableOpacity
             onPress={handleLogout}
             activeOpacity={0.8}
-            className="w-full max-w-xs border-2 border-primary py-3 rounded-lg flex-row items-center justify-center gap-2"
+            className="w-full border-2 border-primary py-3 rounded-lg flex-row items-center justify-center gap-2"
           >
             <MaterialIcons name="logout" size={18} color="#DC2D2A" />
             <Text className="text-xs font-black text-primary uppercase">Log Out</Text>
           </TouchableOpacity>
-
-          <Text className="text-[10px] font-bold text-accent/60 tracking-wider">
-            Version 2.4.0 (Build 108)
-          </Text>
         </View>
       </RefreshableScrollView>
     </SafeAreaView>

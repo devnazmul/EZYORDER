@@ -11,6 +11,7 @@ export const QUERY_KEYS = {
   // User keys
   USERS: "users",
   SINGLE_USER: "single_user",
+  SINGLE_OWNER: "single_owner",
 
   // Discount keys
   COUPONS: "coupons",

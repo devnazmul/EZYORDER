@@ -48,3 +48,27 @@ export const getAllOrders = async (token: string, restaurantId: string | number)
   }
   return [];
 };
+
+// GET KITCHEN PENDING ORDERS
+export const getPendingOrders = async (
+  token: string,
+  restaurantId: string | number,
+  perPage: number = 12,
+  page: number = 1,
+  orderId?: string
+) => {
+  const params: Record<string, any> = { page };
+  if (orderId) {
+    params.order_id = orderId;
+  }
+  const response = await axios.get(`${API_BASE_URL}/order/All/pending/order/${restaurantId}/${perPage}`, {
+    headers: getHeaders(token),
+    params,
+    validateStatus: () => true,
+  });
+
+  if (response.status === 200 && response.data) {
+    return response.data;
+  }
+  return null;
+};

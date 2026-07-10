@@ -31,31 +31,8 @@ export const getDashboardRevenueChart = async (token: string, filterBy: string) 
     params: { date_filter: filterBy },
     validateStatus: () => true,
   });
-
-  // Temporary mock data for UI testing since API is sending empty values
-  const mockWeek = [
-    { name: "Mon", value: 120 },
-    { name: "Tue", value: 150 },
-    { name: "Wed", value: 80 },
-    { name: "Thu", value: 220 },
-    { name: "Fri", value: 310 },
-    { name: "Sat", value: 450 },
-    { name: "Sun", value: 380 },
-  ];
-
-  const mockMonth = Array.from({ length: 31 }, (_, i) => ({
-    name: `${String(i + 1).padStart(2, "0")} Jul`,
-    value: Math.floor(Math.sin((i + 1) * 0.5) * 150) + 250,
-  }));
-
-  const apiData = response.status === 200 && response.data?.success ? response.data.data || [] : [];
-
-  // If the API data is empty or all values are 0, use mock data temporarily
-  const hasData = apiData.some((d: any) => parseFloat(d.value) > 0);
-  if (!hasData) {
-    return filterBy === "this_week" ? mockWeek : mockMonth;
-  }
-  return apiData;
+  console.log(response.data);
+  return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
 
 export const getDashboardOrdersByType = async (token: string, filterBy: string) => {

@@ -31,17 +31,11 @@ export default function OrdersLayout() {
           title: "All Orders",
         }}
       />
-      <Stack.Screen
-        name="order-reports"
-        options={{
-          headerShown: true,
-          title: "Order Reports",
-        }}
-      />
+
       <Stack.Screen
         name="kitchen-screen"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: "Kitchen Screen",
         }}
       />

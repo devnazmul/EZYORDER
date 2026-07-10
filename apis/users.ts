@@ -18,3 +18,13 @@ export const getUsers = async (token: string, params: Record<string, any> = {}) 
   console.log("Users data", response.data);
   return response.status === 200 && response.data?.success ? response.data : [];
 };
+
+// GET SINGLE OWNER PROFILE
+export const getOwnerProfile = async (token: string, id: string | number) => {
+  const response = await axios.get(`${API_BASE_URL}/owner/${id}`, {
+    headers: getHeaders(token),
+    validateStatus: () => true,
+  });
+  console.log("Owner profile data", response.data);
+  return response.status === 200 && response.data ? response.data : null;
+};
