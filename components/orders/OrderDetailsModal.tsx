@@ -1,8 +1,8 @@
+import Button from "@/components/reuseable/Button";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import Button from "./reuseable/Button";
 
 interface OrderDetailsModalProps {
   visible: boolean;
@@ -92,7 +92,10 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
                             </Text>
                             <Text className="text-[10px] text-accent mt-0.5">{formatAmount(price)} each</Text>
                             {item.variations && item.variations.length > 0 ? (
-                              <Text className="text-[9px] text-secondary font-semibold mt-0.5" numberOfLines={1}>
+                              <Text
+                                className="text-[9px] text-secondary font-semibold mt-0.5"
+                                numberOfLines={1}
+                              >
                                 {item.variations
                                   .map((v: any) => v.variation?.name || v.name || "")
                                   .filter(Boolean)

@@ -1,9 +1,9 @@
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardRecentOrders } from "@/hooks/useDashboardQueries";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import EmptyState from "../reuseable/EmptyState";
-import RecentOrderRow from "../RecentOrderRow";
+import RecentOrderRow from "./RecentOrderRow";
 
 export default function RecentOrders() {
   const { token } = useAuth();

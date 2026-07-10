@@ -1,10 +1,10 @@
-import PartnerCard from "@/components/PartnerCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import { useAuth } from "@/context/AuthContext";
 import { useRestaurantPartnersQuery } from "@/hooks/usePartnerQueries";
 import React, { useMemo } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import PartnerCard from "./PartnerCard";
 
 export default function PartnersView() {
   const { user, token } = useAuth();

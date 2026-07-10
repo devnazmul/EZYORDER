@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useDashboardLiveOrderBoard } from "@/hooks/useDashboardQueries";
 import React from "react";
 import { Text, View } from "react-native";
-import OrderStatusCard from "../OrderStatusCard";
+import OrderStatusCard from "./OrderStatusCard";
 
 export default function LiveOrderBoard() {
   const { token } = useAuth();
@@ -10,7 +10,10 @@ export default function LiveOrderBoard() {
 
   if (isLoading) {
     return (
-      <View key="loading" className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[160px] justify-center items-center">
+      <View
+        key="loading"
+        className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[160px] justify-center items-center"
+      >
         <Text className="text-xs text-accent">Loading order board...</Text>
       </View>
     );

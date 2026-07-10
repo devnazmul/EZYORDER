@@ -1,9 +1,9 @@
+import StatusBadge from "@/components/reuseable/StatusBadge";
+import { useData } from "@/context/context/DataContext";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
-import { useData } from "@/context/context/DataContext";
 import React, { useMemo } from "react";
 import { Text, View } from "react-native";
-import StatusBadge from "./reuseable/StatusBadge";
 
 interface RecentOrderRowProps {
   order: any;
@@ -27,7 +27,6 @@ export default function RecentOrderRow({ order, index }: RecentOrderRowProps) {
     }
     return order.time || "";
   }, [order.created_at, order.time]);
-
 
   return (
     <View className="p-4 flex-row items-center justify-between">

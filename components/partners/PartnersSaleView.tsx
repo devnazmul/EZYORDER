@@ -1,10 +1,10 @@
-import PartnerSaleCard from "@/components/PartnerSaleCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import { useAuth } from "@/context/AuthContext";
 import { useDailyOrderPartnerSalesQuery } from "@/hooks/usePartnerQueries";
 import React, { useMemo } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import PartnerSaleCard from "./PartnerSaleCard";
 
 export default function PartnersSaleView() {
   const { user, token } = useAuth();

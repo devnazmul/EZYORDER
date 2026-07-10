@@ -1,8 +1,8 @@
+import Button from "@/components/reuseable/Button";
+import StatusBadge from "@/components/reuseable/StatusBadge";
 import { formatAmount } from "@/utils/formatters";
 import React from "react";
 import { Text, View } from "react-native";
-import Button from "./reuseable/Button";
-import StatusBadge from "./reuseable/StatusBadge";
 
 interface OrderCardProps {
   item: any;
