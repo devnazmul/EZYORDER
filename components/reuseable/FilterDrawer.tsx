@@ -1,8 +1,12 @@
 import FilterChips from "@/components/reuseable/FilterChips";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import DatePickerModal from "./DatePickerModal";
+import DateRangeField from "./inputs/DateRangeField";
+import NumberRangeField from "./inputs/NumberRangeField";
+import TextField from "./inputs/TextField";
+import DateField from "./inputs/DateField";
 
 export interface FilterField {
   id: string;
@@ -174,150 +178,76 @@ export default function FilterDrawer({
                   if (field.type === "date-range") {
                     const range = localValues[field.id] || { start: "", end: "" };
                     return (
-                      <View key={field.id}>
-                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
-                          {field.label}
-                        </Text>
-                        <View className="flex-row items-center gap-3">
-                          {/* Start Date */}
-                          <TouchableOpacity
-                            onPress={() => setActiveDatePicker({ fieldId: field.id, type: "start" })}
-                            activeOpacity={0.8}
-                            className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3"
-                          >
-                            <View>
-                              <Text className="text-[8px] font-bold text-accent uppercase">Start Date</Text>
-                              <Text className="text-xs font-semibold text-neutral mt-0.5">
-                                {formatDateLabel(range.start)}
-                              </Text>
-                            </View>
-                            <MaterialIcons name="calendar-today" size={16} color="#DC2D2A" />
-                          </TouchableOpacity>
-
-                          {/* End Date */}
-                          <TouchableOpacity
-                            onPress={() => setActiveDatePicker({ fieldId: field.id, type: "end" })}
-                            activeOpacity={0.8}
-                            className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3"
-                          >
-                            <View>
-                              <Text className="text-[8px] font-bold text-accent uppercase">End Date</Text>
-                              <Text className="text-xs font-semibold text-neutral mt-0.5">
-                                {formatDateLabel(range.end)}
-                              </Text>
-                            </View>
-                            <MaterialIcons name="calendar-today" size={16} color="#DC2D2A" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
+                      <DateRangeField
+                        key={field.id}
+                        label={field.label}
+                        startDateValue={range.start}
+                        endDateValue={range.end}
+                        onSelectStartDate={() => setActiveDatePicker({ fieldId: field.id, type: "start" })}
+                        onSelectEndDate={() => setActiveDatePicker({ fieldId: field.id, type: "end" })}
+                        formatDateLabel={formatDateLabel}
+                      />
                     );
                   }
 
                   if (field.type === "number-range") {
                     const range = localValues[field.id] || { min: "", max: "" };
                     return (
-                      <View key={field.id}>
-                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
-                          {field.label}
-                        </Text>
-                        <View className="flex-row items-center gap-3">
-                          {/* Min Amount */}
-                          <View className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3">
-                            <View className="flex-1">
-                              <Text className="text-[8px] font-bold text-accent uppercase">Min Amount</Text>
-                              <TextInput
-                                keyboardType="numeric"
-                                placeholder="0.00"
-                                placeholderTextColor="#6E6E6E"
-                                value={range.min}
-                                onChangeText={(text) => {
-                                  setLocalValues((prev) => ({
-                                    ...prev,
-                                    [field.id]: {
-                                      ...(prev[field.id] || { min: "", max: "" }),
-                                      min: text,
-                                    },
-                                  }));
-                                }}
-                                className="text-xs font-semibold text-neutral mt-0.5 p-0"
-                              />
-                            </View>
-                          </View>
-
-                          {/* Max Amount */}
-                          <View className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3">
-                            <View className="flex-1">
-                              <Text className="text-[8px] font-bold text-accent uppercase">Max Amount</Text>
-                              <TextInput
-                                keyboardType="numeric"
-                                placeholder="0.00"
-                                placeholderTextColor="#6E6E6E"
-                                value={range.max}
-                                onChangeText={(text) => {
-                                  setLocalValues((prev) => ({
-                                    ...prev,
-                                    [field.id]: {
-                                      ...(prev[field.id] || { min: "", max: "" }),
-                                      max: text,
-                                    },
-                                  }));
-                                }}
-                                className="text-xs font-semibold text-neutral mt-0.5 p-0"
-                              />
-                            </View>
-                          </View>
-                        </View>
-                      </View>
+                      <NumberRangeField
+                        key={field.id}
+                        label={field.label}
+                        minValue={range.min}
+                        maxValue={range.max}
+                        onChangeMinText={(text) => {
+                          setLocalValues((prev) => ({
+                            ...prev,
+                            [field.id]: {
+                              ...(prev[field.id] || { min: "", max: "" }),
+                              min: text,
+                            },
+                          }));
+                        }}
+                        onChangeMaxText={(text) => {
+                          setLocalValues((prev) => ({
+                            ...prev,
+                            [field.id]: {
+                              ...(prev[field.id] || { min: "", max: "" }),
+                              max: text,
+                            },
+                          }));
+                        }}
+                      />
                     );
                   }
 
                   if (field.type === "text") {
                     const textVal = localValues[field.id] || "";
                     return (
-                      <View key={field.id}>
-                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
-                          {field.label}
-                        </Text>
-                        <View className="bg-base-100 border border-base-200 rounded-xl p-3">
-                          <TextInput
-                            keyboardType="numeric"
-                            placeholder="Enter value..."
-                            placeholderTextColor="#6E6E6E"
-                            value={textVal}
-                            onChangeText={(text) => {
-                              setLocalValues((prev) => ({
-                                ...prev,
-                                [field.id]: text,
-                              }));
-                            }}
-                            className="text-xs font-semibold text-neutral p-0"
-                          />
-                        </View>
-                      </View>
+                      <TextField
+                        key={field.id}
+                        label={field.label}
+                        value={textVal}
+                        keyboardType="numeric"
+                        onChangeText={(text) => {
+                          setLocalValues((prev) => ({
+                            ...prev,
+                            [field.id]: text,
+                          }));
+                        }}
+                      />
                     );
                   }
 
                   if (field.type === "date") {
                     const dateVal = localValues[field.id] || "";
                     return (
-                      <View key={field.id}>
-                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
-                          {field.label}
-                        </Text>
-                        <TouchableOpacity
-                          onPress={() => setActiveDatePicker({ fieldId: field.id, type: "single" })}
-                          activeOpacity={0.8}
-                          className="flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3"
-                        >
-                          <View>
-                            <Text className="text-[8px] font-bold text-accent uppercase">Selected Date</Text>
-                            <Text className="text-xs font-semibold text-neutral mt-0.5">
-                              {formatDateLabel(dateVal)}
-                            </Text>
-                          </View>
-                          <MaterialIcons name="calendar-today" size={16} color="#DC2D2A" />
-                        </TouchableOpacity>
-                      </View>
+                      <DateField
+                        key={field.id}
+                        label={field.label}
+                        value={dateVal}
+                        onPress={() => setActiveDatePicker({ fieldId: field.id, type: "single" })}
+                        formatDateLabel={formatDateLabel}
+                      />
                     );
                   }
 

@@ -1,8 +1,10 @@
 import Button from "@/components/reuseable/Button";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import { MaterialIcons } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useData } from "@/context/context/DataContext";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 
 interface OrderDetailsModalProps {
   visible: boolean;
@@ -11,6 +13,12 @@ interface OrderDetailsModalProps {
 }
 
 export default function OrderDetailsModal({ visible, order, onClose }: OrderDetailsModalProps) {
+  const { settings } = useData();
+
+  const currencySymbol = useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
+
   if (!order) return null;
 
   const detailItems = order.detail || order.details || [];
@@ -90,7 +98,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
                             <Text className="text-xs font-semibold text-neutral" numberOfLines={1}>
                               {dishName}
                             </Text>
-                            <Text className="text-[10px] text-accent mt-0.5">{formatAmount(price)} each</Text>
+                            <Text className="text-[10px] text-accent mt-0.5">{formatAmount(price, currencySymbol)} each</Text>
                             {item.variations && item.variations.length > 0 ? (
                               <Text
                                 className="text-[9px] text-secondary font-semibold mt-0.5"
@@ -105,7 +113,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
                           </View>
                         </View>
                         <Text className="text-xs font-bold text-neutral ml-2">
-                          {formatAmount(String(qty * parseFloat(String(price))))}
+                          {formatAmount(String(qty * parseFloat(String(price))), currencySymbol)}
                         </Text>
                       </View>
                     );
@@ -123,14 +131,14 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
                 <View className="flex-row justify-between">
                   <Text className="text-xs text-accent">Subtotal:</Text>
                   <Text className="text-xs font-semibold text-neutral">
-                    {formatAmount(order.final_price || "0")}
+                    {formatAmount(order.final_price || "0", currencySymbol)}
                   </Text>
                 </View>
 
                 {order.tax && parseFloat(order.tax) > 0 ? (
                   <View className="flex-row justify-between">
                     <Text className="text-xs text-accent">Tax:</Text>
-                    <Text className="text-xs font-semibold text-neutral">{formatAmount(order.tax)}</Text>
+                    <Text className="text-xs font-semibold text-neutral">{formatAmount(order.tax, currencySymbol)}</Text>
                   </View>
                 ) : null}
 
@@ -138,7 +146,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
                   <View className="flex-row justify-between">
                     <Text className="text-xs text-accent">Tip:</Text>
                     <Text className="text-xs font-semibold text-neutral">
-                      {formatAmount(order.tip_amount)}
+                      {formatAmount(order.tip_amount, currencySymbol)}
                     </Text>
                   </View>
                 ) : null}
@@ -147,14 +155,14 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
                   <View className="flex-row justify-between">
                     <Text className="text-xs text-accent">Discount:</Text>
                     <Text className="text-xs font-semibold text-green-600">
-                      -{formatAmount(order.discount)}
+                      -{formatAmount(order.discount, currencySymbol)}
                     </Text>
                   </View>
                 ) : null}
 
                 <View className="border-t border-base-200 pt-2 mt-1 flex-row justify-between items-center">
                   <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
-                  <Text className="text-md font-bold text-primary">{formatAmount(order.amount || "0")}</Text>
+                  <Text className="text-md font-bold text-primary">{formatAmount(order.amount || "0", currencySymbol)}</Text>
                 </View>
               </View>
             </View>

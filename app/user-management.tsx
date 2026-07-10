@@ -82,7 +82,7 @@ export default function UserManagementScreen() {
   }, [filterValues]);
 
   return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
+    <SafeAreaView edges={["left", "right", "bottom"]} className="flex-1 bg-base-100">
       {/* App Header with Back Button */}
       <AppHeader showBackButton={true} />
 

@@ -1,8 +1,10 @@
 import Button from "@/components/reuseable/Button";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import { formatAmount } from "@/utils/formatters";
-import React from "react";
+import React, { useMemo } from "react";
 import { Text, View } from "react-native";
+import { useData } from "@/context/context/DataContext";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 
 interface OrderCardProps {
   item: any;
@@ -10,6 +12,12 @@ interface OrderCardProps {
 }
 
 export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
+  const { settings } = useData();
+
+  const currencySymbol = useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
+
   // Helper to extract items description
   const getOrderItemsText = (order: any) => {
     if (!order) return "";
@@ -79,7 +87,7 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
         {/* Price Row */}
         <View className="flex-row justify-between items-center pt-1">
           <Text className="text-md font-bold text-neutral">
-            {formatAmount(item.amount || item.final_price || "0")}
+            {formatAmount(item.amount || item.final_price || "0", currencySymbol)}
           </Text>
         </View>
       </View>
