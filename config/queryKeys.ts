@@ -31,5 +31,12 @@ export const QUERY_KEYS = {
   COMBINE_DATA: "combineData",
   RESTAURANT: "restaurant",
   BUSINESS_TIMING: "businessTiming",
+
+  // Reports keys
+  REPORTS: "reports",
+  SALES_SUMMARY: "salesSummary",
+  SALES_TREND: "salesTrend",
+  SALES_BY_ORDER_TYPE: "salesByOrderType",
+  CUSTOMERS: "customers",
 } as const;
 

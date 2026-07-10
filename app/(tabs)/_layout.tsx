@@ -86,9 +86,7 @@ export default function TabsLayout() {
   const { token, isLoading } = useAuth();
 
   const { data } = useNotificationUnreadCountQuery(token || "");
-
-  const unreadCount = data?.count || 0;
-  const hasUnread = unreadCount > 0;
+  const hasUnread = data?.count > 0 ? true : false;
 
   if (isLoading) {
     return (
@@ -102,6 +100,24 @@ export default function TabsLayout() {
   if (!token) {
     return <Redirect href="/(auth)/login" />;
   }
+
+  const renderTabBarLabel =
+    (title: string) =>
+    ({ color }: { color: string }) => (
+      <Text
+        style={{
+          color,
+          fontSize: 10.5,
+          fontWeight: "600",
+          marginTop: 2,
+          textAlign: "center",
+        }}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
+        {title}
+      </Text>
+    );
 
   return (
     <Tabs
@@ -124,17 +140,13 @@ export default function TabsLayout() {
           paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 12,
           paddingTop: 12,
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
-          marginTop: 2,
-        },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
           title: "Dashboard",
+          tabBarLabel: renderTabBarLabel("Dashboard"),
           tabBarIcon: ({ color }) => <MaterialIcons name="dashboard" size={24} color={color} />,
         }}
       />
@@ -142,6 +154,7 @@ export default function TabsLayout() {
         name="orders"
         options={{
           title: "Orders",
+          tabBarLabel: renderTabBarLabel("Orders"),
           tabBarIcon: ({ color }) => <MaterialIcons name="receipt" size={24} color={color} />,
         }}
       />
@@ -149,6 +162,7 @@ export default function TabsLayout() {
         name="reports"
         options={{
           title: "Reports",
+          tabBarLabel: renderTabBarLabel("Reports"),
           tabBarIcon: ({ color }) => <MaterialIcons name="bar-chart" size={24} color={color} />,
         }}
       />
@@ -156,6 +170,7 @@ export default function TabsLayout() {
         name="notifications"
         options={{
           title: "Notifications",
+          tabBarLabel: renderTabBarLabel("Notifications"),
           tabBarIcon: ({ color }) => (
             <View style={{ width: 24, height: 24 }}>
               <MaterialIcons name="notifications" size={24} color={color} />
@@ -168,6 +183,7 @@ export default function TabsLayout() {
         name="more"
         options={{
           title: "More",
+          tabBarLabel: renderTabBarLabel("More"),
           tabBarIcon: ({ color }) => <MaterialIcons name="more-horiz" size={24} color={color} />,
         }}
       />

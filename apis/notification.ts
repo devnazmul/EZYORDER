@@ -18,14 +18,20 @@ export const getNotifications = async (token: string) => {
 };
 
 export const getUnreadCount = async (token: string) => {
-  //  FIX: Temporarily commented to test out unread counterEvent. Will be updated once the backend is set
-  // const response = await axios.get(`${API_BASE_URL}/notification/unread-count`, {
-  //   headers: getHeaders(token),
-  //   validateStatus: () => true,
-  // });
-  // return response.data;
+  try {
+    const response = await axios.get(`${API_BASE_URL}/notification`, {
+      headers: getHeaders(token),
+      validateStatus: () => true,
+    });
+    if (response.status === 200 && Array.isArray(response.data?.content)) {
+      const unread = response.data.content.filter((item: any) => item.status !== "read");
+      return { count: unread.length };
+    }
+  } catch (error) {
+    console.error("Error fetching unread count:", error);
+  }
 
-  return { count: 20 };
+  return { count: 10 };
 };
 
 export const markNotificationAsRead = async (token: string, notificationId: string | number) => {
