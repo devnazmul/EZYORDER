@@ -36,7 +36,7 @@ export default function DatePickerModal({
 }: DatePickerModalProps) {
   // Parse initial state date or default to today
   const initialDate = useMemo(() => {
-    if (selectedDate) {
+    if (selectedDate && typeof selectedDate === "string") {
       const parts = selectedDate.split("-");
       if (parts.length === 3) {
         return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));

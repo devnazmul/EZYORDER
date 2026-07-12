@@ -23,9 +23,14 @@ const flattenOrders = (rawData: any) => {
 };
 
 // GET TODAY'S LIVE ORDERS
-export const getTodayOrders = async (token: string, restaurantId: string | number) => {
+export const getTodayOrders = async (
+  token: string,
+  restaurantId: string | number,
+  params: Record<string, any> = {},
+) => {
   const response = await axios.get(`${API_BASE_URL}/order/All/order/today/${restaurantId}`, {
     headers: getHeaders(token),
+    params,
     validateStatus: () => true,
   });
 
@@ -35,14 +40,18 @@ export const getTodayOrders = async (token: string, restaurantId: string | numbe
   return [];
 };
 
-// GET ALL HISTORICAL ORDERS
-export const getAllOrders = async (token: string, restaurantId: string | number) => {
+// // GET ALL HISTORICAL ORDERS
+export const getAllOrders = async (
+  token: string,
+  restaurantId: string | number,
+  params: Record<string, any> = {},
+) => {
   const response = await axios.get(`${API_BASE_URL}/v3.0/order/All/order/every/${restaurantId}`, {
     headers: getHeaders(token),
-    params: { per_page: 50, page: 1 },
+    params: { per_page: 50, page: 1, ...params },
     validateStatus: () => true,
   });
-  console.log(response.data);
+  console.log(response.headers);
   if (response.status === 200 && response.data) {
     return flattenOrders(response.data.data || response.data);
   }
@@ -55,7 +64,7 @@ export const getPendingOrders = async (
   restaurantId: string | number,
   perPage: number = 12,
   page: number = 1,
-  orderId?: string
+  orderId?: string,
 ) => {
   const params: Record<string, any> = { page };
   if (orderId) {

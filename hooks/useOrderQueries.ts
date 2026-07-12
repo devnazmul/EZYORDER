@@ -5,11 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 export const useTodayOrdersQuery = (
   token: string,
   restaurantId: string | number,
+  params: Record<string, any> = {},
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.ORDERS, "today", restaurantId],
-    queryFn: () => getTodayOrders(token, restaurantId),
+    queryKey: [QUERY_KEYS.ORDERS, "today", restaurantId, params],
+    queryFn: () => getTodayOrders(token, restaurantId, params),
     enabled: !!token && !!restaurantId && (options?.enabled ?? true),
   });
 };
@@ -17,11 +18,12 @@ export const useTodayOrdersQuery = (
 export const useAllOrdersQuery = (
   token: string,
   restaurantId: string | number,
+  params: Record<string, any> = {},
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.ORDERS, "all", restaurantId],
-    queryFn: () => getAllOrders(token, restaurantId),
+    queryKey: [QUERY_KEYS.ORDERS, "all", restaurantId, params],
+    queryFn: () => getAllOrders(token, restaurantId, params),
     enabled: !!token && !!restaurantId && (options?.enabled ?? true),
   });
 };

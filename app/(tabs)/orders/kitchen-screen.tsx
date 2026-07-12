@@ -10,7 +10,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { usePendingOrdersQuery } from "@/hooks/useOrderQueries";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function KitchenScreen() {
@@ -47,13 +47,7 @@ export default function KitchenScreen() {
   const totalCount = data?.total || 0;
   const lastPage = data?.last_page || 1;
 
-  if (isLoading) {
-    return (
-      <View key="loading" className="flex-1">
-        <LoadingScreen message="Loading kitchen orders..." />
-      </View>
-    );
-  }
+  const showListLoader = isLoading || isRefetching;
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
@@ -71,7 +65,12 @@ export default function KitchenScreen() {
           containerClassName="mb-4"
         />
 
-        {orders.length === 0 ? (
+        {showListLoader ? (
+          <View key="list-loading" className="flex-1 justify-center items-center py-10">
+            <ActivityIndicator size="large" color="#DC2D2A" />
+            <Text className="text-xs text-accent mt-3">Updating kitchen orders...</Text>
+          </View>
+        ) : orders.length === 0 ? (
           <View key="empty" className="flex-1 justify-center items-center py-10 bg-base-100">
             <EmptyState
               icon="assignment-late"

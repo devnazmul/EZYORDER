@@ -21,14 +21,14 @@ export default function Home() {
   const onRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["dashboardMetrics"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboardLiveOrderBoard"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboardRevenueChart"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboardOrdersByTypeChart"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboardKitchenActivityCard"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboardPromotionsTable"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboardRecentOrdersTable"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboardTopDishesPerformance"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardMetrics"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardLiveOrderBoard"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardRevenueChart"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardOrdersByTypeChart"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardKitchenActivityCard"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardPromotionsTable"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardRecentOrdersTable"] }),
+      queryClient.refetchQueries({ queryKey: ["dashboardTopDishesPerformance"] }),
     ]);
     setIsRefreshing(false);
   };

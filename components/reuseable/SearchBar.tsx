@@ -1,12 +1,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardTypeOptions, TextInput, TouchableOpacity, View } from "react-native";
 
 interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
   containerClassName?: string;
+  keyboardType?: KeyboardTypeOptions;
 }
 
 export default function SearchBar({
@@ -14,6 +15,7 @@ export default function SearchBar({
   onChangeText,
   placeholder = "Search...",
   containerClassName = "",
+  keyboardType = "default",
 }: SearchBarProps) {
   return (
     <View
@@ -26,6 +28,7 @@ export default function SearchBar({
         placeholderTextColor="#8C8C8C"
         value={value}
         onChangeText={onChangeText}
+        keyboardType={keyboardType}
       />
       {value.length > 0 && (
         <TouchableOpacity onPress={() => onChangeText("")}>

@@ -8,7 +8,7 @@ interface ChipItem {
 
 interface FilterChipsProps {
   chips: ChipItem[];
-  selectedId: string;
+  selectedId: string | string[];
   onSelect: (id: string) => void;
   containerClassName?: string;
 }
@@ -27,7 +27,9 @@ export default function FilterChips({
         contentContainerStyle={{ flexDirection: "row", paddingRight: 16 }}
       >
         {chips.map((chip) => {
-          const isSelected = chip.id === selectedId;
+          const isSelected = Array.isArray(selectedId)
+            ? selectedId.includes(chip.id)
+            : chip.id === selectedId;
           return (
             <TouchableOpacity
               key={chip.id}

@@ -1,7 +1,7 @@
 import FilterChips from "@/components/reuseable/FilterChips";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, Text, TouchableOpacity, View, KeyboardTypeOptions } from "react-native";
 import DatePickerModal from "./DatePickerModal";
 import DateRangeField from "./inputs/DateRangeField";
 import NumberRangeField from "./inputs/NumberRangeField";
@@ -13,6 +13,8 @@ export interface FilterField {
   label: string;
   type: "chips" | "date-range" | "number-range" | "text" | "date";
   options?: { id: string; label: string }[]; // For chips type
+  keyboardType?: KeyboardTypeOptions;
+  isMultiSelect?: boolean;
 }
 
 interface FilterDrawerProps {
@@ -52,6 +54,10 @@ export default function FilterDrawer({
     Object.keys(values).forEach((key) => {
       const val = values[key];
       if (val === "all") return;
+      if (Array.isArray(val)) {
+        if (val.length > 0 && !val.includes("all")) count++;
+        return;
+      }
       if (typeof val === "object" && val !== null) {
         if (val.start || val.end || val.min || val.max) count++;
       } else if (val) {
@@ -61,11 +67,39 @@ export default function FilterDrawer({
     return count;
   }, [values]);
 
-  const handleChipSelect = (fieldId: string, optionId: string) => {
-    setLocalValues((prev) => ({
-      ...prev,
-      [fieldId]: optionId,
-    }));
+  const handleChipSelect = (field: FilterField, optionId: string) => {
+    if (!field.isMultiSelect) {
+      setLocalValues((prev) => ({
+        ...prev,
+        [field.id]: optionId,
+      }));
+      return;
+    }
+
+    setLocalValues((prev) => {
+      const current = Array.isArray(prev[field.id]) ? prev[field.id] : [prev[field.id] || "all"];
+      if (optionId === "all") {
+        return {
+          ...prev,
+          [field.id]: ["all"],
+        };
+      }
+
+      let next = current.filter((x: string) => x !== "all");
+      if (next.includes(optionId)) {
+        next = next.filter((x: string) => x !== optionId);
+      } else {
+        next.push(optionId);
+      }
+
+      if (next.length === 0) {
+        next = ["all"];
+      }
+      return {
+        ...prev,
+        [field.id]: next,
+      };
+    });
   };
 
   const handleDateSelect = (dateStr: string) => {
@@ -96,7 +130,7 @@ export default function FilterDrawer({
     const cleared: Record<string, any> = {};
     fields.forEach((f) => {
       if (f.type === "chips") {
-        cleared[f.id] = "all";
+        cleared[f.id] = f.isMultiSelect ? ["all"] : "all";
       } else if (f.type === "date-range") {
         cleared[f.id] = { start: "", end: "" };
       } else if (f.type === "number-range") {
@@ -169,7 +203,7 @@ export default function FilterDrawer({
                         <FilterChips
                           chips={field.options}
                           selectedId={selectedId}
-                          onSelect={(optionId) => handleChipSelect(field.id, optionId)}
+                          onSelect={(optionId) => handleChipSelect(field, optionId)}
                         />
                       </View>
                     );
@@ -227,7 +261,7 @@ export default function FilterDrawer({
                         key={field.id}
                         label={field.label}
                         value={textVal}
-                        keyboardType="numeric"
+                        keyboardType={field.keyboardType || "default"}
                         onChangeText={(text) => {
                           setLocalValues((prev) => ({
                             ...prev,
@@ -283,7 +317,11 @@ export default function FilterDrawer({
           visible={true}
           onClose={() => setActiveDatePicker(null)}
           title={`Select Date`}
-          selectedDate={localValues[activeDatePicker.fieldId]}
+          selectedDate={
+            activeDatePicker.type === "single"
+              ? localValues[activeDatePicker.fieldId]
+              : localValues[activeDatePicker.fieldId]?.[activeDatePicker.type]
+          }
           onSelectDate={handleDateSelect}
         />
       )}
