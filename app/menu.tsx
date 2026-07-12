@@ -1,12 +1,15 @@
 import AppHeader from "@/components/AppHeader";
+import CategoryCard from "@/components/menu/CategoryCard";
 import KpiCard from "@/components/reports/KpiCard";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import SearchBar from "@/components/reuseable/SearchBar";
 import { useAuth } from "@/context/AuthContext";
 import { useMenuAllQuery, useMenuMatrixQuery } from "@/hooks/useMenuQueries";
+import { useDebounce } from "@/hooks/useDebounce";
 import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MenuManagement() {
@@ -14,13 +17,18 @@ export default function MenuManagement() {
   const restaurantId = user?.restaurant?.[0]?.id || user?.business_id;
 
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  const menuParams = useMemo(() => {
+    return { search_key: debouncedSearchQuery };
+  }, [debouncedSearchQuery]);
 
   // Fetch all menu items
   const {
     data: menuData,
     isLoading: isMenuLoading,
     refetch: refetchMenus,
-  } = useMenuAllQuery(token || "", String(restaurantId || ""));
+  } = useMenuAllQuery(token || "", String(restaurantId || ""), menuParams);
 
   // Fetch KPI matrix counts
   const {
@@ -30,18 +38,11 @@ export default function MenuManagement() {
   } = useMenuMatrixQuery(token || "");
 
   const menuList = useMemo(() => {
-    console.log(menuData);
     return Array.isArray(menuData) ? menuData : [];
   }, [menuData]);
 
-  // Handle local searching of categories
-  const filteredMenuList = useMemo(() => {
-    if (!searchQuery.trim()) return menuList;
-    const query = searchQuery.toLowerCase();
-    return menuList.filter(
-      (item) => item?.name?.toLowerCase().includes(query) || item?.description?.toLowerCase().includes(query),
-    );
-  }, [menuList, searchQuery]);
+  // Offloaded to API querying
+  const filteredMenuList = menuList;
 
   const handleRefresh = async () => {
     await Promise.all([refetchMenus(), refetchMatrix()]);
@@ -151,82 +152,18 @@ export default function MenuManagement() {
             </View>
           ) : (
             <View className="gap-y-4">
-              {filteredMenuList.map((item) => {
-                const isActive = item?.show_in_customer === 1 || item?.show_in_customer === "1";
-                const isTimeBased = item?.is_time_based === 1 || item?.is_time_based === "1";
-                const dishCount = Array.isArray(item?.dishes) ? item.dishes.length : 0;
-                return (
-                  <View
-                    key={item?.id || String(item?.name)}
-                    className={`bg-base-300 border rounded-lg p-4 shadow-sm ${
-                      !isActive ? "border-l-4 border-l-primary border-base-200" : "border-base-200"
-                    }`}
-                  >
-                    {/* Top Row: Name, time-based badge & View icon */}
-                    <View className="flex-row justify-between items-center mb-3">
-                      <View className="flex-row items-center flex-1 pr-2 gap-2">
-                        <Text className="text-md font-black text-neutral shrink" numberOfLines={1}>
-                          {item?.name}
-                        </Text>
-                        {isTimeBased && (
-                          <View className="flex-row items-center bg-amber-100 px-2 py-0.5 rounded-full gap-1">
-                            <MaterialIcons name="schedule" size={10} color="#92400e" />
-                            <Text className="text-[9px] font-bold text-amber-800 ml-0.5">Time-Based</Text>
-                          </View>
-                        )}
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => {
-                          Alert.alert("Menu detail", `Opening dishes list for: ${item?.name}`);
-                        }}
-                        className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center"
-                        activeOpacity={0.8}
-                      >
-                        <MaterialIcons name="visibility" size={18} color="#2563EB" />
-                      </TouchableOpacity>
-                    </View>
-
-                    {/* Details Row: Description, Status, Dishes count */}
-                    <View className="flex-row border-t border-base-200/50 border-dashed pt-3 justify-between">
-                      {/* Description */}
-                      <View className="flex-1 pr-2">
-                        <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">
-                          Description
-                        </Text>
-                        <Text className="text-xs text-accent/80 font-medium mt-0.5" numberOfLines={1}>
-                          {item?.description || "No description"}
-                        </Text>
-                      </View>
-
-                      {/* Status */}
-                      <View className="items-center px-2">
-                        <Text className="text-[9px] font-bold text-accent uppercase tracking-wider mb-0.5">
-                          Status
-                        </Text>
-                        <View
-                          className={`px-2.5 py-0.5 rounded-lg ${isActive ? "bg-green-100" : "bg-red-100"}`}
-                        >
-                          <Text
-                            className={`text-[9px] font-bold uppercase ${
-                              isActive ? "text-green-700" : "text-red-700"
-                            }`}
-                          >
-                            {isActive ? "Active" : "Inactive"}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Dishes count */}
-                      <View className="items-end pl-2">
-                        <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">
-                          Dishes
-                        </Text>
-                        <Text className="text-md font-black text-neutral mt-0.5">{dishCount}</Text>
-                      </View>
-                    </View>
-                  </View>
-                );
-              })}
+              {filteredMenuList.map((item) => (
+                <CategoryCard
+                  key={item?.id || String(item?.name)}
+                  item={item}
+                  onPress={() => {
+                    router.push({
+                      pathname: "/dishes",
+                      params: { menuId: item?.id, menuName: item?.name },
+                    });
+                  }}
+                />
+              ))}
             </View>
           )}
         </View>

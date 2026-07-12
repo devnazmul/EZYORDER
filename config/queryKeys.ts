@@ -32,6 +32,10 @@ export const QUERY_KEYS = {
   COMBINE_DATA: "combineData",
   RESTAURANT: "restaurant",
   BUSINESS_TIMING: "businessTiming",
+  DISHES: "dishes",
+  SINGLE_MENU: "single_menu",
+  MENU_ALL: "menuAll",
+  MENU_MATRIX: "menuMatrix",
 
   // Reports keys
   REPORTS: "reports",

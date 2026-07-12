@@ -8,12 +8,13 @@ const getHeaders = (token: string) => ({
   Accept: "application/json",
 });
 
-export const getMenuAll = async (token: string, restaurantId: string) => {
+export const getMenuAll = async (token: string, restaurantId: string, params: Record<string, any> = {}) => {
   const response = await axios.get(`${API_BASE_URL}/menu/AllbuId/${restaurantId}`, {
     headers: getHeaders(token),
     params: {
       response_type: "json",
       file_name: "menu",
+      ...params,
     },
     validateStatus: () => true,
   });
@@ -26,4 +27,21 @@ export const getMenuMatrix = async (token: string) => {
     validateStatus: () => true,
   });
   return response.status === 200 && response.data?.success ? response.data.data : null;
+};
+
+export const getDishes = async (token: string, menuId: string | number, params: Record<string, any> = {}) => {
+  const response = await axios.get(`${API_BASE_URL}/dishes/${menuId}`, {
+    headers: getHeaders(token),
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 ? response.data : null;
+};
+
+export const getSingleMenu = async (token: string, menuId: string | number, restaurantId: string | number) => {
+  const response = await axios.get(`${API_BASE_URL}/menu/by-restaurant/${menuId}/${restaurantId}`, {
+    headers: getHeaders(token),
+    validateStatus: () => true,
+  });
+  return response.status === 200 ? response.data : null;
 };
