@@ -43,5 +43,8 @@ export const QUERY_KEYS = {
   SALES_TREND: "salesTrend",
   SALES_BY_ORDER_TYPE: "salesByOrderType",
   CUSTOMERS: "customers",
+  SALES_BY_ITEM: "salesByItem",
+  SALES_HOURLY: "salesHourly",
+  SALES_DAILY_SUMMARY: "salesDailySummary",
 } as const;
 

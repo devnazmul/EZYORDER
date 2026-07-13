@@ -80,3 +80,34 @@ export const getCustomers = async (token: string, params: CustomerParams) => {
   console.log("Customer Response", response.data);
   return response.status === 200 && Array.isArray(response.data?.data) ? response.data.data : [];
 };
+
+// Fetch sales breakdown by individual menu items
+export const getSalesByItem = async (token: string, params: SalesParams) => {
+  const response = await axios.get(`${API_BASE_URL}/reports/sales/by-item`, {
+    headers: getHeaders(token),
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success ? response.data.data : null;
+};
+
+// Fetch hourly sales breakdown
+export const getSalesHourly = async (token: string, params: SalesParams) => {
+  const response = await axios.get(`${API_BASE_URL}/reports/sales/hourly`, {
+    headers: getHeaders(token),
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success ? response.data.data : null;
+};
+
+// Fetch day-by-day sales summary breakdown
+export const getSalesDailySummary = async (token: string, params: SalesParams) => {
+  const response = await axios.get(`${API_BASE_URL}/reports/sales/daily-summary`, {
+    headers: getHeaders(token),
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success ? response.data.data : null;
+};
+

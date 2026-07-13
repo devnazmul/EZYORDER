@@ -77,7 +77,7 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
               <Text className="text-md font-bold text-neutral">#{item.id}</Text>
               <View className="bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                 <Text className="text-[9px] font-bold text-blue-700 uppercase tracking-wider">
-                  {item.type || "Delivery"}
+                  {item.type.split("_").join(" ") || "Delivery"}
                 </Text>
               </View>
             </View>
