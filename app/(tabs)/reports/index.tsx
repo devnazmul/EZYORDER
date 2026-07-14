@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import WeeklyInsightsCard from "@/components/reports/WeeklyInsightsCard";
 import MenuCard from "@/components/reuseable/MenuCard";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -42,7 +41,6 @@ export default function ReportsHub() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader />
 
       {/* Elegant Toast notification for insights */}
       {toast && (

@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import PageTitle from "@/components/reuseable/PageTitle";
 import ToggleBar from "@/components/reuseable/ToggleBar";
 import ReservationsView from "@/components/tables-reservations/ReservationsView";
@@ -18,7 +17,6 @@ export default function TablesAndReservations() {
 
   return (
     <SafeAreaView edges={["left", "right", "bottom"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton={true} />
 
       <View className="flex-1 px-4 py-4">
         {/* Reusable Page Title */}

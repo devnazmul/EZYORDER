@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import DealCard from "@/components/menu/DealCard";
 import DishCard from "@/components/menu/DishCard";
 import DishDetailDrawer from "@/components/menu/DishDetailDrawer";
@@ -137,7 +136,6 @@ export default function DishesScreen() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton={true} />
 
       <View className="flex-1 px-4 py-4">
         <PageTitle title={String(menuName || "Category Menu")} icon="restaurant" />

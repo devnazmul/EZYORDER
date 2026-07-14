@@ -1,13 +1,14 @@
-import { useAuth } from "@/context/AuthContext";
-import { useDashboardKitchenActivity } from "@/hooks/useDashboardQueries";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-export default function KitchenActivity() {
-  const { token } = useAuth();
-  const { data: kitchenActivity = {}, isLoading } = useDashboardKitchenActivity(token || "");
+interface KitchenActivityProps {
+  kitchenActivity: any;
+  isLoading: boolean;
+}
+
+export default function KitchenActivity({ kitchenActivity = {}, isLoading }: KitchenActivityProps) {
 
   if (isLoading) {
     return (

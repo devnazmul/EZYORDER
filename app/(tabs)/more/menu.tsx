@@ -1,11 +1,10 @@
-import AppHeader from "@/components/AppHeader";
 import CategoryCard from "@/components/menu/CategoryCard";
 import KpiCard from "@/components/reports/KpiCard";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import SearchBar from "@/components/reuseable/SearchBar";
 import { useAuth } from "@/context/AuthContext";
-import { useMenuAllQuery, useMenuMatrixQuery } from "@/hooks/useMenuQueries";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useMenuAllQuery, useMenuMatrixQuery } from "@/hooks/useMenuQueries";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -52,8 +51,6 @@ export default function MenuManagement() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton={true} />
-
       <RefreshableScrollView
         className="flex-1 px-4 py-4"
         onRefresh={handleRefresh}
@@ -158,7 +155,7 @@ export default function MenuManagement() {
                   item={item}
                   onPress={() => {
                     router.push({
-                      pathname: "/dishes",
+                      pathname: "/more/dishes",
                       params: { menuId: item?.id, menuName: item?.name },
                     });
                   }}

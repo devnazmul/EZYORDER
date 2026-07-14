@@ -1,5 +1,6 @@
+import { router } from "expo-router";
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface OrderStatusCardProps {
   title: string;
@@ -30,12 +31,37 @@ export default function OrderStatusCard({ title, count, type }: OrderStatusCardP
     circleClass = "bg-pink-500 w-6 h-6 items-center justify-center rounded-full";
   }
 
+  const handlePress = () => {
+    let params: Record<string, string> = {
+      tab: "eat_in,delivery,take_away,walk_in",
+    };
+
+    if (type === "new") {
+      params.status = "pending";
+      params.payment_status = "";
+    } else if (type === "preparing") {
+      params.status = "kitchen";
+      params.payment_status = "";
+    } else if (type === "completed") {
+      params.status = "completed";
+      params.payment_status = "";
+    } else if (type === "unpaid") {
+      params.status = "";
+      params.payment_status = "unpaid";
+    }
+
+    router.push({
+      pathname: "/orders/todays-orders",
+      params,
+    });
+  };
+
   return (
-    <View className={containerClass}>
+    <TouchableOpacity activeOpacity={0.8} onPress={handlePress} className={containerClass}>
       <Text className={textClass}>{title}</Text>
       <View className={circleClass}>
         <Text className="text-white text-[11px] font-extrabold">{count}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

@@ -1,13 +1,13 @@
-import { useAuth } from "@/context/AuthContext";
-import { useDashboardLiveOrderBoard } from "@/hooks/useDashboardQueries";
 import React from "react";
 import { Text, View } from "react-native";
 import OrderStatusCard from "./OrderStatusCard";
 
-export default function LiveOrderBoard() {
-  const { token } = useAuth();
-  const { data: liveOrderBoard = {}, isLoading } = useDashboardLiveOrderBoard(token || "");
+interface LiveOrderBoardProps {
+  liveOrderBoard: any;
+  isLoading: boolean;
+}
 
+export default function LiveOrderBoard({ liveOrderBoard = {}, isLoading }: LiveOrderBoardProps) {
   if (isLoading) {
     return (
       <View
@@ -21,7 +21,7 @@ export default function LiveOrderBoard() {
 
   return (
     <View key="loaded" className="mb-6 gap-y-3">
-      <Text className="text-base font-bold text-neutral">Order Status</Text>
+      <Text className="text-base font-bold text-neutral">Live Today's Order Board</Text>
       <View className="gap-y-2">
         <OrderStatusCard title="NEW ORDERS" count={liveOrderBoard?.new_order || 0} type="new" />
         <OrderStatusCard title="PREPARING" count={liveOrderBoard?.preparing || 0} type="preparing" />

@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import KpiCard from "@/components/reports/KpiCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer from "@/components/reuseable/FilterDrawer";
@@ -84,7 +83,6 @@ export default function UserManagementScreen() {
   return (
     <SafeAreaView edges={["left", "right", "bottom"]} className="flex-1 bg-base-100">
       {/* App Header with Back Button */}
-      <AppHeader showBackButton={true} />
 
       <FlatList
         data={filteredUsers}

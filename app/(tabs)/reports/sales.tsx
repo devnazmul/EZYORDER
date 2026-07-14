@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import KpiCard from "@/components/reports/KpiCard";
 import RevenueByOrderTypeCard from "@/components/reports/RevenueByOrderTypeCard";
 import SalesAreaChart from "@/components/reports/SalesAreaChart";
@@ -190,7 +189,6 @@ const SalesReport = () => {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton />
 
       <RefreshableScrollView onRefresh={handleRefresh} refreshing={isRefreshing}>
         {/* Header Title and Filter Trigger */}

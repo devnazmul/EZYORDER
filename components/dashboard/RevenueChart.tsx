@@ -1,6 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/context/DataContext";
-import { useDashboardRevenueChart } from "@/hooks/useDashboardQueries";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -11,12 +9,12 @@ import EmptyState from "../reuseable/EmptyState";
 
 interface RevenueChartProps {
   filterBy: string;
+  revenueChart: any[];
+  isLoading: boolean;
 }
 
-export default function RevenueChart({ filterBy }: RevenueChartProps) {
-  const { token } = useAuth();
+export default function RevenueChart({ filterBy, revenueChart = [], isLoading }: RevenueChartProps) {
   const { settings } = useData();
-  const { data: revenueChart = [], isLoading } = useDashboardRevenueChart(token || "", filterBy);
 
   console.log("Revenue data", revenueChart);
 

@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import ExpenseCard from "@/components/expenses/ExpenseCard";
 import ExpenseDetailModal from "@/components/expenses/ExpenseDetailModal";
 import EmptyState from "@/components/reuseable/EmptyState";
@@ -158,7 +157,6 @@ export default function ExpensesScreen() {
   return (
     <SafeAreaView edges={["left", "right", "bottom"]} className="flex-1 bg-base-100">
       {/* App Header with Back Button */}
-      <AppHeader showBackButton={true} />
 
       <RefreshableScrollView onRefresh={handleRefresh} contentContainerStyle={{ paddingBottom: 80 }}>
         {/*  Page Title */}

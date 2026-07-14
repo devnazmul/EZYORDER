@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import CampaignsView from "@/components/discounts/CampaignsView";
 import CouponsView from "@/components/discounts/CouponsView";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
@@ -82,7 +81,6 @@ export default function DiscountsAndCampaignsScreen() {
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       {/* App Header with Back Button */}
-      <AppHeader showBackButton={true} />
 
       <RefreshableScrollView
         className="flex-1 px-4 py-4"

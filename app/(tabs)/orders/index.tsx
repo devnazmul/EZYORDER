@@ -1,9 +1,9 @@
-import AppHeader from "@/components/AppHeader";
 import MenuCard from "@/components/reuseable/MenuCard";
+import PageTitle from "@/components/reuseable/PageTitle";
 import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OrdersHub() {
@@ -24,13 +24,7 @@ export default function OrdersHub() {
       icon: "list-alt",
       route: "/orders/all-orders" as const,
     },
-    {
-      id: "order-reports",
-      title: "Order Reports",
-      description: "Deep dive into sales trends and analytics.",
-      icon: "bar-chart",
-      route: "/orders/order-reports" as const,
-    },
+
     {
       id: "kitchen-screen",
       title: "Kitchen Screen",
@@ -42,7 +36,6 @@ export default function OrdersHub() {
 
   return (
     <SafeAreaView edges={["bottom", "left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader />
 
       {/* Main Content Scroll View */}
       <ScrollView
@@ -51,10 +44,12 @@ export default function OrdersHub() {
         showsVerticalScrollIndicator={false}
       >
         {/* Page Header */}
-        <View className="mb-6">
-          <Text className="text-2xl font-extrabold text-neutral mb-1">Orders</Text>
-          <Text className="text-xs text-accent">Select an option to manage your orders operations.</Text>
-        </View>
+
+        <PageTitle
+          title="Orders"
+          icon="receipt"
+          description="Select an option to manage your orders operations."
+        />
 
         {/* Action Cards Grid */}
         <View className="gap-y-4">

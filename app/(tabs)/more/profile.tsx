@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import EmptyState from "@/components/reuseable/EmptyState";
 import LoadingScreen from "@/components/reuseable/LoadingScreen";
 import PageTitle from "@/components/reuseable/PageTitle";
@@ -151,7 +150,6 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton={true} />
 
       <RefreshableScrollView
         onRefresh={refetch}

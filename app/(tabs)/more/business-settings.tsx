@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import BusinessInfoCard from "@/components/business-settings/BusinessInfoCard";
 import BusinessScheduleCard from "@/components/business-settings/BusinessScheduleCard";
 import ExpenseTypeCard from "@/components/business-settings/ExpenseTypeCard";
@@ -164,7 +163,6 @@ export default function BusinessSettingsScreen() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton={true} />
 
       <RefreshableScrollView
         onRefresh={handleRefresh}

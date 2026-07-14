@@ -1,5 +1,4 @@
 import { CustomerParams } from "@/apis/reports";
-import AppHeader from "@/components/AppHeader";
 import CustomerCard from "@/components/CustomerCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
@@ -147,8 +146,6 @@ export default function CustomersReport() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton />
-
       {/* Main content header */}
       <View className="px-4 pt-4">
         <PageTitle title="Customers" icon="group" badgeCount={customers.length} />

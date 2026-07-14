@@ -1,5 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
-import { useDashboardOrdersByType } from "@/hooks/useDashboardQueries";
 import React from "react";
 import { Text, View } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
@@ -7,11 +5,11 @@ import EmptyState from "../reuseable/EmptyState";
 
 interface OrdersByTypeChartProps {
   filterBy: string;
+  ordersByType: any[];
+  isLoading: boolean;
 }
 
-export default function OrdersByTypeChart({ filterBy }: OrdersByTypeChartProps) {
-  const { token } = useAuth();
-  const { data: ordersByType = [], isLoading } = useDashboardOrdersByType(token || "", filterBy);
+export default function OrdersByTypeChart({ filterBy, ordersByType = [], isLoading }: OrdersByTypeChartProps) {
 
   const total = ordersByType.reduce((acc: number, curr: any) => acc + (parseInt(String(curr.value)) || 0), 0);
 

@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import { useAuth } from "@/context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -52,42 +51,37 @@ export default function MoreSettingsHub() {
 
   const handleItemPress = (title: string) => {
     if (title === "Menu Management") {
-      router.push("/menu");
+      router.push("/more/menu");
       return;
     }
     if (title === "Tables & Reservations") {
-      router.push("/tables-and-reservations");
+      router.push("/more/tables-and-reservations");
       return;
     }
     if (title === "User Management") {
-      router.push("/user-management");
+      router.push("/more/user-management");
       return;
     }
     if (title === "Discounts & Campaigns") {
-      router.push("/discounts-and-campaigns");
+      router.push("/more/discounts-and-campaigns");
       return;
     }
     if (title === "Expenses") {
-      router.push("/expenses");
+      router.push("/more/expenses");
       return;
     }
     if (title === "Partners") {
-      router.push("/partners");
+      router.push("/more/partners");
       return;
     }
     if (title === "Business Settings") {
-      router.push("/business-settings");
+      router.push("/more/business-settings");
       return;
     }
     if (title === "Profile") {
-      router.push("/profile");
+      router.push("/more/profile");
       return;
     }
-    Alert.alert(
-      "Feature Coming Soon",
-      `The "${title}" module is currently under development and will be available in the next app update.`,
-      [{ text: "OK" }],
-    );
   };
 
   const handleLogout = () => {
@@ -99,7 +93,6 @@ export default function MoreSettingsHub() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader />
 
       <RefreshableScrollView className="flex-1 px-4 py-4" contentContainerStyle={{ paddingBottom: 40 }}>
         {/* 1. Header Profile Card */}

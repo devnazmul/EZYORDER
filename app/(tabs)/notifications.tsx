@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import NotificationCard from "@/components/NotificationCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import FilterChips from "@/components/reuseable/FilterChips";
@@ -149,7 +148,6 @@ export default function Notifications() {
 
   return (
     <SafeAreaView key="loaded" edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader />
 
       <SectionList
         className="flex-1 px-4"
