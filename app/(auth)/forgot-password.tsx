@@ -22,22 +22,8 @@ export default function ForgotPassword() {
   const [cooldown, setCooldown] = useState(0);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
-
   useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    let interval: number;
+    let interval: any;
     if (cooldown > 0) {
       interval = setInterval(() => {
         setCooldown((prev) => prev - 1);
@@ -47,10 +33,6 @@ export default function ForgotPassword() {
       if (interval) clearInterval(interval);
     };
   }, [cooldown]);
-
-  const showToast = (message: string, type: "success" | "error") => {
-    setToast({ message, type });
-  };
 
   const validateForm = () => {
     const newErrors: { email?: string } = {};
@@ -66,38 +48,33 @@ export default function ForgotPassword() {
   };
 
   const forgotPasswordMutation = useForgotPasswordMutation(
-    async (response) => {
-      const data = response.data;
-
-      if (response.status >= 200 && response.status < 300) {
-        showToast("Password reset link sent to your email.", "success");
-        setIsSent(true);
-        setCooldown(45);
-      } else {
-        let errorMessage = "Failed to send reset link.";
-        if (response.status === 404 || response.status === 401) {
-          errorMessage = "No account found for that email address";
-        } else if (data?.errors) {
-          const firstErrorKey = Object.keys(data.errors)[0];
-          if (firstErrorKey && data.errors[firstErrorKey]?.[0]) {
-            errorMessage = data.errors[firstErrorKey][0];
-          }
-        } else if (data?.message) {
-          errorMessage = data.message;
-          if (
-            errorMessage.toLowerCase().includes("not found") ||
-            errorMessage.toLowerCase().includes("unauthenticated")
-          ) {
-            errorMessage = "No account found for that email address";
-          }
+    async (data) => {
+      setIsSent(true);
+      setCooldown(45);
+    },
+    (error: any) => {
+      let errorMessage = "Failed to send reset link.";
+      const data = error?.data;
+      if (error?.status === 404 || error?.status === 401) {
+        errorMessage = "No account found for that email address";
+      } else if (data?.errors) {
+        const firstErrorKey = Object.keys(data.errors)[0];
+        if (firstErrorKey && data.errors[firstErrorKey]?.[0]) {
+          errorMessage = data.errors[firstErrorKey][0];
         }
-        setErrorBanner(errorMessage);
+      } else if (data?.message) {
+        errorMessage = data.message;
+        if (
+          errorMessage.toLowerCase().includes("not found") ||
+          errorMessage.toLowerCase().includes("unauthenticated")
+        ) {
+          errorMessage = "No account found for that email address";
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
-    },
-    (error) => {
-      console.error(error);
-      setErrorBanner("Network connection error. Please try again.");
-    },
+      setErrorBanner(errorMessage);
+    }
   );
 
   const isLoading = forgotPasswordMutation.isPending;
@@ -117,27 +94,6 @@ export default function ForgotPassword() {
 
   return (
     <SafeAreaView className="flex-1 bg-base-100">
-      {/* Toast Alert Notification */}
-      {toast && (
-        <View
-          className={`absolute top-12 left-4 right-4 z-50 p-4 rounded-xl shadow-lg flex-row items-center border ${
-            toast.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
-          }`}
-        >
-          <MaterialIcons
-            name={toast.type === "success" ? "check-circle" : "error"}
-            size={24}
-            color={toast.type === "success" ? "#16a34a" : "#dc2626"}
-          />
-          <Text
-            className={`ml-3 font-semibold flex-1 text-sm ${
-              toast.type === "success" ? "text-green-800" : "text-red-800"
-            }`}
-          >
-            {toast.message}
-          </Text>
-        </View>
-      )}
 
       {/* Header back button (only show when not sent) */}
       {!isSent && (

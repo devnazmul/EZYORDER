@@ -1,10 +1,12 @@
 import Button from "@/components/reuseable/Button";
 import InputField from "@/components/reuseable/InputField";
+import { allowedUserTypes } from "@/constants/allowedUserTypes";
 import { useAuth } from "@/context/AuthContext";
 import { useLoginMutation } from "@/hooks/useAuthQueries";
+import { checkUserType } from "@/utils/checkUserType";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -21,26 +23,6 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
-
-  // Toast Alert Notification state
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
-
-  // Auto-hide toast after 4 seconds
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  const showToast = (message: string, type: "success" | "error") => {
-    setToast({ message, type });
-  };
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -74,52 +56,54 @@ const Login = () => {
     }
   };
 
-  // React Query login mutation hook
-  const loginMutation = useLoginMutation(
-    async (response) => {
-      const data = response.data;
+  const onLoginSuccess = async (data: any) => {
+    const allowedRoles = allowedUserTypes;
 
-      if (response.status >= 200 && response.status < 300) {
-        const userType = (data?.type || data?.user?.type || "").toLowerCase().trim();
-        const allowedRoles = ["restaurant_owner", "owner"];
+    if (!checkUserType(data, allowedRoles)) {
+      setErrorBanner("Access Denied. This application is restricted for you to use.");
+      return;
+    }
 
-        if (!allowedRoles.includes(userType)) {
-          setErrorBanner(
-            "Access Denied. This application is restricted to Restaurant Owners and Business Administrators.",
-          );
-          return;
-        }
+    if (data?.token) {
+      await login(data.token, data);
+    }
 
-        showToast("User logged in successfully", "success");
-
-        if (data?.token) {
-          await login(data.token, data);
-        }
-
+    const userType = (data?.type || "").toLowerCase().trim();
+    switch (userType) {
+      case "restaurant_owner":
+      case "owner":
         router.replace("/(tabs)/home");
-      } else {
-        let errorMessage = "Invalid credentials";
-        if (response.status === 401) {
-          errorMessage = "Invalid email or password";
-        } else if (data?.errors) {
-          const firstErrorKey = Object.keys(data.errors)[0];
-          if (firstErrorKey && data.errors[firstErrorKey]?.[0]) {
-            errorMessage = data.errors[firstErrorKey][0];
-          }
-        } else if (data?.message) {
-          errorMessage = data.message;
-          if (errorMessage.toLowerCase().includes("unauthenticated")) {
-            errorMessage = "Invalid email or password";
-          }
-        }
-        setErrorBanner(errorMessage);
+        break;
+      case "driver":
+        router.replace("/(driver)/index");
+        break;
+      default:
+        break;
+    }
+  };
+
+  const onLoginError = (error: any) => {
+    let errorMessage = "Invalid credentials";
+    const data = error?.data;
+    if (error?.status === 401) {
+      errorMessage = "Invalid email or password";
+    } else if (data?.errors) {
+      const firstErrorKey = Object.keys(data.errors)[0];
+      if (firstErrorKey && data.errors[firstErrorKey]?.[0]) {
+        errorMessage = data.errors[firstErrorKey][0];
       }
-    },
-    (error) => {
-      console.error(error);
-      setErrorBanner("Network connection error. Please try again.");
-    },
-  );
+    } else if (data?.message) {
+      errorMessage = data.message;
+      if (errorMessage.toLowerCase().includes("unauthenticated")) {
+        errorMessage = "Invalid email or password";
+      }
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    setErrorBanner(errorMessage);
+  };
+
+  const loginMutation = useLoginMutation(onLoginSuccess, onLoginError);
 
   const isLoading = loginMutation.isPending;
 
@@ -135,28 +119,6 @@ const Login = () => {
   return (
     <SafeAreaView className="flex-1 bg-base-100">
       <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Elegant Toast Message Banner */}
-      {toast && (
-        <View
-          className={`absolute top-12 left-4 right-4 z-50 p-4 rounded-xl shadow-lg flex-row items-center border ${
-            toast.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
-          }`}
-        >
-          <MaterialIcons
-            name={toast.type === "success" ? "check-circle" : "error"}
-            size={24}
-            color={toast.type === "success" ? "#16a34a" : "#dc2626"}
-          />
-          <Text
-            className={`ml-3 font-semibold flex-1 text-sm ${
-              toast.type === "success" ? "text-green-800" : "text-red-800"
-            }`}
-          >
-            {toast.message}
-          </Text>
-        </View>
-      )}
 
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
         <ScrollView

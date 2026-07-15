@@ -4,7 +4,7 @@ import ENV from "@/config/env";
 const API_BASE_URL = ENV.API_BASE_URL;
 
 export const loginUser = async (email: string, password: string) => {
-  return await axios.post(
+  const response = await axios.post(
     `${API_BASE_URL}/auth`,
     { email, password },
     {
@@ -15,10 +15,16 @@ export const loginUser = async (email: string, password: string) => {
       validateStatus: () => true,
     }
   );
+
+  if (response.status >= 200 && response.status < 300) {
+    return response.data;
+  } else {
+    throw response;
+  }
 };
 
 export const forgotPassword = async (email: string) => {
-  return await axios.post(
+  const response = await axios.post(
     `${API_BASE_URL}/v1.0/forget-password`,
     {
       email,
@@ -32,4 +38,10 @@ export const forgotPassword = async (email: string) => {
       validateStatus: () => true,
     }
   );
+
+  if (response.status >= 200 && response.status < 300) {
+    return response.data;
+  } else {
+    throw response;
+  }
 };
