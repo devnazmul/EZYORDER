@@ -2,9 +2,9 @@ import AppHeader from "@/components/AppHeader";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationUnreadCountQuery } from "@/hooks/useNotificationQueries";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Redirect, Tabs, usePathname } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
 import React, { useEffect, useRef } from "react";
-import { ActivityIndicator, Animated, Text, View } from "react-native";
+import { Animated, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function PulseDot() {
@@ -84,23 +84,10 @@ function PulseDot() {
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  const { token, isLoading } = useAuth();
+  const { token } = useAuth();
 
   const { data } = useNotificationUnreadCountQuery(token || "");
   const hasUnread = data?.count > 0 ? true : false;
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 bg-base-100 items-center justify-center">
-        <ActivityIndicator size="large" color="#DC2D2A" />
-        <Text className="mt-4 text-xs font-semibold text-accent">Loading Application...</Text>
-      </View>
-    );
-  }
-
-  if (!token) {
-    return <Redirect href="/(auth)/login" />;
-  }
 
   const renderTabBarLabel =
     (title: string) =>

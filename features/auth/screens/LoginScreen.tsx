@@ -67,19 +67,6 @@ const LoginScreen = () => {
     if (data?.token) {
       await login(data.token, data);
     }
-
-    const userType = (data?.type || "").toLowerCase().trim();
-    switch (userType) {
-      case "restaurant_owner":
-      case "owner":
-        router.replace({ pathname: "/(tabs)/home" });
-        break;
-      case "driver":
-        router.replace({ pathname: "/(driver)" });
-        break;
-      default:
-        break;
-    }
   };
 
   const onLoginError = (error: any) => {
