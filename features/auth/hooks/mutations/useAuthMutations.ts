@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { loginUser, forgotPassword } from "@/apis/auth";
+import { loginUser, forgotPassword } from "../../apis/auth";
 
 export const useLoginMutation = (onSuccess: (response: any) => void, onError: (error: any) => void) => {
   return useMutation({
