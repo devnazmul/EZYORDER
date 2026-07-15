@@ -1,8 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import "../../global.css";
-
-const queryClient = new QueryClient();
 
 const DriverLayout: React.FC = () => {
   return (
