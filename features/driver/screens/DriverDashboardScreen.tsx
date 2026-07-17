@@ -1,21 +1,22 @@
 import AppHeader from "@/components/AppHeader";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import { useAuth } from "@/context/AuthContext";
+import { useOwnerProfileQuery } from "@/hooks/useUserQueries";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
-import React, { useMemo, useState } from "react";
-import { Alert } from "react-native";
+import React, { useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WelcomeHeader from "../components/dashboard/WelcomeHeader";
 import DriverActiveOrder from "../components/DriverActiveOrder";
 import DriverQuickStats from "../components/DriverQuickStats";
-import LiveOrderBoard from "../components/LiveOrderBoard";
-import WeeklyPerformance from "../components/WeeklyPerformance";
-import { useUpdateDriverStatusMutation } from "../hooks/mutations/useDriverMutations";
-import { useDriverDashboardStatsQuery } from "../hooks/queries/useDriverQueries";
+import { useUpdateDriverOrderStatusMutation } from "../hooks/mutations/useDriverMutations";
+import {
+  useDriverActiveAssignedOrdersQuery,
+  useDriverDashboardStatsQuery,
+} from "../hooks/queries/useDriverQueries";
 
 export default function DriverDashboardScreen() {
   const { token, user, logout } = useAuth();
-  console.log(user);
+
   // Queries
   const {
     data: statsData,
@@ -23,11 +24,23 @@ export default function DriverDashboardScreen() {
     isRefetching,
     refetch: refetchStats,
   } = useDriverDashboardStatsQuery(token || "");
-  console.log(statsData);
-  const statusMutation = useUpdateDriverStatusMutation(token || "");
 
-  // Local state for online toggle
-  const [isOnline, setIsOnline] = useState(user?.driver_status === "available");
+  const {
+    data: activeOrders,
+    isLoading: isLoadingActiveOrders,
+    refetch: refetchActiveOrders,
+  } = useDriverActiveAssignedOrdersQuery(token || "");
+
+  const { data: profileData, refetch: refetchProfile } = useOwnerProfileQuery(token || "", user?.id || null);
+
+  const profileUser = useMemo(() => {
+    if (!profileData) return null;
+    return profileData.user || profileData.data?.user || null;
+  }, [profileData]);
+
+  const activeUser = profileUser || user;
+
+  const updateOrderStatusMutation = useUpdateDriverOrderStatusMutation(token || "");
 
   const currencySymbol = useMemo(() => {
     if (statsData) {
@@ -37,31 +50,7 @@ export default function DriverDashboardScreen() {
 
   // Re-fetch all queries on pull-to-refresh
   const handleRefresh = async () => {
-    await refetchStats();
-  };
-
-  const handleStatusToggle = () => {
-    const nextStatus = isOnline ? "offline" : "available";
-    statusMutation.mutate(nextStatus, {
-      onSuccess: () => {
-        setIsOnline(nextStatus === "available");
-      },
-      onError: (err: any) => {
-        const errMsg = err?.data?.message || err?.message || "Failed to update availability status.";
-        Alert.alert("Error", errMsg);
-      },
-    });
-  };
-
-  const handleLogout = () => {
-    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => logout(),
-      },
-    ]);
+    await Promise.all([refetchStats(), refetchActiveOrders(), refetchProfile()]);
   };
 
   const orderBoard = statsData?.order_board;
@@ -75,9 +64,7 @@ export default function DriverDashboardScreen() {
         contentContainerStyle={{ paddingBottom: 60, gap: 10 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Welcome Header */}
-
-        <WelcomeHeader user={user} />
+        <WelcomeHeader user={activeUser} />
 
         <DriverQuickStats
           isLoadingStats={isRefetching || isLoadingStats}
@@ -86,11 +73,15 @@ export default function DriverDashboardScreen() {
           distanceUnit={statsData?.distance_unit}
         />
 
-        <DriverActiveOrder />
+        <DriverActiveOrder
+          ordersList={activeOrders}
+          isLoading={isRefetching || isLoadingActiveOrders}
+          updateStatusMutation={updateOrderStatusMutation}
+        />
 
-        <LiveOrderBoard orderBoardData={orderBoard} isLoading={isLoadingStats} />
+        {/* <LiveOrderBoard orderBoardData={orderBoard} isLoading={isLoadingStats} /> */}
 
-        <WeeklyPerformance />
+        {/* <WeeklyPerformance /> */}
       </RefreshableScrollView>
     </SafeAreaView>
   );

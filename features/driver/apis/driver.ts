@@ -1,4 +1,5 @@
 import ENV from "@/config/env";
+import { logApiResponse } from "@/utils/logApiResponse";
 import axios from "axios";
 
 const API_BASE_URL = ENV.API_BASE_URL;
@@ -14,6 +15,7 @@ export const getDriverDashboardStats = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
+
   return response.status === 200 && response.data?.success ? response.data.data : null;
 };
 
@@ -23,6 +25,7 @@ export const getDriverActiveAssignedOrders = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
+  logApiResponse("Driver Active Orders", response.data);
   return response.status === 200 && response.data?.success ? response.data.data : [];
 };
 
@@ -37,7 +40,7 @@ export const updateDriverStatus = async (token: string, status: "available" | "o
         "Content-Type": "application/json",
       },
       validateStatus: () => true,
-    }
+    },
   );
   if (response.status === 200 && response.data?.success) {
     return response.data;
@@ -50,20 +53,16 @@ export const updateDriverStatus = async (token: string, status: "available" | "o
 export const updateDriverOrderStatus = async (
   token: string,
   orderId: string | number,
-  formData: FormData
+  formData: FormData,
 ) => {
-  const response = await axios.post(
-    `${API_BASE_URL}/v1.0/driver/order/status/${orderId}`,
-    formData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        // Note: Do NOT set Content-Type header; axios sets the multipart boundary automatically
-      },
-      validateStatus: () => true,
-    }
-  );
+  const response = await axios.post(`${API_BASE_URL}/v1.0/driver/order/status/${orderId}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      // Note: Do NOT set Content-Type header; axios sets the multipart boundary automatically
+    },
+    validateStatus: () => true,
+  });
   if (response.status === 200 && response.data?.success) {
     return response.data;
   } else {

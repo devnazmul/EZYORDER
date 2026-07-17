@@ -1,5 +1,6 @@
+import { QUERY_KEYS } from "@/config/queryKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateDriverStatus, updateDriverOrderStatus } from "../../apis/driver";
+import { updateDriverOrderStatus, updateDriverStatus } from "../../apis/driver";
 
 export const useUpdateDriverStatusMutation = (token: string) => {
   const queryClient = useQueryClient();
@@ -7,6 +8,7 @@ export const useUpdateDriverStatusMutation = (token: string) => {
     mutationFn: (status: "available" | "offline") => updateDriverStatus(token, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["driverDashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SINGLE_OWNER] });
     },
   });
 };
