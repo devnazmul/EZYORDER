@@ -9,7 +9,10 @@ import {
 export const useNotificationsQuery = (token: string) => {
   return useQuery({
     queryKey: ["notifications"],
-    queryFn: () => getNotifications(token),
+    queryFn: async () => {
+      const data = await getNotifications(token);
+      return data?.notifications?.data || [];
+    },
     enabled: !!token,
   });
 };
@@ -36,10 +39,22 @@ export const useMarkNotificationAsReadMutation = (token: string) => {
 export const useMarkAllAsReadMutation = (token: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => markAllAsRead(token),
+    mutationFn: async () => {
+      const notifications = queryClient.getQueryData<any[]>(["notifications"]) || [];
+      const unreadIds = notifications
+        .filter((item: any) => (item.status || "").toLowerCase().trim() === "unread")
+        .map((item: any) => item.id);
+      
+      if (unreadIds.length > 0) {
+        return markAllAsRead(token, unreadIds);
+      }
+      return true;
+    },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
     },
   });
 };
+

@@ -9,12 +9,14 @@ import {
   useNotificationsQuery,
   useNotificationUnreadCountQuery,
 } from "@/hooks/useNotificationQueries";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { RefreshControl, SectionList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Notifications() {
   const { token } = useAuth();
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState("all");
 
   // Fetch queries
@@ -30,24 +32,28 @@ export default function Notifications() {
 
   const handleNotificationPress = async (notification: any) => {
     // 1. Mark as read on backend if it's currently unread
-    if (notification.status !== "read") {
+    const statusStr = (notification.status || "").toLowerCase().trim();
+    if (statusStr === "unread") {
       await markAsReadMutation.mutateAsync(notification.id);
     }
 
-    // 2. Future routing placeholder
-    console.log(`Notification clicked: ${notification.id}. Routing placeholder.`);
-    /*
-    switch (notification.type) {
-      case "order":
-        router.push(`/orders/all-orders?search=${notification.orderId || ""}`);
-        break;
-      case "promotion":
-        router.push("/home");
-        break;
-      default:
-        break;
+    // 2. Perform routing based on notification_link or dynamic fields
+    const link = notification.notification_link;
+    if (link) {
+      if (link.startsWith("order/")) {
+        const orderId = link.split("/")[1];
+        router.push(`/orders/all-orders?search=${orderId}`);
+      } else {
+        try {
+          router.push(link);
+        } catch (e) {
+          console.error("Failed to route link:", link, e);
+        }
+      }
+    } else if (notification.entity_id) {
+      // Fallback fallback if notification has raw entity_id
+      router.push(`/orders/all-orders?search=${notification.entity_id}`);
     }
-    */
   };
 
   const handleMarkAllAsRead = async () => {
@@ -175,15 +181,31 @@ export default function Notifications() {
                 <Text className="text-xl font-bold text-neutral">Notifications</Text>
                 <Text className="text-xs text-accent mt-1">Stay updated with your restaurant's activity</Text>
               </View>
-              {unreadCount > 0 && (
+              <View className="flex-row gap-x-2">
                 <TouchableOpacity
-                  onPress={handleMarkAllAsRead}
-                  className="px-3 py-1.5 rounded-lg bg-primary/10"
+                  onPress={async () => {
+                    const { triggerLocalNotificationMock } = await import("@/hooks/usePushNotifications");
+                    await triggerLocalNotificationMock(
+                      "Test Assignment Alert!",
+                      "Order #5713 has been assigned to you.",
+                      { orderId: "5713" }
+                    );
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-secondary/10"
                 >
-                  <Text className="text-xs font-bold text-primary">Mark all as read</Text>
+                  <Text className="text-xs font-bold text-secondary">Test Push</Text>
                 </TouchableOpacity>
-              )}
+                {unreadCount > 0 && (
+                  <TouchableOpacity
+                    onPress={handleMarkAllAsRead}
+                    className="px-3 py-1.5 rounded-lg bg-primary/10"
+                  >
+                    <Text className="text-xs font-bold text-primary">Mark all as read</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
+
 
             {/* Filter Chips row */}
             <FilterChips

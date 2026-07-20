@@ -6,7 +6,10 @@ interface NotificationItem {
   id: string | number;
   title?: string;
   message?: string;
-  status?: string; // "read" or "unread"
+  notification_title?: string;
+  notification_description?: string;
+  notification_link?: string | null;
+  status?: string; // "read" or "unRead"
   sender_type?: string;
   created_at?: string;
   activity_time?: string;
@@ -18,7 +21,8 @@ interface NotificationCardProps {
 }
 
 export default function NotificationCard({ notification, onPress }: NotificationCardProps) {
-  const isUnread = notification.status !== "read";
+  const statusStr = (notification.status || "").toLowerCase().trim();
+  const isUnread = statusStr === "unread";
   const type = (notification.sender_type || "").toLowerCase().trim();
 
   // Color mappings
@@ -99,12 +103,12 @@ export default function NotificationCard({ notification, onPress }: Notification
             numberOfLines={1}
             className={`text-sm shrink mr-2 text-neutral ${isUnread ? "font-bold" : "font-medium"}`}
           >
-            {notification.title || "Alert"}
+            {notification.notification_title || notification.title || "Alert"}
           </Text>
           <Text className="text-[10px] text-accent font-semibold">{timeLabel}</Text>
         </View>
         <Text numberOfLines={2} className="text-xs text-accent mt-1 leading-4">
-          {notification.message || ""}
+          {notification.notification_description || notification.message || ""}
         </Text>
       </View>
 
