@@ -77,6 +77,7 @@ export default function DriverDashboardScreen() {
           ordersList={activeOrders}
           isLoading={isRefetching || isLoadingActiveOrders}
           updateStatusMutation={updateOrderStatusMutation}
+          refetchActiveOrders={refetchActiveOrders}
         />
 
         {/* <LiveOrderBoard orderBoardData={orderBoard} isLoading={isLoadingStats} /> */}

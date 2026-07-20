@@ -50,4 +50,7 @@ export interface DriverOrder {
   accepted_at: string | null;
   picked_up_at: string | null;
   delivered_at: string | null;
+  detail?: any[];
+  details?: any[];
 }
+
