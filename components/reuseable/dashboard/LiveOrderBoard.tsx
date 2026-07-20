@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import LiveOrderBoardSkeleton from "../skeletons/LiveOrderBoardSkeleton";
 
 export interface LiveOrderBoardData {
   new_order: number;
@@ -103,14 +104,7 @@ export default function LiveOrderBoard({
   role = "manager",
 }: LiveOrderBoardProps) {
   if (isLoading) {
-    return (
-      <View
-        key="loading"
-        className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[160px] justify-center items-center"
-      >
-        <Text className="text-xs text-accent">Loading order board...</Text>
-      </View>
-    );
+    return <LiveOrderBoardSkeleton />;
   }
 
   const newOrdersCount = liveOrderBoard?.new_order ?? 0;
