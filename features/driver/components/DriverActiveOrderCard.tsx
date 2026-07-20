@@ -1,9 +1,11 @@
+import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
+import Button from "@/components/reuseable/Button";
 import { useData } from "@/context/context/DataContext";
+import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Animated, Linking, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
-import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
+import { Animated, Linking, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DriverOrder } from "../types";
 
 interface DriverActiveOrderCardProps {
@@ -11,13 +13,8 @@ interface DriverActiveOrderCardProps {
   isLoading: boolean;
   updateStatusMutation: any;
   refetchActiveOrders?: () => void;
-  triggerExceptionModal?: (
-    orderId: string | number,
-    type: "failed" | "cancel" | "damaged",
-    title: string,
-    reasons: string[],
-  ) => void;
-  handleRetry?: (orderId: string | number) => void;
+  onOpenDetails: () => void;
+  onOpenHelp: () => void;
 }
 
 const DELIVERY_STATUSES_MAP: Record<string, Record<string, any>> = {
@@ -59,8 +56,8 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
   isLoading,
   updateStatusMutation,
   refetchActiveOrders,
-  triggerExceptionModal,
-  handleRetry,
+  onOpenDetails,
+  onOpenHelp,
 }: DriverActiveOrderCardProps) => {
   const { settings } = useData();
   const currencySymbol = React.useMemo(() => {
@@ -140,6 +137,23 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
       Linking.openURL(url).catch(() => {
         showAlert("Error", "Could not launch SMS app.", "error");
       });
+    }
+  };
+
+  const handleDirectGps = () => {
+    const lat = activeOrder?.latitude;
+    const lng = activeOrder?.longitude;
+    if (lat && lng) {
+      const url =
+        Platform.select({
+          ios: `maps://app?daddr=${lat},${lng}&saddr=Current%20Location`,
+          android: `google.navigation:q=${lat},${lng}`,
+        }) || `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+      Linking.openURL(url).catch(() => {
+        showAlert("Error", "Could not open map navigation.", "error");
+      });
+    } else {
+      showAlert("GPS Missing", "No lat/long coordinates available for this order.", "error");
     }
   };
 
@@ -256,12 +270,16 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
             refetchActiveOrders?.();
             showAlert(
               "Success",
-              `Payment of ${currencySymbol}${Number(collectedAmount).toFixed(2)} recorded!`,
+              `Payment of ${formatAmount(collectedAmount, currencySymbol)} recorded!`,
               "success",
             );
             setCollectedAmount("");
           } else {
-            showAlert("Error", res?.message || "Payment could not be recorded. Please contact support.", "error");
+            showAlert(
+              "Error",
+              res?.message || "Payment could not be recorded. Please contact support.",
+              "error",
+            );
           }
         },
         onError: (err: any) => {
@@ -274,21 +292,11 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
 
   if (isLoading) {
     const Bone = ({ className, style }: { className?: string; style?: any }) => (
-      <View className={`bg-slate-200 rounded-md ${className || ""}`} style={style} />
+      <View className={`bg-slate-200 rounded-lg ${className || ""}`} style={style} />
     );
 
     return (
       <Animated.View key="loading" style={{ opacity: pulse }} className="w-full">
-        {/* Header */}
-        <View className="mb-2 flex-row items-start justify-between">
-          <Bone className="h-4 w-24" />
-          <Bone className="h-4 w-8" />
-        </View>
-        <View className="mb-4 flex-row items-start justify-between">
-          <Bone className="h-3.5 w-16" />
-          <Bone className="h-3.5 w-10" />
-        </View>
-
         {/* Step tracker */}
         <View className="mb-6 px-1.5">
           <View className="flex-row justify-between items-center mb-4">
@@ -299,45 +307,40 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
               </View>
             ))}
           </View>
-          <Bone className="w-full h-14 rounded-md" />
+          <Bone className="w-full h-14 rounded-lg" />
         </View>
 
         {/* Payment banner */}
-        <Bone className="w-full h-10 rounded-2xl mb-3" />
+        <Bone className="w-full h-10 rounded-lg mb-3" />
 
         {/* Customer info card */}
-        <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100 shadow-sm">
+        <View className="bg-white rounded-lg p-4 mb-3 border border-slate-100 shadow-sm">
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center gap-2">
-              <Bone className="w-9 h-9 rounded-full" />
+              <Bone className="w-9 h-9 rounded-lg" />
               <View>
                 <Bone className="h-3.5 w-28 mb-1.5" />
                 <Bone className="h-2.5 w-20" />
               </View>
             </View>
             <View className="flex-row gap-2">
-              <Bone className="w-10 h-10 rounded-full" />
-              <Bone className="w-10 h-10 rounded-full" />
+              <Bone className="w-10 h-10 rounded-lg" />
+              <Bone className="w-10 h-10 rounded-lg" />
             </View>
-          </View>
-          <View className="flex-row gap-2">
-            <Bone className="h-6 w-24 rounded-full" />
-            <Bone className="h-6 w-20 rounded-full" />
-            <Bone className="h-6 w-24 rounded-full" />
           </View>
         </View>
 
         {/* Address card */}
-        <View className="bg-white rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
+        <View className="bg-white rounded-lg p-4 mb-4 border border-slate-100 shadow-sm">
           <View className="flex-row items-start gap-3">
-            <Bone className="w-9 h-9 rounded-full" />
+            <Bone className="w-9 h-9 rounded-lg" />
             <View className="flex-1">
               <Bone className="h-2.5 w-28 mb-2" />
               <Bone className="h-3.5 w-full mb-1.5" />
               <Bone className="h-3.5 w-2/3" />
             </View>
           </View>
-          <Bone className="w-full h-11 rounded-xl mt-4" />
+          <Bone className="w-full h-11 rounded-lg mt-4" />
         </View>
       </Animated.View>
     );
@@ -345,12 +348,13 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
 
   return (
     <View key="loaded" className="w-full">
+      {/* Steps Progress Tracker */}
       <View className="mb-6 px-1.5">
         <View className="flex-row justify-between items-center mb-4 relative">
           {/* Horizontal Line Connections */}
           <View className="absolute left-4 right-4 top-4 h-[2px] bg-slate-100 z-0" />
           <View
-            style={{ width: `${currentStep * 25}%` }}
+            style={{ width: `${currentStep * (100 / Math.max(1, DELIVERY_STATUS_KEYS.length - 1))}%` }}
             className="absolute left-4 top-4 h-[2px] bg-emerald-500 z-0"
           />
 
@@ -377,7 +381,7 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
                   />
                 </View>
                 <Text
-                  className={`text-[8px] font-black capitalize mt-1.5 tracking-wider ${
+                  className={`text-[8px] font-semibold capitalize mt-1.5 tracking-wider ${
                     isActive ? "text-primary" : isPassed ? "text-emerald-500" : "text-slate-400"
                   }`}
                 >
@@ -406,15 +410,110 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
         </TouchableOpacity>
       </View>
 
+      {/* Address and Route Launch Panel */}
+      <View className="mb-4">
+        <Text>Delivery Address</Text>
+
+        <View className="flex-row items-center justify-between gap-3">
+          <Text numberOfLines={2} className="text-xs text-slate-500 font-semibold flex-1 leading-4">
+            {activeOrder?.door_no ? `${activeOrder.door_no}, ` : ""}
+            {activeOrder?.customer_address}
+            {activeOrder?.customer_post_code ? ` — ${activeOrder.customer_post_code}` : ""}
+          </Text>
+
+          {activeOrder?.latitude && activeOrder?.longitude && (
+            <TouchableOpacity
+              onPress={handleDirectGps}
+              className="w-7 h-7 rounded-lg bg-emerald-100 items-center justify-center shrink-0"
+            >
+              <MaterialIcons name="directions" size={16} color="#10b981" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {activeOrder?.initial_note ? (
+          <TouchableOpacity
+            onPress={() => setIsNoteExpanded(!isNoteExpanded)}
+            activeOpacity={0.7}
+            className="mt-3 border-t border-slate-100 pt-2"
+          >
+            <View className="flex-row items-center justify-between">
+              <Text className="text-[10px] font-semibold text-slate-400 capitalize tracking-wider">
+                Delivery instructions
+              </Text>
+              <MaterialIcons
+                name={isNoteExpanded ? "expand-less" : "expand-more"}
+                size={14}
+                color="#94a3b8"
+              />
+            </View>
+            {isNoteExpanded && (
+              <Text className="text-[10px] text-slate-500 py-2 leading-4 italic">
+                {activeOrder.initial_note}
+              </Text>
+            )}
+          </TouchableOpacity>
+        ) : null}
+
+        <View className="mt-3">
+          <Button label="Get Route Navigation" onPress={handleGetRoute} variant="primary" />
+        </View>
+      </View>
+
+      {/* Customer Contact Panel */}
+      <View className="mb-3">
+        <View className="flex-row gap-2.5">
+          {/* Call Button containing the number */}
+          <View className="flex-1">
+            <Button
+              label={`Call: ${activeOrder?.customer_phone || "N/A"}`}
+              onPress={() => {
+                if (activeOrder?.customer_phone && activeOrder?.customer_phone !== "N/A") {
+                  Linking.openURL(`tel:${activeOrder.customer_phone}`);
+                }
+              }}
+              variant="secondary"
+            />
+          </View>
+
+          {/* Message Button */}
+          <View className="flex-1">
+            <Button
+              label="Message"
+              onPress={() => handleQuickSMS("I am on my way with your order.")}
+              variant="secondary"
+            />
+          </View>
+        </View>
+
+        {/* Quick Messages Section below the message button */}
+        <View className="mt-4 pt-4 border-t border-slate-100">
+          <Text className="text-[10px] font-semibold text-slate-400 capitalize tracking-wider mb-2">
+            Quick message
+          </Text>
+          <View className="flex-row gap-2 flex-wrap">
+            {["I am on my way.", "I have arrived.", "Please call back."].map((msg) => (
+              <TouchableOpacity
+                key={msg}
+                onPress={() => handleQuickSMS(msg)}
+                className="px-3.5 py-2 bg-slate-50 rounded-lg border border-slate-200/60 active:bg-slate-100"
+              >
+                <Text className="text-[10px] font-semibold text-slate-600 capitalize">{msg}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </View>
+
       {/* Payment Handling Section */}
-      <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100 shadow-sm">
+      <View className="bg-white rounded-lg p-4 mb-3 border border-slate-100 shadow-sm">
         <View className="flex-row justify-between items-center mb-3">
           <View className="flex-row items-center gap-2">
-            <View className="w-9 h-9 rounded-full bg-slate-50 items-center justify-center">
+            <View className="w-9 h-9 rounded-lg bg-slate-50 items-center justify-center">
               <MaterialIcons name="payment" size={18} color="#475569" />
             </View>
-            <Text className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-              Payment Handling
+            <Text className="text-[10px] font-semibold text-slate-400 capitalize tracking-wider">
+              Payment handling
             </Text>
           </View>
           <View
@@ -423,29 +522,38 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
             }`}
           >
             <Text
-              className={`text-[9px] font-black uppercase tracking-wider ${
+              className={`text-[9px] font-bold capitalize tracking-wider ${
                 paymentMethod === "Cash" ? "text-amber-700" : "text-emerald-700"
               }`}
             >
-              {paymentMethod === "Cash" ? "Cash On Delivery" : "Prepaid"}
+              {paymentMethod === "Cash" ? "Cash on delivery" : "Prepaid"}
             </Text>
           </View>
         </View>
 
         {paymentMethod === "Cash" ? (
-          <View className="bg-amber-50/50 border border-amber-100 rounded-xl p-3">
+          <View className="bg-amber-50/50 border border-amber-100 rounded-lg p-3">
             <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">
-                Cash to Collect
+              <Text className="text-[10px] font-semibold text-amber-800 capitalize tracking-wider">
+                Cash to collect
               </Text>
-              <Text className="text-sm font-black text-amber-800">
-                {currencySymbol}
-                {totalAmount.toFixed(2)}
+              <Text className="text-sm font-bold text-amber-800">
+                {formatAmount(totalAmount, currencySymbol)}
               </Text>
             </View>
 
-            <View className="flex-row items-center bg-white border border-slate-200 rounded-xl px-3 py-2.5 mt-1">
-              <Text className="font-black text-slate-400 mr-2 text-sm">{currencySymbol}</Text>
+            <TouchableOpacity
+              onPress={() => setCollectedAmount(totalAmount.toFixed(2))}
+              activeOpacity={0.7}
+              className="bg-amber-100/50 border border-amber-200/60 rounded-lg px-2.5 py-1.5 self-start mb-2 mt-1"
+            >
+              <Text className="text-[10px] font-semibold text-amber-800 capitalize">
+                Exact — {formatAmount(totalAmount, currencySymbol)}
+              </Text>
+            </TouchableOpacity>
+
+            <View className="flex-row items-center bg-white border border-slate-200 rounded-lg px-3 py-2.5 mt-1">
+              <Text className="font-semibold text-slate-400 mr-2 text-sm">{currencySymbol}</Text>
               <TextInput
                 value={collectedAmount}
                 onChangeText={setCollectedAmount}
@@ -457,27 +565,25 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
               />
             </View>
 
-            <TouchableOpacity
-              onPress={handleConfirmPayment}
-              disabled={updateStatusMutation.isPending}
-              activeOpacity={0.8}
-              className="w-full mt-3 bg-slate-900 py-3 rounded-xl flex-row items-center justify-center active:opacity-85 disabled:opacity-50"
-            >
-              <Text className="text-white text-xs font-black uppercase tracking-wider">
-                {updateStatusMutation.isPending ? "Confirming..." : "Confirm Payment"}
-              </Text>
-            </TouchableOpacity>
+            <View className="mt-3">
+              <Button
+                label={updateStatusMutation.isPending ? "Confirming..." : "Confirm payment"}
+                onPress={handleConfirmPayment}
+                disabled={updateStatusMutation.isPending}
+                variant="primary"
+              />
+            </View>
           </View>
         ) : (
-          <View className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex-row items-center gap-3">
-            <View className="w-8 h-8 rounded-full bg-emerald-500 items-center justify-center">
+          <View className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 flex-row items-center gap-3">
+            <View className="w-8 h-8 rounded-lg bg-emerald-500 items-center justify-center">
               <MaterialIcons name="security" size={16} color="white" />
             </View>
             <View className="flex-1">
-              <Text className="font-black text-emerald-800 text-[10px] uppercase tracking-wider">
-                Payment Already Collected
+              <Text className="font-semibold text-emerald-800 text-[10px] capitalize tracking-wider">
+                Payment already collected
               </Text>
-              <Text className="text-[10px] text-emerald-600 font-bold mt-0.5">
+              <Text className="text-[10px] text-emerald-600 font-semibold mt-0.5">
                 This order is prepaid and fully settled.
               </Text>
             </View>
@@ -485,290 +591,13 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
         )}
       </View>
 
-      {/* Customer Call & SMS Panel */}
-      <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100 shadow-sm">
-        <View className="flex-row items-center justify-between mb-3">
-          <View className="flex-row items-center gap-2">
-            <View className="w-9 h-9 rounded-full bg-blue-50 items-center justify-center">
-              <MaterialIcons name="person" size={18} color="#3b82f6" />
-            </View>
-            <View>
-              <Text className="font-bold text-sm text-neutral capitalize">{activeOrder?.customer_name}</Text>
-              <Text className="text-[10px] text-slate-400 font-medium">{activeOrder?.customer_phone}</Text>
-            </View>
-          </View>
-
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              onPress={() => Linking.openURL(`tel:${activeOrder?.customer_phone}`)}
-              className="w-10 h-10 rounded-full bg-emerald-500 items-center justify-center active:opacity-80"
-            >
-              <MaterialIcons name="phone" size={16} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleQuickSMS("I am on my way with your order.")}
-              className="w-10 h-10 rounded-full bg-blue-500 items-center justify-center active:opacity-80"
-            >
-              <MaterialIcons name="message" size={16} color="white" />
-            </TouchableOpacity>
-          </View>
+      {/* Drawer Action Triggers */}
+      <View className="flex-row gap-2.5 mt-3">
+        <View className="flex-1">
+          <Button label="View Details" onPress={onOpenDetails} variant="secondary" />
         </View>
-
-        {activeOrder?.customer_note ? (
-          <View className="flex-row items-start gap-1.5 mb-3 px-3 py-2 bg-blue-50/50 rounded-lg">
-            <MaterialIcons name="chat-bubble-outline" size={12} color="#3b82f6" style={{ marginTop: 1 }} />
-            <Text className="text-[10px] text-blue-700 leading-4 flex-1">{activeOrder.customer_note}</Text>
-          </View>
-        ) : null}
-
-        <View className="flex-row gap-2 flex-wrap">
-          {["I am on my way.", "I have arrived.", "Please call back."].map((msg) => (
-            <TouchableOpacity
-              key={msg}
-              onPress={() => handleQuickSMS(msg)}
-              className="px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100 active:bg-slate-100"
-            >
-              <Text className="text-[9px] font-bold text-slate-500">{msg}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      {/* Order Details Panel */}
-      {(() => {
-        const details = activeOrder?.detail || activeOrder?.details || [];
-        const itemCount = details.reduce(
-          (sum: number, item: any) => sum + (item.qty || item.quantity || 1),
-          0,
-        );
-
-        return (
-          <View className="bg-white rounded-2xl p-4 mb-3 border border-slate-100 shadow-sm">
-            <View className="flex-row justify-between items-center mb-3">
-              <View className="flex-row items-center gap-2">
-                <View className="w-9 h-9 rounded-full bg-slate-50 items-center justify-center">
-                  <MaterialIcons name="receipt" size={18} color="#475569" />
-                </View>
-                <View>
-                  <Text className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                    Order Details
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 font-bold mt-0.5">
-                    {itemCount} {itemCount === 1 ? "Item" : "Items"}
-                  </Text>
-                </View>
-              </View>
-              <View className="flex-row items-center gap-2">
-                <View
-                  className={`px-2 py-0.5 rounded-full ${
-                    paymentMethod === "Cash" ? "bg-amber-100" : "bg-emerald-100"
-                  }`}
-                >
-                  <Text
-                    className={`text-[9px] font-black uppercase tracking-wider ${
-                      paymentMethod === "Cash" ? "text-amber-700" : "text-emerald-700"
-                    }`}
-                  >
-                    {paymentMethod}
-                  </Text>
-                </View>
-                <Text className="font-black text-slate-900 text-sm">
-                  {currencySymbol}
-                  {totalAmount.toFixed(2)}
-                </Text>
-              </View>
-            </View>
-
-            {details.length > 0 ? (
-              <View className="gap-y-1.5 mt-1">
-                {details.map((item: any, idx: number) => {
-                  const title = item.dish?.name || item.meal?.name || item.dish_name || "Unknown Item";
-                  const qty = item.qty || item.quantity || 1;
-                  return (
-                    <View
-                      key={item.id || idx}
-                      className="flex-row justify-between items-center bg-slate-50 border border-slate-200/60 rounded-xl p-2.5 shadow-sm"
-                    >
-                      <Text className="text-xs font-bold text-slate-700 flex-1 pr-2" numberOfLines={1}>
-                        {title}
-                      </Text>
-                      <View className="bg-slate-200 px-1.5 py-0.5 rounded-lg shrink-0">
-                        <Text className="text-[9px] font-black text-slate-600">{qty}x</Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
-            ) : (
-              <Text className="text-xs text-slate-400 italic text-center py-2">No items listed</Text>
-            )}
-          </View>
-        );
-      })()}
-
-      {/* Address and Route Launch Panel */}
-      <View className="bg-white rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
-        <View className="flex-row items-start gap-3 mb-1">
-          <View className="w-9 h-9 rounded-full bg-rose-50 items-center justify-center mt-0.5">
-            <MaterialIcons name="location-pin" size={18} color="#ef4444" />
-          </View>
-          <View className="flex-1">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                Delivery Address
-              </Text>
-              {activeOrder?.latitude && activeOrder?.longitude && (
-                <View className="flex-row items-center gap-1 px-2 py-0.5 bg-emerald-50 rounded-full">
-                  <MaterialIcons name="gps-fixed" size={9} color="#10b981" />
-                  <Text className="text-[8px] font-bold text-emerald-600">GPS Pinned</Text>
-                </View>
-              )}
-            </View>
-            <Text className="font-bold text-xs text-neutral mt-1 leading-4">
-              {activeOrder?.door_no ? `${activeOrder.door_no}, ` : ""}
-              {activeOrder?.customer_address}
-              {activeOrder?.customer_post_code ? ` — ${activeOrder.customer_post_code}` : ""}
-            </Text>
-          </View>
-        </View>
-
-        {activeOrder?.initial_note ? (
-          <TouchableOpacity
-            onPress={() => setIsNoteExpanded(!isNoteExpanded)}
-            activeOpacity={0.7}
-            className="mt-3 ml-12 border border-slate-100 rounded-xl overflow-hidden"
-          >
-            <View className="flex-row items-center justify-between px-3 py-2 bg-slate-50">
-              <Text className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
-                Delivery Instructions
-              </Text>
-              <MaterialIcons
-                name={isNoteExpanded ? "expand-less" : "expand-more"}
-                size={16}
-                color="#94a3b8"
-              />
-            </View>
-            {isNoteExpanded && (
-              <Text className="text-[10px] text-slate-500 px-3 py-2.5 leading-4 italic bg-white">
-                {activeOrder.initial_note}
-              </Text>
-            )}
-          </TouchableOpacity>
-        ) : null}
-
-        <TouchableOpacity
-          onPress={handleGetRoute}
-          className="w-full mt-4 py-3 bg-primary rounded-xl flex-row items-center justify-center gap-2 active:opacity-80"
-        >
-          <MaterialIcons name="navigation" size={16} color="white" />
-          <Text className="text-xs font-bold text-white">Get Route Navigation</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Help & Exception Handling Panel */}
-      <View className="bg-white rounded-2xl p-4 mb-4 border border-slate-100 shadow-sm">
-        <View className="flex-row items-center gap-2 mb-4">
-          <View className="w-9 h-9 rounded-full bg-rose-50 items-center justify-center">
-            <MaterialIcons name="error-outline" size={18} color="#ef4444" />
-          </View>
-          <View>
-            <Text className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-              Help & Exception Handling
-            </Text>
-            <Text className="text-[10px] text-slate-500 font-bold mt-0.5">
-              Report issues or manage delivery status
-            </Text>
-          </View>
-        </View>
-
-        {/* Buttons Grid */}
-        <View className="flex-row flex-wrap gap-2">
-          {/* Failed Delivery */}
-          <TouchableOpacity
-            onPress={() =>
-              triggerExceptionModal?.(
-                activeOrder.id,
-                "failed",
-                "Reason for Failure",
-                ["Customer Unavailable", "Wrong Address", "Order Damaged", "Other"]
-              )
-            }
-            activeOpacity={0.7}
-            className="flex-1 min-w-[45%] p-3 bg-rose-50/50 border border-rose-100 rounded-lg items-center justify-center flex-row gap-2 active:bg-rose-50"
-          >
-            <MaterialIcons name="block" size={16} color="#f43f5e" />
-            <Text className="text-[10px] font-black text-rose-600 uppercase tracking-wider">
-              Failed Delivery
-            </Text>
-          </TouchableOpacity>
-
-          {/* Wrong Address */}
-          <TouchableOpacity
-            onPress={() =>
-              showAlert(
-                "Incorrect Address",
-                "To update the address details, please contact the dispatch support center.",
-                "info"
-              )
-            }
-            activeOpacity={0.7}
-            className="flex-1 min-w-[45%] p-3 bg-amber-50/50 border border-amber-100 rounded-lg items-center justify-center flex-row gap-2 active:bg-amber-50"
-          >
-            <MaterialIcons name="location-off" size={16} color="#d97706" />
-            <Text className="text-[10px] font-black text-amber-600 uppercase tracking-wider">
-              Wrong Address
-            </Text>
-          </TouchableOpacity>
-
-          {/* Order Damaged */}
-          <TouchableOpacity
-            onPress={() =>
-              triggerExceptionModal?.(
-                activeOrder.id,
-                "damaged",
-                "Report Damage",
-                ["Packaging Ruined", "Items Spilled", "Cold Food", "Other"]
-              )
-            }
-            activeOpacity={0.7}
-            className="flex-1 min-w-[45%] p-3 bg-orange-50/50 border border-orange-100 rounded-lg items-center justify-center flex-row gap-2 active:bg-orange-50"
-          >
-            <MaterialIcons name="broken-image" size={16} color="#ea580c" />
-            <Text className="text-[10px] font-black text-orange-600 uppercase tracking-wider">
-              Order Damaged
-            </Text>
-          </TouchableOpacity>
-
-          {/* Retry Delivery */}
-          <TouchableOpacity
-            onPress={() => handleRetry?.(activeOrder.id)}
-            activeOpacity={0.7}
-            className="flex-1 min-w-[45%] p-3 bg-blue-50/50 border border-blue-100 rounded-lg items-center justify-center flex-row gap-2 active:bg-blue-50"
-          >
-            <MaterialIcons name="refresh" size={16} color="#2563eb" />
-            <Text className="text-[10px] font-black text-blue-600 uppercase tracking-wider">
-              Retry Delivery
-            </Text>
-          </TouchableOpacity>
-
-          {/* Cancel Order */}
-          <TouchableOpacity
-            onPress={() =>
-              triggerExceptionModal?.(
-                activeOrder.id,
-                "cancel",
-                "Cancel Delivery",
-                ["Customer Request", "Address Issue", "Force Majeure", "Other"]
-              )
-            }
-            activeOpacity={0.7}
-            className="w-full p-3 bg-slate-50 border border-slate-200/40 rounded-lg items-center justify-center flex-row gap-2 active:bg-slate-100"
-          >
-            <MaterialIcons name="close" size={16} color="#475569" />
-            <Text className="text-[10px] font-black text-slate-600 uppercase tracking-wider">
-              Cancel Order
-            </Text>
-          </TouchableOpacity>
+        <View className="flex-1">
+          <Button label="Get Help" onPress={onOpenHelp} variant="outline" />
         </View>
       </View>
 

@@ -1,19 +1,24 @@
 import AppHeader from "@/components/AppHeader";
+import LiveOrderBoard from "@/components/reuseable/dashboard/LiveOrderBoard";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import { useAuth } from "@/context/AuthContext";
 import { useOwnerProfileQuery } from "@/hooks/useUserQueries";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AssignedOrdersFeed from "../components/AssignedOrdersFeed";
 import WelcomeHeader from "../components/dashboard/WelcomeHeader";
 import DriverActiveOrder from "../components/DriverActiveOrder";
 import DriverQuickStats from "../components/DriverQuickStats";
-import LiveOrderBoard from "@/components/reuseable/dashboard/LiveOrderBoard";
+import OrderDetailsDrawer from "../components/OrderDetailsDrawer";
+import WeeklyPerformance from "../components/WeeklyPerformance";
 import { useUpdateDriverOrderStatusMutation } from "../hooks/mutations/useDriverMutations";
 import {
   useDriverActiveAssignedOrdersQuery,
   useDriverDashboardStatsQuery,
 } from "../hooks/queries/useDriverQueries";
+import { DriverOrder } from "../types";
 
 export default function DriverDashboardScreen() {
   const { token, user, logout } = useAuth();
@@ -22,15 +27,19 @@ export default function DriverDashboardScreen() {
   const {
     data: statsData,
     isLoading: isLoadingStats,
-    isRefetching,
+    isFetching: isFetchingStats,
     refetch: refetchStats,
   } = useDriverDashboardStatsQuery(token || "");
 
   const {
     data: activeOrders,
     isLoading: isLoadingActiveOrders,
+    isFetching: isFetchingActiveOrders,
     refetch: refetchActiveOrders,
   } = useDriverActiveAssignedOrdersQuery(token || "");
+
+  const isStatsLoading = isLoadingStats || isFetchingStats || !statsData;
+  const isActiveOrdersLoading = isLoadingActiveOrders || isFetchingActiveOrders || !activeOrders;
 
   const { data: profileData, refetch: refetchProfile } = useOwnerProfileQuery(token || "", user?.id || null);
 
@@ -40,6 +49,8 @@ export default function DriverDashboardScreen() {
   }, [profileData]);
 
   const activeUser = profileUser || user;
+
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState<DriverOrder | null>(null);
 
   const updateOrderStatusMutation = useUpdateDriverOrderStatusMutation(token || "");
 
@@ -77,7 +88,7 @@ export default function DriverDashboardScreen() {
         <WelcomeHeader user={activeUser} />
 
         <DriverQuickStats
-          isLoadingStats={isRefetching || isLoadingStats}
+          isLoadingStats={isStatsLoading}
           stats={statsData?.stats}
           currencySymbol={currencySymbol}
           distanceUnit={statsData?.distance_unit}
@@ -85,15 +96,32 @@ export default function DriverDashboardScreen() {
 
         <DriverActiveOrder
           ordersList={activeOrders}
-          isLoading={isRefetching || isLoadingActiveOrders}
+          isLoading={isActiveOrdersLoading}
           updateStatusMutation={updateOrderStatusMutation}
           refetchActiveOrders={refetchActiveOrders}
         />
 
-        <LiveOrderBoard liveOrderBoard={orderBoard} isLoading={isLoadingStats} role="driver" />
+        <View className="bg-base-300 p-4 rounded-lg flex-1">
+          <Text className="mb-4 font-bold capitalize opacity-80">Live Today's Orders</Text>
+          <LiveOrderBoard liveOrderBoard={orderBoard} isLoading={isStatsLoading} role="driver" />
+        </View>
 
-        {/* <WeeklyPerformance /> */}
+        <AssignedOrdersFeed
+          orders={activeOrders || []}
+          isLoading={isActiveOrdersLoading}
+          currencySymbol={currencySymbol || "£"}
+          onViewOrder={(order) => setSelectedOrderDetails(order)}
+        />
+
+        <WeeklyPerformance />
       </RefreshableScrollView>
+
+      <OrderDetailsDrawer
+        order={selectedOrderDetails}
+        visible={selectedOrderDetails !== null}
+        onClose={() => setSelectedOrderDetails(null)}
+        currencySymbol={currencySymbol || "£"}
+      />
     </SafeAreaView>
   );
 }

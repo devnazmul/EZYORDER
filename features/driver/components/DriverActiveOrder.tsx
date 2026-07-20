@@ -1,10 +1,14 @@
 import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
+import { useData } from "@/context/context/DataContext";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { DriverOrder } from "../types";
 import DriverActiveOrderCard from "./DriverActiveOrderCard";
 import ExceptionModal, { ExceptionModalConfig } from "./ExceptionModal";
+import OrderDetailsDrawer from "./OrderDetailsDrawer";
+import HelpDrawer from "./HelpDrawer";
 
 interface DriverActiveOrderProps {
   ordersList: DriverOrder[] | [];
@@ -21,6 +25,12 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
 }: DriverActiveOrderProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [activeDrawer, setActiveDrawer] = useState<"details" | "help" | null>(null);
+
+  const { settings } = useData();
+  const currencySymbol = React.useMemo(() => {
+    return getCurrencySymbol(settings?.currency);
+  }, [settings?.currency]);
 
   const [exceptionModal, setExceptionModal] = useState<ExceptionModalConfig>({
     visible: false,
@@ -99,10 +109,10 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
         onSuccess: (res: any) => {
           setExceptionModal((prev) => ({ ...prev, visible: false }));
           refetchActiveOrders();
-          showAlert("Success", `Report submitted: ${reason}`, "success");
+          showAlert("Success", "Exception report submitted successfully", "success");
         },
         onError: (err: any) => {
-          const errMsg = err?.data?.message || err?.message || "Failed to submit exception report";
+          const errMsg = err?.data?.message || err?.message || "Failed to submit exception";
           showAlert("Error", errMsg, "error");
         },
       },
@@ -110,8 +120,6 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
   };
 
   const handleRetry = (orderId: string | number) => {
-    if (updateStatusMutation.isPending) return;
-
     const data = new FormData();
     data.append("status", "on_route");
 
@@ -140,11 +148,13 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
 
   if (isLoading) {
     return (
-      <View key="loading" className="bg-base-300 p-4 pb-1 rounded-lg flex-1">
+      <View key="loading" className="bg-base-300 p-4 rounded-lg flex-1">
         <DriverActiveOrderCard
           activeOrder={{} as any}
           isLoading={true}
           updateStatusMutation={updateStatusMutation}
+          onOpenDetails={() => {}}
+          onOpenHelp={() => {}}
         />
       </View>
     );
@@ -152,9 +162,9 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
 
   if (!ordersList || ordersList.length === 0) {
     return (
-      <View key="empty" className="bg-base-300 p-4 pb-1 rounded-lg flex-1 justify-center items-center py-10">
+      <View key="empty" className="bg-base-300 p-4 rounded-lg flex-1 justify-center items-center py-10">
         <MaterialIcons name="inbox" size={48} color="#94a3b8" />
-        <Text className="text-slate-400 font-bold mt-2">No active orders assigned</Text>
+        <Text className="text-slate-400 font-semibold mt-2 capitalize">No active orders assigned</Text>
       </View>
     );
   }
@@ -162,16 +172,16 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
   const activeOrder = ordersList[activeIndex];
 
   return (
-    <View key="loaded" className="bg-base-300 p-4 pb-1 rounded-lg flex-1">
+    <View key="loaded" className="bg-base-300 p-4 rounded-lg flex-1">
       <View className="mb-2 flex-row items-start justify-between px-1">
         <Text className="font-bold capitalize opacity-80">Active Order</Text>
-        <Text className="font-extrabold capitalize opacity-30">
+        <Text className="font-semibold capitalize opacity-30">
           {activeIndex + 1}/{ordersList.length}
         </Text>
       </View>
       <View className="flex-row items-start justify-between mb-4 px-1">
-        <Text className="font-bold capitalize text-sm opacity-50">OrderId</Text>
-        <Text className="font-bold capitalize text-sm opacity-30">{activeOrder?.id}</Text>
+        <Text className="font-semibold capitalize text-sm opacity-50">OrderId</Text>
+        <Text className="font-semibold capitalize text-sm opacity-30">{activeOrder?.id}</Text>
       </View>
 
       <View className="flex-1 w-full" onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
@@ -190,8 +200,8 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
                   isLoading={false}
                   updateStatusMutation={updateStatusMutation}
                   refetchActiveOrders={refetchActiveOrders}
-                  triggerExceptionModal={triggerExceptionModal}
-                  handleRetry={handleRetry}
+                  onOpenDetails={() => setActiveDrawer("details")}
+                  onOpenHelp={() => setActiveDrawer("help")}
                 />
               </View>
             ))}
@@ -199,7 +209,23 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
         )}
       </View>
 
-      {/* Lifted Exceptions & Branded Alerts Modals */}
+      {/* Slide-Up Drawers (Details / Help) */}
+      <OrderDetailsDrawer
+        order={activeDrawer === "details" ? activeOrder : null}
+        visible={activeDrawer === "details"}
+        onClose={() => setActiveDrawer(null)}
+        currencySymbol={currencySymbol || "£"}
+      />
+
+      <HelpDrawer
+        orderId={activeDrawer === "help" && activeOrder ? activeOrder.id : null}
+        visible={activeDrawer === "help"}
+        onClose={() => setActiveDrawer(null)}
+        triggerExceptionModal={triggerExceptionModal}
+        handleRetry={handleRetry}
+      />
+
+      {/* Exception Reason Modal Dialog */}
       <ExceptionModal
         visible={exceptionModal.visible}
         title={exceptionModal.title}

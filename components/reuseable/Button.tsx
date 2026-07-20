@@ -27,10 +27,14 @@ export default function Button({
     btnClass += isPressable ? " bg-primary" : " bg-primary/50";
     txtClass += " text-white";
   } else if (variant === "secondary") {
-    btnClass += isPressable ? " bg-base-300 border border-base-200" : " bg-base-300/50 border border-base-200/50";
+    btnClass += isPressable
+      ? " bg-base-300 border border-base-200"
+      : " bg-base-300/50 border border-base-200/50";
     txtClass += " text-neutral";
   } else if (variant === "outline") {
-    btnClass += isPressable ? " bg-transparent border border-primary" : " bg-transparent border border-primary/50";
+    btnClass += isPressable
+      ? " bg-transparent border border-primary"
+      : " bg-transparent border border-primary/50";
     txtClass += " text-primary";
   }
 
@@ -44,7 +48,9 @@ export default function Button({
       {isLoading ? (
         <ActivityIndicator size="small" color={variant === "primary" ? "#FFFFFF" : "#DC2D2A"} />
       ) : (
-        <Text className={txtClass}>{label}</Text>
+        <Text numberOfLines={1} className={txtClass}>
+          {label}
+        </Text>
       )}
     </TouchableOpacity>
   );

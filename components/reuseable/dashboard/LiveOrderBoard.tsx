@@ -113,14 +113,11 @@ export default function LiveOrderBoard({
   const unpaidCount = liveOrderBoard?.unpaid ?? 0;
 
   return (
-    <View key="loaded" className="mb-6 gap-y-3">
-      <Text className="text-base font-bold text-neutral">Live Today's Order Board</Text>
-      <View className="gap-y-2">
-        <OrderStatusCard title="NEW ORDERS" count={newOrdersCount} type="new" role={role} />
-        <OrderStatusCard title="PREPARING" count={preparingCount} type="preparing" role={role} />
-        <OrderStatusCard title="COMPLETED" count={completedCount} type="completed" role={role} />
-        <OrderStatusCard title="UNPAID" count={unpaidCount} type="unpaid" role={role} />
-      </View>
+    <View key="loaded" className="gap-y-2">
+      <OrderStatusCard title="NEW ORDERS" count={newOrdersCount} type="new" role={role} />
+      <OrderStatusCard title="PREPARING" count={preparingCount} type="preparing" role={role} />
+      <OrderStatusCard title="COMPLETED" count={completedCount} type="completed" role={role} />
+      <OrderStatusCard title="UNPAID" count={unpaidCount} type="unpaid" role={role} />
     </View>
   );
 }
