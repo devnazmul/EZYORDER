@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import WelcomeHeader from "../components/dashboard/WelcomeHeader";
 import DriverActiveOrder from "../components/DriverActiveOrder";
 import DriverQuickStats from "../components/DriverQuickStats";
+import LiveOrderBoard from "@/components/reuseable/dashboard/LiveOrderBoard";
 import { useUpdateDriverOrderStatusMutation } from "../hooks/mutations/useDriverMutations";
 import {
   useDriverActiveAssignedOrdersQuery,
@@ -53,7 +54,16 @@ export default function DriverDashboardScreen() {
     await Promise.all([refetchStats(), refetchActiveOrders(), refetchProfile()]);
   };
 
-  const orderBoard = statsData?.order_board;
+  const orderBoard = useMemo(() => {
+    const ob = statsData?.order_board;
+    if (!ob) return undefined;
+    return {
+      new_order: ob.new_order ?? ob.new_orders ?? 0,
+      preparing: ob.preparing ?? 0,
+      complete: ob.complete ?? ob.completed ?? 0,
+      unpaid: ob.unpaid ?? 0,
+    };
+  }, [statsData?.order_board]);
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
@@ -80,7 +90,7 @@ export default function DriverDashboardScreen() {
           refetchActiveOrders={refetchActiveOrders}
         />
 
-        {/* <LiveOrderBoard orderBoardData={orderBoard} isLoading={isLoadingStats} /> */}
+        <LiveOrderBoard liveOrderBoard={orderBoard} isLoading={isLoadingStats} role="driver" />
 
         {/* <WeeklyPerformance /> */}
       </RefreshableScrollView>
