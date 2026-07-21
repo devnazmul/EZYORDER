@@ -1,8 +1,8 @@
+import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
+import Button from "@/components/reuseable/Button";
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import Button from "@/components/reuseable/Button";
-import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
 
 interface HelpDrawerProps {
   orderId: string | number | null;
@@ -55,12 +55,12 @@ export default function HelpDrawer({
 
   const handleFailedDelivery = () => {
     onClose();
-    triggerExceptionModal?.(
-      orderId,
-      "failed",
-      "Reason For Failure",
-      ["Customer Unavailable", "Wrong Address", "Order Damaged", "Other"],
-    );
+    triggerExceptionModal?.(orderId, "failed", "Reason For Failure", [
+      "Customer Unavailable",
+      "Wrong Address",
+      "Order Damaged",
+      "Other",
+    ]);
   };
 
   const handleWrongAddress = () => {
@@ -74,12 +74,12 @@ export default function HelpDrawer({
 
   const handleOrderDamaged = () => {
     onClose();
-    triggerExceptionModal?.(
-      orderId,
-      "damaged",
-      "Report Damage",
-      ["Packaging Ruined", "Items Spilled", "Cold Food", "Other"],
-    );
+    triggerExceptionModal?.(orderId, "damaged", "Report Damage", [
+      "Packaging Ruined",
+      "Items Spilled",
+      "Cold Food",
+      "Other",
+    ]);
   };
 
   const handleRetryDelivery = () => {
@@ -89,23 +89,19 @@ export default function HelpDrawer({
 
   const handleCancelOrder = () => {
     onClose();
-    triggerExceptionModal?.(
-      orderId,
-      "cancel",
-      "Cancel Delivery",
-      ["Customer Request", "Address Issue", "Force Majeure", "Other"],
-    );
+    triggerExceptionModal?.(orderId, "cancel", "Cancel Delivery", [
+      "Customer Request",
+      "Address Issue",
+      "Force Majeure",
+      "Other",
+    ]);
   };
 
   return (
     <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
       <View className="flex-1 bg-black/60 justify-end">
         {/* Backdrop tap to close */}
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={onClose}
-          className="absolute inset-0 w-full h-full"
-        />
+        <TouchableOpacity activeOpacity={1} onPress={onClose} className="absolute inset-0 w-full h-full" />
 
         <View className="bg-base-300 w-full rounded-t-lg p-6 border-t border-slate-100/10 shadow-2xl">
           {/* Drag handle */}
@@ -129,36 +125,16 @@ export default function HelpDrawer({
 
           {/* Grid list of help items */}
           <View className="gap-2.5 mb-6">
-            <Button
-              label="Failed Delivery"
-              onPress={handleFailedDelivery}
-              variant="secondary"
-              containerClassName="border border-rose-100/50 bg-rose-50/20"
-            />
+            <Button label="Failed Delivery" onPress={handleFailedDelivery} variant="secondary" />
             <Button
               label="Wrong Address"
               onPress={handleWrongAddress}
               variant="secondary"
               containerClassName="border border-amber-100/50 bg-amber-50/20"
             />
-            <Button
-              label="Order Damaged"
-              onPress={handleOrderDamaged}
-              variant="secondary"
-              containerClassName="border border-orange-100/50 bg-orange-50/20"
-            />
-            <Button
-              label="Retry Delivery"
-              onPress={handleRetryDelivery}
-              variant="secondary"
-              containerClassName="border border-blue-100/50 bg-blue-50/20"
-            />
-            <Button
-              label="Cancel Order"
-              onPress={handleCancelOrder}
-              variant="secondary"
-              containerClassName="border border-slate-200/50 bg-slate-50/20"
-            />
+            <Button label="Order Damaged" onPress={handleOrderDamaged} variant="secondary" />
+            <Button label="Retry Delivery" onPress={handleRetryDelivery} variant="secondary" />
+            <Button label="Cancel Order" onPress={handleCancelOrder} variant="secondary" />
           </View>
 
           <Button label="Close Help" onPress={onClose} variant="primary" />

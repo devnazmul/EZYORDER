@@ -102,11 +102,11 @@ export default function StatusBadge({
   // Apply custom prop overrides if provided
   if (icon) resolvedIconName = icon;
   if (iconColor) resolvedIconColor = iconColor;
-  if (containerClassName) resolvedContainerClass = containerClassName;
+
   if (textClassName) resolvedTextClass = textClassName;
 
   return (
-    <View className={resolvedContainerClass}>
+    <View className={`${resolvedContainerClass} ${containerClassName}`}>
       <MaterialIcons name={resolvedIconName} size={12} color={resolvedIconColor} style={{ marginRight: 4 }} />
       <Text className={resolvedTextClass}>{resolvedLabel}</Text>
     </View>

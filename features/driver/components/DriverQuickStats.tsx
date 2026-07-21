@@ -46,7 +46,7 @@ const DriverQuickStats: React.FC<DriverQuickStatsProps> = ({
                 value={`${(stats?.total_distance ?? 0).toFixed(1)} ${distanceUnit}`}
                 icon="alt-route"
                 iconColor="#2563EB"
-                gradientColors={["#F2F7FF", "#E3EDFF"]}
+                gradientColors={["#EFF6FF", "#DBEAFE"]}
                 loading={isLoadingStats}
               />
             </View>
@@ -56,7 +56,7 @@ const DriverQuickStats: React.FC<DriverQuickStatsProps> = ({
                 value={String(stats?.deliveries_count ?? 0)}
                 icon="check-circle-outline"
                 iconColor="#7C3AED"
-                gradientColors={["#F2F7FF", "#E3EDFF"]}
+                gradientColors={["#FAF5FF", "#E9D5FF"]}
                 loading={isLoadingStats}
               />
             </View>
@@ -69,7 +69,7 @@ const DriverQuickStats: React.FC<DriverQuickStatsProps> = ({
           value={`${(stats?.avg_rating ?? 0).toFixed(1)} / 5.0`}
           icon="star-border"
           iconColor="#D97706"
-          gradientColors={["#F2F7FF", "#E3EDFF"]}
+          gradientColors={["#FFFBEB", "#FEF3C7"]}
           loading={isLoadingStats}
         />
       </View>

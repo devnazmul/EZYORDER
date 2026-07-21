@@ -8,6 +8,7 @@ interface ButtonProps {
   disabled?: boolean;
   isLoading?: boolean;
   containerClassName?: string;
+  buttonClassName?: string;
 }
 
 export default function Button({
@@ -17,6 +18,7 @@ export default function Button({
   disabled = false,
   isLoading = false,
   containerClassName = "",
+  buttonClassName = "",
 }: ButtonProps) {
   const isPressable = !disabled && !isLoading;
 
@@ -48,7 +50,7 @@ export default function Button({
       {isLoading ? (
         <ActivityIndicator size="small" color={variant === "primary" ? "#FFFFFF" : "#DC2D2A"} />
       ) : (
-        <Text numberOfLines={1} className={txtClass}>
+        <Text numberOfLines={1} className={`${txtClass} ${buttonClassName}`}>
           {label}
         </Text>
       )}

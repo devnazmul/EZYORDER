@@ -1,5 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getDriverDashboardStats, getDriverActiveAssignedOrders } from "../../apis/driver";
+import {
+  getDriverDashboardStats,
+  getDriverActiveAssignedOrders,
+  getOrderDetailById,
+} from "../../apis/driver";
 
 export const useDriverDashboardStatsQuery = (token: string) => {
   return useQuery({
@@ -14,5 +18,13 @@ export const useDriverActiveAssignedOrdersQuery = (token: string) => {
     queryKey: ["driverActiveAssignedOrders"],
     queryFn: () => getDriverActiveAssignedOrders(token),
     enabled: !!token,
+  });
+};
+
+export const useOrderDetailQuery = (token: string, orderId: string | number, enabled: boolean) => {
+  return useQuery({
+    queryKey: ["orderDetail", orderId],
+    queryFn: () => getOrderDetailById(token, orderId),
+    enabled: enabled && !!token && !!orderId,
   });
 };

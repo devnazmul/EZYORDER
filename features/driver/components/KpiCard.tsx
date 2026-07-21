@@ -1,7 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useRef } from "react";
-import { Animated, Text, View } from "react-native";
+import React from "react";
+import { Text, View } from "react-native";
+import KpiCardSkeleton from "./skeletons/KpiCardSkeleton";
 
 export interface KpiCardProps {
   title: string;
@@ -30,62 +31,9 @@ export default function KpiCard({
   loading = false,
   valueClassName,
 }: KpiCardProps) {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (!loading) return;
-
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.5,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    pulse.start();
-
-    return () => {
-      pulse.stop();
-    };
-  }, [loading, pulseAnim]);
-
   // SKELETON LOADER STATE
   if (loading) {
-    return (
-      <Animated.View
-        key="loading"
-        style={{
-          borderRadius: 6,
-          borderWidth: 1,
-          borderColor: "rgba(0, 0, 0, 0.05)",
-          opacity: pulseAnim,
-        }}
-        className="w-full min-h-[110px] flex-1 p-4 bg-slate-100 shadow-sm justify-between"
-      >
-        <View className="flex-col justify-between flex-1">
-          <View className="flex-row items-center justify-start gap-2">
-            {/* Icon placeholder */}
-            <View className="w-8 h-8 rounded-xl bg-slate-200" />
-            {/* Title placeholder */}
-            <View className="w-16 h-3.5 rounded bg-slate-200" />
-          </View>
-          <View>
-            {/* Value placeholder */}
-            <View className="w-24 h-7 rounded bg-slate-200 mt-2" />
-            {/* Trend placeholder */}
-            {trend && <View className="w-20 h-4 rounded-full bg-slate-200 mt-2" />}
-          </View>
-        </View>
-      </Animated.View>
-    );
+    return <KpiCardSkeleton trend={trend} />;
   }
 
   return (

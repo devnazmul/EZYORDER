@@ -2,18 +2,24 @@ import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandA
 import { useData } from "@/context/context/DataContext";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
+import { UseMutationResult } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { DriverOrder } from "../types";
 import DriverActiveOrderCard from "./DriverActiveOrderCard";
 import ExceptionModal, { ExceptionModalConfig } from "./ExceptionModal";
-import OrderDetailsDrawer from "./OrderDetailsDrawer";
 import HelpDrawer from "./HelpDrawer";
+import DriverActiveOrderCardSkeleton from "./skeletons/DriverActiveOrderCardSkeleton";
 
 interface DriverActiveOrderProps {
   ordersList: DriverOrder[] | [];
   isLoading: boolean;
-  updateStatusMutation: any;
+  updateStatusMutation: UseMutationResult<
+    unknown,
+    unknown,
+    { orderId: string | number; formData: FormData },
+    unknown
+  >;
   refetchActiveOrders: () => void;
 }
 
@@ -149,13 +155,11 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
   if (isLoading) {
     return (
       <View key="loading" className="bg-base-300 p-4 rounded-lg flex-1">
-        <DriverActiveOrderCard
-          activeOrder={{} as any}
-          isLoading={true}
-          updateStatusMutation={updateStatusMutation}
-          onOpenDetails={() => {}}
-          onOpenHelp={() => {}}
-        />
+        <View className="mb-2 flex-row items-start justify-between px-2 mb-4">
+          <Text className="font-bold capitalize opacity-80">Active Orders</Text>
+          <Text className="font-semibold capitalize opacity-30">0/0</Text>
+        </View>
+        <DriverActiveOrderCardSkeleton />
       </View>
     );
   }
@@ -173,15 +177,11 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
 
   return (
     <View key="loaded" className="bg-base-300 p-4 rounded-lg flex-1">
-      <View className="mb-2 flex-row items-start justify-between px-1">
-        <Text className="font-bold capitalize opacity-80">Active Order</Text>
+      <View className="mb-2 flex-row items-start justify-between px-2 mb-4">
+        <Text className="font-bold capitalize opacity-80">Active Orders</Text>
         <Text className="font-semibold capitalize opacity-30">
           {activeIndex + 1}/{ordersList.length}
         </Text>
-      </View>
-      <View className="flex-row items-start justify-between mb-4 px-1">
-        <Text className="font-semibold capitalize text-sm opacity-50">OrderId</Text>
-        <Text className="font-semibold capitalize text-sm opacity-30">{activeOrder?.id}</Text>
       </View>
 
       <View className="flex-1 w-full" onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
@@ -194,13 +194,12 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
             scrollEventThrottle={16}
           >
             {ordersList.map((order) => (
-              <View key={order.id} style={{ width: containerWidth }}>
+              <View key={order.id} style={{ width: containerWidth }} className="px-2">
                 <DriverActiveOrderCard
                   activeOrder={order}
                   isLoading={false}
                   updateStatusMutation={updateStatusMutation}
                   refetchActiveOrders={refetchActiveOrders}
-                  onOpenDetails={() => setActiveDrawer("details")}
                   onOpenHelp={() => setActiveDrawer("help")}
                 />
               </View>
@@ -209,13 +208,7 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
         )}
       </View>
 
-      {/* Slide-Up Drawers (Details / Help) */}
-      <OrderDetailsDrawer
-        order={activeDrawer === "details" ? activeOrder : null}
-        visible={activeDrawer === "details"}
-        onClose={() => setActiveDrawer(null)}
-        currencySymbol={currencySymbol || "£"}
-      />
+      {/* Slide-Up Drawers (Help) */}
 
       <HelpDrawer
         orderId={activeDrawer === "help" && activeOrder ? activeOrder.id : null}

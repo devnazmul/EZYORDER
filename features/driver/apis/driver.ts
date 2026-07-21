@@ -69,3 +69,12 @@ export const updateDriverOrderStatus = async (
     throw response;
   }
 };
+
+// GET ORDER DETAILS BY ID
+export const getOrderDetailById = async (token: string, orderId: string | number) => {
+  const response = await axios.get(`${API_BASE_URL}/order/${orderId}`, {
+    headers: getHeaders(token),
+    validateStatus: () => true,
+  });
+  return response.status === 200 ? response.data : null;
+};
