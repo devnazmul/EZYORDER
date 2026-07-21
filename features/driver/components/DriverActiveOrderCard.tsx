@@ -8,7 +8,7 @@ import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
 import { UseMutationResult } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import { Linking, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Animated, Linking, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DriverOrder } from "../types";
 import ActiveOrderDetailsModal from "./ActiveOrderDetailsModal";
 import DriverActiveOrderCardSkeleton from "./skeletons/DriverActiveOrderCardSkeleton";
@@ -82,6 +82,20 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
   const totalAmount = parseFloat(activeOrder?.amount || activeOrder?.total_due_amount || "0");
 
   const [currentStep, setCurrentStep] = useState(0);
+  const progressAnim = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: currentStep,
+      duration: 350,
+      useNativeDriver: false,
+    }).start();
+  }, [currentStep, progressAnim]);
+
+  const lineWidth = progressAnim.interpolate({
+    inputRange: [0, Math.max(1, DELIVERY_STATUS_KEYS.length - 1)],
+    outputRange: ["0%", "100%"],
+  });
   const [collectedAmount, setCollectedAmount] = useState("");
   const [deliveryNote, setDeliveryNote] = useState("");
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
@@ -357,8 +371,8 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
           <View className="flex-row justify-between items-center mb-4 relative">
             {/* Horizontal Line Connections */}
             <View className="absolute left-4 right-4 top-4 h-[2px] bg-slate-100 z-0" />
-            <View
-              style={{ width: `${currentStep * (100 / Math.max(1, DELIVERY_STATUS_KEYS.length - 1))}%` }}
+            <Animated.View
+              style={{ width: lineWidth }}
               className="absolute left-4 top-4 h-[2px] bg-emerald-500 z-0"
             />
 
