@@ -63,6 +63,7 @@ export const updateDriverOrderStatus = async (
     },
     validateStatus: () => true,
   });
+  logApiResponse("Update driver order status response: ", response.data);
   if (response.status === 200 && response.data?.success) {
     return response.data;
   } else {
@@ -76,5 +77,20 @@ export const getOrderDetailById = async (token: string, orderId: string | number
     headers: getHeaders(token),
     validateStatus: () => true,
   });
+  logApiResponse("Driver detail by id response: ", response.data);
   return response.status === 200 ? response.data : null;
+};
+
+// GET ALL HISTORICAL DRIVER ORDERS (PAGINATED WITH FILTERS)
+export const getDriverOrdersList = async (token: string, params: Record<string, any> = {}) => {
+  const response = await axios.get(`${API_BASE_URL}/order/All/order`, {
+    headers: getHeaders(token),
+    params,
+    validateStatus: () => true,
+  });
+  logApiResponse("Driver orders list response: ", response.data);
+  if (response.status === 200 && response.data) {
+    return response.data;
+  }
+  return null;
 };

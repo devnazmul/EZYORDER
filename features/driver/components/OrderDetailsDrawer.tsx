@@ -260,7 +260,7 @@ export default function OrderDetailsDrawer({
 
             <View className="border-t border-base-200 pt-2 mt-1 flex-row justify-between items-center">
               <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
-              <Text className="text-md font-bold text-primary">
+              <Text className="text-md font-bold text-neutral">
                 {formatAmount(parseFloat(order.amount || order.total_due_amount || "0"), currencySymbol)}
               </Text>
             </View>

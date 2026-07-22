@@ -16,9 +16,9 @@ const WelcomeHeader: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
       <Text className="text-sm text-neutral  ">
         You are currently{" "}
         <Text
-          className={`font-bold ${user?.driver_status === "available" ? "text-success" : "text-slate-400"}`}
+          className={`font-bold capitalize  ${user?.driver_status === "available" ? "text-success" : "text-slate-400"}`}
         >
-          {user?.driver_status === "available" ? "Online" : "Offline"}
+          {user?.driver_status === "available" ? "Available For deliveries" : "Not Available For deliveries"}
         </Text>
       </Text>
     </View>
