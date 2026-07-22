@@ -10,6 +10,9 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import "../global.css";
 
@@ -69,13 +72,17 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <DataProvider>
-          <StatusBar style="dark" />
-          <RootNavigation />
-        </DataProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <DataProvider>
+            <BottomSheetModalProvider>
+              <StatusBar style="dark" />
+              <RootNavigation />
+            </BottomSheetModalProvider>
+          </DataProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
