@@ -12,7 +12,6 @@ import WelcomeHeader from "../components/dashboard/WelcomeHeader";
 import DriverActiveOrder from "../components/DriverActiveOrder";
 import DriverQuickStats from "../components/DriverQuickStats";
 import OrderDetailsDrawer from "../components/OrderDetailsDrawer";
-import WeeklyPerformance from "../components/WeeklyPerformance";
 import { useUpdateDriverOrderStatusMutation } from "../hooks/mutations/useDriverMutations";
 import {
   useDriverActiveAssignedOrdersQuery,
@@ -113,7 +112,7 @@ export default function DriverDashboardScreen() {
           onViewOrder={(order) => setSelectedOrderDetails(order)}
         />
 
-        <WeeklyPerformance />
+        {/* <WeeklyPerformance /> */}
       </RefreshableScrollView>
 
       <OrderDetailsDrawer
