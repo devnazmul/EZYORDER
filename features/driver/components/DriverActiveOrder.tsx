@@ -154,7 +154,7 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
 
   if (isLoading) {
     return (
-      <View key="loading" className="bg-base-300 p-4 rounded-lg flex-1">
+      <View key="loading" className="bg-base-300 p-4 rounded-3xl flex-1">
         <View className="mb-2 flex-row items-start justify-between px-2 mb-4">
           <Text className="font-bold capitalize opacity-80">Active Orders</Text>
           <Text className="font-semibold capitalize opacity-30">0/0</Text>
@@ -166,7 +166,7 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
 
   if (!ordersList || ordersList.length === 0) {
     return (
-      <View key="empty" className="bg-base-300 p-4 rounded-lg flex-1 justify-center items-center py-10">
+      <View key="empty" className="bg-base-300 p-4 rounded-3xl flex-1 justify-center items-center py-10">
         <MaterialIcons name="inbox" size={48} color="#94a3b8" />
         <Text className="text-slate-400 font-semibold mt-2 capitalize">No active orders assigned</Text>
       </View>
@@ -176,7 +176,7 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
   const activeOrder = ordersList[activeIndex];
 
   return (
-    <View key="loaded" className="bg-base-300 p-4 rounded-lg flex-1">
+    <View key="loaded" className="bg-base-300 p-4 rounded-3xl flex-1">
       <View className="mb-2 flex-row items-start justify-between px-2 mb-4">
         <Text className="font-bold capitalize opacity-80">Active Orders</Text>
         <Text className="font-semibold capitalize opacity-30">
@@ -201,6 +201,12 @@ const DriverActiveOrder: React.FC<DriverActiveOrderProps> = ({
                   updateStatusMutation={updateStatusMutation}
                   refetchActiveOrders={refetchActiveOrders}
                   onOpenHelp={() => setActiveDrawer("help")}
+                  onCancelOrder={() => triggerExceptionModal(order.id, "cancel", "Cancel Delivery", [
+                    "Customer Request",
+                    "Address Issue",
+                    "Force Majeure",
+                    "Other",
+                  ])}
                 />
               </View>
             ))}

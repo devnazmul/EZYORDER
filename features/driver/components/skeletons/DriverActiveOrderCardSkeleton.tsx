@@ -26,7 +26,7 @@ export default function DriverActiveOrderCardSkeleton() {
   return (
     <Animated.View
       style={{ opacity: pulse }}
-      className="w-full p-4 bg-slate-100 border border-slate-200/50 rounded-lg shadow-sm mb-2 flex-col gap-6 overflow-hidden"
+      className="w-full p-4 bg-slate-100 border border-slate-200/50 rounded-2xl shadow-sm mb-2 flex-col gap-6 overflow-hidden"
     >
       {/* Header showing Order ID */}
       <View className="flex-row justify-between items-center pb-3 border-b border-slate-200/40">

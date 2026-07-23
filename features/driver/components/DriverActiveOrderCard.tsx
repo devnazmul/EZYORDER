@@ -24,6 +24,7 @@ interface DriverActiveOrderCardProps {
   >;
   refetchActiveOrders?: () => void;
   onOpenHelp: () => void;
+  onCancelOrder: () => void;
 }
 
 const DELIVERY_STATUSES_MAP: Record<string, Record<string, any>> = {
@@ -66,6 +67,7 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
   updateStatusMutation,
   refetchActiveOrders,
   onOpenHelp,
+  onCancelOrder,
 }: DriverActiveOrderCardProps) => {
   const { settings } = useData();
   const currencySymbol = React.useMemo(() => {
@@ -83,6 +85,26 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
 
   const [currentStep, setCurrentStep] = useState(0);
   const progressAnim = React.useRef(new Animated.Value(0)).current;
+  const pulseAnim = React.useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 750,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 750,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulseLoop.start();
+    return () => pulseLoop.stop();
+  }, [pulseAnim]);
 
   useEffect(() => {
     Animated.timing(progressAnim, {
@@ -341,6 +363,13 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
     );
   };
 
+  const handleQuickReply = (msg: string) => {
+    if (activeOrder.customer_phone && activeOrder.customer_phone !== "N/A") {
+      const url = `sms:${activeOrder.customer_phone}${Platform.OS === "ios" ? "&" : "?"}body=${encodeURIComponent(msg)}`;
+      Linking.openURL(url).catch(() => {});
+    }
+  };
+
   if (isLoading) {
     return <DriverActiveOrderCardSkeleton />;
   }
@@ -349,13 +378,13 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
     <>
       <View
         key="loaded-2"
-        className="w-full p-4 bg-base-200 border border-base-100/50 rounded-lg shadow-sm mb-2 flex-col gap-6 overflow-hidden"
+        className="w-full p-4 bg-base-200 border border-base-100/50 rounded-2xl shadow-sm mb-2 flex-col gap-6 overflow-hidden"
       >
         {/* Header showing Order ID */}
         <View className="flex-row justify-between items-center pb-3 border-b border-slate-200/40">
           <View>
             <Text className="text-md font-semibold text-slate-400 capitalize tracking-wider">Order ID</Text>
-            <Text className="text-xl font-bold text-neutral/80 mt-0.5">{activeOrder?.id}</Text>
+            <Text className="text-xl font-bold text-neutral/80 mt-0.5">#{activeOrder?.id}</Text>
           </View>
           <TouchableOpacity
             onPress={onOpenHelp}
@@ -382,26 +411,31 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
               const isActive = _id === currentStep + 1;
 
               return (
-                <View key={key} className="items-center flex-1">
+                <View key={key} className="items-center flex-1 relative">
+                  {isActive && (
+                    <Animated.View
+                      style={{ opacity: pulseAnim }}
+                      className="absolute top-0 w-8 h-8 rounded-full bg-primary/20 border border-primary/40 z-0"
+                    />
+                  )}
                   <View
-                    className={`w-8 h-8 rounded-full items-center justify-center z-10 border-2 ${
+                    className={`w-8 h-8 rounded-full items-center justify-center z-10 border ${
                       isPassed
                         ? "bg-emerald-500 border-emerald-500 text-white "
                         : isActive
                           ? " border-primary text-primary"
                           : "bg-base-300 border-slate-100 text-slate-400"
                     }`}
-                    style={isActive ? { borderStyle: "dotted" } : undefined}
                   >
                     <MaterialIcons
-                      name={stepInfo.icon}
-                      size={14}
+                      name={isPassed ? "check" : stepInfo.icon}
+                      size={isPassed ? 18 : 14}
                       color={isPassed ? "white" : isActive ? "#DC2D2A" : "#00000025"}
                     />
                   </View>
                   <Text
                     className={`text-[8px] font-semibold capitalize mt-1.5 tracking-wider ${
-                      isActive ? "text-primary" : isPassed ? "text-emerald-500" : "text-slate-400"
+                      isActive ? "text-primary font-bold" : isPassed ? "text-emerald-500" : "text-slate-400"
                     }`}
                   >
                     {stepInfo.title}
@@ -413,70 +447,135 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
 
           <TouchableOpacity
             onPress={handleUpdateOrderStatus}
-            activeOpacity={0.8}
-            className={`w-full py-3.5 px-4 rounded-md shadow-sm flex-row items-center justify-between bg-primary/80`}
+            activeOpacity={0.85}
+            className="w-full py-3.5 px-4 rounded-lg shadow-md flex-row items-center justify-between bg-primary border border-primary/50"
           >
             <View>
-              <Text className="text-white text-xs font-semibold ">Next Step</Text>
-              <Text className="text-white text-xs font-black capitalize tracking-wider">
+              <Text className="text-white text-[9px] font-medium capitalize tracking-wider">Next Step</Text>
+              <Text className="text-white text-xs font-bold capitalize mt-0.5 tracking-wider">
                 {(() => {
                   const nextApiStatus = DELIVERY_STATUS_KEYS[currentStep + 1];
                   return DELIVERY_STATUSES_MAP[nextApiStatus]?.description || "";
                 })()}
               </Text>
             </View>
-            <MaterialIcons name="arrow-forward" size={20} color="white" />
+            <View className="w-8 h-8 rounded-full bg-white/10 items-center justify-center border border-white/20">
+              <MaterialIcons name="arrow-forward" size={18} color="white" />
+            </View>
           </TouchableOpacity>
         </View>
-        <View className="flex-row items-start justify-between border-t border-neutral/5 pt-4 pr-2 gap-4">
-          {/* From Section */}
-          <View className="flex-1">
-            <View className="flex-row items-center gap-1 mb-0.5">
-              <Text className="text-sm font-medium text-neutral/50 tracking-wider mb-0.5">From</Text>
+        {/* Visual Route Path Section */}
+        <View style={{ gap: 24 }} className="border-t  border-b border-slate-200/40 py-4 relative">
+          {/* Pickup Address */}
+          <View className="flex-row items-center gap-3">
+            <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center border border-blue-100">
+              <MaterialIcons name="storefront" size={16} color="#2563EB" />
             </View>
-            <Text className="text-sm font-semibold text-neutral">
-              Restaurant #{activeOrder.restaurant_id}
-            </Text>
+            <View className="flex-1">
+              <Text className="text-[10px] font-medium text-slate-400 capitalize tracking-wider">
+                Pickup From
+              </Text>
+              <Text className="text-sm font-semibold text-neutral mt-0.5">
+                Restaurant #{activeOrder.restaurant_id}
+              </Text>
+            </View>
           </View>
 
-          {/* To Section */}
-          <View className="flex-1">
-            <View className="flex-row items-center gap-1 mb-0.5">
-              <Text className="text-sm font-medium text-neutral/50 tracking-wider mb-0.5">To</Text>
+          {/* Vertical Connecting Line */}
+          <View
+            style={{
+              position: "absolute",
+              left: 12,
+              top: 50,
+              bottom: 48,
+              width: 2,
+              borderWidth: 1,
+              borderColor: "#cbd5e1",
+              borderStyle: "solid",
+            }}
+          />
+
+          {/* Delivery Address */}
+          <View className="flex-row items-center gap-3">
+            <View className="w-8 h-8 rounded-full bg-primary/10 items-center justify-center border border-primary/20">
+              <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
             </View>
-            <Text className="text-sm font-semibold text-neutral leading-4 ">
-              {activeOrder.door_no ? `${activeOrder.door_no}, ` : ""}
-              {activeOrder.customer_address}
-            </Text>
+            <View className="flex-1">
+              <Text className="text-[10px] font-medium text-slate-400 capitalize tracking-wider">
+                Deliver To
+              </Text>
+              <Text className="text-sm font-semibold text-neutral mt-0.5 leading-4" numberOfLines={2}>
+                {activeOrder.door_no ? `${activeOrder.door_no}, ` : ""}
+                {activeOrder.customer_address}
+              </Text>
+            </View>
+            {activeOrder.customer_address && activeOrder.customer_address !== "N/A" && (
+              <TouchableOpacity
+                onPress={handleGetRoute}
+                activeOpacity={0.7}
+                className="p-1.5 rounded-lg bg-primary/10 border border-primary/20 items-center justify-center"
+              >
+                <MaterialIcons name="near-me" size={15} color="#DC2D2A" />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
-        <View className="flex-row items-start justify-between  border-b border-neutral/5 pb-4 pr-6">
-          {/* Customer Section */}
-          <View>
-            <View className="flex-row items-center gap-1 mb-0.5">
-              <Text className="text-sm font-medium text-neutral/50 tracking-wider mb-0.5">Customer</Text>
+
+        {/* Customer & Payment Information Row */}
+        <View className="flex-row items-start justify-between ">
+          {/* Customer Details */}
+          <View className="flex-row items-start gap-2.5 flex-1 pr-4">
+            <View className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center border border-slate-200/50">
+              <MaterialIcons name="person" size={18} color="#64748B" />
             </View>
-            <Text className="text-sm font-semibold text-neutral" numberOfLines={1}>
-              {activeOrder.customer_name}
-            </Text>
-            <Text className="text-sm text-neutral/60 font-medium ">{activeOrder.customer_phone}</Text>
+            <View className="flex-1">
+              <Text className="text-sm font-bold text-neutral" numberOfLines={1}>
+                {activeOrder.customer_name}
+              </Text>
+              {activeOrder.customer_phone && activeOrder.customer_phone !== "N/A" ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(() => {});
+                  }}
+                  activeOpacity={0.7}
+                  className="flex-row items-center mt-0.5"
+                >
+                  <Text className="text-xs text-primary font-medium">(</Text>
+                  <MaterialIcons
+                    name="phone"
+                    size={11}
+                    color="#DC2D2A"
+                    style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
+                  />
+                  <Text className="text-xs text-primary font-medium">) </Text>
+                  <Text className="text-xs text-primary font-medium">{activeOrder.customer_phone}</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text className="text-xs text-neutral/30 font-medium mt-0.5">(No phone)</Text>
+              )}
+              {/* Modern Quick Message Chips */}
+              {activeOrder.customer_phone && activeOrder.customer_phone !== "N/A" && (
+                <View className="flex-row flex-wrap gap-2 mt-3">
+                  {["On my way", "Arrived", "Call me back"].map((msg) => (
+                    <TouchableOpacity
+                      key={msg}
+                      onPress={() => handleQuickReply(msg)}
+                      activeOpacity={0.7}
+                      className="px-3 py-1.5 rounded-full bg-primary/5 border border-slate-200/50"
+                    >
+                      <Text className="text-[9px] text-neutral/60 font-semibold capitalize">{msg}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
           </View>
 
-          {/* Amount Section */}
-          <View>
-            <View className="flex-row items-center gap-1 mb-0.5">
-              <Text className="text-sm font-medium text-neutral/50 tracking-wider mb-0.5">Amount</Text>
-            </View>
-            <Text className="text-md font-bold text-neutral">
+          {/* Payment Status & Amount */}
+          <View className="items-end gap-y-1.5 shrink-0">
+            <Text className="text-lg font-black text-neutral">
               {formatAmount(activeOrder.amount || activeOrder.total_due_amount || "0", currencySymbol)}
             </Text>
-          </View>
-          {/* Payment Status Section */}
-          <View>
-            <View className="flex-row items-center gap-1 mb-0.5">
-              <Text className="text-sm font-medium text-neutral/50 tracking-wider mb-0.5">Payment</Text>
-            </View>
-
             <StatusBadge
               status={activeOrder?.payment_status.toLocaleLowerCase() === "paid" ? "paid" : "unpaid"}
             />
@@ -550,7 +649,7 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
           <View className="flex-1">
             <Button
               label="Cancel This Order"
-              onPress={() => {}}
+              onPress={onCancelOrder}
               variant="secondary"
               buttonClassName="!text-primary "
             />

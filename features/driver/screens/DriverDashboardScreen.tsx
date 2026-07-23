@@ -59,6 +59,13 @@ export default function DriverDashboardScreen() {
     }
   }, [statsData]);
 
+  const filteredActiveOrders = useMemo(() => {
+    if (!activeOrders) return [];
+    return activeOrders.filter(
+      (order: DriverOrder) => order.delivery_status !== "delivered" && order.status !== "delivered",
+    );
+  }, [activeOrders]);
+
   // Re-fetch all queries on pull-to-refresh
   const handleRefresh = async () => {
     await Promise.all([refetchStats(), refetchActiveOrders(), refetchProfile()]);
@@ -94,19 +101,19 @@ export default function DriverDashboardScreen() {
         />
 
         <DriverActiveOrder
-          ordersList={activeOrders}
+          ordersList={filteredActiveOrders}
           isLoading={isActiveOrdersLoading}
           updateStatusMutation={updateOrderStatusMutation}
           refetchActiveOrders={refetchActiveOrders}
         />
 
-        <View className="bg-base-300 p-4 rounded-lg flex-1">
+        <View className="bg-base-300 p-4 rounded-3xl flex-1">
           <Text className="mb-4 font-bold capitalize opacity-80">Live Today's Orders</Text>
           <LiveOrderBoard liveOrderBoard={orderBoard} isLoading={isStatsLoading} role="driver" />
         </View>
 
         <AssignedOrdersFeed
-          orders={activeOrders || []}
+          orders={filteredActiveOrders}
           isLoading={isActiveOrdersLoading}
           currencySymbol={currencySymbol || "£"}
           onViewOrder={(order) => setSelectedOrderDetails(order)}
