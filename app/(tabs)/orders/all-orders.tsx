@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import OrderCard from "@/components/orders/OrderCard";
 import OrderDetailsModal from "@/components/orders/OrderDetailsModal";
 import EmptyState from "@/components/reuseable/EmptyState";
@@ -8,17 +7,9 @@ import ToggleBar from "@/components/reuseable/ToggleBar";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAllOrdersQuery, useTodayOrdersQuery } from "@/hooks/useOrderQueries";
-import { MaterialIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface AllOrdersProps {
@@ -27,6 +18,8 @@ interface AllOrdersProps {
 
 export default function AllOrders({ initialTab = "historical" }: AllOrdersProps) {
   const { token, user } = useAuth();
+  const searchParams = useLocalSearchParams();
+  const pathname = usePathname();
 
   const restaurantId =
     user?.restaurant?.length > 0 ? String(user?.restaurant[0]?.id) : String(user?.business_id || "1");
@@ -58,22 +51,62 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     setActiveTab(initialTab);
   }, [initialTab]);
 
+  // Sync router search params
+  useEffect(() => {
+    if (
+      searchParams.exclude_status ||
+      searchParams.date_filter ||
+      searchParams.tab ||
+      searchParams.is_schedule_order ||
+      searchParams.status ||
+      searchParams.payment_status
+    ) {
+      if (pathname.includes("todays-orders")) {
+        setActiveTab("live");
+      } else {
+        setActiveTab("historical");
+      }
+
+      setFilterValues({
+        status: searchParams.status
+          ? [searchParams.status as string]
+          : (searchParams.exclude_status ? ["pending", "kitchen"] : ["all"]),
+        payment_status: searchParams.payment_status ? (searchParams.payment_status as string) : "all",
+        order_type: searchParams.tab ? (searchParams.tab as string).split(",") : ["all"],
+        customer_name: "",
+        customer_phone: "",
+        table_number: "",
+        date_range: { start: "", end: "" },
+        amount_range: { min: "", max: "" },
+        exclude_status: searchParams.exclude_status || "",
+        date_filter: searchParams.date_filter || "",
+        is_schedule_order: searchParams.is_schedule_order || "",
+      });
+
+      // Clear the query parameters from the router state so they don't trigger again
+      router.setParams({
+        exclude_status: undefined as any,
+        date_filter: undefined as any,
+        tab: undefined as any,
+        filterBy: undefined as any,
+        is_schedule_order: undefined as any,
+        status: undefined as any,
+        payment_status: undefined as any,
+      });
+    }
+  }, [
+    searchParams.exclude_status,
+    searchParams.date_filter,
+    searchParams.tab,
+    searchParams.is_schedule_order,
+    searchParams.status,
+    searchParams.payment_status,
+    pathname,
+  ]);
+
   const isLive = activeTab === "live";
 
-  // Reset all filters when changing tabs
-  useEffect(() => {
-    setFilterValues({
-      status: ["all"],
-      payment_status: "all",
-      order_type: ["all"],
-      customer_name: "",
-      customer_phone: "",
-      table_number: "",
-      date_range: { start: "", end: "" },
-      amount_range: { min: "", max: "" },
-    });
-    setSearchQuery("");
-  }, [activeTab]);
+
 
   // Debounce search query
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -146,6 +179,16 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
   const queryParams = useMemo(() => {
     const params: Record<string, any> = {};
 
+    if (filterValues.exclude_status) {
+      params.exclude_status = filterValues.exclude_status;
+    }
+    if (filterValues.date_filter) {
+      params.date_filter = filterValues.date_filter;
+    }
+    if (filterValues.is_schedule_order) {
+      params.is_schedule_order = filterValues.is_schedule_order;
+    }
+
     if (debouncedSearchQuery.trim()) {
       params.order_id = debouncedSearchQuery.trim();
     }
@@ -210,8 +253,6 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton={true} />
-
       {/* Main Body */}
       <View className="flex-1 px-4 py-4">
         {/* Toggle between Live and Historical */}
@@ -223,6 +264,17 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
           activeId={activeTab}
           onSelect={(id) => {
             setActiveTab(id as "live" | "historical");
+            setFilterValues({
+              status: ["all"],
+              payment_status: "all",
+              order_type: ["all"],
+              customer_name: "",
+              customer_phone: "",
+              table_number: "",
+              date_range: { start: "", end: "" },
+              amount_range: { min: "", max: "" },
+            });
+            setSearchQuery("");
           }}
           containerClassName="mb-4"
         />

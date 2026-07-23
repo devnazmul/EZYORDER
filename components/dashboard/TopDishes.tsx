@@ -1,17 +1,15 @@
 import React from "react";
 import { Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useAuth } from "@/context/AuthContext";
-import { useDashboardTopDishes } from "@/hooks/useDashboardQueries";
 import EmptyState from "../reuseable/EmptyState";
 
 interface TopDishesProps {
   filterBy: string;
+  topDishes: any[];
+  isLoading: boolean;
 }
 
-export default function TopDishes({ filterBy }: TopDishesProps) {
-  const { token } = useAuth();
-  const { data: topDishes = [], isLoading } = useDashboardTopDishes(token || "", filterBy);
+export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDishesProps) {
 
   if (isLoading) {
     return (

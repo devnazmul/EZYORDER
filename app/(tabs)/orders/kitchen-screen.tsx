@@ -1,4 +1,3 @@
-import AppHeader from "@/components/AppHeader";
 import KitchenCard from "@/components/orders/KitchenCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import LoadingScreen from "@/components/reuseable/LoadingScreen";
@@ -51,7 +50,6 @@ export default function KitchenScreen() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <AppHeader showBackButton={true} />
 
       <View className="flex-1 px-4 py-4">
         {/* Title & Count Row */}

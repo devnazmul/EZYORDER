@@ -46,3 +46,5 @@ app-example
 /agent_input
 /agent_output
 .env
+google-services.json
+GoogleService-Info.plist

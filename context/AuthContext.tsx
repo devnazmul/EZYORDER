@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import authStore, { UserData } from "@/utils/authStore";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import { unregisterDeviceToken } from "@/apis/notification";
 
 interface AuthContextType {
   user: UserData | null;
@@ -50,6 +53,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      if (token) {
+        try {
+          if (Device.isDevice) {
+            const tokenData = await Notifications.getDevicePushTokenAsync();
+            const deviceToken = tokenData.data;
+            if (deviceToken) {
+              await unregisterDeviceToken(token, deviceToken);
+              console.log("Device token unregistered successfully during logout.");
+            }
+          }
+        } catch (err) {
+          console.error("Failed to unregister device token on logout:", err);
+        }
+      }
+
       await authStore.clearSession();
       setToken(null);
       setUser(null);

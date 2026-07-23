@@ -10,7 +10,7 @@ export default function RefreshableScrollView({
   children,
   onRefresh,
   refreshing,
-  className = "flex-1 px-4 py-4",
+  className,
   contentContainerStyle = { paddingBottom: 32 },
   showsVerticalScrollIndicator = false,
   ...props
@@ -31,7 +31,7 @@ export default function RefreshableScrollView({
 
   return (
     <ScrollView
-      className={className}
+      className={`flex-1 px-4 py-4 ${className}`}
       contentContainerStyle={contentContainerStyle}
       showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       refreshControl={

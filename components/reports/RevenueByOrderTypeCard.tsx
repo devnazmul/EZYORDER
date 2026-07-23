@@ -1,49 +1,36 @@
+import { formatAmount } from "@/utils/formatters";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+import React from "react";
 import { Text, View } from "react-native";
-
-export interface OrderTypeDataPoint {
-  key: string;
-  label: string;
-  value: number;
-  icon: keyof typeof MaterialIcons.glyphMap;
-}
 
 interface RevenueByOrderTypeCardProps {
   orderTypeData: any;
   netSales: number;
+  currencySymbol: string;
   containerClassName?: string;
 }
+
+const getIcon = (type: string): keyof typeof MaterialIcons.glyphMap => {
+  const norm = type.toLowerCase().replace("-", "_");
+  if (norm.includes("delivery")) return "delivery-dining";
+  if (norm.includes("eat_in") || norm.includes("dine_in")) return "restaurant";
+  if (norm.includes("take_away") || norm.includes("takeaway")) return "takeout-dining";
+  if (norm.includes("walk_in") || norm.includes("walkin")) return "person-add";
+  return "shopping-bag";
+};
+
+const formatLabel = (type: string) => {
+  return type.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
 
 export default function RevenueByOrderTypeCard({
   orderTypeData,
   netSales = 0,
+  currencySymbol,
   containerClassName = "",
 }: RevenueByOrderTypeCardProps) {
-  // Parse order types internally
-  const orderTypesSummary = useMemo(() => {
-    const defaults = [
-      { key: "delivery", label: "Delivery", value: 0, icon: "delivery-dining" as const },
-      { key: "eat_in", label: "Eat In", value: 0, icon: "restaurant" as const },
-      { key: "take_away", label: "Take Away", value: 0, icon: "takeout-dining" as const },
-      { key: "walk_in", label: "Walk In", value: 0, icon: "person-add" as const },
-    ];
 
-    if (!orderTypeData || !Array.isArray(orderTypeData)) return defaults;
-
-    return defaults.map((def) => {
-      const matched = orderTypeData.find(
-        (item: any) =>
-          item.order_type === def.key ||
-          item.order_type === def.key.replace("_", "-") ||
-          item.order_type === def.key.replace("-", "_")
-      );
-      return {
-        ...def,
-        value: matched ? parseFloat(matched.amount) || 0 : 0,
-      };
-    });
-  }, [orderTypeData]);
+  const list = Array.isArray(orderTypeData) ? orderTypeData : [];
 
   return (
     <View
@@ -52,34 +39,36 @@ export default function RevenueByOrderTypeCard({
       <Text className="text-md font-bold text-neutral mb-5">Revenue by Order Type</Text>
 
       <View className="gap-y-4">
-        {orderTypesSummary.map((item) => {
-          // Calculate percentage based on netSales
-          const percent = netSales > 0 ? Math.min(Math.round((item.value / netSales) * 100), 100) : 0;
+        {list.length === 0 ? (
+          <Text className="text-xs text-accent italic text-center py-4">No order data for this period.</Text>
+        ) : (
+          list.map((item: any, i: number) => {
+            const val = Number(item.amount || item.value || 0);
+            const percent = netSales > 0 ? Math.min(Math.round((val / netSales) * 100), 100) : 0;
+            const label = formatLabel(item.order_type || "");
+            const icon = getIcon(item.order_type || "");
 
-          return (
-            <View key={item.key} className="gap-y-2">
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row gap-2 items-center">
-                  <MaterialIcons name={item.icon} size={18} color="#6E6E6E" />
-                  <Text className="text-xs font-bold text-neutral ">{item.label} </Text>
+            return (
+              <View key={i} className="gap-y-2">
+                <View className="flex-row justify-between items-center">
+                  <View className="flex-row gap-2 items-center flex-1 min-w-0 mr-2">
+                    <MaterialIcons name={icon} size={18} color="#6E6E6E" />
+                    <Text className="text-xs font-bold text-neutral truncate" numberOfLines={1}>
+                      {label}
+                    </Text>
+                  </View>
+                  <Text className="text-xs font-bold text-neutral shrink-0">
+                    {formatAmount(val, currencySymbol)} ({percent}%)
+                  </Text>
                 </View>
-                <Text className="text-xs font-bold text-neutral">
-                  $
-                  {item.value.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}{" "}
-                  ({percent}%)
-                </Text>
-              </View>
 
-              {/* Progress bar line */}
-              <View className="h-2 w-full bg-base-200 rounded-full overflow-hidden">
-                <View style={{ width: `${percent}%` }} className="h-full bg-primary rounded-full" />
+                <View className="h-2 w-full bg-base-200 rounded-full overflow-hidden">
+                  <View style={{ width: `${percent}%` }} className="h-full bg-primary rounded-full" />
+                </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })
+        )}
       </View>
     </View>
   );

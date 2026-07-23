@@ -43,5 +43,14 @@ export const QUERY_KEYS = {
   SALES_TREND: "salesTrend",
   SALES_BY_ORDER_TYPE: "salesByOrderType",
   CUSTOMERS: "customers",
+  SALES_BY_ITEM: "salesByItem",
+  SALES_HOURLY: "salesHourly",
+  SALES_DAILY_SUMMARY: "salesDailySummary",
+
+  // Driver keys
+  DRIVER_DASHBOARD_STATS: "driverDashboardStats",
+  DRIVER_ACTIVE_ASSIGNED_ORDERS: "driverActiveAssignedOrders",
+  DRIVER_ORDERS_LIST: "driverOrdersList",
+  ORDER_DETAIL: "orderDetail",
 } as const;
 

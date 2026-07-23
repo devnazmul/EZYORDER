@@ -1,5 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSalesSummary, getSalesTrend, getSalesByOrderType, SalesParams, getCustomers, CustomerParams } from "@/apis/reports";
+import {
+  getSalesSummary,
+  getSalesTrend,
+  getSalesByOrderType,
+  SalesParams,
+  getCustomers,
+  CustomerParams,
+  getSalesByItem,
+  getSalesHourly,
+  getSalesDailySummary,
+} from "@/apis/reports";
 import { QUERY_KEYS } from "@/config/queryKeys";
 
 export const useSalesSummaryQuery = (token: string | null, params: SalesParams) => {
@@ -33,3 +43,28 @@ export const useCustomersQuery = (token: string | null, params: CustomerParams) 
     enabled: !!token,
   });
 };
+
+export const useSalesByItemQuery = (token: string | null, params: SalesParams) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_BY_ITEM, params, token],
+    queryFn: () => getSalesByItem(token!, params),
+    enabled: !!token && !!params.restaurant_id,
+  });
+};
+
+export const useSalesHourlyQuery = (token: string | null, params: SalesParams) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_HOURLY, params, token],
+    queryFn: () => getSalesHourly(token!, params),
+    enabled: !!token && !!params.restaurant_id,
+  });
+};
+
+export const useSalesDailySummaryQuery = (token: string | null, params: SalesParams) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_DAILY_SUMMARY, params, token],
+    queryFn: () => getSalesDailySummary(token!, params),
+    enabled: !!token && !!params.restaurant_id,
+  });
+};
+

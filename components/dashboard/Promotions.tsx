@@ -1,15 +1,15 @@
-import { useAuth } from "@/context/AuthContext";
-import { useDashboardPromotions } from "@/hooks/useDashboardQueries";
 import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import EmptyState from "../reuseable/EmptyState";
 import StatusBadge from "../reuseable/StatusBadge";
 
-export default function Promotions() {
-  const { token } = useAuth();
-  const { data: promotions = [], isLoading } = useDashboardPromotions(token || "");
+interface PromotionsProps {
+  promotions: any[];
+  isLoading: boolean;
+}
 
+export default function Promotions({ promotions = [], isLoading }: PromotionsProps) {
   if (isLoading) {
     return (
       <View className="mb-6 gap-y-3">
@@ -58,7 +58,7 @@ export default function Promotions() {
 
         {/* Bottom Manage All Action Button */}
         <TouchableOpacity
-          onPress={() => router.push("/discounts-and-campaigns")}
+          onPress={() => router.push("/more/discounts-and-campaigns")}
           activeOpacity={0.7}
           className="w-full py-4 items-center justify-center border-t border-base-200"
         >

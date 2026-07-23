@@ -1,14 +1,15 @@
-import { useAuth } from "@/context/AuthContext";
-import { useDashboardRecentOrders } from "@/hooks/useDashboardQueries";
+import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import EmptyState from "../reuseable/EmptyState";
 import RecentOrderRow from "./RecentOrderRow";
 
-export default function RecentOrders() {
-  const { token } = useAuth();
-  const { data: recentOrders = [], isLoading } = useDashboardRecentOrders(token || "");
+interface RecentOrdersProps {
+  recentOrders: any[];
+  isLoading: boolean;
+}
 
+export default function RecentOrders({ recentOrders = [], isLoading }: RecentOrdersProps) {
   if (isLoading) {
     return (
       <View className="gap-y-3">
@@ -33,8 +34,15 @@ export default function RecentOrders() {
             ))}
           </View>
         )}
-        <TouchableOpacity className="w-full py-4 items-center justify-center border-t border-base-200">
-          <Text className="text-xs font-bold text-primary uppercase">VIEW ALL HISTORY</Text>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/orders/todays-orders",
+            })
+          }
+          className="w-full py-4 items-center justify-center border-t border-base-200"
+        >
+          <Text className="text-xs font-bold text-primary uppercase">VIEW TODAY'S ORDERS</Text>
         </TouchableOpacity>
       </View>
     </View>
