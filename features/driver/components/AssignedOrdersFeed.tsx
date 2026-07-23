@@ -74,8 +74,8 @@ export default function AssignedOrdersFeed({
               >
                 <View className="flex-1 mr-4">
                   <Text className="text-xs font-bold text-neutral">#{order.id}</Text>
-                  <Text className="text-[9px] text-accent uppercase font-bold mt-1">
-                    {order.customer_name || "N/A"} • {order.type || "Order"}
+                  <Text className="text-[9px] text-accent capitalize font-bold mt-1">
+                    {order.customer_name || "N/A"} • {order.type ? (order.type.charAt(0).toUpperCase() + order.type.slice(1).toLowerCase()) : "Order"}
                     {orderTime ? ` • ${orderTime}` : ""}
                   </Text>
                 </View>
@@ -95,7 +95,7 @@ export default function AssignedOrdersFeed({
         </View>
       )}
       <TouchableOpacity className="w-full py-4 items-center justify-center border-t border-base-200">
-        <Text className="text-xs font-bold text-primary uppercase">VIEW ALL ORDERS</Text>
+        <Text className="text-xs font-bold text-primary capitalize">View All Orders</Text>
       </TouchableOpacity>
     </View>
   );

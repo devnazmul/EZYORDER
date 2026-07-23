@@ -114,10 +114,10 @@ export default function LiveOrderBoard({
 
   return (
     <View key="loaded" className="gap-y-2">
-      <OrderStatusCard title="NEW ORDERS" count={newOrdersCount} type="new" role={role} />
-      <OrderStatusCard title="PREPARING" count={preparingCount} type="preparing" role={role} />
-      <OrderStatusCard title="COMPLETED" count={completedCount} type="completed" role={role} />
-      <OrderStatusCard title="UNPAID" count={unpaidCount} type="unpaid" role={role} />
+      <OrderStatusCard title="New Orders" count={newOrdersCount} type="new" role={role} />
+      <OrderStatusCard title="Preparing" count={preparingCount} type="preparing" role={role} />
+      <OrderStatusCard title="Completed" count={completedCount} type="completed" role={role} />
+      <OrderStatusCard title="Unpaid" count={unpaidCount} type="unpaid" role={role} />
     </View>
   );
 }

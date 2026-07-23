@@ -45,7 +45,9 @@ export default function ExceptionModal({
         <View className="bg-base-300 w-full max-w-[340px] rounded-lg p-6 border border-base-200 shadow-xl">
           {/* Header */}
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-md font-black text-neutral uppercase tracking-wider">{title}</Text>
+            <Text className="text-md font-black text-neutral capitalize tracking-wider">
+              {title ? title.charAt(0).toUpperCase() + title.slice(1).toLowerCase() : ""}
+            </Text>
             <TouchableOpacity onPress={onClose} disabled={isLoading}>
               <Feather name="x" size={20} color="#6E6E6E" />
             </TouchableOpacity>
@@ -53,7 +55,7 @@ export default function ExceptionModal({
 
           <ScrollView showsVerticalScrollIndicator={false} className="max-h-[300px]">
             {/* Reason Selection */}
-            <Text className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+            <Text className="text-[10px] font-black text-slate-400 capitalize tracking-widest mb-3">
               Select a Reason
             </Text>
             <View className="flex-col gap-2 mb-4">
@@ -78,7 +80,7 @@ export default function ExceptionModal({
             </View>
 
             {/* Description Details */}
-            <Text className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+            <Text className="text-[10px] font-black text-slate-400 capitalize tracking-widest mb-2">
               Additional Details (Optional)
             </Text>
             <TextInput

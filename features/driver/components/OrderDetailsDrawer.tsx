@@ -107,7 +107,7 @@ export default function OrderDetailsDrawer({
         <View className="gap-y-1">
           <Text className="text-lg font-bold text-neutral">Order #{order.id}</Text>
           <Text className="text-xs text-accent">
-            Status: <Text className="font-bold uppercase text-primary">{order.status}</Text>
+            Status: <Text className="font-bold capitalize text-primary">{order.status ? order.status.replace(/_/g, " ").charAt(0).toUpperCase() + order.status.replace(/_/g, " ").slice(1).toLowerCase() : ""}</Text>
           </Text>
         </View>
         <TouchableOpacity
@@ -124,7 +124,7 @@ export default function OrderDetailsDrawer({
       >
         {/* Customer Information */}
         <View className="gap-y-2">
-          <Text className="text-xs font-bold text-accent uppercase tracking-wider">Customer Details</Text>
+          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Customer Details</Text>
           <View className="bg-base-100 rounded-xl p-4 gap-y-2 border border-base-200">
             <View className="flex-row justify-between">
               <Text className="text-xs text-accent">Name:</Text>
@@ -158,7 +158,7 @@ export default function OrderDetailsDrawer({
 
         {/* Order Items Section */}
         <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-accent uppercase tracking-wider">Order Items</Text>
+          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Order Items</Text>
           <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-0">
             {isLoadingDetails ? (
               <ItemsSummarySkeleton />
@@ -231,7 +231,7 @@ export default function OrderDetailsDrawer({
         {/* Instructions Section */}
         {order.initial_note ? (
           <View className="gap-y-2 mt-4">
-            <Text className="text-xs font-bold text-accent uppercase tracking-wider">Instructions</Text>
+            <Text className="text-xs font-bold text-accent capitalize tracking-wider">Instructions</Text>
             <View className="bg-base-100 rounded-xl p-4 border border-base-200">
               <Text className="text-xs text-neutral/70 italic font-medium leading-4">
                 {order.initial_note}
@@ -242,19 +242,19 @@ export default function OrderDetailsDrawer({
 
         {/* Bill Summary Section */}
         <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-accent uppercase tracking-wider">Bill Summary</Text>
+          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Bill Summary</Text>
           <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-2">
             <View className="flex-row justify-between">
               <Text className="text-xs text-accent">Payment Status:</Text>
-              <Text className="text-xs font-semibold text-neutral uppercase">
-                {order.payment_status || "Unpaid"}
+              <Text className="text-xs font-semibold text-neutral capitalize">
+                {order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1).toLowerCase() : "Unpaid"}
               </Text>
             </View>
 
             <View className="flex-row justify-between">
               <Text className="text-xs text-accent">Payment Method:</Text>
-              <Text className="text-xs font-semibold text-neutral uppercase">
-                {order.payment_method || "N/A"}
+              <Text className="text-xs font-semibold text-neutral capitalize">
+                {order.payment_method ? (order.payment_method.toLowerCase() === "cod" ? "COD" : order.payment_method.charAt(0).toUpperCase() + order.payment_method.slice(1).toLowerCase()) : "N/A"}
               </Text>
             </View>
 

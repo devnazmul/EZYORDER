@@ -37,7 +37,7 @@ export default function DriverOrderFeedCard({
 
         {/* Price Row */}
         <View className="flex-row justify-between items-center border-t border-base-200/50 pt-2.5">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">Total Amount:</Text>
+          <Text className="text-[10px] font-bold text-accent capitalize tracking-wider">Total Amount:</Text>
           <Text className="text-md font-bold text-neutral">
             {formatAmount(order.amount || order.total_due_amount || "0", currencySymbol)}
           </Text>

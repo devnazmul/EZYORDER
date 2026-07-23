@@ -363,7 +363,7 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
             className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white"
           >
             <MaterialIcons name="help-outline" size={13} color="#6E6E6E" />
-            <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Help</Text>
+            <Text className="text-[10px] font-bold text-slate-600 capitalize tracking-wider">Help</Text>
           </TouchableOpacity>
         </View>
         {/* Steps Progress Tracker */}
@@ -418,7 +418,7 @@ const DriverActiveOrderCard: React.FC<DriverActiveOrderCardProps> = ({
           >
             <View>
               <Text className="text-white text-xs font-semibold ">Next Step</Text>
-              <Text className="text-white text-xs font-black Capitalize tracking-wider">
+              <Text className="text-white text-xs font-black capitalize tracking-wider">
                 {(() => {
                   const nextApiStatus = DELIVERY_STATUS_KEYS[currentStep + 1];
                   return DELIVERY_STATUSES_MAP[nextApiStatus]?.description || "";
