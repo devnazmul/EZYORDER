@@ -50,7 +50,7 @@ export default function Button({
       {isLoading ? (
         <ActivityIndicator size="small" color={variant === "primary" ? "#FFFFFF" : "#DC2D2A"} />
       ) : (
-        <Text numberOfLines={1} className={`${txtClass} ${buttonClassName}`}>
+        <Text numberOfLines={1} className={`${txtClass} ${buttonClassName} !bg-transparent`}>
           {label}
         </Text>
       )}

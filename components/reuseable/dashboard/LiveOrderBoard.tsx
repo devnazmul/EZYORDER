@@ -52,7 +52,7 @@ function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCa
 
   const handlePress = () => {
     if (role === "driver") {
-      // TODO: Place driver specific routes here when provided
+      router.push({ pathname: "/(driver)/my-orders" });
       return;
     }
 
@@ -81,15 +81,8 @@ function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCa
     });
   };
 
-  const isInteractive = role !== "driver";
-
   return (
-    <TouchableOpacity
-      activeOpacity={isInteractive ? 0.8 : 1}
-      onPress={handlePress}
-      disabled={role === "driver"} // Temporarily disabled for driver until routes are specified
-      className={containerClass}
-    >
+    <TouchableOpacity activeOpacity={0.8} onPress={handlePress} className={containerClass}>
       <Text className={textClass}>{title}</Text>
       <View className={circleClass}>
         <Text className="text-white text-[11px] font-extrabold">{count}</Text>

@@ -8,3 +8,7 @@ Skeleton loaders must follow these design themes and guidelines to ensure unifie
 - **Visual Coherence**: The background, borders, and pulse rates of card skeleton loaders must match the design theme of other general skeletons and loaders on the same view (e.g., matching card skeletons to surrounding KPI card loaders) to ensure unified loading states.
 - **NativeWind Component Styling**: Always use standard, primitive React Native components (e.g., `<View className="bg-slate-200 rounded h-3 w-16" />`) directly instead of passing classNames through custom helper components (like `<Bone className="..." />`). Because NativeWind is a build-time compiler, passing style strings as props to custom components skips compile-time style generation, rendering skeleton elements invisible with 0 height and width.
 
+## Casing & Text Presentation Guidelines
+
+- **Capitalized Casing Only**: To maintain a modern, friendly, and consistent aesthetic, always prefer capitalized font styling (sentence case, title case, or `capitalize` styling) over fully uppercase casing. Avoid using `uppercase` style utilities (like `uppercase` in Tailwind/NativeWind) or fully upper-cased string literals for status labels, headers, buttons, or descriptors.
+

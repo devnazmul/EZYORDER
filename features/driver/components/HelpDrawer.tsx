@@ -1,8 +1,13 @@
 import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
 import Button from "@/components/reuseable/Button";
-import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
+import {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetModal,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Text, View } from "react-native";
 
 interface HelpDrawerProps {
   orderId: string | number | null;
@@ -24,12 +29,52 @@ export default function HelpDrawer({
   triggerExceptionModal,
   handleRetry,
 }: HelpDrawerProps) {
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const isFirstRender = useRef(true);
+  const isOpenRef = useRef(false);
+
+  const snapPoints = useMemo(() => ["50%"], []);
+
   const [alertConfig, setAlertConfig] = useState<BrandAlertConfig>({
     visible: false,
     title: "",
     description: "",
     type: "info",
   });
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.6} />
+    ),
+    [],
+  );
+
+  const handleDismiss = useCallback(() => {
+    isOpenRef.current = false;
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (!visible) return;
+    }
+
+    if (visible) {
+      if (!isOpenRef.current) {
+        isOpenRef.current = true;
+        const timer = setTimeout(() => {
+          bottomSheetRef.current?.present();
+        }, 50);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      if (isOpenRef.current) {
+        isOpenRef.current = false;
+        bottomSheetRef.current?.dismiss();
+      }
+    }
+  }, [visible]);
 
   if (!orderId) return null;
 
@@ -98,48 +143,60 @@ export default function HelpDrawer({
   };
 
   return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View className="flex-1 bg-black/60 justify-end">
-        {/* Backdrop tap to close */}
-        <TouchableOpacity activeOpacity={1} onPress={onClose} className="absolute inset-0 w-full h-full" />
-
-        <View className="bg-base-300 w-full rounded-t-lg p-6 border-t border-slate-100/10 shadow-2xl">
-          {/* Drag handle */}
-          <View className="w-12 h-1 bg-slate-200 rounded-full self-center mb-5" />
-
-          {/* Header */}
-          <View className="flex-row justify-between items-center mb-4">
-            <View>
-              <Text className="text-lg font-bold text-slate-900 capitalize">Help & Exceptions</Text>
-              <Text className="text-[10px] text-slate-400 font-semibold mt-0.5 capitalize">
-                Report delivery issues or retry actions
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={onClose}
-              className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
-            >
-              <MaterialIcons name="close" size={18} color="#475569" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Grid list of help items */}
-          <View className="gap-2.5 mb-6">
-            <Button label="Failed Delivery" onPress={handleFailedDelivery} variant="secondary" />
-            <Button
-              label="Wrong Address"
-              onPress={handleWrongAddress}
-              variant="secondary"
-              containerClassName="border border-amber-100/50 bg-amber-50/20"
-            />
-            <Button label="Order Damaged" onPress={handleOrderDamaged} variant="secondary" />
-            <Button label="Retry Delivery" onPress={handleRetryDelivery} variant="secondary" />
-            <Button label="Cancel Order" onPress={handleCancelOrder} variant="secondary" />
-          </View>
-
-          <Button label="Close Help" onPress={onClose} variant="primary" />
-        </View>
+    <BottomSheetModal
+      ref={bottomSheetRef}
+      snapPoints={snapPoints}
+      enableDynamicSizing={false}
+      enablePanDownToClose
+      onDismiss={handleDismiss}
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
+      handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
+    >
+      {/* Header */}
+      <View className="border-b border-base-200 pb-3 px-6 pt-2">
+        <Text className="text-lg font-bold text-neutral capitalize">Help & Exceptions</Text>
+        <Text className="text-[10px] text-slate-400 font-semibold mt-0.5 capitalize">
+          Report delivery issues or retry actions
+        </Text>
       </View>
+
+      <BottomSheetScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
+      >
+        {/* Grid list of help items */}
+        <View className="gap-2.5 mb-6">
+          <Button
+            label="Failed Delivery"
+            onPress={handleFailedDelivery}
+
+            containerClassName="!border-rose-100 !bg-rose-50/40"
+            buttonClassName="!text-rose-700"
+          />
+          <Button
+            label="Wrong Address"
+            onPress={handleWrongAddress}
+
+            containerClassName="!border-amber-100 !bg-amber-50/40"
+            buttonClassName="!text-amber-700"
+          />
+          <Button
+            label="Order Damaged"
+            onPress={handleOrderDamaged}
+
+            containerClassName="!border-orange-100 !bg-orange-50/40"
+            buttonClassName="!text-orange-700"
+          />
+          <Button
+            label="Retry Delivery"
+            onPress={handleRetryDelivery}
+
+            containerClassName="!border-emerald-100 !bg-emerald-50/40"
+            buttonClassName="!text-emerald-700"
+          />
+        </View>
+      </BottomSheetScrollView>
 
       <BrandAlertModal
         visible={alertConfig.visible}
@@ -151,6 +208,6 @@ export default function HelpDrawer({
         onConfirm={alertConfig.onConfirm || (() => {})}
         onCancel={() => setAlertConfig((prev) => ({ ...prev, visible: false }))}
       />
-    </Modal>
+    </BottomSheetModal>
   );
 }

@@ -1,6 +1,7 @@
 import Badge from "@/components/reuseable/Badge";
 import EmptyState from "@/components/reuseable/EmptyState";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { DriverOrder } from "../types";
@@ -50,7 +51,7 @@ export default function AssignedOrdersFeed({
   }
 
   return (
-    <View className="bg-base-300 rounded-xl overflow-hidden border border-base-200 shadow-sm">
+    <View className="bg-base-300 rounded-3xl overflow-hidden border border-base-200 shadow-sm">
       <View className="p-4 pb-2">
         <Text className="text-sm font-bold text-neutral">My Assigned Orders</Text>
       </View>
@@ -60,7 +61,7 @@ export default function AssignedOrdersFeed({
         </View>
       ) : (
         <View className="divide-y divide-base-200 border-t border-base-200">
-          {orders.slice(0, 10).map((order, index) => {
+          {orders.slice(0, 5).map((order, index) => {
             const totalAmount = parseFloat(order.amount || order.total_due_amount || "0");
             const orderTime = order.created_at ? formatDateTime(order.created_at) : order.order_time || "";
             const badgeStyles = getStatusBadgeStyles(order.status);
@@ -75,7 +76,10 @@ export default function AssignedOrdersFeed({
                 <View className="flex-1 mr-4">
                   <Text className="text-xs font-bold text-neutral">#{order.id}</Text>
                   <Text className="text-[9px] text-accent capitalize font-bold mt-1">
-                    {order.customer_name || "N/A"} • {order.type ? (order.type.charAt(0).toUpperCase() + order.type.slice(1).toLowerCase()) : "Order"}
+                    {order.customer_name || "N/A"} •{" "}
+                    {order.type
+                      ? order.type.charAt(0).toUpperCase() + order.type.slice(1).toLowerCase()
+                      : "Order"}
                     {orderTime ? ` • ${orderTime}` : ""}
                   </Text>
                 </View>
@@ -94,8 +98,13 @@ export default function AssignedOrdersFeed({
           })}
         </View>
       )}
-      <TouchableOpacity className="w-full py-4 items-center justify-center border-t border-base-200">
-        <Text className="text-xs font-bold text-primary capitalize">View All Orders</Text>
+      <TouchableOpacity
+        onPress={() => {
+          router.push({ pathname: "/(driver)/my-orders" });
+        }}
+        className="w-full bg-primary py-4 items-center justify-center border-t border-base-200"
+      >
+        <Text className="text-xs text-white font-bold text-primary capitalize">View All Orders</Text>
       </TouchableOpacity>
     </View>
   );

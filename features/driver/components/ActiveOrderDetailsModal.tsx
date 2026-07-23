@@ -179,7 +179,7 @@ export default function ActiveOrderDetailsModal({
       >
         {/* Customer Information */}
         <View className="gap-y-2">
-          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Customer Details</Text>
+          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Customer Details</Text>
           <View className="bg-base-100 rounded-xl p-4 gap-y-2 border border-base-200">
             <View className="flex-row justify-between">
               <Text className="text-xs text-accent">Name:</Text>
@@ -250,7 +250,7 @@ export default function ActiveOrderDetailsModal({
 
         {/* Order Items Section */}
         <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Order Items</Text>
+          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Order Items</Text>
           <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-0">
             {isLoadingDetails ? (
               <ItemsSummarySkeleton />
@@ -322,7 +322,7 @@ export default function ActiveOrderDetailsModal({
 
         {/* Order Details Section */}
         <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Order Details</Text>
+          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Order Details</Text>
           <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-2">
             {activeOrder.order_time || activeOrder.created_at ? (
               <View className="flex-row justify-between">
@@ -360,7 +360,7 @@ export default function ActiveOrderDetailsModal({
 
             {activeOrder.remarks ? (
               <View className="border-t border-base-200 pt-2 mt-1">
-                <Text className="text-[10px] font-bold text-accent capitalize tracking-wider mb-1">
+                <Text className="text-[10px] font-bold text-neutral capitalize tracking-wider mb-1">
                   Staff Remarks
                 </Text>
                 <Text className="text-xs text-neutral/70 italic leading-4 bg-white/50 p-2.5 rounded border border-base-200">
@@ -373,7 +373,7 @@ export default function ActiveOrderDetailsModal({
 
         {/* Bill Summary */}
         <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Bill Summary</Text>
+          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Bill Summary</Text>
           <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-2">
             <View className="flex-row justify-between">
               <Text className="text-xs text-accent">Subtotal:</Text>

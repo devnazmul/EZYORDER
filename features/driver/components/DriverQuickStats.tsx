@@ -18,7 +18,7 @@ const DriverQuickStats: React.FC<DriverQuickStatsProps> = ({
 }: DriverQuickStatsProps) => {
   const earningTrend: string = stats?.earnings_trend?.split(" ").at(0) + " vs Yesterday" || "";
   return (
-    <View className="bg-base-300 p-4 pb-1 rounded-lg flex-1">
+    <View className="bg-base-300 p-4 pb-1 rounded-3xl flex-1">
       <Text className="mb-4 font-bold capitalize opacity-80">Quick Stats</Text>
       <View className="flex-col gap-2 mb-4">
         {/* First row: 2 columns */}

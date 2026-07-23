@@ -26,7 +26,7 @@ export default function AssignedOrdersFeedSkeleton() {
   return (
     <Animated.View
       style={{ opacity: pulse }}
-      className="bg-base-300 p-4 rounded-lg flex-1"
+      className="bg-base-300 p-4 rounded-3xl flex-1"
     >
       {/* Header Placeholder */}
       <View className="flex-row justify-between items-center mb-4">

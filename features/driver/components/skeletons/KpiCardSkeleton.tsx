@@ -34,7 +34,7 @@ export default function KpiCardSkeleton({ trend }: KpiCardSkeletonProps) {
   return (
     <Animated.View
       style={{
-        borderRadius: 6,
+        borderRadius: 16,
         borderWidth: 1,
         borderColor: "rgba(0, 0, 0, 0.05)",
         opacity: pulseAnim,
