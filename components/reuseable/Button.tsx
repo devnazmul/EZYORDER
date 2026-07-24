@@ -9,6 +9,8 @@ interface ButtonProps {
   isLoading?: boolean;
   containerClassName?: string;
   buttonClassName?: string;
+  icon?: React.ReactNode;
+  iconPosition?: "left" | "right";
 }
 
 export default function Button({
@@ -19,6 +21,8 @@ export default function Button({
   isLoading = false,
   containerClassName = "",
   buttonClassName = "",
+  icon,
+  iconPosition = "left",
 }: ButtonProps) {
   const isPressable = !disabled && !isLoading;
 
@@ -49,9 +53,13 @@ export default function Button({
       {isLoading ? (
         <ActivityIndicator size="small" color={variant === "primary" ? "#FFFFFF" : "#DC2D2A"} />
       ) : (
-        <Text numberOfLines={1} className={`${txtClass} ${buttonClassName} !bg-transparent`}>
-          {label}
-        </Text>
+        <>
+          {icon && iconPosition === "left" && icon}
+          <Text numberOfLines={1} className={`${txtClass} ${buttonClassName} !bg-transparent`}>
+            {label}
+          </Text>
+          {icon && iconPosition === "right" && icon}
+        </>
       )}
     </Pressable>
   );

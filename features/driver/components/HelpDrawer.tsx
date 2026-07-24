@@ -1,6 +1,7 @@
 import BottomSheet from "@/components/reuseable/BottomSheet";
 import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
 import Button from "@/components/reuseable/Button";
+import { MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { useState } from "react";
 import { Text, View } from "react-native";
@@ -91,11 +92,16 @@ export default function HelpDrawer({
   return (
     <BottomSheet visible={visible} onClose={onClose} snapPoints={["37%"]}>
       {/* Header */}
-      <View className="border-b border-base-200 pb-3 px-6 pt-2">
-        <Text className="text-lg font-bold text-neutral capitalize">Help & Exceptions</Text>
-        <Text className="text-[10px] text-slate-400 font-semibold mt-0.5 capitalize">
-          Report delivery issues or retry actions
-        </Text>
+      <View className="flex-row items-center gap-3 border-b border-base-200 pb-3 px-6 pt-2">
+        <View className="w-9 h-9 rounded-lg bg-rose-50 border border-rose-100 items-center justify-center">
+          <MaterialIcons name="error-outline" size={18} color="#e11d48" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-sm font-bold text-neutral tracking-wider">Help & Exception Handling</Text>
+          <Text className="text-[10px] text-slate-400 font-semibold mt-0.5 capitalize">
+            Report delivery issues or retry actions
+          </Text>
+        </View>
       </View>
 
       <BottomSheetScrollView
@@ -107,26 +113,30 @@ export default function HelpDrawer({
           <Button
             label="Failed Delivery"
             onPress={handleFailedDelivery}
-            containerClassName="!border-rose-100 !bg-rose-50"
-            buttonClassName="!text-rose-700"
+            containerClassName="!border-rose-200 !bg-rose-50"
+            buttonClassName="!text-rose-600"
+            icon={<MaterialIcons name="block" size={16} color="#e11d48" />}
           />
           <Button
             label="Wrong Address"
             onPress={handleWrongAddress}
-            containerClassName="!border-amber-100 !bg-amber-50"
-            buttonClassName="!text-amber-700"
+            containerClassName="!border-amber-200 !bg-amber-50"
+            buttonClassName="!text-amber-600"
+            icon={<MaterialIcons name="place" size={16} color="#d97706" />}
           />
           <Button
             label="Order Damaged"
             onPress={handleOrderDamaged}
-            containerClassName="!border-orange-100 !bg-orange-50"
-            buttonClassName="!text-orange-700 !bg-transparent"
+            containerClassName="!border-orange-200 !bg-orange-50"
+            buttonClassName="!text-orange-600"
+            icon={<MaterialIcons name="view-in-ar" size={16} color="#ea580c" />}
           />
           <Button
             label="Retry Delivery"
             onPress={handleRetryDelivery}
-            containerClassName="!border-emerald-100 !bg-emerald-50"
-            buttonClassName="!text-emerald-700"
+            containerClassName="!border-blue-200 !bg-blue-50"
+            buttonClassName="!text-blue-600"
+            icon={<MaterialIcons name="sync" size={16} color="#2563eb" />}
           />
         </View>
       </BottomSheetScrollView>
