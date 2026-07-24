@@ -1,25 +1,25 @@
 import KitchenActivity from "@/components/dashboard/KitchenActivity";
 import KpiMetrics from "@/components/dashboard/KpiMetrics";
-import LiveOrderBoard from "@/components/dashboard/LiveOrderBoard";
 import OrdersByTypeChart from "@/components/dashboard/OrdersByTypeChart";
 import Promotions from "@/components/dashboard/Promotions";
 import RecentOrders from "@/components/dashboard/RecentOrders";
 import RevenueChart from "@/components/dashboard/RevenueChart";
 import TopDishes from "@/components/dashboard/TopDishes";
+import LiveOrderBoard from "@/components/reuseable/dashboard/LiveOrderBoard";
 import ToggleBar from "@/components/reuseable/ToggleBar";
 import { useAuth } from "@/context/AuthContext";
 import {
-  useDashboardMetric,
-  useDashboardLiveOrderBoard,
-  useDashboardRevenueChart,
-  useDashboardOrdersByType,
   useDashboardKitchenActivity,
+  useDashboardLiveOrderBoard,
+  useDashboardMetric,
+  useDashboardOrdersByType,
   useDashboardPromotions,
   useDashboardRecentOrders,
+  useDashboardRevenueChart,
   useDashboardTopDishes,
 } from "@/hooks/useDashboardQueries";
 import { useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
@@ -78,16 +78,18 @@ export default function Home() {
           containerClassName="mb-6"
         />
 
-        {/* Modular Dashboard widgets */}
-        <KpiMetrics
-          filterBy={filterBy}
-          metrics={metricsQuery.data}
-          isLoading={metricsQuery.isLoading}
-        />
-        <LiveOrderBoard
-          liveOrderBoard={liveOrderBoardQuery.data}
-          isLoading={liveOrderBoardQuery.isLoading}
-        />
+        <KpiMetrics filterBy={filterBy} metrics={metricsQuery.data} isLoading={metricsQuery.isLoading} />
+        <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm mb-6">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-xs font-bold text-accent tracking-widest uppercase">
+              Live Today's Order Board
+            </Text>
+          </View>
+          <LiveOrderBoard
+            liveOrderBoard={liveOrderBoardQuery.data}
+            isLoading={liveOrderBoardQuery.isLoading}
+          />
+        </View>
 
         <View className="gap-y-6 mb-6">
           <RevenueChart
@@ -111,14 +113,8 @@ export default function Home() {
           kitchenActivity={kitchenActivityQuery.data}
           isLoading={kitchenActivityQuery.isLoading}
         />
-        <Promotions
-          promotions={promotionsQuery.data}
-          isLoading={promotionsQuery.isLoading}
-        />
-        <RecentOrders
-          recentOrders={recentOrdersQuery.data}
-          isLoading={recentOrdersQuery.isLoading}
-        />
+        <Promotions promotions={promotionsQuery.data} isLoading={promotionsQuery.isLoading} />
+        <RecentOrders recentOrders={recentOrdersQuery.data} isLoading={recentOrdersQuery.isLoading} />
       </ScrollView>
     </SafeAreaView>
   );

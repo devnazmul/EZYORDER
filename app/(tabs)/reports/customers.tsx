@@ -11,12 +11,18 @@ import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-n
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DEFAULT_FILTERS = {
-  frequency_visit: "all",
+  frequency_visit: ["all"],
   date_filter: "all",
   rating: "all",
   order_by: "all",
   creation_dates: { start: "", end: "" },
   last_visited_date: "",
+  email: "",
+  phone: "",
+  status: "all",
+  payment_status: "all",
+  payment_type: "all",
+  booking_type: "all",
 };
 
 export default function CustomersReport() {
@@ -42,11 +48,55 @@ export default function CustomersReport() {
         id: "frequency_visit",
         label: "Visit Frequency",
         type: "chips" as const,
+        isMultiSelect: true,
         options: [
           { id: "all", label: "All Frequencies" },
           { id: "new", label: "New" },
           { id: "regular", label: "Regular" },
           { id: "vip", label: "VIP" },
+        ],
+      },
+      {
+        id: "booking_type",
+        label: "Order Type",
+        type: "chips" as const,
+        options: [
+          { id: "all", label: "All Types" },
+          { id: "take_away", label: "Take Away" },
+          { id: "delivery", label: "Delivery" },
+          { id: "admin_panel_booking", label: "Eat In" },
+        ],
+      },
+      {
+        id: "status",
+        label: "Order Status",
+        type: "chips" as const,
+        options: [
+          { id: "all", label: "All Statuses" },
+          { id: "pending", label: "Pending" },
+          { id: "completed", label: "Completed" },
+          { id: "cancelled", label: "Cancelled" },
+        ],
+      },
+      {
+        id: "payment_status",
+        label: "Payment Status",
+        type: "chips" as const,
+        options: [
+          { id: "all", label: "All Payment Statuses" },
+          { id: "paid", label: "Paid" },
+          { id: "unpaid", label: "Unpaid" },
+        ],
+      },
+      {
+        id: "payment_type",
+        label: "Payment Type",
+        type: "chips" as const,
+        options: [
+          { id: "all", label: "All Payment Types" },
+          { id: "cash", label: "Cash" },
+          { id: "card", label: "Card" },
+          { id: "change", label: "Change" },
         ],
       },
       {
@@ -87,14 +137,26 @@ export default function CustomersReport() {
         ],
       },
       {
-        id: "creation_dates",
-        label: "Creation Date Range",
-        type: "date-range" as const,
+        id: "email",
+        label: "Email Address",
+        type: "text" as const,
+        keyboardType: "email-address",
+      },
+      {
+        id: "phone",
+        label: "Phone Number",
+        type: "text" as const,
+        keyboardType: "phone-pad",
       },
       {
         id: "last_visited_date",
         label: "Last Visited Date",
         type: "date" as const,
+      },
+      {
+        id: "creation_dates",
+        label: "Creation Date Range",
+        type: "date-range" as const,
       },
     ];
   }, []);
@@ -108,8 +170,11 @@ export default function CustomersReport() {
     if (debouncedSearch.trim()) {
       params.search_key = debouncedSearch.trim();
     }
-    if (filterValues.frequency_visit !== "all") {
-      params.frequency_visit = filterValues.frequency_visit;
+    if (filterValues.frequency_visit && Array.isArray(filterValues.frequency_visit)) {
+      const activeVisits = filterValues.frequency_visit.filter((v: string) => v !== "all");
+      if (activeVisits.length > 0) {
+        params.frequency_visit = activeVisits.join(",");
+      }
     }
     if (filterValues.date_filter !== "all") {
       params.date_filter = filterValues.date_filter;
@@ -128,6 +193,24 @@ export default function CustomersReport() {
     }
     if (filterValues.last_visited_date) {
       params.last_visited_date = filterValues.last_visited_date;
+    }
+    if (filterValues.email) {
+      params.email = filterValues.email.trim();
+    }
+    if (filterValues.phone) {
+      params.phone = filterValues.phone.trim();
+    }
+    if (filterValues.status !== "all") {
+      params.status = filterValues.status;
+    }
+    if (filterValues.payment_status !== "all") {
+      params.payment_status = filterValues.payment_status;
+    }
+    if (filterValues.payment_type !== "all") {
+      params.payment_type = filterValues.payment_type;
+    }
+    if (filterValues.booking_type !== "all") {
+      params.booking_type = filterValues.booking_type;
     }
 
     return params;
@@ -155,7 +238,7 @@ export default function CustomersReport() {
           <SearchBar
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search by name, email, or phone..."
+            placeholder="Search by name, code, or phone..."
             containerClassName="flex-1"
           />
           <FilterDrawer
