@@ -57,6 +57,11 @@ export interface CustomerParams {
   email?: string;
   phone?: string;
   order_by?: "ASC" | "DESC" | "asc" | "desc";
+  last_visited_date?: string;
+  status?: string;
+  payment_status?: string;
+  payment_type?: string;
+  booking_type?: string;
 }
 
 export const getCustomers = async (token: string, params: CustomerParams) => {
