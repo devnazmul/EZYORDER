@@ -1,3 +1,7 @@
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+
+console.log("[ENV] EXPO_PUBLIC_API_BASE_URL =", apiBaseUrl);
+
 function requireEnv(value: string | undefined, name: string): string {
   if (!value) {
     throw new Error(
@@ -10,7 +14,7 @@ function requireEnv(value: string | undefined, name: string): string {
 }
 
 export const ENV = {
-  API_BASE_URL: requireEnv(process.env.EXPO_PUBLIC_API_BASE_URL, "EXPO_PUBLIC_API_BASE_URL"),
+  API_BASE_URL: requireEnv(apiBaseUrl, "EXPO_PUBLIC_API_BASE_URL"),
 } as const;
 
 export default ENV;
