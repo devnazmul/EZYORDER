@@ -1,11 +1,22 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import React from "react";
 import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/context/AuthContext";
 
 const DriverLayout: React.FC = () => {
+  const { token, user } = useAuth();
   const insets = useSafeAreaInsets();
+
+  if (!token) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  const role = (user?.type || "").toLowerCase().trim();
+  if (role !== "driver") {
+    return <Redirect href="/(tabs)/home" />;
+  }
 
   const renderTabBarLabel =
     (title: string) =>
