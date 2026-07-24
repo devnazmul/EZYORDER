@@ -85,6 +85,7 @@ function PulseDot() {
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { token, user } = useAuth();
+  const pathname = usePathname();
 
   const { data } = useNotificationUnreadCountQuery(token || "");
   const hasUnread = data?.count > 0 ? true : false;
@@ -116,7 +117,6 @@ export default function TabsLayout() {
       </Text>
     );
 
-  const pathname = usePathname();
   const rootRoutes = ["/home", "/orders", "/reports", "/notifications", "/more"];
   const showBackButton = !rootRoutes.includes(pathname);
 
