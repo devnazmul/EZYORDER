@@ -51,7 +51,7 @@ export default function AssignedOrdersFeed({
   }
 
   return (
-    <View className="bg-base-300 rounded-3xl overflow-hidden border border-base-200 shadow-sm">
+    <View className="bg-base-300 rounded-3xl overflow-hidden  shadow-sm">
       <View className="p-4 pb-2">
         <Text className="text-sm font-bold text-neutral">My Assigned Orders</Text>
       </View>

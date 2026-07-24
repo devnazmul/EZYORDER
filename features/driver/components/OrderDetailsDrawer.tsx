@@ -1,15 +1,10 @@
+import BottomSheet from "@/components/reuseable/BottomSheet";
 import { useAuth } from "@/context/AuthContext";
+import { formatLabel } from "@/utils/formatLabel";
 import { formatAmount } from "@/utils/formatters";
-import { MaterialIcons } from "@expo/vector-icons";
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import React from "react";
+import { Text, View } from "react-native";
 import { useOrderDetailQuery } from "../hooks/queries/useDriverQueries";
 import { DriverOrder } from "../types";
 import ItemsSummarySkeleton from "./skeletons/ItemsSummarySkeleton";
@@ -27,13 +22,6 @@ export default function OrderDetailsDrawer({
   onClose,
   currencySymbol,
 }: OrderDetailsDrawerProps) {
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const insets = useSafeAreaInsets();
-  const isFirstRender = useRef(true);
-  const isOpenRef = useRef(false);
-
-  const snapPoints = useMemo(() => ["50%", "85%"], []);
-
   const { token } = useAuth();
   const { data: fullOrderDetail, isLoading: isLoadingDetails } = useOrderDetailQuery(
     token || "",
@@ -41,81 +29,25 @@ export default function OrderDetailsDrawer({
     visible,
   );
 
-  const parsePrice = (val: any) => {
-    if (typeof val === "number") return val;
-    if (!val) return 0;
-    const parsed = parseFloat(String(val).replace(/[^0-9.-]/g, ""));
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  const handleClose = () => {
-    bottomSheetRef.current?.dismiss();
-  };
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.6} />
-    ),
-    [],
-  );
-
-  const handleDismiss = useCallback(() => {
-    isOpenRef.current = false;
-    onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (!visible) return;
-    }
-
-    if (visible) {
-      if (!isOpenRef.current) {
-        isOpenRef.current = true;
-        const timer = setTimeout(() => {
-          bottomSheetRef.current?.present();
-        }, 50);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      if (isOpenRef.current) {
-        isOpenRef.current = false;
-        bottomSheetRef.current?.dismiss();
-      }
-    }
-  }, [visible]);
-
   if (!order) return null;
 
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      onDismiss={handleDismiss}
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
-      handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={["50%", "70%"]}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
     >
       {/* Header */}
-      <View className="flex-row justify-between items-center border-b border-base-200 pb-3 px-6 pt-2">
+      <View className="border-b border-base-200 pb-3 px-6 pt-2">
         <View className="gap-y-1">
           <Text className="text-lg font-bold text-neutral">Order #{order.id}</Text>
           <Text className="text-xs text-accent">
-            Status: <Text className="font-bold capitalize text-primary">{order.status ? order.status.replace(/_/g, " ").charAt(0).toUpperCase() + order.status.replace(/_/g, " ").slice(1).toLowerCase() : ""}</Text>
+            Status: <Text className="font-bold capitalize text-primary">{formatLabel(order.status)}</Text>
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={handleClose}
-          className="w-8 h-8 rounded-full bg-base-100 items-center justify-center"
-        >
-          <MaterialIcons name="close" size={18} color="#6E6E6E" />
-        </TouchableOpacity>
       </View>
 
       <BottomSheetScrollView
@@ -180,9 +112,9 @@ export default function OrderDetailsDrawer({
                     {detailItems.map((item: any, index: number) => {
                       const dishName = item.dish?.name || item.meal?.name || item.dish_name || "Item";
                       const qty = item.qty || item.quantity || 1;
-                      const price = parsePrice(
-                        item.dish?.price || item.dish_price || item.main_price || item.price,
-                      );
+                      const rawPrice =
+                        item.dish?.price || item.dish_price || item.main_price || item.price || 0;
+                      const price = typeof rawPrice === "number" ? rawPrice : parseFloat(rawPrice) || 0;
 
                       return (
                         <View
@@ -247,14 +179,18 @@ export default function OrderDetailsDrawer({
             <View className="flex-row justify-between">
               <Text className="text-xs text-accent">Payment Status:</Text>
               <Text className="text-xs font-semibold text-neutral capitalize">
-                {order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1).toLowerCase() : "Unpaid"}
+                {formatLabel(order.payment_status) || "Unpaid"}
               </Text>
             </View>
 
             <View className="flex-row justify-between">
               <Text className="text-xs text-accent">Payment Method:</Text>
               <Text className="text-xs font-semibold text-neutral capitalize">
-                {order.payment_method ? (order.payment_method.toLowerCase() === "cod" ? "COD" : order.payment_method.charAt(0).toUpperCase() + order.payment_method.slice(1).toLowerCase()) : "N/A"}
+                {order.payment_method
+                  ? order.payment_method.toLowerCase() === "cod"
+                    ? "COD"
+                    : formatLabel(order.payment_method)
+                  : "N/A"}
               </Text>
             </View>
 
@@ -267,6 +203,6 @@ export default function OrderDetailsDrawer({
           </View>
         </View>
       </BottomSheetScrollView>
-    </BottomSheetModal>
+    </BottomSheet>
   );
 }

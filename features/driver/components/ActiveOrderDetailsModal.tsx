@@ -1,17 +1,13 @@
+import BottomSheet from "@/components/reuseable/BottomSheet";
 import Button from "@/components/reuseable/Button";
 import { useAuth } from "@/context/AuthContext";
+import { formatLabel } from "@/utils/formatLabel";
 import { formatAmount } from "@/utils/formatters";
 import formatUtcToLocalTime from "@/utils/formatUtcToLocalTime";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetScrollView, BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { UseMutationResult } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React from "react";
 import { Linking, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ItemsSummarySkeleton from "../components/skeletons/ItemsSummarySkeleton";
@@ -62,12 +58,7 @@ export default function ActiveOrderDetailsModal({
   handleGetRoute,
   handleQuickSMS,
 }: ActiveOrderDetailsModalProps) {
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
   const insets = useSafeAreaInsets();
-  const isFirstRender = useRef(true);
-  const isOpenRef = useRef(false);
-
-  const snapPoints = useMemo(() => ["45%", "85%"], []);
 
   const { token } = useAuth();
   const { data: fullOrderDetail, isLoading: isLoadingDetails } = useOrderDetailQuery(
@@ -76,63 +67,13 @@ export default function ActiveOrderDetailsModal({
     visible,
   );
 
-  const parsePrice = (val: any) => {
-    if (typeof val === "number") return val;
-    if (!val) return 0;
-    const parsed = parseFloat(String(val).replace(/[^0-9.-]/g, ""));
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  const handleClose = () => {
-    bottomSheetRef.current?.dismiss();
-  };
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.6} />
-    ),
-    [],
-  );
-
-  const handleDismiss = useCallback(() => {
-    isOpenRef.current = false;
-    onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (!visible) return;
-    }
-
-    if (visible) {
-      if (!isOpenRef.current) {
-        isOpenRef.current = true;
-        const timer = setTimeout(() => {
-          bottomSheetRef.current?.present();
-        }, 50);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      if (isOpenRef.current) {
-        isOpenRef.current = false;
-        bottomSheetRef.current?.dismiss();
-      }
-    }
-  }, [visible]);
-
   if (!activeOrder) return null;
 
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      onDismiss={handleDismiss}
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
-      handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={["55%", "75%"]}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
@@ -142,7 +83,10 @@ export default function ActiveOrderDetailsModal({
         <View className="gap-y-1">
           <Text className="text-lg font-bold text-neutral">Order #{activeOrder.id}</Text>
           <Text className="text-xs text-accent">
-            Type: <Text className="font-bold capitalize text-primary">{activeOrder.type ? (activeOrder.type.charAt(0).toUpperCase() + activeOrder.type.slice(1).toLowerCase()) : "Delivery"}</Text>
+            Type:{" "}
+            <Text className="font-bold capitalize text-primary">
+              {activeOrder.type ? formatLabel(activeOrder.type) : "Delivery"}
+            </Text>
           </Text>
         </View>
         <View className="flex-row items-center gap-3">
@@ -175,7 +119,7 @@ export default function ActiveOrderDetailsModal({
 
       <BottomSheetScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 }}
       >
         {/* Customer Information */}
         <View className="gap-y-2">
@@ -272,9 +216,9 @@ export default function ActiveOrderDetailsModal({
                     {detailItems.map((item: any, index: number) => {
                       const dishName = item.dish?.name || item.meal?.name || item.dish_name || "Item";
                       const qty = item.qty || item.quantity || 1;
-                      const price = parsePrice(
-                        item.dish?.price || item.dish_price || item.main_price || item.price,
-                      );
+                      const rawPrice =
+                        item.dish?.price || item.dish_price || item.main_price || item.price || 0;
+                      const price = typeof rawPrice === "number" ? rawPrice : parseFloat(rawPrice) || 0;
 
                       return (
                         <View
@@ -470,6 +414,6 @@ export default function ActiveOrderDetailsModal({
           </View>
         </View>
       </BottomSheetScrollView>
-    </BottomSheetModal>
+    </BottomSheet>
   );
 }

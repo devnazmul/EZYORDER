@@ -12,3 +12,20 @@ Skeleton loaders must follow these design themes and guidelines to ensure unifie
 
 - **Capitalized Casing Only**: To maintain a modern, friendly, and consistent aesthetic, always prefer capitalized font styling (sentence case, title case, or `capitalize` styling) over fully uppercase casing. Avoid using `uppercase` style utilities (like `uppercase` in Tailwind/NativeWind) or fully upper-cased string literals for status labels, headers, buttons, or descriptors.
 
+## Styling & Render Guidelines (React Native / NativeWind)
+
+- **Semi-Transparent Backgrounds and Shadows Bleed-Through**: When applying a semi-transparent background (e.g., `bg-rose-50/40` or an RGBA color) to a component that also contains a shadow (such as Tailwind's `shadow-sm` or Android's `elevation`), the layout engine renders the shadow directly behind the component. Because the background is transparent or translucent, the dark/grayish shadow shape bleeds through the center of the component, making the inner area look muddy or solidly filled with a dark tint instead of being clean and transparent. To fix this, explicitly remove the shadow properties using `!shadow-none` (or `!elevation-0` on Android) when using translucent/semi-transparent background colors:
+  ```tsx
+  <Button
+    label="Failed Delivery"
+    containerClassName="!border-rose-100 !bg-rose-50/40 !shadow-none"
+    buttonClassName="!text-rose-700"
+  />
+  ```
+
+- **Re-mounting Conditionally Rendered Root Components (NativeWind v4)**: When conditional states switch (e.g. `isLoading` transitioning from `true` to `false`), React Native layouts can trigger styling warning logs if NativeWind tries to reuse the layout view nodes. Always provide a unique `key` parameter to the root view containers of conditional blocks:
+  - Loading root container: `<View key="loading" ...>`
+  - Loaded card root container: `<View key="loaded" ...>`
+  - Empty state container: `<View key="empty" ...>`
+
+

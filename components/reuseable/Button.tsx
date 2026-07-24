@@ -1,5 +1,5 @@
 import React from "react";
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Pressable, Text } from "react-native";
 
 interface ButtonProps {
   label: string;
@@ -41,10 +41,9 @@ export default function Button({
   }
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={isPressable ? onPress : undefined}
       disabled={!isPressable}
-      activeOpacity={0.8}
       className={`${btnClass} ${containerClassName}`}
     >
       {isLoading ? (
@@ -54,6 +53,6 @@ export default function Button({
           {label}
         </Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }

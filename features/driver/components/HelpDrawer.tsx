@@ -1,12 +1,8 @@
+import BottomSheet from "@/components/reuseable/BottomSheet";
 import BrandAlertModal, { BrandAlertConfig } from "@/components/reuseable/BrandAlertModal";
 import Button from "@/components/reuseable/Button";
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import React, { useState } from "react";
 import { Text, View } from "react-native";
 
 interface HelpDrawerProps {
@@ -29,52 +25,12 @@ export default function HelpDrawer({
   triggerExceptionModal,
   handleRetry,
 }: HelpDrawerProps) {
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const isFirstRender = useRef(true);
-  const isOpenRef = useRef(false);
-
-  const snapPoints = useMemo(() => ["50%"], []);
-
   const [alertConfig, setAlertConfig] = useState<BrandAlertConfig>({
     visible: false,
     title: "",
     description: "",
     type: "info",
   });
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.6} />
-    ),
-    [],
-  );
-
-  const handleDismiss = useCallback(() => {
-    isOpenRef.current = false;
-    onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (!visible) return;
-    }
-
-    if (visible) {
-      if (!isOpenRef.current) {
-        isOpenRef.current = true;
-        const timer = setTimeout(() => {
-          bottomSheetRef.current?.present();
-        }, 50);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      if (isOpenRef.current) {
-        isOpenRef.current = false;
-        bottomSheetRef.current?.dismiss();
-      }
-    }
-  }, [visible]);
 
   if (!orderId) return null;
 
@@ -132,27 +88,8 @@ export default function HelpDrawer({
     handleRetry?.(orderId);
   };
 
-  const handleCancelOrder = () => {
-    onClose();
-    triggerExceptionModal?.(orderId, "cancel", "Cancel Delivery", [
-      "Customer Request",
-      "Address Issue",
-      "Force Majeure",
-      "Other",
-    ]);
-  };
-
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      onDismiss={handleDismiss}
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
-      handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
-    >
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={["37%"]}>
       {/* Header */}
       <View className="border-b border-base-200 pb-3 px-6 pt-2">
         <Text className="text-lg font-bold text-neutral capitalize">Help & Exceptions</Text>
@@ -170,29 +107,25 @@ export default function HelpDrawer({
           <Button
             label="Failed Delivery"
             onPress={handleFailedDelivery}
-
-            containerClassName="!border-rose-100 !bg-rose-50/40"
+            containerClassName="!border-rose-100 !bg-rose-50"
             buttonClassName="!text-rose-700"
           />
           <Button
             label="Wrong Address"
             onPress={handleWrongAddress}
-
-            containerClassName="!border-amber-100 !bg-amber-50/40"
+            containerClassName="!border-amber-100 !bg-amber-50"
             buttonClassName="!text-amber-700"
           />
           <Button
             label="Order Damaged"
             onPress={handleOrderDamaged}
-
-            containerClassName="!border-orange-100 !bg-orange-50/40"
-            buttonClassName="!text-orange-700"
+            containerClassName="!border-orange-100 !bg-orange-50"
+            buttonClassName="!text-orange-700 !bg-transparent"
           />
           <Button
             label="Retry Delivery"
             onPress={handleRetryDelivery}
-
-            containerClassName="!border-emerald-100 !bg-emerald-50/40"
+            containerClassName="!border-emerald-100 !bg-emerald-50"
             buttonClassName="!text-emerald-700"
           />
         </View>
@@ -208,6 +141,6 @@ export default function HelpDrawer({
         onConfirm={alertConfig.onConfirm || (() => {})}
         onCancel={() => setAlertConfig((prev) => ({ ...prev, visible: false }))}
       />
-    </BottomSheetModal>
+    </BottomSheet>
   );
 }
