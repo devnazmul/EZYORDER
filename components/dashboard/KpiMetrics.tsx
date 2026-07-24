@@ -3,8 +3,18 @@ import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { cssInterop } from "nativewind";
 import React, { useMemo } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+
+cssInterop(MaterialIcons, {
+  className: {
+    target: "style",
+    nativeStyleToProp: {
+      color: true,
+    },
+  },
+});
 
 interface KpiMetricsProps {
   filterBy: string;
@@ -15,7 +25,6 @@ interface KpiMetricsProps {
 export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMetricsProps) {
   const { settings } = useData();
 
-  // Resolve currency symbol
   const currencySymbol = useMemo(() => {
     return getCurrencySymbol(settings?.currency);
   }, [settings?.currency]);
@@ -35,7 +44,7 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
 
   return (
     <View key="loaded" className="gap-y-4 mb-6">
-      {/* Revenue Dark Panel Card */}
+      {/* Revenue Dark Panel Card (Row 1 - 1 Column) */}
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() =>
@@ -63,14 +72,14 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
           <View
             className={
               isNegativeTrend
-                ? "bg-red-500/10 p-2.5 rounded-xl border border-red-500/20"
-                : "bg-green-500/10 p-2.5 rounded-xl border border-green-500/20"
+                ? "bg-error/10 p-2.5 rounded-xl border border-error/20"
+                : "bg-success/10 p-2.5 rounded-xl border border-success/20"
             }
           >
             <MaterialIcons
               name={isNegativeTrend ? "trending-down" : "trending-up"}
               size={22}
-              color={isNegativeTrend ? "#ef4444" : "#22c55e"}
+              className={isNegativeTrend ? "text-error" : "text-success"}
             />
           </View>
         </View>
@@ -78,16 +87,16 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
           {metrics?.revenueTrend && (
             <View
               className={`flex-row items-center gap-1 px-2.5 py-1 rounded-full border ${
-                isNegativeTrend ? "bg-red-500/20 border-red-500/30" : "bg-green-500/20 border-green-500/30"
+                isNegativeTrend ? "bg-error/20 border-error/30" : "bg-success/20 border-success/30"
               }`}
             >
               <MaterialIcons
                 name={isNegativeTrend ? "trending-down" : "trending-up"}
                 size={12}
-                color={isNegativeTrend ? "#f87171" : "#4ade80"}
+                className={isNegativeTrend ? "text-error" : "text-success"}
               />
               <Text
-                className={`text-[10px] font-bold ${isNegativeTrend ? "text-red-400" : "text-green-400"}`}
+                className={`text-[10px] font-bold ${isNegativeTrend ? "text-error" : "text-success"}`}
               >
                 {metrics.revenueTrend} vs {filterBy === "this_week" ? "Last Week" : "Last Month"}
               </Text>
@@ -96,7 +105,7 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
         </View>
       </TouchableOpacity>
 
-      {/* Side by side Stats cards */}
+      {/* Row 2 - 2 Columns */}
       <View className="flex-row gap-4">
         {/* Today's Orders */}
         <TouchableOpacity
@@ -130,20 +139,46 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
               },
             })
           }
-          className="flex-1 bg-yellow-500/5 p-4 rounded-xl border border-yellow-500/10"
+          className="flex-1 bg-warning/5 p-4 rounded-xl border border-warning/10"
         >
-          <Text className="text-[10px] font-bold text-yellow-600 tracking-wider uppercase">
+          <Text className="text-[10px] font-bold text-warning tracking-wider uppercase">
             AVERAGE ORDER
           </Text>
           <Text className="text-2xl font-extrabold text-neutral mt-1">
             {formatAmount(metrics?.avgOrder || "0", currencySymbol)}
           </Text>
-          <Text className="text-[10px] text-yellow-600/70 mt-1">Avg size</Text>
+          <Text className="text-[10px] text-accent mt-1">Avg size</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Horizontal Scrollable Indicators List */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-2 ">
+      {/* Row 3 - 1 Column */}
+      {/* Today's Sales */}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() =>
+          router.push({
+            pathname: "/orders/todays-orders",
+            params: {
+              tab: "eat_in,delivery,take_away,walk_in",
+              status: "completed",
+            },
+          })
+        }
+        className="bg-success/5 p-4 rounded-xl border border-success/10 flex-row justify-between items-center"
+      >
+        <View>
+          <Text className="text-[10px] font-bold text-success tracking-wider uppercase">TODAY'S SALES</Text>
+          <Text className="text-2xl font-extrabold text-neutral mt-1">
+            {formatAmount(metrics?.todaySales || "0", currencySymbol)}
+          </Text>
+        </View>
+        <View className="bg-success/10 p-2.5 rounded-xl border border-success/20">
+          <MaterialIcons name="payments" size={22} className="text-success" />
+        </View>
+      </TouchableOpacity>
+
+      {/* Row 4 - 2 Columns */}
+      <View className="flex-row gap-4">
         {/* Active Orders */}
         <TouchableOpacity
           activeOpacity={0.8}
@@ -158,14 +193,17 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
               },
             })
           }
-          className="bg-[#1b1b1b] px-4 py-2.5 rounded-lg flex-row items-center gap-2 mr-2"
+          className="flex-1 bg-info/5 p-4 rounded-xl border border-info/10"
         >
-          <MaterialIcons name="restaurant" size={16} color="white" />
-          <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-            ACTIVE ORDERS ({metrics?.activeOrders || 0})
-          </Text>
+          <View className="flex-row justify-between items-start">
+            <Text className="text-[10px] font-bold text-info tracking-wider uppercase">ACTIVE ORDERS</Text>
+            <MaterialIcons name="restaurant" size={16} className="text-info" />
+          </View>
+          <Text className="text-2xl font-extrabold text-neutral mt-2">{metrics?.activeOrders || 0}</Text>
+          <Text className="text-[10px] text-accent mt-1">In progress</Text>
         </TouchableOpacity>
-        {/* Scheduled */}
+
+        {/* Scheduled Orders */}
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() =>
@@ -179,33 +217,16 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
               },
             })
           }
-          className="bg-[#1b1b1b] px-4 py-2.5 rounded-lg flex-row items-center gap-2 mr-2"
+          className="flex-1 bg-secondary/5 p-4 rounded-xl border border-secondary/10"
         >
-          <MaterialIcons name="calendar-today" size={16} color="white" />
-          <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-            SCHEDULED ORDERS ({metrics?.scheduledOrders || 0})
-          </Text>
+          <View className="flex-row justify-between items-start">
+            <Text className="text-[10px] font-bold text-secondary tracking-wider uppercase">SCHEDULED</Text>
+            <MaterialIcons name="calendar-today" size={16} className="text-secondary" />
+          </View>
+          <Text className="text-2xl font-extrabold text-neutral mt-2">{metrics?.scheduledOrders || 0}</Text>
+          <Text className="text-[10px] text-accent mt-1">Booked ahead</Text>
         </TouchableOpacity>
-        {/* Sales */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() =>
-            router.push({
-              pathname: "/orders/todays-orders",
-              params: {
-                tab: "eat_in,delivery,take_away,walk_in",
-                status: "completed",
-              },
-            })
-          }
-          className="bg-[#1b1b1b] px-4 py-2.5 rounded-lg flex-row items-center gap-2"
-        >
-          <MaterialIcons name="payments" size={16} color="white" />
-          <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-            TODAY'S SALES ({formatAmount(metrics?.todaySales || "0", currencySymbol)})
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+      </View>
     </View>
   );
 }
