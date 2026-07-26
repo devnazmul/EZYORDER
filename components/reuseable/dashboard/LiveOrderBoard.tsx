@@ -1,3 +1,4 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -26,28 +27,33 @@ interface OrderStatusCardProps {
 function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCardProps) {
   let containerClass = "";
   let textClass = "";
-  let circleClass = "";
+  let iconName: keyof typeof MaterialIcons.glyphMap = "notifications-none";
+  let iconColor = "#2563eb";
 
   if (type === "new") {
     containerClass =
       "bg-blue-500/10 border-l-4 border-blue-500 p-4 flex-row justify-between items-center rounded-r-xl";
     textClass = "text-xs font-bold text-blue-800 tracking-wider";
-    circleClass = "w-6 h-6 items-center justify-center rounded-full bg-blue-500";
+    iconName = "notifications-none";
+    iconColor = "#2563eb";
   } else if (type === "preparing") {
     containerClass =
       "bg-orange-500/10 border-l-4 border-orange-500 p-4 flex-row justify-between items-center rounded-r-xl";
     textClass = "text-xs font-bold text-orange-800 tracking-wider";
-    circleClass = "bg-orange-500 w-6 h-6 items-center justify-center rounded-full";
+    iconName = "schedule";
+    iconColor = "#f97316";
   } else if (type === "completed") {
     containerClass =
       "bg-gray-500/10 border-l-4 border-gray-500 p-4 flex-row justify-between items-center rounded-r-xl opacity-60";
     textClass = "text-xs font-bold text-gray-800 tracking-wider";
-    circleClass = "bg-gray-500 w-6 h-6 items-center justify-center rounded-full";
+    iconName = "history";
+    iconColor = "#4b5563";
   } else if (type === "unpaid") {
     containerClass =
       "bg-pink-500/10 border-l-4 border-pink-500 p-4 flex-row justify-between items-center rounded-r-xl";
     textClass = "text-xs font-bold text-pink-800 tracking-wider";
-    circleClass = "bg-pink-500 w-6 h-6 items-center justify-center rounded-full";
+    iconName = "history";
+    iconColor = "#ec4899";
   }
 
   const handlePress = () => {
@@ -81,12 +87,17 @@ function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCa
     });
   };
 
+  const isFlippedIcon = type === "completed" || type === "unpaid";
+
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={handlePress} className={containerClass}>
-      <Text className={textClass}>{title}</Text>
-      <View className={circleClass}>
-        <Text className="text-white text-[11px] font-extrabold">{count}</Text>
-      </View>
+      <Text className={textClass}>{`${title} (${count})`}</Text>
+      <MaterialIcons
+        name={iconName}
+        size={22}
+        color={iconColor}
+        style={isFlippedIcon ? { transform: [{ scaleX: -1 }] } : undefined}
+      />
     </TouchableOpacity>
   );
 }
