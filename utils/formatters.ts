@@ -64,4 +64,3 @@ export function formatDateTime(date?: string, time?: string): string {
 }
 
 export { formatAmount } from "./formatAmount";
-

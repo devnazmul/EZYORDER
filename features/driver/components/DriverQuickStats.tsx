@@ -1,7 +1,8 @@
 import { formatAmount } from "@/utils/formatAmount";
 import React from "react";
 import { Text, View } from "react-native";
-import KpiCard from "./KpiCard";
+import { formatRating } from "../utils/formatRating";
+import KpiCard from "@/components/reuseable/dashboard/KpiCard";
 
 interface DriverQuickStatsProps {
   isLoadingStats: boolean;
@@ -66,7 +67,7 @@ const DriverQuickStats: React.FC<DriverQuickStatsProps> = ({
         {/* Second row: Rating */}
         <KpiCard
           title="Rating"
-          value={`${(stats?.avg_rating ?? 0).toFixed(1)} / 5.0`}
+          value={formatRating(stats?.avg_rating)}
           icon="star-border"
           iconColor="#D97706"
           gradientColors={["#FFFBEB", "#FEF3C7"]}
