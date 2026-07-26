@@ -79,3 +79,10 @@ When conditional states switch (like `isLoading = true` -> `isLoading = false`),
   - Loading root container: `<View key="loading" ...>`
   - Finished card root container: `<View key="loaded" ...>`
   - Empty state container: `<View key="empty" ...>`
+
+---
+
+## 5. Design & Typography Styling Guidelines
+
+- **Title Text Case**: Always use `capitalize` styling (e.g. Tailwind `capitalize` class) for component titles, section headers, card labels, and section titles across the application. Avoid using `uppercase` or `lowercase` for titles.
+
