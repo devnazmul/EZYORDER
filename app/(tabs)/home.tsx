@@ -80,8 +80,8 @@ export default function Home() {
 
         <KpiMetrics filterBy={filterBy} metrics={metricsQuery.data} isLoading={metricsQuery.isLoading} />
         <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm mb-6">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xs font-bold text-accent tracking-widest uppercase">
+          <View className="flex-row justify-between items-center pb-3 border-b border-base-200 mb-4">
+            <Text className="text-sm font-semibold text-neutral capitalize">
               Live Today's Order Board
             </Text>
           </View>

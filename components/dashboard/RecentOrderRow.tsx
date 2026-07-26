@@ -32,7 +32,7 @@ export default function RecentOrderRow({ order, index }: RecentOrderRowProps) {
     <View className="p-4 flex-row items-center justify-between">
       <View className="flex-1 mr-4">
         <Text className="text-xs font-bold text-neutral">#{order.id}</Text>
-        <Text className="text-[9px] text-accent uppercase font-bold mt-1">
+        <Text className="text-[9px] text-accent capitalize font-semibold mt-1">
           {customerName} • {order.type || "Order"}
           {orderTime ? ` • ${orderTime}` : ""}
         </Text>

@@ -1,6 +1,5 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import EmptyState from "../reuseable/EmptyState";
 
 interface TopDishesProps {
@@ -10,7 +9,6 @@ interface TopDishesProps {
 }
 
 export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDishesProps) {
-
   if (isLoading) {
     return (
       <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[120px] justify-center items-center">
@@ -21,11 +19,10 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
 
   return (
     <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm">
-      <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-xs font-bold text-accent tracking-widest uppercase font-semibold">
-          Top Best Sellers
+      <View className="pb-3 border-b border-base-200 mb-4">
+        <Text className="text-sm font-semibold text-neutral capitalize">
+          Top Dishes Performance {filterBy.split("_").join(" ")}
         </Text>
-        <MaterialIcons name="star-outline" size={20} color="#6E6E6E" />
       </View>
 
       {topDishes.length === 0 ? (

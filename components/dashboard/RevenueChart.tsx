@@ -100,9 +100,9 @@ export default function RevenueChart({ filterBy, revenueChart = [], isLoading }:
   return (
     <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm">
       {/* Header with Title and Total Value */}
-      <View className="flex-row justify-between items-center mb-4">
+      <View className="flex-row justify-between items-center pb-3 border-b border-base-200 mb-4">
         <View>
-          <Text className="text-[10px] font-bold text-accent tracking-widest uppercase">
+          <Text className="text-sm font-semibold text-neutral capitalize">
             Revenue {filterBy === "this_week" ? "This Week" : "This Month"}
           </Text>
           <Text className="text-base font-extrabold text-neutral mt-0.5">

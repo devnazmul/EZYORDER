@@ -22,9 +22,12 @@ export default function RecentOrders({ recentOrders = [], isLoading }: RecentOrd
   }
 
   return (
-    <View className="gap-y-3">
-      <Text className="text-base font-bold text-neutral">Recent Completed</Text>
+    <View>
       <View className="bg-base-300 rounded-xl overflow-hidden border border-base-200 shadow-sm">
+        {/* Title Header */}
+        <View className="p-4 pb-3 border-b border-base-200 flex-row justify-between items-center">
+          <Text className="text-sm font-semibold text-neutral capitalize">Recent Completed Orders</Text>
+        </View>
         {recentOrders.length === 0 ? (
           <EmptyState description="No recent completed transactions" pyClassName="py-8" />
         ) : (
@@ -42,7 +45,7 @@ export default function RecentOrders({ recentOrders = [], isLoading }: RecentOrd
           }
           className="w-full py-4 items-center justify-center border-t border-base-200"
         >
-          <Text className="text-xs font-bold text-primary uppercase">VIEW TODAY'S ORDERS</Text>
+          <Text className="text-xs font-semibold text-primary capitalize">View Today's Orders</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -9,8 +9,11 @@ interface OrdersByTypeChartProps {
   isLoading: boolean;
 }
 
-export default function OrdersByTypeChart({ filterBy, ordersByType = [], isLoading }: OrdersByTypeChartProps) {
-
+export default function OrdersByTypeChart({
+  filterBy,
+  ordersByType = [],
+  isLoading,
+}: OrdersByTypeChartProps) {
   const total = ordersByType.reduce((acc: number, curr: any) => acc + (parseInt(String(curr.value)) || 0), 0);
 
   const COLORS = ["#DC2D2A", "#00677f", "#F97316", "#06B6D4"];
@@ -47,9 +50,11 @@ export default function OrdersByTypeChart({ filterBy, ordersByType = [], isLoadi
 
   return (
     <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm">
-      <Text className="text-xs font-bold text-accent tracking-widest uppercase mb-4 font-semibold">
-        Orders by Type
-      </Text>
+      <View className="flex-row justify-between items-center pb-3 border-b border-base-200 mb-4">
+        <Text className="text-sm font-semibold text-neutral capitalize">
+          Orders by Type of {filterBy.split("_").join(" ")}
+        </Text>
+      </View>
 
       {ordersByType.length === 0 ? (
         <EmptyState description="No distribution data available" pyClassName="py-8" />
@@ -59,7 +64,7 @@ export default function OrdersByTypeChart({ filterBy, ordersByType = [], isLoadi
           <View className="w-24 h-24 items-center justify-center relative">
             <View className="absolute z-10 w-24 h-24 items-center justify-center pointer-events-none">
               <Text className="text-xs font-extrabold text-neutral">{total}</Text>
-              <Text className="text-[8px] text-accent font-bold uppercase tracking-wider">Orders</Text>
+              <Text className="text-[8px] text-accent font-bold capitalize tracking-wider">Orders</Text>
             </View>
             <Svg width={135} height={135} viewBox="0 0 96 96">
               {/* Background Base Ring */}
@@ -112,7 +117,7 @@ export default function OrdersByTypeChart({ filterBy, ordersByType = [], isLoadi
                 <View key={index} className="flex-row items-center justify-between w-[70%] mx-auto">
                   <View className="flex-row items-center gap-2">
                     <View className={`w-2 h-2 rounded-full ${colorClass}`} />
-                    <Text className="text-xs font-medium text-black uppercase">{t.name} </Text>
+                    <Text className="text-xs font-medium text-black capitalize">{t.name} </Text>
                   </View>
                   <Text className="text-xs font-bold text-neutral">{percent}%</Text>
                 </View>
