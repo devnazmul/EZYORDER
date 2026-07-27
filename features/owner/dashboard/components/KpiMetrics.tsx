@@ -5,14 +5,21 @@ import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import { View } from "react-native";
+import SparklineChart from "./SparklineChart";
 
 interface KpiMetricsProps {
   filterBy: string;
   metrics: any;
+  revenueChart?: any[];
   isLoading: boolean;
 }
 
-export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMetricsProps) {
+export default function KpiMetrics({
+  filterBy,
+  metrics = {},
+  revenueChart = [],
+  isLoading,
+}: KpiMetricsProps) {
   const { settings } = useData();
 
   const currencySymbol = useMemo(() => {
@@ -23,6 +30,11 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
     const trend = metrics?.revenueTrend || "";
     return trend.includes("-");
   }, [metrics?.revenueTrend]);
+
+  const sparklineData = useMemo(() => {
+    if (!revenueChart || !Array.isArray(revenueChart)) return [];
+    return revenueChart.map((d: any) => parseFloat(d.value) || 0);
+  }, [revenueChart]);
 
   if (isLoading) {
     return (
@@ -55,6 +67,7 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
       <View className="flex-1">
         <KpiCard
           variant="dark"
+          minHeight={140}
           title={filterBy === "this_week" ? "This Week Revenue" : "This Month Revenue"}
           value={formatAmount(metrics?.revenue || "0", currencySymbol)}
           icon="currency-pound"
@@ -66,6 +79,18 @@ export default function KpiMetrics({ filterBy, metrics = {}, isLoading }: KpiMet
             metrics?.revenueTrend
               ? `${metrics.revenueTrend} vs ${filterBy === "this_week" ? "Last Week" : "Last Month"}`
               : undefined
+          }
+          rightElement={
+            sparklineData.length > 0 ? (
+              <SparklineChart
+                data={sparklineData}
+                width={170}
+                height={80}
+                paddingBottom={30}
+                strokeColor={isNegativeTrend ? "#DC2D2A" : "#10B981"}
+                gradientId={isNegativeTrend ? "revenueSparklineNeg" : "revenueSparklinePos"}
+              />
+            ) : null
           }
           onPress={() =>
             router.push({

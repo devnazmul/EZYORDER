@@ -19,7 +19,9 @@ export interface KpiCardProps {
 
   valueClassName?: string;
   containerClassName?: string;
+  minHeight?: number;
   subtitle?: string;
+  rightElement?: React.ReactNode;
   onPress?: () => void;
 }
 
@@ -36,7 +38,9 @@ export default function KpiCard({
   loading = false,
   valueClassName = "",
   containerClassName = "",
+  minHeight,
   subtitle,
+  rightElement,
   onPress,
 }: KpiCardProps) {
   // SKELETON LOADER STATE
@@ -74,6 +78,7 @@ export default function KpiCard({
         borderRadius: 16,
         borderWidth: 1,
         borderColor: variant === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+        ...(minHeight ? { minHeight } : {}),
       }}
       className={`min-h-[110px] flex-1 p-4 shadow-sm ${containerClassName}`}
     >
@@ -100,47 +105,52 @@ export default function KpiCard({
             {title}
           </Text>
         </View>
-        <View>
-          <Text
-            className={`text-2xl font-bold mt-1 ${
-              variant === "dark" ? "text-base-100" : "text-neutral"
-            } ${valueClassName}`}
-          >
-            {value}
-          </Text>
-
-          {subtitle ? (
+        <View className="flex-row items-end justify-between">
+          <View>
             <Text
-              className={`text-[10px] font-medium mt-0.5 ${
-                variant === "dark" ? "text-white/70" : "text-accent"
-              }`}
+              className={`text-2xl font-bold mt-1 ${
+                variant === "dark" ? "text-base-100" : "text-neutral"
+              } ${valueClassName}`}
             >
-              {subtitle}
+              {value}
             </Text>
-          ) : null}
 
-          {/* Trend Badge */}
-          {trend && (
-            <View
-              className={`flex-row items-center self-start px-1.5 py-1 rounded-full gap-1 mt-2 ${
-                trend === "up" ? "bg-success/20" : trend === "down" ? "bg-error/20" : "bg-white/10"
-              }`}
-            >
-              <MaterialIcons
-                name={trend === "up" ? "trending-up" : trend === "down" ? "trending-down" : "trending-flat"}
-                size={14}
-                color={trend === "up" ? "#36d399" : trend === "down" ? "#ff8369" : "rgba(255, 255, 255, 0.7)"}
-              />
+            {subtitle ? (
               <Text
-                className={`text-[8px] font-medium capitalize truncate ${
-                  trend === "up" ? "text-success" : trend === "down" ? "text-error" : "text-white/70"
+                className={`text-[10px] font-medium mt-0.5 ${
+                  variant === "dark" ? "text-white/70" : "text-accent"
                 }`}
-                numberOfLines={1}
               >
-                {trendText}
+                {subtitle}
               </Text>
-            </View>
-          )}
+            ) : null}
+
+            {/* Trend Badge */}
+            {trend && (
+              <View
+                className={`flex-row items-center self-start px-1.5 py-1 rounded-full gap-1 mt-2 ${
+                  trend === "up" ? "bg-success/20" : trend === "down" ? "bg-error/20" : "bg-white/10"
+                }`}
+              >
+                <MaterialIcons
+                  name={trend === "up" ? "trending-up" : trend === "down" ? "trending-down" : "trending-flat"}
+                  size={14}
+                  color={trend === "up" ? "#36d399" : trend === "down" ? "#ff8369" : "rgba(255, 255, 255, 0.7)"}
+                />
+                <Text
+                  className={`text-[8px] font-medium capitalize truncate ${
+                    trend === "up" ? "text-success" : trend === "down" ? "text-error" : "text-white/70"
+                  }`}
+                  numberOfLines={1}
+                >
+                  {trendText}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Right Element Slot */}
+          {rightElement ? <View className="justify-end items-end">{rightElement}</View> : null}
         </View>
       </View>
     </LinearGradient>
