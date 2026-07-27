@@ -1,8 +1,9 @@
+import ActionCard from "@/components/reuseable/cards/ActionCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import { router } from "expo-router";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 
 interface PromotionsProps {
   promotions: any[];
@@ -10,31 +11,19 @@ interface PromotionsProps {
 }
 
 export default function Promotions({ promotions = [], isLoading }: PromotionsProps) {
-  if (isLoading) {
-    return (
-      <View className="mb-6 gap-y-3">
-        <Text className="text-base font-bold text-neutral">Promotions &amp; Menu</Text>
-        <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[120px] justify-center items-center">
-          <Text className="text-xs text-accent">Loading promotions...</Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View className="mb-6">
-      {/* Promotions List Card */}
-      <View className="bg-base-300 rounded-xl overflow-hidden border border-base-200 shadow-sm">
-        {/* Title Header */}
-        <View className="p-4 pb-3 border-b border-base-200 flex-row justify-between items-center">
-          <Text className="text-sm font-semibold text-neutral capitalize">
-            Promotions &amp; Menu Insights
-          </Text>
-        </View>
+      <ActionCard
+        title="Promotions & Menu Insights"
+        isLoading={isLoading}
+        loadingText="Loading promotions..."
+        actionLabel="Manage All"
+        onActionPress={() => router.push("/more/discounts-and-campaigns")}
+      >
         {promotions.length === 0 ? (
-          <EmptyState description="No active promotions" pyClassName="py-8" />
+          <EmptyState key="empty" description="No active promotions" pyClassName="py-8" />
         ) : (
-          <View className="divide-y divide-base-200">
+          <View key="loaded" className="divide-y divide-base-200">
             {promotions.map((promo: any, idx: number) => (
               <View key={idx} className="p-4 flex-row items-center justify-between">
                 <View className="flex-1 mr-4">
@@ -58,16 +47,7 @@ export default function Promotions({ promotions = [], isLoading }: PromotionsPro
             ))}
           </View>
         )}
-
-        {/* Bottom Manage All Action Button */}
-        <TouchableOpacity
-          onPress={() => router.push("/more/discounts-and-campaigns")}
-          activeOpacity={0.7}
-          className="w-full py-4 items-center justify-center border-t border-base-200"
-        >
-          <Text className="text-xs font-semibold text-primary capitalize">Manage All</Text>
-        </TouchableOpacity>
-      </View>
+      </ActionCard>
     </View>
   );
 }
