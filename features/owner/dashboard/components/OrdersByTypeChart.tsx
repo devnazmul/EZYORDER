@@ -1,7 +1,7 @@
 import EmptyState from "@/components/reuseable/EmptyState";
 import ActionCard from "@/components/reuseable/cards/ActionCard";
 import { router } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
 import { getOrderTypeColor } from "../constants/orderTypeColors";
@@ -22,7 +22,13 @@ export default function OrdersByTypeChart({
   ordersByType = [],
   isLoading,
 }: OrdersByTypeChartProps) {
-  const total = ordersByType.reduce((acc: number, curr: OrderTypeItem) => acc + (curr.value || 0), 0);
+  // Sort order types descending by value (highest to lowest)
+  const sortedOrdersByType = useMemo(() => {
+    if (!ordersByType || !Array.isArray(ordersByType)) return [];
+    return [...ordersByType].sort((a, b) => (b.value || 0) - (a.value || 0));
+  }, [ordersByType]);
+
+  const total = sortedOrdersByType.reduce((acc: number, curr: OrderTypeItem) => acc + (curr.value || 0), 0);
 
   const handleItemPress = (name: string) => {
     const tabKey = String(name || "")
@@ -65,7 +71,7 @@ export default function OrdersByTypeChart({
         })
       }
     >
-      {ordersByType.length === 0 ? (
+      {sortedOrdersByType.length === 0 ? (
         <View key="empty">
           <EmptyState description="No distribution data available" pyClassName="py-8" />
         </View>
@@ -89,7 +95,7 @@ export default function OrdersByTypeChart({
               />
               {total > 0 && (
                 <G transform="rotate(-90 48 48)">
-                  {ordersByType.map((item, idx) => {
+                  {sortedOrdersByType.map((item, idx) => {
                     const percentage = ((item.value || 0) / total) * 100;
                     const strokeLength = (percentage / 100) * circumference;
                     const rotateAngle = (accumulatedPercentage / 100) * 360;
@@ -119,7 +125,7 @@ export default function OrdersByTypeChart({
 
           {/* List Legend items with percentages */}
           <View className="flex-1 ml-6 gap-y-2">
-            {ordersByType.map((t, index) => {
+            {sortedOrdersByType.map((t, index) => {
               const countVal = t.value || 0;
               const percent = total > 0 ? ((countVal / total) * 100).toFixed(0) : "0";
               const color = getOrderTypeColor(t.name);
