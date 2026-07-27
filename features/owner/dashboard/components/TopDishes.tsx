@@ -1,8 +1,9 @@
 import Badge from "@/components/reuseable/Badge";
 import EmptyState from "@/components/reuseable/EmptyState";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface TopDishItem {
   name: string;
@@ -18,12 +19,37 @@ interface TopDishesProps {
 }
 
 const LEADERBOARD_CONFIG = [
-  { rowStyle: { backgroundColor: "rgba(234, 179, 8, 0.12)", borderColor: "rgba(234, 179, 8, 0.35)" }, color: "#EAB308", trophy: "#FFD700" },
-  { rowStyle: { backgroundColor: "rgba(148, 163, 184, 0.18)", borderColor: "rgba(148, 163, 184, 0.4)" }, color: "#94A3B8", trophy: "#C0C0C0" },
-  { rowStyle: { backgroundColor: "rgba(180, 83, 9, 0.14)", borderColor: "rgba(180, 83, 9, 0.35)" }, color: "#B45309", trophy: "#CD7F32" },
+  {
+    rowStyle: { backgroundColor: "rgba(234, 179, 8, 0.12)", borderColor: "rgba(234, 179, 8, 0.35)" },
+    color: "#EAB308",
+    trophy: "#FFD700",
+  },
+  {
+    rowStyle: { backgroundColor: "rgba(148, 163, 184, 0.18)", borderColor: "rgba(148, 163, 184, 0.4)" },
+    color: "#94A3B8",
+    trophy: "#C0C0C0",
+  },
+  {
+    rowStyle: { backgroundColor: "rgba(180, 83, 9, 0.14)", borderColor: "rgba(180, 83, 9, 0.35)" },
+    color: "#B45309",
+    trophy: "#CD7F32",
+  },
 ];
 
 export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDishesProps) {
+  const handleDishPress = (dishName: string) => {
+    router.push({
+      pathname: "/orders/all-orders",
+      params: {
+        tab: "eat_in,delivery,take_away,walk_in",
+        filterBy,
+        date_filter: filterBy,
+        dish_ids: dishName,
+        dish_name: dishName,
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <View
@@ -53,8 +79,10 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
             const cfg = LEADERBOARD_CONFIG[i];
 
             return (
-              <View
+              <TouchableOpacity
                 key={dish.name || i}
+                onPress={() => handleDishPress(dish.name)}
+                activeOpacity={0.7}
                 className="flex-row items-center justify-between p-3 border rounded-xl gap-x-3 bg-base-100/50 border-base-200"
                 style={cfg?.rowStyle}
               >
@@ -64,7 +92,10 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
                     className="w-7 h-7 rounded-full items-center justify-center bg-primary/10 overflow-hidden"
                     style={cfg ? { backgroundColor: cfg.color } : undefined}
                   >
-                    <Text className="text-xs font-bold text-primary" style={cfg ? { color: "#FFFFFF" } : undefined}>
+                    <Text
+                      className="text-xs font-bold text-primary"
+                      style={cfg ? { color: "#FFFFFF" } : undefined}
+                    >
                       {i + 1}
                     </Text>
                   </View>
@@ -73,7 +104,11 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
                     <Text className="text-xs font-bold text-neutral truncate capitalize" numberOfLines={1}>
                       {dish.name}
                     </Text>
-                    <Badge text={`${dish.total_quantity} sold`} containerClassName="-ml-1" />
+                    <Badge
+                      text={`${dish.total_quantity} sold`}
+                      containerClassName="-ml-1 bg-primary/10 border border-primary/20 "
+                      textClassName="text-primary opacity-80"
+                    />
                   </View>
                 </View>
 
@@ -83,7 +118,10 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
                   <View className="h-2 bg-base-200/70 rounded-full overflow-hidden w-16">
                     <View
                       className="bg-primary h-full rounded-full"
-                      style={[{ width: `${dish.percent}%` }, cfg ? { backgroundColor: cfg.color } : undefined]}
+                      style={[
+                        { width: `${dish.percent}%` },
+                        cfg ? { backgroundColor: cfg.color } : undefined,
+                      ]}
                     />
                   </View>
                 </View>
@@ -92,7 +130,7 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
                 <View className="w-6 items-center justify-center">
                   {cfg ? <Ionicons name="trophy" size={20} color={cfg.trophy} /> : null}
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
         </View>

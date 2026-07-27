@@ -60,7 +60,9 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
       searchParams.tab ||
       searchParams.is_schedule_order ||
       searchParams.status ||
-      searchParams.payment_status
+      searchParams.payment_status ||
+      searchParams.dish_ids ||
+      searchParams.dish_name
     ) {
       if (pathname.includes("todays-orders")) {
         setActiveTab("live");
@@ -82,6 +84,8 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         exclude_status: searchParams.exclude_status || "",
         date_filter: (searchParams.date_filter as string) || (searchParams.filterBy as string) || "",
         is_schedule_order: searchParams.is_schedule_order || "",
+        dish_ids: searchParams.dish_ids || "",
+        dish_name: searchParams.dish_name || "",
       });
 
       // Clear the query parameters from the router state so they don't trigger again
@@ -93,6 +97,8 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         is_schedule_order: undefined as any,
         status: undefined as any,
         payment_status: undefined as any,
+        dish_ids: undefined as any,
+        dish_name: undefined as any,
       });
     }
   }, [
@@ -103,6 +109,8 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     searchParams.is_schedule_order,
     searchParams.status,
     searchParams.payment_status,
+    searchParams.dish_ids,
+    searchParams.dish_name,
     pathname,
   ]);
 
@@ -168,7 +176,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         id: "table_number",
         label: "Table Number",
         type: "text",
-        keyboardType: "numeric",
+        keyboardType: "default",
       },
       { id: "date_range", label: "Date Range", type: "date-range" },
       { id: "amount_range", label: "Price Range", type: "number-range" },
@@ -189,6 +197,12 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     }
     if (filterValues.is_schedule_order) {
       params.is_schedule_order = filterValues.is_schedule_order;
+    }
+    if (filterValues.dish_ids) {
+      params.dish_ids = filterValues.dish_ids;
+    }
+    if (filterValues.dish_name) {
+      params.dish_name = filterValues.dish_name;
     }
 
     if (debouncedSearchQuery.trim()) {
