@@ -7,7 +7,6 @@ import {
   useMarkAllAsReadMutation,
   useMarkNotificationAsReadMutation,
   useNotificationsQuery,
-  useNotificationUnreadCountQuery,
 } from "@/hooks/useNotificationQueries";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -19,10 +18,10 @@ export default function Notifications() {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState("all");
 
-  // Fetch queries
-  const { data: notifications = [], isLoading, isRefetching, refetch } = useNotificationsQuery(token || "");
-  const { data: unreadCountData = { count: 0 } } = useNotificationUnreadCountQuery(token || "");
-  const unreadCount = unreadCountData?.count || 0;
+  // Fetch single query returning both notifications list & unread count
+  const { data: notificationData, isLoading, isRefetching, refetch } = useNotificationsQuery(token || "");
+  const notifications = notificationData?.list || [];
+  const unreadCount = notificationData?.unreadCount || 0;
 
   console.log("notification", notifications);
 

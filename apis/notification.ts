@@ -61,28 +61,6 @@ export const getNotifications = async (
   return null;
 };
 
-export const getUnreadCount = async (token: string) => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/v1.0/notifications`, {
-      headers: getHeaders(token),
-      params: {
-        page: 1,
-        per_page: 1,
-      },
-      validateStatus: () => true,
-    });
-
-    logApiResponse("GET UNREAD COUNT RESPONSE: ", response.data);
-
-    if (response.status === 200 && response.data?.success) {
-      return { count: response.data.data?.total_unread_count || 0 };
-    }
-  } catch (error) {
-    console.error("Error fetching unread count:", error);
-  }
-  return { count: 0 };
-};
-
 export const changeNotificationStatus = async (token: string, notificationIds: (string | number)[]) => {
   const response = await axios.put(
     `${API_BASE_URL}/v1.0/notifications/change-status`,

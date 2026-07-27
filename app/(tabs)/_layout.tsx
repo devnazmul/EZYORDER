@@ -1,83 +1,45 @@
 import AppHeader from "@/components/AppHeader";
 import { useAuth } from "@/context/AuthContext";
-import { useNotificationUnreadCountQuery } from "@/hooks/useNotificationQueries";
+import { useNotificationsQuery } from "@/hooks/useNotificationQueries";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Redirect, Tabs, usePathname } from "expo-router";
-import React, { useEffect, useRef } from "react";
-import { Animated, Text, View } from "react-native";
+import React from "react";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function PulseDot() {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const opacityAnim = useRef(new Animated.Value(0.6)).current;
+function NotificationBadge({ count }: { count: number }) {
+  if (!count || count <= 0) return null;
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 2.2,
-            duration: 1200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 0,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(opacityAnim, {
-            toValue: 0,
-            duration: 1200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 0.6,
-            duration: 0,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]),
-    ).start();
-  }, [pulseAnim, opacityAnim]);
+  const displayCount = count > 99 ? "99+" : String(count);
 
   return (
     <View
       style={{
         position: "absolute",
-        top: 0,
-        right: 0,
-        width: 8,
-        height: 8,
+        top: -4,
+        right: -7,
+        backgroundColor: "#DC2D2A",
+        minWidth: 17,
+        height: 16,
+        borderRadius: 9999,
+        paddingHorizontal: 1,
         alignItems: "center",
         justifyContent: "center",
+        borderWidth: 1.5,
+        borderColor: "#FFFFFF",
       }}
     >
-      {/* Pulsing ring */}
-      <Animated.View
+      <Text
         style={{
-          width: 8,
-          height: 8,
-          borderRadius: 4,
-          backgroundColor: "#DC2D2A",
-          transform: [{ scale: pulseAnim }],
-          opacity: opacityAnim,
-          position: "absolute",
+          color: "#FFFFFF",
+          fontSize: 9,
+          fontWeight: "bold",
+          textAlign: "center",
+          includeFontPadding: false,
         }}
-      />
-      {/* Solid inner dot */}
-      <View
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: "#DC2D2A",
-          borderWidth: 1,
-          borderColor: "#FFFFFF",
-          position: "absolute",
-        }}
-      />
+      >
+        {displayCount}
+      </Text>
     </View>
   );
 }
@@ -87,8 +49,8 @@ export default function TabsLayout() {
   const { token, user } = useAuth();
   const pathname = usePathname();
 
-  const { data } = useNotificationUnreadCountQuery(token || "");
-  const hasUnread = data?.count > 0 ? true : false;
+  const { data: notificationData } = useNotificationsQuery(token || "");
+  const unreadCount = Number(notificationData?.unreadCount || 0);
 
   if (!token) {
     return <Redirect href="/(auth)/login" />;
@@ -177,7 +139,7 @@ export default function TabsLayout() {
             tabBarIcon: ({ color }) => (
               <View style={{ width: 24, height: 24 }}>
                 <MaterialIcons name="notifications" size={24} color={color} />
-                {hasUnread && <PulseDot />}
+                <NotificationBadge count={unreadCount} />
               </View>
             ),
           }}
