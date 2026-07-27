@@ -56,6 +56,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     if (
       searchParams.exclude_status ||
       searchParams.date_filter ||
+      searchParams.filterBy ||
       searchParams.tab ||
       searchParams.is_schedule_order ||
       searchParams.status ||
@@ -79,7 +80,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         date_range: { start: "", end: "" },
         amount_range: { min: "", max: "" },
         exclude_status: searchParams.exclude_status || "",
-        date_filter: searchParams.date_filter || "",
+        date_filter: (searchParams.date_filter as string) || (searchParams.filterBy as string) || "",
         is_schedule_order: searchParams.is_schedule_order || "",
       });
 
@@ -97,6 +98,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
   }, [
     searchParams.exclude_status,
     searchParams.date_filter,
+    searchParams.filterBy,
     searchParams.tab,
     searchParams.is_schedule_order,
     searchParams.status,

@@ -1,11 +1,19 @@
 import EmptyState from "@/components/reuseable/EmptyState";
+import ActionCard from "@/components/reuseable/cards/ActionCard";
+import { router } from "expo-router";
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
+import { getOrderTypeColor } from "../constants/orderTypeColors";
+
+interface OrderTypeItem {
+  name: string;
+  value: number;
+}
 
 interface OrdersByTypeChartProps {
   filterBy: string;
-  ordersByType: any[];
+  ordersByType: OrderTypeItem[];
   isLoading: boolean;
 }
 
@@ -14,32 +22,23 @@ export default function OrdersByTypeChart({
   ordersByType = [],
   isLoading,
 }: OrdersByTypeChartProps) {
-  const total = ordersByType.reduce((acc: number, curr: any) => acc + (parseInt(String(curr.value)) || 0), 0);
+  const total = ordersByType.reduce((acc: number, curr: OrderTypeItem) => acc + (curr.value || 0), 0);
 
-  const COLORS = ["#DC2D2A", "#00677f", "#F97316", "#06B6D4"];
-
-  const getLegendColorClass = (index: number) => {
-    switch (index % 4) {
-      case 0:
-        return "bg-primary";
-      case 1:
-        return "bg-secondary";
-      case 2:
-        return "bg-orange-500";
-      case 3:
-        return "bg-cyan-500";
-      default:
-        return "bg-accent";
-    }
+  const handleItemPress = (name: string) => {
+    const tabKey = String(name || "")
+      .toLowerCase()
+      .trim()
+      .split(" ")
+      .join("_");
+    router.push({
+      pathname: "/orders/all-orders",
+      params: {
+        tab: tabKey,
+        filterBy,
+        date_filter: filterBy,
+      },
+    });
   };
-
-  if (isLoading) {
-    return (
-      <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[160px] justify-center items-center">
-        <Text className="text-xs text-accent">Loading distribution...</Text>
-      </View>
-    );
-  }
 
   // SVG Configuration
   const radius = 28;
@@ -49,17 +48,29 @@ export default function OrdersByTypeChart({
   let accumulatedPercentage = 0;
 
   return (
-    <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm">
-      <View className="flex-row justify-between items-center pb-3 border-b border-base-200 mb-4">
-        <Text className="text-sm font-semibold text-neutral capitalize">
-          Orders by Type of {filterBy.split("_").join(" ")}
-        </Text>
-      </View>
-
+    <ActionCard
+      title={`Orders by Type of ${filterBy.split("_").join(" ")}`}
+      isLoading={isLoading}
+      loadingText="Loading distribution..."
+      bodyClassName="p-4"
+      actionLabel="View All Orders"
+      onActionPress={() =>
+        router.push({
+          pathname: "/orders/all-orders",
+          params: {
+            tab: "eat_in,delivery,take_away,walk_in",
+            filterBy,
+            date_filter: filterBy,
+          },
+        })
+      }
+    >
       {ordersByType.length === 0 ? (
-        <EmptyState description="No distribution data available" pyClassName="py-8" />
+        <View key="empty">
+          <EmptyState description="No distribution data available" pyClassName="py-8" />
+        </View>
       ) : (
-        <View className="flex-row items-center justify-between px-2">
+        <View className="flex-row items-center justify-between px-2 py-1">
           {/* Custom SVG Donut Pie Chart */}
           <View className="w-24 h-24 items-center justify-center relative">
             <View className="absolute z-10 w-24 h-24 items-center justify-center pointer-events-none">
@@ -78,12 +89,12 @@ export default function OrdersByTypeChart({
               />
               {total > 0 && (
                 <G transform="rotate(-90 48 48)">
-                  {ordersByType.map((item: any, idx: number) => {
-                    const val = parseFloat(String(item.value)) || 0;
-                    const percentage = (val / total) * 100;
+                  {ordersByType.map((item, idx) => {
+                    const percentage = ((item.value || 0) / total) * 100;
                     const strokeLength = (percentage / 100) * circumference;
                     const rotateAngle = (accumulatedPercentage / 100) * 360;
                     accumulatedPercentage += percentage;
+                    const color = getOrderTypeColor(item.name);
 
                     return (
                       <Circle
@@ -92,11 +103,12 @@ export default function OrdersByTypeChart({
                         cy="48"
                         r={radius}
                         fill="transparent"
-                        stroke={COLORS[idx % COLORS.length]}
+                        stroke={color}
                         strokeWidth={strokeWidth}
                         strokeDasharray={`${strokeLength} ${circumference}`}
                         strokeDashoffset={0}
                         transform={`rotate(${rotateAngle} 48 48)`}
+                        onPress={() => handleItemPress(item.name)}
                       />
                     );
                   })}
@@ -107,25 +119,30 @@ export default function OrdersByTypeChart({
 
           {/* List Legend items with percentages */}
           <View className="flex-1 ml-6 gap-y-2">
-            {ordersByType.map((t: any, index: number) => {
-              console.log(t);
-              const countVal = parseInt(String(t.value)) || 0;
+            {ordersByType.map((t, index) => {
+              const countVal = t.value || 0;
               const percent = total > 0 ? ((countVal / total) * 100).toFixed(0) : "0";
-              const colorClass = getLegendColorClass(index);
+              const color = getOrderTypeColor(t.name);
 
               return (
-                <View key={index} className="flex-row items-center justify-between w-[70%] mx-auto">
-                  <View className="flex-row items-center gap-2">
-                    <View className={`w-2 h-2 rounded-full ${colorClass}`} />
-                    <Text className="text-xs font-medium text-black capitalize">{t.name} </Text>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleItemPress(t.name)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center justify-between w-[90%] py-0.5 mx-auto"
+                >
+                  <View className="flex-row items-center gap-1.5">
+                    <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                    <Text className="text-xs font-medium text-neutral capitalize">{t.name}</Text>
+                    <Text className="text-xs font-medium text-neutral/40">({percent}%)</Text>
                   </View>
-                  <Text className="text-xs font-bold text-neutral">{percent}%</Text>
-                </View>
+                  <Text className="text-xs font-bold text-neutral">{countVal}</Text>
+                </TouchableOpacity>
               );
             })}
           </View>
         </View>
       )}
-    </View>
+    </ActionCard>
   );
 }
