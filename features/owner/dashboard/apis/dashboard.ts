@@ -1,4 +1,5 @@
 import ENV from "@/config/env";
+import { logApiResponse } from "@/utils/logApiResponse";
 import axios from "axios";
 
 const API_BASE_URL = ENV.API_BASE_URL;
@@ -14,6 +15,7 @@ export const getDashboardMetric = async (token: string, filterBy: string) => {
     params: { date_filter: filterBy },
     validateStatus: () => true,
   });
+  logApiResponse("Dashboard Metrics", response.data);
   return response.status === 200 && response.data?.success ? response.data.data : null;
 };
 
@@ -22,6 +24,7 @@ export const getDashboardLiveOrderBoard = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
+  logApiResponse("Dashboard Live Order Board", response.data);
   return response.status === 200 && response.data?.success ? response.data.data : null;
 };
 
@@ -31,7 +34,7 @@ export const getDashboardRevenueChart = async (token: string, filterBy: string) 
     params: { date_filter: filterBy },
     validateStatus: () => true,
   });
-  console.log(response.data);
+  logApiResponse("Dashboard Revenue Chart", response.data);
   return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
 
@@ -41,6 +44,7 @@ export const getDashboardOrdersByType = async (token: string, filterBy: string) 
     params: { date_filter: filterBy },
     validateStatus: () => true,
   });
+  logApiResponse("Dashboard Orders By Type", response.data);
   return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
 
@@ -49,6 +53,7 @@ export const getDashboardKitchenActivity = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
+  logApiResponse("Dashboard Kithen Activity", response.data);
   return response.status === 200 && response.data?.success ? response.data.data : null;
 };
 
@@ -57,7 +62,7 @@ export const getDashboardCouponUsages = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
-  console.log(response.data);
+  logApiResponse("Dashboard Coupoon Usages", response.data);
   return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
 
@@ -66,7 +71,7 @@ export const getDashboardRecentOrders = async (token: string) => {
     headers: getHeaders(token),
     validateStatus: () => true,
   });
-  console.log(response.data);
+  logApiResponse("Dashboard Recent Orders", response.data);
   return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
 
@@ -76,5 +81,6 @@ export const getDashboardTopDishes = async (token: string, filterBy: string) => 
     params: { date_filter: filterBy },
     validateStatus: () => true,
   });
+  logApiResponse("Dashboard Top Dishes", response.data);
   return response.status === 200 && response.data?.success ? response.data.data || [] : [];
 };
