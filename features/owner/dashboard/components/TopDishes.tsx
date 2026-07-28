@@ -101,7 +101,7 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
                   </View>
 
                   <View className="flex-1 min-w-0 items-start gap-1">
-                    <Text className="text-xs font-bold text-neutral truncate capitalize" numberOfLines={1}>
+                    <Text className="text-xs font-bold text-neutral capitalize">
                       {dish.name}
                     </Text>
                     <Badge
