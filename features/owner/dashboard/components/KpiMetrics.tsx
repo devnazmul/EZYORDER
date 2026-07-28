@@ -2,6 +2,7 @@ import KpiCard from "@/components/reuseable/dashboard/KpiCard";
 import { useData } from "@/context/context/DataContext";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import { View } from "react-native";
@@ -166,6 +167,19 @@ export default function KpiMetrics({
         iconColor="#FFFFFF"
         iconBgColor="#F43F5E"
         gradientColors={["#881337", "#4C0519"]}
+        rightElement={
+          <View
+            style={{
+              transform: [{ rotate: "-17deg" }],
+              opacity: 0.05,
+              position: "absolute",
+              bottom: -7,
+            }}
+            className="justify-center items-center pr-2 pb-1"
+          >
+            <Ionicons name="receipt-outline" size={80} color="#FFFFFF" />
+          </View>
+        }
         onPress={() =>
           router.push({
             pathname: "/orders/todays-orders",
