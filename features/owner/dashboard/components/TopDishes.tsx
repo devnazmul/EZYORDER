@@ -5,6 +5,8 @@ import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
+import TopDishesSkeleton from "./skeletons/TopDishesSkeleton";
+
 interface TopDishItem {
   name: string;
   total_quantity: number;
@@ -51,14 +53,7 @@ export default function TopDishes({ filterBy, topDishes = [], isLoading }: TopDi
   };
 
   if (isLoading) {
-    return (
-      <View
-        key="loading"
-        className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[120px] justify-center items-center"
-      >
-        <Text className="text-xs text-accent">Loading top dishes...</Text>
-      </View>
-    );
+    return <TopDishesSkeleton />;
   }
 
   return (

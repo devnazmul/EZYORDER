@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React from "react";
 import { View } from "react-native";
 import RecentOrderRow from "./RecentOrderRow";
+import RecentOrdersSkeleton from "./skeletons/RecentOrdersSkeleton";
 
 interface RecentOrdersProps {
   recentOrders: any[];
@@ -16,7 +17,7 @@ export default function RecentOrders({ recentOrders = [], isLoading }: RecentOrd
       <ActionCard
         title="Recent Completed Orders"
         isLoading={isLoading}
-        loadingText="Loading transactions..."
+        skeleton={<RecentOrdersSkeleton />}
         actionLabel="View Today's Orders"
         actionClassName="bg-primary"
         actionTextClassName="text-white"

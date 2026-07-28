@@ -84,7 +84,7 @@ export default function OwnerDashboardScreen() {
             filterBy={filterBy}
             metrics={metricsQuery.data}
             revenueChart={revenueChartQuery.data}
-            isLoading={metricsQuery.isLoading}
+            isLoading={metricsQuery.isLoading || metricsQuery.isRefetching}
           />
           <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm mb-6">
             <View className="flex-row justify-between items-center pb-3 border-b border-base-200 mb-4">
@@ -92,7 +92,7 @@ export default function OwnerDashboardScreen() {
             </View>
             <LiveOrderBoard
               liveOrderBoard={liveOrderBoardQuery.data}
-              isLoading={liveOrderBoardQuery.isLoading}
+              isLoading={liveOrderBoardQuery.isLoading || liveOrderBoardQuery.isRefetching}
             />
           </View>
 
@@ -100,27 +100,33 @@ export default function OwnerDashboardScreen() {
             <RevenueChart
               filterBy={filterBy}
               revenueChart={revenueChartQuery.data}
-              isLoading={revenueChartQuery.isLoading}
+              isLoading={revenueChartQuery.isLoading || revenueChartQuery.isRefetching}
               resetKey={resetKey}
             />
             <OrdersByTypeChart
               filterBy={filterBy}
               ordersByType={ordersByTypeQuery.data}
-              isLoading={ordersByTypeQuery.isLoading}
+              isLoading={ordersByTypeQuery.isLoading || ordersByTypeQuery.isRefetching}
             />
             <TopDishes
               filterBy={filterBy}
               topDishes={topDishesQuery.data}
-              isLoading={topDishesQuery.isLoading}
+              isLoading={topDishesQuery.isLoading || topDishesQuery.isRefetching}
             />
           </View>
 
           <KitchenActivity
             kitchenActivity={kitchenActivityQuery.data}
-            isLoading={kitchenActivityQuery.isLoading}
+            isLoading={kitchenActivityQuery.isLoading || kitchenActivityQuery.isRefetching}
           />
-          <Promotions promotions={promotionsQuery.data} isLoading={promotionsQuery.isLoading} />
-          <RecentOrders recentOrders={recentOrdersQuery.data} isLoading={recentOrdersQuery.isLoading} />
+          <Promotions
+            promotions={promotionsQuery.data}
+            isLoading={promotionsQuery.isLoading || promotionsQuery.isRefetching}
+          />
+          <RecentOrders
+            recentOrders={recentOrdersQuery.data}
+            isLoading={recentOrdersQuery.isLoading || recentOrdersQuery.isRefetching}
+          />
         </Pressable>
       </ScrollView>
     </SafeAreaView>

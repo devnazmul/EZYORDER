@@ -4,6 +4,7 @@ import StatusBadge from "@/components/reuseable/StatusBadge";
 import { router } from "expo-router";
 import React from "react";
 import { Text, View } from "react-native";
+import PromotionsSkeleton from "./skeletons/PromotionsSkeleton";
 
 interface PromotionsProps {
   promotions: any[];
@@ -16,7 +17,7 @@ export default function Promotions({ promotions = [], isLoading }: PromotionsPro
       <ActionCard
         title="Promotions & Menu Insights"
         isLoading={isLoading}
-        loadingText="Loading promotions..."
+        skeleton={<PromotionsSkeleton />}
         actionLabel="Manage All"
         onActionPress={() => router.push("/more/discounts-and-campaigns")}
       >

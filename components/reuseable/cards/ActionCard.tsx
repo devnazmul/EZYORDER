@@ -35,6 +35,10 @@ export interface ActionCardProps {
    */
   loadingText?: string;
   /**
+   * Optional custom skeleton loader node rendered when isLoading is true.
+   */
+  skeleton?: React.ReactNode;
+  /**
    * Outer container Tailwind className overrides.
    */
   containerClassName?: string;
@@ -69,6 +73,7 @@ export default function ActionCard({
   actionElement,
   isLoading = false,
   loadingText = "Loading...",
+  skeleton,
   containerClassName = "",
   headerClassName = "",
   titleClassName = "",
@@ -77,6 +82,9 @@ export default function ActionCard({
   actionTextClassName = "",
 }: ActionCardProps) {
   if (isLoading) {
+    if (skeleton) {
+      return <>{skeleton}</>;
+    }
     return (
       <View
         key="loading"

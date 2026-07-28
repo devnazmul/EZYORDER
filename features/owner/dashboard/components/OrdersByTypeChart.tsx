@@ -5,6 +5,7 @@ import React, { useMemo } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
 import { getOrderTypeColor } from "../constants/orderTypeColors";
+import OrdersByTypeChartSkeleton from "./skeletons/OrdersByTypeChartSkeleton";
 
 interface OrderTypeItem {
   name: string;
@@ -22,6 +23,9 @@ export default function OrdersByTypeChart({
   ordersByType = [],
   isLoading,
 }: OrdersByTypeChartProps) {
+  if (isLoading) {
+    return <OrdersByTypeChartSkeleton />;
+  }
   // Sort order types descending by value (highest to lowest)
   const sortedOrdersByType = useMemo(() => {
     if (!ordersByType || !Array.isArray(ordersByType)) return [];
