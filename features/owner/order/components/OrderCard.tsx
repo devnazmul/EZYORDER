@@ -1,7 +1,9 @@
+import Badge from "@/components/reuseable/Badge";
 import Button from "@/components/reuseable/Button";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/context/DataContext";
+import { getOrderTypeColor } from "@/utils/orderTypeColors";
 import { useUsersQuery } from "@/hooks/useUserQueries";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
@@ -29,6 +31,14 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
   const currencySymbol = useMemo(() => {
     return getCurrencySymbol(settings?.currency);
   }, [settings?.currency]);
+
+  const orderTypeColor = useMemo(() => {
+    return getOrderTypeColor(item.type);
+  }, [item.type]);
+
+  const orderTypeText = useMemo(() => {
+    return (item.type || "Delivery").split("_").join(" ");
+  }, [item.type]);
 
   const assignedText = useMemo(() => {
     if (item.driver) return `Driver: ${item.driver.first_Name || item.driver.name}`;
@@ -75,11 +85,15 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
           <View className="gap-y-1 flex-1 pr-2">
             <View className="flex-row items-center gap-2">
               <Text className="text-md font-bold text-neutral">#{item.id}</Text>
-              <View className="bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                <Text className="text-[9px] font-bold text-blue-700 uppercase tracking-wider">
-                  {item.type.split("_").join(" ") || "Delivery"}
-                </Text>
-              </View>
+              <Badge
+                text={orderTypeText}
+                containerStyle={{
+                  backgroundColor: `${orderTypeColor}15`,
+                  borderColor: `${orderTypeColor}30`,
+                  borderWidth: 1,
+                }}
+                textStyle={{ color: orderTypeColor }}
+              />
             </View>
             <Text className="text-sm font-semibold text-neutral">
               {item.customer_name ||
@@ -100,20 +114,20 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
         <View className="flex-row flex-wrap justify-between items-center gap-2 border-t border-b border-base-200/50 py-2.5">
           <View className="flex flex-col gap-2">
             <View className="flex-row items-center gap-1">
-              <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">Source:</Text>
-              <Text className="text-[9px] font-bold text-neutral uppercase">
+              <Text className="text-[9px] font-bold text-accent capitalize tracking-wider">Source:</Text>
+              <Text className="text-[9px] font-bold text-neutral capitalize">
                 {String(item.order_app || "").toLowerCase() === "pos" ? "POS" : "Client"}
               </Text>
             </View>
 
             <View className="flex-row items-center gap-1">
-              <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">Assigned:</Text>
+              <Text className="text-[9px] font-bold text-accent capitalize tracking-wider">Assigned:</Text>
               <Text className="text-[9px] font-semibold text-neutral">{assignedText}</Text>
             </View>
           </View>
 
           <View className="flex-row items-center gap-1">
-            <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">Payment:</Text>
+            <Text className="text-[9px] font-bold text-accent capitalize tracking-wider">Payment:</Text>
             <StatusBadge status={item.payment_status} />
           </View>
         </View>

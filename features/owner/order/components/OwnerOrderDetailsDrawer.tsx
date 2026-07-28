@@ -1,46 +1,50 @@
 import OrderItemList from "@/components/bottomsheet/OrderItemList";
 import Badge from "@/components/reuseable/Badge";
 import BottomSheet from "@/components/reuseable/BottomSheet";
-import { useAuth } from "@/context/AuthContext";
-import { formatLabel } from "@/utils/formatLabel";
+import { useData } from "@/context/context/DataContext";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { getStatusBadgeConfig } from "@/utils/getStatusBadgeConfig";
+import { formatLabel } from "@/utils/formatLabel";
+import { getOrderTypeColor } from "@/utils/orderTypeColors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import React from "react";
+import React, { useMemo } from "react";
 import { Linking, Platform, Text, TouchableOpacity, View } from "react-native";
-import { useOrderDetailQuery } from "../hooks/queries/useDriverQueries";
-import { DriverOrder } from "../types";
-import PickupDetailsSkeleton from "./skeletons/PickupDetailsSkeleton";
 
-interface OrderDetailsDrawerProps {
-  order: DriverOrder | null;
+interface OwnerOrderDetailsDrawerProps {
   visible: boolean;
+  order: any;
   onClose: () => void;
-  currencySymbol: string;
+  currencySymbol?: string;
 }
 
-export default function OrderDetailsDrawer({
-  order,
+export default function OwnerOrderDetailsDrawer({
   visible,
+  order,
   onClose,
-  currencySymbol,
-}: OrderDetailsDrawerProps) {
-  const { token } = useAuth();
+  currencySymbol: customCurrencySymbol,
+}: OwnerOrderDetailsDrawerProps) {
+  const { settings } = useData();
 
-  const { data: fullOrderDetail, isLoading: isLoadingDetails } = useOrderDetailQuery(
-    token || "",
-    order?.id || "",
-    visible,
-  );
+  const resolvedCurrencySymbol = useMemo(() => {
+    if (customCurrencySymbol) return customCurrencySymbol;
+    return getCurrencySymbol(settings?.currency);
+  }, [customCurrencySymbol, settings?.currency]);
 
   if (!order) return null;
+
+  const detailItems = order.detail || order.details || [];
+  const statusConfig = getStatusBadgeConfig(order.status || "pending");
+  const payConfig = getStatusBadgeConfig(order.payment_status || "unpaid");
+  const orderTypeColor = getOrderTypeColor(order.type);
+  const formattedType = (order.type || "Delivery").split("_").join(" ");
 
   const handleCallPhone = (phone: string) => {
     Linking.openURL(`tel:${phone}`).catch(() => {});
   };
 
-  const handleOpenMaps = (address: string, lat?: string | null, lng?: string | null) => {
+  const handleOpenMaps = (address: string, lat?: string | number | null, lng?: string | number | null) => {
     let url = "";
     if (lat && lng) {
       url =
@@ -59,10 +63,13 @@ export default function OrderDetailsDrawer({
     Linking.openURL(url).catch(() => {});
   };
 
-  const detailItems = fullOrderDetail?.detail || fullOrderDetail?.details || [];
-  const restaurant = fullOrderDetail?.restaurant;
-  const statusConfig = getStatusBadgeConfig(order.status || "pending");
-  const payConfig = getStatusBadgeConfig(order.payment_status || "unpaid");
+  // Staff assignment text helper
+  const assignedText =
+    order.driver?.first_Name ||
+    order.driver?.name ||
+    order.waiter?.first_Name ||
+    order.waiter?.name ||
+    "Unassigned";
 
   return (
     <BottomSheet
@@ -73,15 +80,26 @@ export default function OrderDetailsDrawer({
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
     >
-      {/* Header */}
+      {/* Drawer Header */}
       <View className="flex-row justify-between items-center border-b border-base-200 pb-3 px-6 pt-2">
         <View className="flex-row items-center gap-3">
           <View className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 items-center justify-center">
             <MaterialIcons name="receipt-long" size={20} color="#DC2D2A" />
           </View>
           <View>
-            <Text className="text-base font-bold text-neutral">Order #{order.id}</Text>
-            <Text className="text-[11px] text-accent font-medium mt-0.5">Assigned Delivery Details</Text>
+            <View className="flex-row items-center gap-2">
+              <Text className="text-base font-bold text-neutral">Order #{order.id}</Text>
+              <Badge
+                text={formattedType}
+                containerStyle={{
+                  backgroundColor: `${orderTypeColor}15`,
+                  borderColor: `${orderTypeColor}30`,
+                  borderWidth: 1,
+                }}
+                textStyle={{ color: orderTypeColor }}
+              />
+            </View>
+            <Text className="text-[11px] text-accent font-medium mt-0.5">Owner Management Overview</Text>
           </View>
         </View>
 
@@ -98,104 +116,32 @@ export default function OrderDetailsDrawer({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
-        {/* Restaurant Pickup Section */}
-        {isLoadingDetails ? (
-          <PickupDetailsSkeleton />
-        ) : restaurant ? (
-          <View key="pickup-loaded" className="gap-y-2 mb-4">
-            <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Pickup Details</Text>
-            <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="storefront" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Restaurant:</Text>
-                </View>
-                <Text className="text-xs font-bold text-neutral">{restaurant.Name}</Text>
-              </View>
-
-              {fullOrderDetail?.created_at || order?.created_at ? (
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2">
-                    <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
-                    <Text className="text-xs text-accent">Placed On:</Text>
-                  </View>
-                  <Text className="text-xs font-bold text-neutral">
-                    {formatDateTime(fullOrderDetail?.created_at || order?.created_at)}
-                  </Text>
-                </View>
-              ) : null}
-
-              {restaurant.PhoneNumber ? (
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2">
-                    <MaterialIcons name="phone" size={16} color="#DC2D2A" />
-                    <Text className="text-xs text-accent">Phone:</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => handleCallPhone(restaurant.PhoneNumber!)}
-                    activeOpacity={0.7}
-                    className="flex-row items-center"
-                  >
-                    <Text className="text-xs text-primary font-bold">(</Text>
-                    <MaterialIcons
-                      name="phone"
-                      size={11}
-                      color="#DC2D2A"
-                      style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
-                    />
-                    <Text className="text-xs text-primary font-bold">) </Text>
-                    <Text className="text-xs text-primary font-bold">{restaurant.PhoneNumber}</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-
-              {restaurant.Address ? (
-                <View className="flex-row items-start justify-between">
-                  <View className="flex-row items-center gap-2">
-                    <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
-                    <Text className="text-xs text-accent">Address:</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleOpenMaps(
-                        `${restaurant.Address} ${restaurant.PostCode || ""}`,
-                        restaurant.latitude,
-                        restaurant.longitude,
-                      )
-                    }
-                    activeOpacity={0.7}
-                    className="flex-1 ml-4"
-                  >
-                    <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
-                      {restaurant.Address}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-            </View>
-          </View>
-        ) : null}
-
         {/* Customer Information Section */}
-        <View className="gap-y-2">
+        <View className="gap-y-2 mb-4">
           <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Customer Details</Text>
           <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
                 <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
-                <Text className="text-xs text-accent">Name:</Text>
+                <Text className="text-xs text-accent">Customer:</Text>
               </View>
-              <Text className="text-xs font-bold text-neutral">{order.customer_name || "N/A"}</Text>
+              <Text className="text-xs font-bold text-neutral">
+                {order.customer_name ||
+                  order.user?.first_Name ||
+                  (order.table_number && parseFloat(order.table_number) > 0
+                    ? `Table ${parseFloat(order.table_number)}`
+                    : "Walk-in Customer")}
+              </Text>
             </View>
 
-            {order.customer_phone && order.customer_phone !== "N/A" ? (
+            {order.customer_phone || order.user?.phone ? (
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="phone" size={16} color="#DC2D2A" />
                   <Text className="text-xs text-accent">Phone:</Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => handleCallPhone(order.customer_phone!)}
+                  onPress={() => handleCallPhone((order.customer_phone || order.user?.phone)!)}
                   activeOpacity={0.7}
                   className="flex-row items-center"
                 >
@@ -207,7 +153,7 @@ export default function OrderDetailsDrawer({
                     style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
                   />
                   <Text className="text-xs text-primary font-bold">) </Text>
-                  <Text className="text-xs text-primary font-bold">{order.customer_phone}</Text>
+                  <Text className="text-xs text-primary font-bold">{order.customer_phone || order.user?.phone}</Text>
                 </TouchableOpacity>
               </View>
             ) : null}
@@ -224,35 +170,77 @@ export default function OrderDetailsDrawer({
               </View>
             ) : null}
 
-            <View className="flex-row items-start justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
-                <Text className="text-xs text-accent">Address:</Text>
+            {order.customer_address || order.address ? (
+              <View className="flex-row items-start justify-between">
+                <View className="flex-row items-center gap-2">
+                  <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
+                  <Text className="text-xs text-accent">Address:</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() =>
+                    handleOpenMaps(
+                      `${order.customer_address || order.address} ${order.customer_post_code || order.post_code || ""}`,
+                      order.latitude,
+                      order.longitude,
+                    )
+                  }
+                  activeOpacity={0.7}
+                  className="flex-1 ml-4"
+                >
+                  <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
+                    {order.door_no ? `${order.door_no}, ` : ""}
+                    {order.customer_address || order.address}
+                    {order.customer_post_code || order.post_code ? ` - ${order.customer_post_code || order.post_code}` : ""}
+                  </Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={() =>
-                  handleOpenMaps(
-                    `${order.customer_address} ${order.customer_post_code || ""}`,
-                    order.latitude,
-                    order.longitude,
-                  )
-                }
-                activeOpacity={0.7}
-                className="flex-1 ml-4"
-              >
-                <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
-                  {order.door_no ? `${order.door_no}, ` : ""}
-                  {order.customer_address}
-                  {order.customer_post_code ? ` - ${order.customer_post_code}` : ""}
+            ) : null}
+
+            {order.table_number && parseFloat(order.table_number) > 0 ? (
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <MaterialIcons name="restaurant" size={16} color="#DC2D2A" />
+                  <Text className="text-xs text-accent">Table:</Text>
+                </View>
+                <Text className="text-xs font-bold text-neutral">
+                  Table {parseFloat(order.table_number)}
                 </Text>
-              </TouchableOpacity>
+              </View>
+            ) : null}
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
+                <Text className="text-xs text-accent">Placed On:</Text>
+              </View>
+              <Text className="text-xs font-bold text-neutral">
+                {order.created_at ? formatDateTime(order.created_at) : "--:--"}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <MaterialIcons name="devices" size={16} color="#DC2D2A" />
+                <Text className="text-xs text-accent">Source:</Text>
+              </View>
+              <Text className="text-xs font-bold text-neutral capitalize">
+                {String(order.order_app || "").toLowerCase() === "pos" ? "POS" : "Client App"}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <MaterialIcons name="badge" size={16} color="#DC2D2A" />
+                <Text className="text-xs text-accent">Assigned Staff:</Text>
+              </View>
+              <Text className="text-xs font-bold text-neutral">{assignedText}</Text>
             </View>
           </View>
         </View>
 
         {/* Instructions Section */}
         {order.initial_note ? (
-          <View className="gap-y-2 mt-4">
+          <View className="gap-y-2 mb-4">
             <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Instructions</Text>
             <View className="bg-primary/5 border border-primary/20 rounded-lg p-3.5 flex-row items-start gap-2.5">
               <MaterialIcons name="assignment-late" size={18} color="#DC2D2A" />
@@ -264,10 +252,14 @@ export default function OrderDetailsDrawer({
         ) : null}
 
         {/* Order Items Section */}
-        <OrderItemList items={detailItems} isLoading={isLoadingDetails} currencySymbol={currencySymbol} />
+        <OrderItemList
+          items={detailItems}
+          currencySymbol={resolvedCurrencySymbol}
+          containerClassName="mb-4"
+        />
 
-        {/* Bill Summary Section */}
-        <View className="gap-y-2 mt-4 mb-2">
+        {/* Financial & Bill Summary Section */}
+        <View className="gap-y-2 mb-2">
           <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Bill Summary</Text>
           <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
             <View className="flex-row justify-between items-center">
@@ -284,23 +276,23 @@ export default function OrderDetailsDrawer({
               />
             </View>
 
-            <View className="flex-row justify-between items-center">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="credit-card" size={16} color="#DC2D2A" />
-                <Text className="text-xs text-accent">Payment Method:</Text>
-              </View>
-              <Badge
-                text={
-                  order.payment_method
-                    ? order.payment_method.toLowerCase() === "cod"
+            {order.payment_method ? (
+              <View className="flex-row justify-between items-center">
+                <View className="flex-row items-center gap-2">
+                  <MaterialIcons name="credit-card" size={16} color="#DC2D2A" />
+                  <Text className="text-xs text-accent">Payment Method:</Text>
+                </View>
+                <Badge
+                  text={
+                    order.payment_method.toLowerCase() === "cod"
                       ? "COD"
                       : formatLabel(order.payment_method)
-                    : "N/A"
-                }
-                containerClassName="bg-secondary/10 border border-secondary/25"
-                textClassName="text-neutral font-semibold"
-              />
-            </View>
+                  }
+                  containerClassName="bg-secondary/10 border border-secondary/25"
+                  textClassName="text-neutral font-semibold"
+                />
+              </View>
+            ) : null}
 
             <View className="flex-row justify-between items-center border-t border-base-200/60 pt-2.5">
               <View className="flex-row items-center gap-2">
@@ -308,47 +300,42 @@ export default function OrderDetailsDrawer({
                 <Text className="text-xs text-accent">Subtotal:</Text>
               </View>
               <Text className="text-xs font-bold text-neutral">
-                {formatAmount(
-                  parseFloat(fullOrderDetail?.final_price || fullOrderDetail?.amount || order.amount || "0"),
-                  currencySymbol,
-                )}
+                {formatAmount(order.final_price || order.amount || "0", resolvedCurrencySymbol)}
               </Text>
             </View>
 
-            {(fullOrderDetail?.tax || order.tax) && parseFloat(fullOrderDetail?.tax || order.tax) > 0 ? (
+            {order.tax && parseFloat(order.tax) > 0 ? (
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="account-balance" size={16} color="#DC2D2A" />
                   <Text className="text-xs text-accent">Tax:</Text>
                 </View>
                 <Text className="text-xs font-bold text-neutral">
-                  {formatAmount(parseFloat(fullOrderDetail?.tax || order.tax), currencySymbol)}
+                  {formatAmount(order.tax, resolvedCurrencySymbol)}
                 </Text>
               </View>
             ) : null}
 
-            {(fullOrderDetail?.tip_amount || order.tip_amount) &&
-            parseFloat(fullOrderDetail?.tip_amount || order.tip_amount) > 0 ? (
+            {order.tip_amount && parseFloat(order.tip_amount) > 0 ? (
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="volunteer-activism" size={16} color="#DC2D2A" />
                   <Text className="text-xs text-accent">Tip:</Text>
                 </View>
                 <Text className="text-xs font-bold text-neutral">
-                  {formatAmount(parseFloat(fullOrderDetail?.tip_amount || order.tip_amount), currencySymbol)}
+                  {formatAmount(order.tip_amount, resolvedCurrencySymbol)}
                 </Text>
               </View>
             ) : null}
 
-            {(fullOrderDetail?.discount || order.discount) &&
-            parseFloat(fullOrderDetail?.discount || order.discount) > 0 ? (
+            {order.discount && parseFloat(order.discount) > 0 ? (
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="local-offer" size={16} color="#DC2D2A" />
                   <Text className="text-xs text-accent">Discount:</Text>
                 </View>
                 <Text className="text-xs font-bold text-primary">
-                  -{formatAmount(parseFloat(fullOrderDetail?.discount || order.discount), currencySymbol)}
+                  -{formatAmount(order.discount, resolvedCurrencySymbol)}
                 </Text>
               </View>
             ) : null}
@@ -359,7 +346,7 @@ export default function OrderDetailsDrawer({
                 <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
               </View>
               <Text className="text-base font-bold text-primary">
-                {formatAmount(parseFloat(order.amount || order.total_due_amount || "0"), currencySymbol)}
+                {formatAmount(order.amount || "0", resolvedCurrencySymbol)}
               </Text>
             </View>
           </View>

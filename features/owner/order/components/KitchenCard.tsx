@@ -43,7 +43,7 @@ export default function KitchenCard({ order }: KitchenCardProps) {
       {/* Card Header */}
       <View className="flex-row justify-between items-start border-b border-base-200 pb-3 mb-3">
         <View>
-          <Text className="text-base font-black text-neutral">Order #{order.id}</Text>
+          <Text className="text-base font-bold text-neutral">Order #{order.id}</Text>
           {order.customer_name ? (
             <Text className="text-xs text-accent font-medium mt-0.5">{order.customer_name}</Text>
           ) : null}
@@ -61,7 +61,7 @@ export default function KitchenCard({ order }: KitchenCardProps) {
               }`}
             />
             <Text
-              className={`text-[9px] font-black uppercase tracking-wider ${
+              className={`text-[9px] font-black capitalize tracking-wider ${
                 isKitchenStatus ? "text-primary" : "text-emerald-600"
               }`}
             >
@@ -76,7 +76,7 @@ export default function KitchenCard({ order }: KitchenCardProps) {
       {/* Order Type Badge */}
       <View className="flex-row items-center gap-1.5 bg-neutral/5 self-start px-2 py-0.5 rounded-lg mb-3">
         <MaterialIcons name={typeIcon} size={14} color="#6E6E6E" />
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">{typeLabel}</Text>
+        <Text className="text-[10px] font-bold text-accent capitalize tracking-wider">{typeLabel}</Text>
       </View>
 
       {/* Dishes List */}
@@ -108,7 +108,7 @@ export default function KitchenCard({ order }: KitchenCardProps) {
         <View className="bg-primary/5 border border-primary/10 rounded-lg p-2.5 mt-3.5 flex-row items-start gap-1.5">
           <MaterialIcons name="info-outline" size={14} color="#DC2D2A" style={{ marginTop: 1 }} />
           <View className="flex-1">
-            <Text className="text-[10px] font-black text-primary uppercase tracking-wider">
+            <Text className="text-[10px] font-black text-primary capitalize tracking-wider">
               Notes / Remarks
             </Text>
             <Text className="text-xs font-medium text-neutral mt-0.5">

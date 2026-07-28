@@ -17,7 +17,7 @@ export default function PageTitle({ title, icon, badgeCount, description }: Page
       </View>
       <View className="">
         <View className="flex-row items-center gap-2">
-          <Text className="text-lg font-black text-neutral uppercase tracking-tight">{title}</Text>
+          <Text className="text-lg font-bold text-neutral capitalize tracking-tight">{title}</Text>
           {badgeCount !== undefined && badgeCount > 0 && (
             <View className="bg-primary px-2.5 py-0.5 rounded-full items-center justify-center">
               <Text className="text-white text-[10px] font-bold">{badgeCount}</Text>

@@ -32,7 +32,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
             <View className="gap-y-1">
               <Text className="text-lg font-bold text-neutral">Order #{order.id}</Text>
               <Text className="text-xs text-accent">
-                Type: <Text className="font-bold uppercase text-primary">{order.type}</Text>
+                Type: <Text className="font-bold capitalize text-primary">{order.type}</Text>
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} className="p-1 rounded-full">
@@ -44,7 +44,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
           <ScrollView showsVerticalScrollIndicator={false} className="gap-y-4">
             {/* Customer Information */}
             <View className="gap-y-2">
-              <Text className="text-xs font-bold text-accent uppercase tracking-wider">Customer Details</Text>
+              <Text className="text-xs font-bold text-accent capitalize tracking-wider">Customer Details</Text>
               <View className="bg-base-100 rounded-xl p-4 gap-y-2 border border-base-200">
                 <View className="flex-row justify-between">
                   <Text className="text-xs text-accent">Name:</Text>
@@ -75,7 +75,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
 
             {/* Itemized Order Items List */}
             <View className="gap-y-2 mt-4">
-              <Text className="text-xs font-bold text-accent uppercase tracking-wider">Order Items</Text>
+              <Text className="text-xs font-bold text-accent capitalize tracking-wider">Order Items</Text>
               <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-0">
                 {detailItems.length > 0 ? (
                   detailItems.map((item: any, index: number) => {
@@ -126,7 +126,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: OrderDeta
 
             {/* Bill Summary */}
             <View className="gap-y-2 mt-4">
-              <Text className="text-xs font-bold text-accent uppercase tracking-wider">Bill Summary</Text>
+              <Text className="text-xs font-bold text-accent capitalize tracking-wider">Bill Summary</Text>
               <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-2">
                 <View className="flex-row justify-between">
                   <Text className="text-xs text-accent">Subtotal:</Text>
