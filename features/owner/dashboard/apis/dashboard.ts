@@ -36,6 +36,32 @@ export const getDashboardRevenueChart = async (token: string, filterBy: string) 
   });
   logApiResponse("Dashboard Revenue Chart", response.data);
   return response.status === 200 && response.data?.success ? response.data.data || [] : [];
+
+  /*
+  // MOCK DATA FOR ALL 31 DAYS (COMMENTED OUT FOR TESTING):
+  if (filterBy === "this_month") {
+    const mockValues = [
+      320, 450, 280, 510, 620, 410, 390, 750, 680, 520,
+      430, 610, 790, 840, 590, 480, 670, 710, 540, 380,
+      650, 720, 810, 490, 580, 640, 770, 830, 600, 530, 690,
+    ];
+    return Array.from({ length: 31 }, (_, i) => ({
+      name: `${String(i + 1).padStart(2, "0")} Jul`,
+      value: mockValues[i],
+    }));
+  }
+
+  // Weekly mock data fallback (7 days)
+  return [
+    { name: "Mon", value: 320 },
+    { name: "Tue", value: 450 },
+    { name: "Wed", value: 280 },
+    { name: "Thu", value: 510 },
+    { name: "Fri", value: 620 },
+    { name: "Sat", value: 750 },
+    { name: "Sun", value: 680 },
+  ];
+  */
 };
 
 export const getDashboardOrdersByType = async (token: string, filterBy: string) => {

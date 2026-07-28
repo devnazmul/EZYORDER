@@ -1,22 +1,32 @@
+import ActionCard from "@/components/reuseable/cards/ActionCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import { useData } from "@/context/context/DataContext";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
-import { MaterialIcons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
-import { Dimensions, Text, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { Dimensions, Pressable, Text, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
+import RevenueChartSkeleton from "./skeletons/RevenueChartSkeleton";
 
 interface RevenueChartProps {
   filterBy: string;
   revenueChart: any[];
   isLoading: boolean;
+  resetKey?: number;
 }
 
-export default function RevenueChart({ filterBy, revenueChart = [], isLoading }: RevenueChartProps) {
+export default function RevenueChart({
+  filterBy,
+  revenueChart = [],
+  isLoading,
+  resetKey,
+}: RevenueChartProps) {
   const { settings } = useData();
+  const [focusedBarIndex, setFocusedBarIndex] = useState<number | undefined>(undefined);
 
-  console.log("Revenue data", revenueChart);
+  useEffect(() => {
+    setFocusedBarIndex(undefined);
+  }, [resetKey]);
 
   // Resolve currency symbol
   const currencySymbol = useMemo(() => {
@@ -29,152 +39,277 @@ export default function RevenueChart({ filterBy, revenueChart = [], isLoading }:
   }, [revenueChart]);
 
   if (isLoading) {
-    return (
-      <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[200px] justify-center items-center">
-        <Text className="text-xs text-accent">Loading revenue...</Text>
-      </View>
-    );
+    return <RevenueChartSkeleton />;
   }
 
   // Dimension helpers
   const screenWidth = Dimensions.get("window").width;
   const chartHeight = 210;
   const isMonthFilter = revenueChart.length > 7;
-  const chartWidth = isMonthFilter ? screenWidth - 32 : screenWidth - 60;
+  // Card padding is p-4 (32px total). Deduct padding + Y-axis margin.
+  const chartWidth = screenWidth - 32;
+  const availableChartArea = chartWidth - 50; // Reserve ~50px for Y-axis text & labels
 
-  // Dynamically compute bar width to fit the container width
-  const barWidth = useMemo(() => {
-    const spacing = isMonthFilter ? 4 : 16;
+  // Dynamically compute bar width & spacing so both weekly and monthly charts are justified across the screen
+  const { barWidth, barSpacing, initialSpacing } = useMemo(() => {
     const count = revenueChart.length || 1;
-    const availableWidth = chartWidth + 70; // deduct margins and Y-axis text space
-    const computed = (availableWidth - spacing * (count - 1)) / count;
-    return Math.max(4, Math.min(24, computed));
-  }, [revenueChart.length, isMonthFilter, chartWidth]);
+    if (isMonthFilter) {
+      const initSpace = 4;
+      const spaceBetween = count > 20 ? 2 : 4;
+      const availableForBars = availableChartArea - initSpace * 2;
+      const computedWidth = (availableForBars - spaceBetween * (count - 1)) / count;
+      const finalBarWidth = Math.max(3, Math.min(20, Math.floor(computedWidth)));
+      const finalSpacing = Math.max(
+        1,
+        Math.floor((availableForBars - finalBarWidth * count) / Math.max(1, count - 1)),
+      );
+      return { barWidth: finalBarWidth, barSpacing: finalSpacing, initialSpacing: initSpace };
+    }
+
+    // Weekly View (e.g. 7 days): Justify bars across availableChartArea with generous width and spacing
+    const initSpace = 12;
+    const availableForBars = availableChartArea - initSpace * 2;
+    const targetSpacing = 20;
+    const computedWidth = (availableForBars - targetSpacing * (count - 1)) / count;
+    const finalBarWidth = Math.max(12, Math.min(28, Math.floor(computedWidth)));
+    const finalSpacing = Math.max(
+      8,
+      Math.floor((availableForBars - finalBarWidth * count) / Math.max(1, count - 1)),
+    );
+    return {
+      barWidth: finalBarWidth,
+      barSpacing: finalSpacing,
+      initialSpacing: initSpace,
+    };
+  }, [revenueChart.length, isMonthFilter, availableChartArea]);
 
   // Prepare chart data mapped for react-native-gifted-charts
   const data = useMemo(() => {
-    return revenueChart.map((d: any) => {
+    return revenueChart.map((d: any, index: number) => {
       const val = parseFloat(d.value) || 0;
       const item: any = {
         value: val,
         frontColor: "#DC2D2A",
+        gradientColor: "#FF9E93",
+        showGradient: true,
+        barBorderTopLeftRadius: 4,
+        barBorderTopRightRadius: 4,
+        barBorderRadius: 0,
+        barStyle: {
+          borderTopLeftRadius: 4,
+          borderTopRightRadius: 4,
+          borderRadius: 4,
+        },
         name: d.name, // keep reference of full name for tooltips
       };
 
       if (isMonthFilter) {
-        // Use custom labelComponent for rotated labels in month view
+        // Extract day number (e.g. "01 Jul" -> 1, "05 Jul" -> 5, or fallback to index + 1)
+        const parsedDay = parseInt(String(d.name || "").replace(/\D/g, ""), 10);
+        const dayNum = !isNaN(parsedDay) && parsedDay > 0 ? parsedDay : index + 1;
+
+        // Display labels only every 5 days (e.g. 1, 5, 10, 15, 20, 25, 30)
+        const showLabel = dayNum === 1 || dayNum % 5 === 0;
+        const targetLabelWidth = 28;
+        const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
+
         item.labelComponent = () => (
-          <View style={{ width: barWidth, alignItems: "center", marginTop: 24 }}>
-            <Text
-              style={{
-                fontSize: 7,
-                color: "#6E6E6E",
-                fontWeight: "bold",
-                borderColor: "#000000",
-                borderWidth: 0,
-                minWidth: 50,
-                transform: [{ rotate: "-75deg" }],
-                marginTop: 10,
-                marginBottom: 0,
-                marginLeft: 20,
-                marginRight: 0,
-              }}
-            >
-              {d.name}
+          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center" }}>
+            <Text style={{ fontSize: 8, color: "#6E6E6E", fontWeight: "600", textAlign: "center" }}>
+              {showLabel ? String(dayNum) : ""}
             </Text>
           </View>
         );
       } else {
-        item.label = d.name;
+        const targetLabelWidth = 36;
+        const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
+
+        item.labelComponent = () => (
+          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center" }}>
+            <Text style={{ fontSize: 8, color: "#6E6E6E", fontWeight: "600", textAlign: "center" }}>
+              {d.name}
+            </Text>
+          </View>
+        );
       }
 
       return item;
     });
-  }, [revenueChart, isMonthFilter, barWidth]);
+  }, [revenueChart, isMonthFilter, barWidth, barSpacing]);
 
   // Compute maximum value in dataset to prevent tooltip clipping at the top
   const maxDataValue = useMemo(() => {
     return Math.max(...data.map((d: any) => d.value), 0);
   }, [data]);
 
+  // Derived focused item
+  const focusedItem = useMemo(() => {
+    if (focusedBarIndex === undefined || focusedBarIndex < 0 || !data[focusedBarIndex]) {
+      return undefined;
+    }
+    return data[focusedBarIndex];
+  }, [focusedBarIndex, data]);
+
+  // Absolutely positioned tooltip coordinates
+  const tooltipPos = useMemo(() => {
+    if (focusedBarIndex === undefined || !focusedItem) return undefined;
+
+    const line1 = `${focusedItem.name}:`;
+    const line2 = formatAmount(focusedItem.value, currencySymbol || "£");
+    const longestLineLen = Math.max(line1.length, line2.length);
+    const estimatedTooltipWidth = Math.max(48, longestLineLen * 5.5 + 16);
+
+    // Center tooltip over focused bar within availableChartArea
+    const barCenterX = initialSpacing + focusedBarIndex * (barWidth + barSpacing) + barWidth / 2;
+    const idealLeft = barCenterX - estimatedTooltipWidth / 2;
+    const clampedLeft = Math.max(4, Math.min(idealLeft, availableChartArea - estimatedTooltipWidth - 4));
+
+    // Calculate Y position relative to chart height container
+    const graphHeight = chartHeight - 85;
+    const maxValue = maxDataValue > 0 ? maxDataValue * 1.2 : 1;
+    const barHeightRatio = Math.min(1, Math.max(0, focusedItem.value / maxValue));
+    const barHeightPixels = barHeightRatio * graphHeight;
+
+    const barTopY = graphHeight - barHeightPixels + 15;
+    const idealTop = barTopY - 40;
+    const clampedTop = Math.max(0, idealTop);
+
+    return {
+      left: clampedLeft,
+      top: clampedTop,
+      line1,
+      line2,
+    };
+  }, [
+    focusedBarIndex,
+    focusedItem,
+    barWidth,
+    barSpacing,
+    initialSpacing,
+    availableChartArea,
+    chartHeight,
+    maxDataValue,
+    currencySymbol,
+  ]);
+
   return (
-    <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm">
-      {/* Header with Title and Total Value */}
-      <View className="flex-row justify-between items-center pb-3 border-b border-base-200 mb-4">
-        <View>
-          <Text className="text-sm font-semibold text-neutral capitalize">
-            Revenue {filterBy === "this_week" ? "This Week" : "This Month"}
-          </Text>
-          <Text className="text-base font-extrabold text-neutral mt-0.5">
-            Total: {formatAmount(totalRevenue, currencySymbol)}
-          </Text>
-        </View>
-        <MaterialIcons name="show-chart" size={20} color="#6E6E6E" />
-      </View>
-
-      {revenueChart.length === 0 ? (
-        <EmptyState description="No revenue data available" pyClassName="py-8" />
-      ) : (
-        <View style={{ height: chartHeight, alignItems: "center", justifyContent: "center" }}>
-          <BarChart
-            data={data}
-            width={chartWidth - 70}
-            height={chartHeight - 85}
-            maxValue={maxDataValue > 0 ? maxDataValue * 1.2 : undefined}
-            barWidth={barWidth}
-            spacing={isMonthFilter ? 8 : 16}
-            initialSpacing={10}
-            noOfSections={4}
-            rulesColor="#E5E7EB"
-            rulesType="solid"
-            yAxisThickness={0}
-            xAxisThickness={1}
-            xAxisColor="#E5E7EB"
-            yAxisTextStyle={{ color: "#6E6E6E", fontSize: 8 }}
-            xAxisLabelTextStyle={{
-              color: "#6E6E6E",
-              fontSize: 8,
-              fontWeight: "bold",
-              textAlign: "center",
+    <Pressable key="loaded" onPress={() => setFocusedBarIndex(undefined)}>
+      <ActionCard
+        title={
+          <View>
+            <Text className="text-sm font-semibold text-neutral capitalize">
+              Revenue {filterBy === "this_week" ? "This Week" : "This Month"}
+            </Text>
+            <Text className="text-base font-extrabold text-neutral mt-0.5">
+              Total: {formatAmount(totalRevenue, currencySymbol)}
+            </Text>
+          </View>
+        }
+        bodyClassName="p-4"
+      >
+        {revenueChart.length === 0 ? (
+          <EmptyState description="No revenue data available" pyClassName="py-8" />
+        ) : (
+          <View
+            style={{
+              height: chartHeight,
+              width: "100%",
+              position: "relative",
+              overflow: "hidden",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-            xAxisLabelsHeight={isMonthFilter ? 60 : 20}
-            activeOpacity={1}
-            isAnimated={true}
-            focusedBarConfig={{
-              color: "#000000ff",
-            }}
-            renderTooltip={(item: any, index: number) => {
-              const tooltipText = `${item.name}: ${formatAmount(item.value, currencySymbol)}`;
-              // Estimate tooltip width: ~5.5px per char at fontSize 9 + 16px horizontal padding
-              const estimatedTooltipWidth = tooltipText.length * 5.5 + 16;
-              // Center tooltip over the bar
-              const centerOffset = -(estimatedTooltipWidth / 2) + barWidth / 2;
+          >
+            <BarChart
+              data={data}
+              width={availableChartArea}
+              rulesLength={availableChartArea}
+              xAxisLength={availableChartArea}
+              endSpacing={0}
+              height={chartHeight - 85}
+              maxValue={maxDataValue > 0 ? maxDataValue * 1.2 : undefined}
+              barWidth={barWidth}
+              spacing={barSpacing}
+              initialSpacing={initialSpacing}
+              labelWidth={isMonthFilter ? 28 : 34}
+              disableScroll={true}
+              focusedBarIndex={focusedBarIndex}
+              onPress={(_item: any, index: number) => {
+                setFocusedBarIndex((prev) => (prev === index ? undefined : index));
+              }}
+              noOfSections={4}
+              rulesColor="#E5E7EB"
+              rulesType="solid"
+              yAxisThickness={0}
+              xAxisThickness={1}
+              xAxisColor="#E5E7EB"
+              showGradient
+              frontColor="#DC2D2A"
+              gradientColor="#FF9E93"
+              barBorderTopLeftRadius={4}
+              barBorderTopRightRadius={4}
+              barBorderRadius={4}
+              barStyle={{
+                borderTopLeftRadius: 4,
+                borderTopRightRadius: 4,
+                borderRadius: 4,
+              }}
+              yAxisTextStyle={{ color: "#6E6E6E", fontSize: 8 }}
+              xAxisLabelTextStyle={{
+                color: "#6E6E6E",
+                fontSize: 8,
+                fontWeight: "600",
+                textAlign: "center",
+              }}
+              xAxisLabelsHeight={24}
+              activeOpacity={1}
+              isAnimated={true}
+              focusedBarConfig={{
+                color: "#000000ff",
+              }}
+            />
 
-              return (
-                <View
+            {/* Sibling Tooltip Popover */}
+            {focusedItem && tooltipPos && (
+              <View
+                pointerEvents="none"
+                style={{
+                  position: "absolute",
+                  left: tooltipPos.left,
+                  top: tooltipPos.top,
+                  zIndex: 999,
+                  elevation: 10,
+                  backgroundColor: "#1F2937",
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 4,
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3,
+                }}
+              >
+                <Text style={{ color: "white", fontSize: 9, fontWeight: "bold", textAlign: "left" }}>
+                  {tooltipPos.line1}
+                </Text>
+                <Text
                   style={{
-                    backgroundColor: "#1F2937",
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 4,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: 6,
-                    transform: [{ translateX: centerOffset }],
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 1.5,
-                    elevation: 3,
+                    color: "white",
+                    fontSize: 9,
+                    fontWeight: "bold",
+                    textAlign: "left",
+                    marginTop: 1,
                   }}
                 >
-                  <Text style={{ color: "white", fontSize: 9, fontWeight: "bold" }}>{tooltipText}</Text>
-                </View>
-              );
-            }}
-          />
-        </View>
-      )}
-    </View>
+                  {tooltipPos.line2}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      </ActionCard>
+    </Pressable>
   );
 }
