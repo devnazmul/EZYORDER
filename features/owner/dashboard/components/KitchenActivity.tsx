@@ -24,23 +24,47 @@ export default function KitchenActivity({ kitchenActivity = {}, isLoading }: Kit
       <View className="gap-y-4">
         {/* Row 1: Waiting Orders & Delayed */}
         <View className="flex-row items-center border-b border-white/10 pb-3">
-          <View className="flex-1 flex-row items-center justify-between pr-3">
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() =>
+              router.push({
+                pathname: "/orders/todays-orders",
+                params: {
+                  tab: "eat_in,delivery,take_away,walk_in",
+                  status: "pending",
+                },
+              })
+            }
+            className="flex-1 flex-row items-center justify-between pr-3"
+          >
             <View className="flex-row items-center gap-1.5">
               <MaterialIcons name="pending-actions" size={16} color="rgba(255, 255, 255, 0.4)" />
               <Text className="text-xs text-accent font-medium capitalize">Waiting Orders</Text>
             </View>
             <Text className="text-lg font-bold text-white">{kitchenActivity?.waiting || 0}</Text>
-          </View>
+          </TouchableOpacity>
 
           <View className="w-[1px] h-6 bg-white/10" />
 
-          <View className="flex-1 flex-row items-center justify-between pl-3">
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() =>
+              router.push({
+                pathname: "/orders/todays-orders",
+                params: {
+                  tab: "eat_in,delivery,take_away,walk_in",
+                  is_delay: "1",
+                },
+              })
+            }
+            className="flex-1 flex-row items-center justify-between pl-3"
+          >
             <View className="flex-row items-center gap-1.5">
               <AntDesign name="warning" size={16} color="rgba(220, 45, 42, 0.6)" />
               <Text className="text-xs text-accent font-medium capitalize">Delayed</Text>
             </View>
             <Text className="text-lg font-bold text-primary">{kitchenActivity?.delayed || 0}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Row 2: Avg Prep Time */}

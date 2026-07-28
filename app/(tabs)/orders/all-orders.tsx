@@ -62,7 +62,8 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
       searchParams.status ||
       searchParams.payment_status ||
       searchParams.dish_ids ||
-      searchParams.dish_name
+      searchParams.dish_name ||
+      searchParams.is_delay
     ) {
       if (pathname.includes("todays-orders")) {
         setActiveTab("live");
@@ -86,6 +87,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         is_schedule_order: searchParams.is_schedule_order || "",
         dish_ids: searchParams.dish_ids || "",
         dish_name: searchParams.dish_name || "",
+        is_delay: searchParams.is_delay || "",
       });
 
       // Clear the query parameters from the router state so they don't trigger again
@@ -99,6 +101,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         payment_status: undefined as any,
         dish_ids: undefined as any,
         dish_name: undefined as any,
+        is_delay: undefined as any,
       });
     }
   }, [
@@ -111,6 +114,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     searchParams.payment_status,
     searchParams.dish_ids,
     searchParams.dish_name,
+    searchParams.is_delay,
     pathname,
   ]);
 
@@ -203,6 +207,9 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
     }
     if (filterValues.dish_name) {
       params.dish_name = filterValues.dish_name;
+    }
+    if (filterValues.is_delay) {
+      params.is_delay = filterValues.is_delay;
     }
 
     if (debouncedSearchQuery.trim()) {
