@@ -1,8 +1,8 @@
+import KpiCard from "@/components/reuseable/dashboard/KpiCard";
 import { formatAmount } from "@/utils/formatAmount";
 import React from "react";
 import { Text, View } from "react-native";
 import { formatRating } from "../utils/formatRating";
-import KpiCard from "@/components/reuseable/dashboard/KpiCard";
 
 interface DriverQuickStatsProps {
   isLoadingStats: boolean;
@@ -23,7 +23,7 @@ const DriverQuickStats: React.FC<DriverQuickStatsProps> = ({
       <Text className="mb-4 font-bold capitalize opacity-80">Quick Stats</Text>
       <View className="flex-col gap-2 mb-4">
         {/* First row: 2 columns */}
-        <View className="flex-row gap-2 h-[230px]">
+        <View className="flex-row gap-2  flex-1">
           {/* Column 1: Earnings */}
           <View className="flex-1">
             <KpiCard
@@ -65,14 +65,16 @@ const DriverQuickStats: React.FC<DriverQuickStatsProps> = ({
         </View>
 
         {/* Second row: Rating */}
-        <KpiCard
-          title="Rating"
-          value={formatRating(stats?.avg_rating)}
-          icon="star-border"
-          iconColor="#D97706"
-          gradientColors={["#FFFBEB", "#FEF3C7"]}
-          loading={isLoadingStats}
-        />
+        <View className="flex-1">
+          <KpiCard
+            title="Rating"
+            value={formatRating(stats?.avg_rating)}
+            icon="star-border"
+            iconColor="#D97706"
+            gradientColors={["#FFFBEB", "#FEF3C7"]}
+            loading={isLoadingStats}
+          />
+        </View>
       </View>
     </View>
   );
