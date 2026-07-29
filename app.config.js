@@ -4,7 +4,7 @@ export default {
     slug: "ezyorder",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/temporary-logo.png",
+    icon: "./assets/images/icon.png",
     scheme: "ezyorder",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -18,16 +18,16 @@ export default {
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       adaptiveIcon: {
         backgroundColor: "#E6F4FE",
-        foregroundImage: "./assets/images/temporary-logo.png",
+        foregroundImage: "./assets/images/android-icon-foreground.png",
         backgroundImage: "./assets/images/android-icon-background.png",
-        monochromeImage: "./assets/images/temporary-logo.png",
+        monochromeImage: "./assets/images/android-icon-monochrome.png",
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
     },
     web: {
       output: "static",
-      favicon: "./assets/images/temporary-logo.png",
+      favicon: "./assets/images/favicon.png",
       bundler: "metro",
     },
     plugins: [
@@ -35,7 +35,7 @@ export default {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/temporary-logo.png",
+          image: "./assets/images/splash-icon.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#ffffff",
