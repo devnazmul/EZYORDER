@@ -1,5 +1,6 @@
 import ActionCard from "@/components/reuseable/cards/ActionCard";
 import EmptyState from "@/components/reuseable/EmptyState";
+import { HP } from "@/utils/getResponsiveSizes";
 import { router } from "expo-router";
 import React from "react";
 import { View } from "react-native";
@@ -13,7 +14,7 @@ interface RecentOrdersProps {
 
 export default function RecentOrders({ recentOrders = [], isLoading }: RecentOrdersProps) {
   return (
-    <View className="mb-6">
+    <View style={{ marginBottom: HP("2.5%") }}>
       <ActionCard
         title="Recent Completed Orders"
         isLoading={isLoading}
@@ -30,9 +31,14 @@ export default function RecentOrders({ recentOrders = [], isLoading }: RecentOrd
         {recentOrders.length === 0 ? (
           <EmptyState key="empty" description="No recent completed transactions" pyClassName="py-8" />
         ) : (
-          <View key="loaded" className="divide-y divide-base-200">
+          <View key="loaded">
             {recentOrders.map((o: any, index: number) => (
-              <RecentOrderRow key={o.id || index} order={o} index={index} />
+              <RecentOrderRow
+                key={o.id || index}
+                order={o}
+                index={index}
+                isLast={index === recentOrders.length - 1}
+              />
             ))}
           </View>
         )}

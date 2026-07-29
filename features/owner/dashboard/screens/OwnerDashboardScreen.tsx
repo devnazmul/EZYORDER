@@ -1,8 +1,12 @@
+import ActionCard from "@/components/reuseable/cards/ActionCard";
 import LiveOrderBoard from "@/components/reuseable/dashboard/LiveOrderBoard";
+import LiveOrderBoardSkeleton from "@/components/reuseable/skeletons/LiveOrderBoardSkeleton";
 import ToggleBar from "@/components/reuseable/ToggleBar";
+import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
+import { HP, WP } from "@/utils/getResponsiveSizes";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import KitchenActivity from "../components/KitchenActivity";
 import KpiMetrics from "../components/KpiMetrics";
@@ -56,19 +60,20 @@ export default function OwnerDashboardScreen() {
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       <ScrollView
-        className="flex-1 px-4 py-4"
-        contentContainerStyle={{ paddingBottom: 24 }}
+        className="flex-1"
+        style={{ paddingHorizontal: WP("4%"), paddingTop: HP("2%") }}
+        contentContainerStyle={{ paddingBottom: HP("4%") }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={onRefresh}
-            tintColor="#DC2D2A"
-            colors={["#DC2D2A"]}
+            tintColor={COLORS.primary}
+            colors={[COLORS.primary]}
           />
         }
       >
-        <Pressable onPress={() => setResetKey((k) => k + 1)}>
+        <Pressable style={{ gap: HP("1.25%") }} onPress={() => setResetKey((k) => k + 1)}>
           {/* Toggle Date Period */}
           <ToggleBar
             options={[
@@ -77,7 +82,7 @@ export default function OwnerDashboardScreen() {
             ]}
             activeId={filterBy}
             onSelect={setFilterBy}
-            containerClassName="mb-6"
+            containerClassName=""
           />
 
           <KpiMetrics
@@ -86,35 +91,38 @@ export default function OwnerDashboardScreen() {
             revenueChart={revenueChartQuery.data}
             isLoading={metricsQuery.isLoading || metricsQuery.isRefetching}
           />
-          <View className="bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm mb-6">
-            <View className="flex-row justify-between items-center pb-3 border-b border-base-200 mb-4">
-              <Text className="text-sm font-semibold text-neutral capitalize">Live Today's Order Board</Text>
-            </View>
-            <LiveOrderBoard
-              liveOrderBoard={liveOrderBoardQuery.data}
-              isLoading={liveOrderBoardQuery.isLoading || liveOrderBoardQuery.isRefetching}
-            />
-          </View>
 
-          <View className="gap-y-6 mb-6">
-            <RevenueChart
-              filterBy={filterBy}
-              revenueChart={revenueChartQuery.data}
-              isLoading={revenueChartQuery.isLoading || revenueChartQuery.isRefetching}
-              resetKey={resetKey}
-            />
-            <OrdersByTypeChart
-              filterBy={filterBy}
-              ordersByType={ordersByTypeQuery.data}
-              isLoading={ordersByTypeQuery.isLoading || ordersByTypeQuery.isRefetching}
-            />
-            <TopDishes
-              filterBy={filterBy}
-              topDishes={topDishesQuery.data}
-              isLoading={topDishesQuery.isLoading || topDishesQuery.isRefetching}
-            />
-          </View>
+          {/* Live Order Board ActionCard */}
+          <ActionCard
+            title="Live Today's Order Board"
+            isLoading={liveOrderBoardQuery.isLoading || liveOrderBoardQuery.isRefetching}
+            skeleton={<LiveOrderBoardSkeleton />}
+            bodyStyle={{ paddingHorizontal: WP("4%"), paddingBottom: HP("2%") }}
+          >
+            <LiveOrderBoard liveOrderBoard={liveOrderBoardQuery.data} />
+          </ActionCard>
 
+          {/* Charts & Top Dishes */}
+          <RevenueChart
+            filterBy={filterBy}
+            revenueChart={revenueChartQuery.data}
+            isLoading={
+              metricsQuery.isLoading || revenueChartQuery.isLoading || revenueChartQuery.isRefetching
+            }
+            resetKey={resetKey}
+          />
+          <OrdersByTypeChart
+            filterBy={filterBy}
+            ordersByType={ordersByTypeQuery.data}
+            isLoading={ordersByTypeQuery.isLoading || ordersByTypeQuery.isRefetching}
+          />
+          <TopDishes
+            filterBy={filterBy}
+            topDishes={topDishesQuery.data}
+            isLoading={topDishesQuery.isLoading || topDishesQuery.isRefetching}
+          />
+
+          {/* Kitchen Activity, Promotions & Recent Orders */}
           <KitchenActivity
             kitchenActivity={kitchenActivityQuery.data}
             isLoading={kitchenActivityQuery.isLoading || kitchenActivityQuery.isRefetching}

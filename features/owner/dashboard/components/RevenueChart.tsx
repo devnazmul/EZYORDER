@@ -4,9 +4,11 @@ import { useData } from "@/context/context/DataContext";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, Pressable, Text, View } from "react-native";
+import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import RevenueChartSkeleton from "./skeletons/RevenueChartSkeleton";
+
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 
 interface RevenueChartProps {
   filterBy: string;
@@ -22,6 +24,7 @@ export default function RevenueChart({
   resetKey,
 }: RevenueChartProps) {
   const { settings } = useData();
+  const { width: screenWidth } = useWindowDimensions();
   const [focusedBarIndex, setFocusedBarIndex] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -43,7 +46,6 @@ export default function RevenueChart({
   }
 
   // Dimension helpers
-  const screenWidth = Dimensions.get("window").width;
   const chartHeight = 210;
   const isMonthFilter = revenueChart.length > 7;
   // Card padding is p-4 (32px total). Deduct padding + Y-axis margin.
@@ -114,7 +116,7 @@ export default function RevenueChart({
         const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
 
         item.labelComponent = () => (
-          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center" }}>
+          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center", marginTop: 8 }}>
             <Text style={{ fontSize: 8, color: "#6E6E6E", fontWeight: "600", textAlign: "center" }}>
               {showLabel ? String(dayNum) : ""}
             </Text>
@@ -125,7 +127,7 @@ export default function RevenueChart({
         const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
 
         item.labelComponent = () => (
-          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center" }}>
+          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center", marginTop: 8 }}>
             <Text style={{ fontSize: 8, color: "#6E6E6E", fontWeight: "600", textAlign: "center" }}>
               {d.name}
             </Text>
@@ -197,15 +199,21 @@ export default function RevenueChart({
       <ActionCard
         title={
           <View>
-            <Text className="text-sm font-semibold text-neutral capitalize">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("sm") }}
+              className="font-semibold text-neutral capitalize"
+            >
               Revenue {filterBy === "this_week" ? "This Week" : "This Month"}
             </Text>
-            <Text className="text-base font-extrabold text-neutral mt-0.5">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("sm") }}
+              className="font-extrabold text-neutral mt-0.5"
+            >
               Total: {formatAmount(totalRevenue, currencySymbol)}
             </Text>
           </View>
         }
-        bodyClassName="p-4"
+        bodyStyle={{ paddingHorizontal: WP("4%"), paddingBottom: HP("0.25%"), paddingTop: HP("0.25%") }}
       >
         {revenueChart.length === 0 ? (
           <EmptyState description="No revenue data available" pyClassName="py-8" />

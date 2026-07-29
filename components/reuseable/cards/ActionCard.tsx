@@ -1,5 +1,6 @@
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
 export interface ActionCardProps {
   /**
@@ -55,6 +56,10 @@ export interface ActionCardProps {
    */
   bodyClassName?: string;
   /**
+   * Body content wrapper inline style overrides.
+   */
+  bodyStyle?: StyleProp<ViewStyle>;
+  /**
    * Action button wrapper Tailwind className overrides.
    */
   actionClassName?: string;
@@ -78,6 +83,7 @@ export default function ActionCard({
   headerClassName = "",
   titleClassName = "",
   bodyClassName = "",
+  bodyStyle,
   actionClassName = "",
   actionTextClassName = "",
 }: ActionCardProps) {
@@ -88,9 +94,12 @@ export default function ActionCard({
     return (
       <View
         key="loading"
-        className={`bg-base-300 p-4 rounded-xl border border-base-200 shadow-sm min-h-[120px] justify-center items-center ${containerClassName}`}
+        style={{ padding: WP("4%"), minHeight: HP("15%") }}
+        className={`bg-base-300 rounded-xl border border-base-200 shadow-sm justify-center items-center ${containerClassName}`}
       >
-        <Text className="text-xs text-accent capitalize">{loadingText}</Text>
+        <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent capitalize">
+          {loadingText}
+        </Text>
       </View>
     );
   }
@@ -103,10 +112,16 @@ export default function ActionCard({
       {/* Title Header */}
       {title || headerRight ? (
         <View
-          className={`p-4 pb-3 border-b border-base-200 flex-row justify-between items-center ${headerClassName}`}
+          style={{ paddingHorizontal: WP("4%"), paddingVertical: HP("1.5%") }}
+          className={`border-b border-base-200 flex-row justify-between items-center ${headerClassName}`}
         >
           {typeof title === "string" ? (
-            <Text className={`text-sm font-semibold text-neutral capitalize ${titleClassName}`}>{title}</Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("sm") }}
+              className={`font-semibold text-neutral capitalize ${titleClassName}`}
+            >
+              {title}
+            </Text>
           ) : (
             title
           )}
@@ -115,7 +130,13 @@ export default function ActionCard({
       ) : null}
 
       {/* Main Content Body */}
-      {bodyClassName ? <View className={bodyClassName}>{children}</View> : children}
+      {bodyClassName || bodyStyle ? (
+        <View style={bodyStyle} className={bodyClassName}>
+          {children}
+        </View>
+      ) : (
+        children
+      )}
 
       {/* Bottom Action Area */}
       {actionElement ? (
@@ -123,10 +144,14 @@ export default function ActionCard({
       ) : actionLabel && onActionPress ? (
         <TouchableOpacity
           onPress={onActionPress}
-          activeOpacity={0.7}
-          className={`w-full py-4 items-center justify-center border-t border-base-200 bg-primary ${actionClassName}`}
+          activeOpacity={0.75}
+          style={{ paddingVertical: HP("1.5%") }}
+          className={`w-full items-center justify-center border-t border-base-200 bg-primary ${actionClassName}`}
         >
-          <Text className={`text-xs font-semibold text-primary capitalize text-white ${actionTextClassName}`}>
+          <Text
+            style={{ fontSize: getResponsiveFontSize("xs") }}
+            className={`font-semibold capitalize text-white ${actionTextClassName}`}
+          >
             {actionLabel}
           </Text>
         </TouchableOpacity>

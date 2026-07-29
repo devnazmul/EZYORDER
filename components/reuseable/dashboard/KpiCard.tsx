@@ -1,3 +1,4 @@
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -78,12 +79,13 @@ export default function KpiCard({
         borderRadius: 16,
         borderWidth: 1,
         borderColor: variant === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-        ...(minHeight ? { minHeight } : {}),
+        padding: WP("3.5%"),
+        minHeight: minHeight ?? HP("13%"),
       }}
-      className={`min-h-[110px] flex-1 p-4 shadow-sm ${containerClassName}`}
+      className={`flex-1 shadow-sm ${containerClassName}`}
     >
-      <View className="flex-col justify-between flex-1">
-        <View className="flex-row items-center justify-start gap-2">
+      <View className="flex-col justify-between flex-1" style={{ gap: WP("2%") }}>
+        <View className="flex-row items-center justify-start" style={{ gap: WP("2%") }}>
           <View
             className={`rounded-xl self-start p-2 ${iconBgClass}`}
             style={{
@@ -93,12 +95,13 @@ export default function KpiCard({
           >
             <MaterialIcons
               name={icon}
-              size={16}
+              size={WP("4%")}
               color={iconColor ? iconColor : variant === "dark" ? "#ffffff" : "#000000"}
             />
           </View>
           <Text
-            className={`flex-1 flex-wrap text-sm font-semibold capitalize ${
+            style={{ fontSize: getResponsiveFontSize("sm") }}
+            className={`flex-1 flex-wrap font-semibold capitalize ${
               variant === "dark" ? "text-base-100" : "text-neutral/60"
             }`}
           >
@@ -108,7 +111,8 @@ export default function KpiCard({
         <View className="flex-row items-end justify-between">
           <View>
             <Text
-              className={`text-2xl font-bold mt-1 ${
+              style={{ fontSize: getResponsiveFontSize("xl") }}
+              className={`font-bold mt-1 ${
                 variant === "dark" ? "text-base-100" : "text-neutral"
               } ${valueClassName}`}
             >
@@ -117,9 +121,8 @@ export default function KpiCard({
 
             {subtitle ? (
               <Text
-                className={`text-[10px] font-medium mt-0.5 ${
-                  variant === "dark" ? "text-white/70" : "text-accent"
-                }`}
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className={`font-medium mt-0.5 ${variant === "dark" ? "text-white/70" : "text-accent"}`}
               >
                 {subtitle}
               </Text>
@@ -128,17 +131,20 @@ export default function KpiCard({
             {/* Trend Badge */}
             {trend && (
               <View
-                className={`flex-row items-center self-start px-1.5 py-1 rounded-full gap-1 mt-2 ${
+                className={`flex-row items-center self-start px-2 py-1 rounded-full gap-1 mt-2 ${
                   trend === "up" ? "bg-success/20" : trend === "down" ? "bg-error/20" : "bg-white/10"
                 }`}
               >
                 <MaterialIcons
                   name={trend === "up" ? "trending-up" : trend === "down" ? "trending-down" : "trending-flat"}
-                  size={14}
-                  color={trend === "up" ? "#36d399" : trend === "down" ? "#ff8369" : "rgba(255, 255, 255, 0.7)"}
+                  size={WP("3.75%")}
+                  color={
+                    trend === "up" ? "#36d399" : trend === "down" ? "#ff8369" : "rgba(255, 255, 255, 0.7)"
+                  }
                 />
                 <Text
-                  className={`text-[8px] font-medium capitalize truncate ${
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className={`font-medium capitalize truncate ${
                     trend === "up" ? "text-success" : trend === "down" ? "text-error" : "text-white/70"
                   }`}
                   numberOfLines={1}

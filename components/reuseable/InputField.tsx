@@ -1,4 +1,5 @@
 import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Text, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
@@ -30,12 +31,21 @@ export default function InputField({
 
   return (
     <View className={containerClassName}>
-      <Text className="text-xs font-semibold text-accent mb-2">{label}</Text>
-      <View className={`flex-row items-center h-12 bg-base-100 border rounded-lg px-3 ${borderClass}`}>
-        {iconName && <MaterialIcons name={iconName} size={20} color={iconColor} />}
+      <Text
+        style={{ fontSize: getResponsiveFontSize("xs"), marginBottom: HP("0.75%") }}
+        className="font-semibold text-accent"
+      >
+        {label}
+      </Text>
+      <View
+        style={{ height: HP("5.8%"), paddingHorizontal: WP("3%") }}
+        className={`flex-row items-center bg-base-100 border rounded-lg ${borderClass}`}
+      >
+        {iconName && <MaterialIcons name={iconName} size={WP("4.6%")} color={iconColor} />}
         <TextInput
-          className="flex-1 h-full text-neutral text-sm ml-2"
-          placeholderTextColor="#9ca3af"
+          style={{ fontSize: getResponsiveFontSize("sm") }}
+          className="flex-1 h-full text-neutral ml-2"
+          placeholderTextColor={COLORS.accent}
           onFocus={(e) => {
             setIsFocused(true);
             onFocus?.(e);
@@ -48,11 +58,15 @@ export default function InputField({
         />
         {rightIconName && (
           <TouchableOpacity onPress={onRightIconPress} className="p-1">
-            <MaterialIcons name={rightIconName} size={20} color={iconColor} />
+            <MaterialIcons name={rightIconName} size={WP("4.6%")} color={iconColor} />
           </TouchableOpacity>
         )}
       </View>
-      {error && <Text className="text-xs text-error mt-1">{error}</Text>}
+      {error && (
+        <Text style={{ fontSize: getResponsiveFontSize("xs"), marginTop: HP("0.5%") }} className="text-error">
+          {error}
+        </Text>
+      )}
     </View>
   );
 }

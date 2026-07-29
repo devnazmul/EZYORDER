@@ -1,3 +1,5 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -22,28 +24,32 @@ export default function ToggleBar({
   containerClassName = "mb-4",
 }: ToggleBarProps) {
   return (
-    <View className={`flex-row p-1 bg-base-200 rounded-xl ${containerClassName}`}>
+    <View style={{ padding: WP("1%") }} className={`flex-row bg-base-200 rounded-xl ${containerClassName}`}>
       {options.map((option) => {
         const isActive = option.id === activeId;
         return (
           <TouchableOpacity
             key={option.id}
             onPress={() => onSelect(option.id)}
+            style={{ paddingVertical: HP("1%"), paddingHorizontal: WP("2%") }}
             className={
               isActive
-                ? "flex-1 py-2.5 flex-row items-center justify-center gap-1.5 rounded-lg bg-primary"
-                : "flex-1 py-2.5 flex-row items-center justify-center gap-1.5 rounded-lg"
+                ? "flex-1 flex-row items-center justify-center gap-1.5 rounded-lg bg-primary"
+                : "flex-1 flex-row items-center justify-center gap-1.5 rounded-lg"
             }
           >
             {option.icon && (
               <MaterialIcons
                 name={option.icon}
-                size={16}
-                color={isActive ? "#ffffff" : "#6E6E6E"}
+                size={WP("4%")}
+                color={isActive ? COLORS.base300 : COLORS.accent}
               />
             )}
             <Text
-              className={isActive ? "text-xs font-semibold text-white" : "text-xs font-semibold text-accent"}
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className={
+                isActive ? "font-semibold capitalize text-white" : "font-semibold capitalize text-accent"
+              }
             >
               {option.label}
             </Text>

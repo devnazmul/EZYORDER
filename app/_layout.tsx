@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
+import { ResponsiveProvider } from "@/context/providers/ResponsiveProvider";
 import "../global.css";
 
 const queryClient = new QueryClient();
@@ -47,16 +48,18 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <DataProvider>
-            <BottomSheetModalProvider>
-              <StatusBar style="dark" />
-              <RootNavigation />
-            </BottomSheetModalProvider>
-          </DataProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <ResponsiveProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <DataProvider>
+              <BottomSheetModalProvider>
+                <StatusBar style="dark" />
+                <RootNavigation />
+              </BottomSheetModalProvider>
+            </DataProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ResponsiveProvider>
     </GestureHandlerRootView>
   );
 }

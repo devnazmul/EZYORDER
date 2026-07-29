@@ -1,3 +1,4 @@
+import COLORS from "@/constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 
@@ -31,8 +32,36 @@ export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {
       return {
         iconName: "restaurant",
         iconColor: "#D97706",
-        containerClass: "bg-amber-50 border border-amber-100",
+        containerClass: "bg-warning/10 border border-warning/30",
         textClass: "text-amber-700",
+      };
+    case "active":
+      return {
+        iconName: "check-circle",
+        iconColor: "#15803D",
+        containerClass: "bg-green-50 border border-green-100",
+        textClass: "text-green-700",
+      };
+    case "expired":
+      return {
+        iconName: "error-outline",
+        iconColor: COLORS.error,
+        containerClass: "bg-error/10 border border-error/30",
+        textClass: "text-error",
+      };
+    case "inactive":
+      return {
+        iconName: "pause-circle-outline",
+        iconColor: "#6E6E6E",
+        containerClass: "bg-neutral/5 border border-neutral/20",
+        textClass: "text-accent",
+      };
+    case "accepted":
+      return {
+        iconName: "thumb-up",
+        iconColor: "#2563EB",
+        containerClass: "bg-blue-50 border border-blue-100",
+        textClass: "text-blue-700",
       };
     case "delivered":
       return {

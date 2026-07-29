@@ -1,6 +1,25 @@
+import { useWindowDimensions } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 
 export type ResponsiveSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
+
+/**
+ * Custom hook to dynamically re-render components on device rotation
+ */
+export const useResponsiveScreen = () => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
+  return {
+    screenWidth: width,
+    screenHeight: height,
+    isLandscape,
+    isPortrait: !isLandscape,
+    wp,
+    hp,
+    getResponsiveFontSize,
+  };
+};
 
 /**
  * Returns height percentage based on standard size tokens
@@ -51,28 +70,28 @@ export const getResponsiveWidth = (size: ResponsiveSize | string = "md"): number
 };
 
 /**
- * Returns responsive font size based on height percentage
+ * Returns responsive font size using width percentage with readable minimum baseline floors
  */
 export const getResponsiveFontSize = (size: ResponsiveSize | string = "md"): number => {
   switch (size) {
     case "xs":
-      return hp("1%");
+      return Math.max(11, wp("2%"));
     case "sm":
-      return hp("1.2%");
+      return Math.max(13, wp("2.6%"));
     case "md":
-      return hp("1.5%");
+      return Math.max(15, wp("3.2%"));
     case "lg":
-      return hp("1.7%");
+      return Math.max(17, wp("3.7%"));
     case "xl":
-      return hp("1.9%");
+      return Math.max(19, wp("4.2%"));
     case "2xl":
-      return hp("2%");
+      return Math.max(22, wp("4.8%"));
     case "3xl":
-      return hp("3%");
+      return Math.max(26, wp("5.8%"));
     case "4xl":
-      return hp("4%");
+      return Math.max(32, wp("7.0%"));
     default:
-      return hp("1.5%");
+      return Math.max(15, wp("3.2%"));
   }
 };
 

@@ -157,13 +157,15 @@ const LoginScreen = () => {
               </Text>
             </View>
 
-            {/* Modern Crisp White Form Card */}
+            {/* Modern Glassmorphic Form Card */}
             <View
               style={{
                 marginBottom: HP("3%"),
                 padding: WP("5%"),
-                backgroundColor: "#FFFFFF",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
                 borderRadius: 24,
+                borderWidth: 1,
+                borderColor: "rgba(255, 255, 255, 0.5)",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 10 },
                 shadowOpacity: 0.25,
@@ -177,17 +179,22 @@ const LoginScreen = () => {
                   className="flex-row items-center bg-error/15 border border-error/30 rounded-lg animate-pulse"
                 >
                   <MaterialIcons name="error" size={20} color="#DC2D2A" />
-                  <Text className="flex-1 text-xs font-semibold text-primary leading-4">{errorBanner}</Text>
+                  <Text
+                    style={{ fontSize: getResponsiveFontSize("xs") }}
+                    className="flex-1 font-semibold text-primary leading-4"
+                  >
+                    {errorBanner}
+                  </Text>
                 </View>
               )}
 
               <View style={{ marginBottom: HP("1.5%") }}>
-                <Text style={{ fontSize: getResponsiveFontSize("2xl") }} className="font-bold text-neutral">
+                <Text style={{ fontSize: getResponsiveFontSize("xl") }} className="font-bold text-neutral">
                   Welcome Back
                 </Text>
                 <Text
-                  style={{ fontSize: getResponsiveFontSize(""), marginTop: HP("0.25%") }}
-                  className="text-accent"
+                  style={{ fontSize: getResponsiveFontSize("sm"), marginTop: HP("0.25%") }}
+                  className="text-accent font-medium"
                 >
                   Log in to continue
                 </Text>

@@ -1,3 +1,4 @@
+import { getResponsiveFontSize } from "@/utils/getResponsiveSizes";
 import React from "react";
 import { StyleProp, Text, TextStyle, View, ViewStyle } from "react-native";
 
@@ -27,8 +28,8 @@ export default function Badge({
     >
       {icon && iconPosition === "left" && icon}
       <Text
-        className={`text-[10px] font-bold capitalize tracking-wider ${textClassName}`}
-        style={textStyle}
+        style={[{ fontSize: getResponsiveFontSize("xs") }, textStyle]}
+        className={`font-bold capitalize tracking-wider ${textClassName}`}
       >
         {text}
       </Text>

@@ -2,6 +2,7 @@ import KpiCard from "@/components/reuseable/dashboard/KpiCard";
 import { useData } from "@/context/context/DataContext";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import { HP, useResponsiveScreen, WP } from "@/utils/getResponsiveSizes";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
@@ -22,6 +23,7 @@ export default function KpiMetrics({
   isLoading,
 }: KpiMetricsProps) {
   const { settings } = useData();
+  const { isLandscape } = useResponsiveScreen();
 
   const currencySymbol = useMemo(() => {
     return getCurrencySymbol(settings?.currency);
@@ -39,7 +41,7 @@ export default function KpiMetrics({
 
   if (isLoading) {
     return (
-      <View key="loading" className="gap-y-2 mb-6 flex-1">
+      <View key="loading" style={{ gap: HP("1.25%") }} className="flex-1">
         <KpiCard title="Revenue" value="--" loading={true} />
         <View className="flex-row gap-2 flex-1">
           <View className="flex-1">
@@ -49,7 +51,6 @@ export default function KpiMetrics({
             <KpiCard title="Scheduled" value="--" loading={true} />
           </View>
         </View>
-        <KpiCard title="Today's Sales" value="--" loading={true} />
         <View className="flex-row gap-2 flex-1">
           <View className="flex-1">
             <KpiCard title="Today's Orders" value="--" loading={true} />
@@ -63,7 +64,7 @@ export default function KpiMetrics({
   }
 
   return (
-    <View key="loaded" className="gap-y-2 mb-6 flex-1">
+    <View key="loaded" style={{ gap: HP("0.75%") }} className="flex-1">
       {/* Revenue Dark Hero Card (Row 1 - Full Width) */}
       <View className="flex-1">
         <KpiCard
@@ -85,9 +86,9 @@ export default function KpiMetrics({
             sparklineData.length > 0 ? (
               <SparklineChart
                 data={sparklineData}
-                width={170}
-                height={80}
-                paddingBottom={30}
+                width={isLandscape ? WP("22%") : WP("38%")}
+                height={isLandscape ? HP("14%") : HP("9%")}
+                paddingBottom={HP("3%")}
                 strokeColor={isNegativeTrend ? "#DC2D2A" : "#10B981"}
                 gradientId={isNegativeTrend ? "revenueSparklineNeg" : "revenueSparklinePos"}
               />
@@ -108,7 +109,7 @@ export default function KpiMetrics({
       </View>
 
       {/* Row 2 - 2 Columns (Active Orders & Scheduled Orders) */}
-      <View className="flex-row gap-2 flex-1">
+      <View className="flex-row flex-1" style={{ gap: HP("0.75") }}>
         <View className="flex-1">
           <KpiCard
             variant="dark"
@@ -173,11 +174,11 @@ export default function KpiMetrics({
               transform: [{ rotate: "-17deg" }],
               opacity: 0.05,
               position: "absolute",
-              bottom: -7,
+              bottom: -HP("1.35%"),
             }}
             className="justify-center items-center pr-2 pb-1"
           >
-            <Ionicons name="receipt-outline" size={80} color="#FFFFFF" />
+            <Ionicons name="receipt-outline" size={WP("19%")} color="#FFFFFF" />
           </View>
         }
         onPress={() =>
@@ -192,7 +193,7 @@ export default function KpiMetrics({
       />
 
       {/* Row 4 - 2 Columns (Today's Orders & Average Order) */}
-      <View className="flex-row gap-2 flex-1">
+      <View className="flex-row  flex-1" style={{ gap: HP("0.75") }}>
         <View className="flex-1">
           <KpiCard
             variant="light"
