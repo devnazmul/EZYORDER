@@ -2,16 +2,17 @@ import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
 import SearchBar from "@/components/reuseable/SearchBar";
 import ToggleBar from "@/components/reuseable/ToggleBar";
+import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
+import { WP } from "@/utils/getResponsiveSizes";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
-import COLORS from "@/constants/colors";
 import React, { useEffect, useMemo, useState } from "react";
-import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import OrderCard from "../components/OrderCard";
 import OrderDetailsModal from "../components/OrderDetailsModal";
+import OrderCardSkeleton from "../components/skeletons/OrderCardSkeleton";
 import { useAllOrdersQuery, useTodayOrdersQuery } from "../hooks/queries/useOrderQueries";
 
 interface AllOrdersProps {
@@ -337,9 +338,10 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
 
         {/* List Content */}
         {isLoading ? (
-          <View key="loading" className="flex-1 justify-center items-center py-20">
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">Loading orders...</Text>
+          <View key="loading" className="flex-1">
+            <OrderCardSkeleton />
+            <OrderCardSkeleton />
+            <OrderCardSkeleton />
           </View>
         ) : (
           <FlatList
@@ -354,9 +356,10 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
             }
             ListEmptyComponent={
               isRefetching ? (
-                <View className="py-20 items-center justify-center">
-                  <ActivityIndicator size="large" color={COLORS.primary} />
-                  <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">Loading orders data...</Text>
+                <View key="refetching" className="flex-1">
+                  <OrderCardSkeleton />
+                  <OrderCardSkeleton />
+                  <OrderCardSkeleton />
                 </View>
               ) : (
                 <View key="empty" className="mt-8">
