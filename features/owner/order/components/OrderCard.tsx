@@ -3,10 +3,11 @@ import Button from "@/components/reuseable/Button";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/context/DataContext";
-import { getOrderTypeColor } from "@/utils/orderTypeColors";
 import { useUsersQuery } from "@/hooks/useUserQueries";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { getOrderTypeColor } from "@/utils/orderTypeColors";
 import React, { useMemo } from "react";
 import { Text, View } from "react-native";
 
@@ -80,11 +81,13 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
 
   return (
     <View className="bg-base-300 rounded-xl border border-base-200 overflow-hidden shadow-sm mb-4">
-      <View className="p-4 gap-y-3">
+      <View style={{ padding: WP("3.5%") }} className="gap-y-3">
         <View className="flex-row justify-between items-start">
           <View className="gap-y-1 flex-1 pr-2">
             <View className="flex-row items-center gap-2">
-              <Text className="text-md font-bold text-neutral">#{item.id}</Text>
+              <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
+                #{item.id}
+              </Text>
               <Badge
                 text={orderTypeText}
                 containerStyle={{
@@ -95,7 +98,10 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
                 textStyle={{ color: orderTypeColor }}
               />
             </View>
-            <Text className="text-sm font-semibold text-neutral">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") + 2 }}
+              className="font-semibold text-neutral"
+            >
               {item.customer_name ||
                 item.user?.first_Name ||
                 (item.table_number && parseFloat(item.table_number) > 0
@@ -106,7 +112,12 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
 
           <View className="items-end gap-y-1">
             <StatusBadge status={item.status} />
-            <Text className="text-[10px] text-accent font-medium mt-0.5">{orderDateTime}</Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="text-accent font-medium mt-0.5"
+            >
+              {orderDateTime}
+            </Text>
           </View>
         </View>
 
@@ -114,41 +125,54 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
         <View className="flex-row flex-wrap justify-between items-center gap-2 border-t border-b border-base-200/50 py-2.5">
           <View className="flex flex-col gap-2">
             <View className="flex-row items-center gap-1">
-              <Text className="text-[9px] font-bold text-accent capitalize tracking-wider">Source:</Text>
-              <Text className="text-[9px] font-bold text-neutral capitalize">
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent capitalize tracking-wider"
+              >
+                Source:
+              </Text>
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-neutral capitalize"
+              >
                 {String(item.order_app || "").toLowerCase() === "pos" ? "POS" : "Client"}
               </Text>
             </View>
 
             <View className="flex-row items-center gap-1">
-              <Text className="text-[9px] font-bold text-accent capitalize tracking-wider">Assigned:</Text>
-              <Text className="text-[9px] font-semibold text-neutral">{assignedText}</Text>
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent capitalize tracking-wider"
+              >
+                Assigned:
+              </Text>
+              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
+                {assignedText}
+              </Text>
             </View>
           </View>
 
           <View className="flex-row items-center gap-1">
-            <Text className="text-[9px] font-bold text-accent capitalize tracking-wider">Payment:</Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-accent capitalize tracking-wider"
+            >
+              Payment:
+            </Text>
             <StatusBadge status={item.payment_status} />
           </View>
         </View>
 
-        {/* Items Summary bubble */}
-        <View className="bg-base-100 rounded-lg p-3">
-          <Text className="text-xs text-accent font-medium leading-4" numberOfLines={2}>
-            {getOrderItemsText(item)}
-          </Text>
-        </View>
-
         {/* Price Row */}
         <View className="flex-row justify-between items-center pt-1">
-          <Text className="text-md font-bold text-neutral">
+          <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
             {formatAmount(item.amount || item.final_price || "0", currencySymbol)}
           </Text>
         </View>
       </View>
 
       {/* Button Action */}
-      <View className="px-4 pb-4">
+      <View style={{ paddingHorizontal: WP("4%") }} className="pb-4">
         <Button label="View Details" onPress={onViewDetails} variant="primary" />
       </View>
     </View>

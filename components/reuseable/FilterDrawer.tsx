@@ -1,12 +1,13 @@
 import FilterChips from "@/components/reuseable/FilterChips";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, ScrollView, Text, TouchableOpacity, View, KeyboardTypeOptions } from "react-native";
+import { KeyboardTypeOptions, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import DatePickerModal from "./DatePickerModal";
+import DateField from "./inputs/DateField";
 import DateRangeField from "./inputs/DateRangeField";
 import NumberRangeField from "./inputs/NumberRangeField";
 import TextField from "./inputs/TextField";
-import DateField from "./inputs/DateField";
 
 export interface FilterField {
   id: string;
@@ -33,7 +34,7 @@ export default function FilterDrawer({
   triggerClassName = "",
 }: FilterDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // Local scratch state to modify before applying
   const [localValues, setLocalValues] = useState<Record<string, any>>(values);
   const [activeDatePicker, setActiveDatePicker] = useState<{
@@ -170,7 +171,7 @@ export default function FilterDrawer({
         activeOpacity={0.8}
         className={`relative bg-base-300 border border-base-200 rounded-lg p-2.5 items-center justify-center ${triggerClassName}`}
       >
-        <MaterialIcons name="filter-list" size={20} color="#DC2D2A" />
+        <MaterialIcons name="filter-list" size={WP("4.75%")} color="#DC2D2A" />
         {activeFilterCount > 0 && (
           <View className="absolute -top-1 -right-1 bg-primary w-5 h-5 rounded-full items-center justify-center border-2 border-base-300">
             <Text className="text-[8px] font-bold text-white">{activeFilterCount}</Text>
@@ -182,22 +183,33 @@ export default function FilterDrawer({
         <View className="flex-1 justify-end bg-neutral/40">
           <View className="bg-base-300 border-t border-base-200 rounded-t-3xl h-[80%] flex-col">
             {/* Header */}
-            <View className="flex-row justify-between items-center px-5 py-4 border-b border-base-200">
-              <Text className="text-base font-black text-neutral uppercase tracking-tight">Filters</Text>
+            <View
+              style={{ paddingHorizontal: WP("5%") }}
+              className="flex-row justify-between items-center py-4 border-b border-base-200"
+            >
+              <Text
+                style={{ fontSize: getResponsiveFontSize("md") }}
+                className="font-black text-neutral uppercase tracking-tight"
+              >
+                Filters
+              </Text>
               <TouchableOpacity onPress={() => setIsOpen(false)} className="p-1">
                 <MaterialIcons name="close" size={24} color="#6E6E6E" />
               </TouchableOpacity>
             </View>
 
             {/* Scrollable Fields */}
-            <ScrollView className="flex-1 px-5 py-4">
+            <ScrollView style={{ paddingHorizontal: WP("5%") }} className="flex-1 py-4">
               <View className="gap-y-6 pb-8">
                 {fields.map((field) => {
                   if (field.type === "chips" && field.options) {
                     const selectedId = localValues[field.id] || "all";
                     return (
                       <View key={field.id}>
-                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
+                        <Text
+                          style={{ fontSize: getResponsiveFontSize("xs") }}
+                          className="font-bold text-accent uppercase tracking-widest mb-3"
+                        >
                           {field.label}
                         </Text>
                         <FilterChips
@@ -291,20 +303,33 @@ export default function FilterDrawer({
             </ScrollView>
 
             {/* Bottom Actions */}
-            <View className="flex-row items-center gap-3 p-4 border-t border-base-200 bg-base-200">
+            <View
+              style={{ padding: WP("4%") }}
+              className="flex-row items-center gap-3 border-t border-base-200 bg-base-200"
+            >
               <TouchableOpacity
                 onPress={handleClear}
                 activeOpacity={0.8}
                 className="flex-1 border border-accent py-3.5 rounded-xl items-center justify-center bg-base-300"
               >
-                <Text className="text-xs font-bold text-accent uppercase tracking-wider">Clear All</Text>
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className="text-xs font-bold text-accent uppercase tracking-wider"
+                >
+                  Clear All
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleApply}
                 activeOpacity={0.8}
                 className="flex-1 bg-primary py-3.5 rounded-xl items-center justify-center"
               >
-                <Text className="text-xs font-bold text-white uppercase tracking-wider">Apply Filters</Text>
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className="text-xs font-bold text-white uppercase tracking-wider"
+                >
+                  Apply Filters
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

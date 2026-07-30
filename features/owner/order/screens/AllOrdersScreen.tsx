@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import OrderCard from "../components/OrderCard";
@@ -277,7 +278,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       {/* Main Body */}
-      <View className="flex-1 px-4 py-4">
+      <View style={{ paddingHorizontal: WP("4%") }} className="flex-1 py-4">
         {/* Toggle between Live and Historical */}
         <ToggleBar
           options={[
@@ -337,7 +338,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         {isLoading ? (
           <View key="loading" className="flex-1 justify-center items-center py-20">
             <ActivityIndicator size="large" color="#DC2D2A" />
-            <Text className="text-xs text-accent mt-3">Loading orders...</Text>
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">Loading orders...</Text>
           </View>
         ) : (
           <FlatList
@@ -354,7 +355,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
               isRefetching ? (
                 <View className="py-20 items-center justify-center">
                   <ActivityIndicator size="large" color="#DC2D2A" />
-                  <Text className="text-xs text-accent mt-3">Loading orders data...</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">Loading orders data...</Text>
                 </View>
               ) : (
                 <View key="empty" className="mt-8">
