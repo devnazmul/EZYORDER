@@ -80,7 +80,7 @@ export default function KpiCard({
         borderWidth: 1,
         borderColor: variant === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
         padding: WP("3.5%"),
-        minHeight: minHeight ?? 100,
+        minHeight: minHeight ?? 110,
       }}
       className={`flex-1 shadow-sm ${containerClassName}`}
     >

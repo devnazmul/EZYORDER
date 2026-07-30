@@ -31,14 +31,11 @@ export default function InputField({
 
   return (
     <View className={containerClassName}>
-      <Text
-        style={{ fontSize: getResponsiveFontSize("xs"), marginBottom: HP("0.75%") }}
-        className="font-semibold text-accent"
-      >
+      <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent mb-1.5">
         {label}
       </Text>
       <View
-        style={{ height: HP("5.8%"), paddingHorizontal: WP("3%") }}
+        style={{ height: HP("5%"), paddingHorizontal: WP("3%") }}
         className={`flex-row items-center bg-base-100 border rounded-lg ${borderClass}`}
       >
         {iconName && <MaterialIcons name={iconName} size={WP("4.6%")} color={iconColor} />}
@@ -63,7 +60,7 @@ export default function InputField({
         )}
       </View>
       {error && (
-        <Text style={{ fontSize: getResponsiveFontSize("xs"), marginTop: HP("0.5%") }} className="text-error">
+        <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-error mt-1">
           {error}
         </Text>
       )}

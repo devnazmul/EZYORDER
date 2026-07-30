@@ -1,7 +1,7 @@
 import Button from "@/components/reuseable/Button";
 import InputField from "@/components/reuseable/InputField";
 import { useAuth } from "@/context/AuthContext";
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { useState } from "react";
@@ -122,7 +122,7 @@ const LoginScreen = () => {
           style={{ paddingHorizontal: WP("4%") }}
           className="w-full"
         >
-          <View style={{ marginTop: HP("2%"), marginBottom: HP("2%") }} className="items-center">
+          <View className="items-center my-4">
             {/* Header Branding */}
 
             <View className="w-16 h-16 bg-primary rounded-lg items-center justify-center shadow-lg mb-4">
@@ -146,7 +146,6 @@ const LoginScreen = () => {
           {/* Modern Glassmorphic Form Card */}
           <View
             style={{
-              marginBottom: HP("3%"),
               padding: WP("5%"),
               backgroundColor: "rgba(255, 255, 255, 0.95)",
               borderRadius: 24,
@@ -158,11 +157,12 @@ const LoginScreen = () => {
               shadowRadius: 15,
               elevation: 10,
             }}
+            className="mb-6"
           >
             {errorBanner && (
               <View
-                style={{ padding: HP("1.5%"), marginBottom: HP("2%"), gap: WP("3%") }}
-                className="flex-row items-center bg-error/15 border border-error/30 rounded-lg animate-pulse"
+                style={{ gap: WP("3%") }}
+                className="flex-row items-center bg-error/15 border border-error/30 rounded-lg animate-pulse p-3 mb-4"
               >
                 <MaterialIcons name="error" size={20} color="#DC2D2A" />
                 <Text
@@ -174,20 +174,20 @@ const LoginScreen = () => {
               </View>
             )}
 
-            <View style={{ marginBottom: HP("1.5%") }}>
+            <View className="mb-4">
               <Text style={{ fontSize: getResponsiveFontSize("xl") }} className="font-bold text-neutral">
                 Welcome Back
               </Text>
               <Text
-                style={{ fontSize: getResponsiveFontSize("sm"), marginTop: HP("0.25%") }}
-                className="text-accent font-medium"
+                style={{ fontSize: getResponsiveFontSize("sm") }}
+                className="text-accent font-medium mt-1"
               >
                 Log in to continue
               </Text>
             </View>
 
             {/* Fields List */}
-            <View style={{ gap: HP("1.5%") }}>
+            <View className="gap-y-3.5">
               {/* Email Field */}
               <InputField
                 label="Email"
@@ -218,10 +218,7 @@ const LoginScreen = () => {
             </View>
 
             {/* Remember Me & Forgot Password Row */}
-            <View
-              style={{ marginTop: HP("2.5%"), marginBottom: HP("1%") }}
-              className="flex-row items-center justify-between"
-            >
+            <View className="flex-row items-center justify-between mt-5 mb-2">
               <TouchableOpacity
                 onPress={() => setRememberMe(!rememberMe)}
                 className="flex-row items-center"
@@ -257,7 +254,7 @@ const LoginScreen = () => {
             </View>
 
             {/* Primary Action Button */}
-            <View style={{ marginTop: HP("1.5%") }}>
+            <View className="mt-4">
               <Button label="Log In" onPress={handleSubmit} isLoading={isLoading} />
             </View>
           </View>
