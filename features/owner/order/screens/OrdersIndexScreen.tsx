@@ -1,6 +1,7 @@
 import MenuCard from "@/components/reuseable/MenuCard";
 import PageTitle from "@/components/reuseable/PageTitle";
 import { useAuth } from "@/context/AuthContext";
+import { HP, WP } from "@/utils/getResponsiveSizes";
 import { router } from "expo-router";
 import React from "react";
 import { ScrollView, View } from "react-native";
@@ -36,11 +37,10 @@ export default function OrdersHub() {
 
   return (
     <SafeAreaView edges={["bottom", "left", "right"]} className="flex-1 bg-base-100">
-
       {/* Main Content Scroll View */}
       <ScrollView
-        className="flex-1 px-4 py-6"
-        contentContainerStyle={{ paddingBottom: 24 }}
+        style={{ paddingHorizontal: WP("4%") }}
+        contentContainerStyle={{ paddingTop: HP("2.5%"), paddingBottom: HP("3%") }}
         showsVerticalScrollIndicator={false}
       >
         {/* Page Header */}

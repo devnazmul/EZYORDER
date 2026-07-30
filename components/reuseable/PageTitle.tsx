@@ -1,3 +1,5 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
@@ -12,20 +14,29 @@ interface PageTitleProps {
 export default function PageTitle({ title, icon, badgeCount, description }: PageTitleProps) {
   return (
     <View className="flex-row items-start gap-2 mb-4">
-      <View className="bg-primary-container/10 p-1.5 rounded-lg">
-        <MaterialIcons name={icon} size={description ? 24 : 18} color="#DC2D2A" />
+      <View className="bg-primary/10 p-3 rounded-lg">
+        <MaterialIcons name={icon} size={description ? WP("6.75%") : WP("5%")} color={COLORS.primary} />
       </View>
       <View className="">
         <View className="flex-row items-center gap-2">
-          <Text className="text-lg font-bold text-neutral capitalize tracking-tight">{title}</Text>
+          <Text
+            style={{ fontSize: getResponsiveFontSize("lg") }}
+            className="font-bold text-neutral capitalize "
+          >
+            {title}
+          </Text>
           {badgeCount !== undefined && badgeCount > 0 && (
             <View className="bg-primary px-2.5 py-0.5 rounded-full items-center justify-center">
-              <Text className="text-white text-[10px] font-bold">{badgeCount}</Text>
+              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-white font-bold">
+                {badgeCount}
+              </Text>
             </View>
           )}
         </View>
         {description !== undefined && description && (
-          <Text className="text-xs text-accent">{description}</Text>
+          <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="text-accent">
+            {description}
+          </Text>
         )}
       </View>
     </View>
