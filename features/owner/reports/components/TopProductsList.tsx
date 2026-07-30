@@ -4,6 +4,7 @@ import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 
 import React from "react";
 import { Text, View } from "react-native";
+import TopProductsListSkeleton from "./skeletons/TopProductsListSkeleton";
 
 interface TopProductsListProps {
   itemList: any[];
@@ -27,6 +28,7 @@ export default function TopProductsList({
     <ActionCard
       title="Top Selling Products"
       isLoading={isLoading}
+      skeleton={<TopProductsListSkeleton />}
       containerClassName={containerClassName}
       bodyStyle={{ padding: WP("3.5%") }}
       actionLabel="View Full Product Report"

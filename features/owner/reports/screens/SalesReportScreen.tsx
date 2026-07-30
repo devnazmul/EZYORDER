@@ -29,6 +29,9 @@ import SalesHourlyList from "../components/SalesHourlyList";
 import SalesItemList from "../components/SalesItemList";
 import SalesSummaryListCard from "../components/SalesSummaryListCard";
 import TopProductsList from "../components/TopProductsList";
+import SalesDailyListSkeleton from "../components/skeletons/SalesDailyListSkeleton";
+import SalesItemListSkeleton from "../components/skeletons/SalesItemListSkeleton";
+import SalesHourlyListSkeleton from "../components/skeletons/SalesHourlyListSkeleton";
 
 // Helper: Calculate Date Period Ranges aligned with calendar boundaries
 const getDateRange = (period: string) => {
@@ -232,19 +235,14 @@ const SalesReport = () => {
           />
         </View>
 
-        {isAnyLoading && !isRefreshing && (
-          <View key="loading" className="py-10 justify-center items-center">
-            <ActivityIndicator size="large" color="#DC2D2A" />
-          </View>
-        )}
-
-        {!isAnyLoading && activeTab === "Overview" && (
+        {activeTab === "Overview" && (
           <View key="overview" className="gap-y-3 pb-6">
             <View className="flex-col gap-y-3">
               <View className="flex-1">
                 <KpiCard
                   variant="dark"
                   minHeight={120}
+                  loading={isSummaryLoading && !isRefreshing}
                   title="Total Sales"
                   value={formatAmount(grossSales, currencySymbol)}
                   gradientColors={["#111827", "#0F172A"]}
@@ -266,6 +264,7 @@ const SalesReport = () => {
               <View className="flex-row gap-3 flex-1">
                 <KpiCard
                   variant="light"
+                  loading={isSummaryLoading && !isRefreshing}
                   title="Total Orders"
                   value={totalOrders.toLocaleString()}
                   icon="shopping-bag"
@@ -276,6 +275,7 @@ const SalesReport = () => {
                 />
                 <KpiCard
                   variant="light"
+                  loading={isSummaryLoading && !isRefreshing}
                   title="Avg Order Value"
                   value={formatAmount(avgOrderValue, currencySymbol)}
                   icon="payments"
@@ -288,6 +288,7 @@ const SalesReport = () => {
               <View className="flex-row gap-3 flex-1">
                 <KpiCard
                   variant="light"
+                  loading={isSummaryLoading && !isRefreshing}
                   title="Total Discounts"
                   value={formatAmount(discounts, currencySymbol)}
                   icon="local-offer"
@@ -298,6 +299,7 @@ const SalesReport = () => {
                 />
                 <KpiCard
                   variant="light"
+                  loading={isSummaryLoading && !isRefreshing}
                   title="Net Sales"
                   value={formatAmount(netSales, currencySymbol)}
                   icon="account-balance-wallet"
@@ -312,6 +314,7 @@ const SalesReport = () => {
             <SalesSummaryListCard
               salesSummary={summaryData}
               currencySymbol={currencySymbol}
+              isLoading={isSummaryLoading && !isRefreshing}
               onNavigateToTab={setActiveTab}
             />
 
@@ -319,13 +322,14 @@ const SalesReport = () => {
             <SalesAreaChart
               trendData={trendData}
               currencySymbol={currencySymbol}
-              isLoading={isTrendLoading}
+              isLoading={isTrendLoading && !isRefreshing}
             />
 
             {/* Payment splits */}
             <SalesByPaymentCard
               salesSummary={summaryData}
               currencySymbol={currencySymbol}
+              isLoading={isSummaryLoading && !isRefreshing}
               onNavigateToTab={setActiveTab}
             />
 
@@ -334,32 +338,46 @@ const SalesReport = () => {
               orderTypeData={orderTypeData}
               netSales={netSales}
               currencySymbol={currencySymbol}
+              isLoading={isOrderTypeLoading && !isRefreshing}
             />
 
             {/* Top performing items */}
             <TopProductsList
               itemList={itemList}
               currencySymbol={currencySymbol}
+              isLoading={isItemLoading && !isRefreshing}
               onNavigateToTab={setActiveTab}
             />
           </View>
         )}
 
-        {!isAnyLoading && activeTab === "Daily" && (
+        {activeTab === "Daily" && (
           <View key="daily">
-            <SalesDailyList dailyList={dailyList} currencySymbol={currencySymbol} />
+            {isDailyLoading && !isRefreshing ? (
+              <SalesDailyListSkeleton />
+            ) : (
+              <SalesDailyList dailyList={dailyList} currencySymbol={currencySymbol} />
+            )}
           </View>
         )}
 
-        {!isAnyLoading && activeTab === "Items" && (
+        {activeTab === "Items" && (
           <View key="items">
-            <SalesItemList itemList={itemList} currencySymbol={currencySymbol} />
+            {isItemLoading && !isRefreshing ? (
+              <SalesItemListSkeleton />
+            ) : (
+              <SalesItemList itemList={itemList} currencySymbol={currencySymbol} />
+            )}
           </View>
         )}
 
-        {!isAnyLoading && activeTab === "Hourly" && (
+        {activeTab === "Hourly" && (
           <View key="hourly">
-            <SalesHourlyList hourlyList={hourlyList} currencySymbol={currencySymbol} />
+            {isHourlyLoading && !isRefreshing ? (
+              <SalesHourlyListSkeleton />
+            ) : (
+              <SalesHourlyList hourlyList={hourlyList} currencySymbol={currencySymbol} />
+            )}
           </View>
         )}
       </RefreshableScrollView>

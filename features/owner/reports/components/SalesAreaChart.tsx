@@ -5,6 +5,7 @@ import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import React, { useMemo } from "react";
 import { Text, useWindowDimensions, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
+import SalesAreaChartSkeleton from "./skeletons/SalesAreaChartSkeleton";
 
 interface SalesAreaChartProps {
   trendData: any;
@@ -87,7 +88,7 @@ export default function SalesAreaChart({
         </View>
       }
       isLoading={isLoading}
-      loadingText="Loading trend..."
+      skeleton={<SalesAreaChartSkeleton />}
       containerClassName={containerClassName}
       bodyClassName="p-5"
     >

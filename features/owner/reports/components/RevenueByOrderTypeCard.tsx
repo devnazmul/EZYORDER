@@ -5,11 +5,13 @@ import { getOrderTypeColor } from "@/utils/orderTypeColors";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
+import RevenueByOrderTypeSkeleton from "./skeletons/RevenueByOrderTypeSkeleton";
 
 interface RevenueByOrderTypeCardProps {
   orderTypeData: any;
   netSales: number;
   currencySymbol: string;
+  isLoading?: boolean;
   containerClassName?: string;
 }
 
@@ -30,6 +32,7 @@ export default function RevenueByOrderTypeCard({
   orderTypeData,
   netSales = 0,
   currencySymbol,
+  isLoading = false,
   containerClassName = "",
 }: RevenueByOrderTypeCardProps) {
   const list = Array.isArray(orderTypeData) ? orderTypeData : [];
@@ -37,6 +40,8 @@ export default function RevenueByOrderTypeCard({
   return (
     <ActionCard
       title="Revenue by Order Type"
+      isLoading={isLoading}
+      skeleton={<RevenueByOrderTypeSkeleton />}
       containerClassName={containerClassName}
       bodyStyle={{ padding: WP("3.5%") }}
     >

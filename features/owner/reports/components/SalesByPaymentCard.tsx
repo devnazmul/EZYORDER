@@ -5,6 +5,7 @@ import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
+import SalesByPaymentSkeleton from "./skeletons/SalesByPaymentSkeleton";
 
 interface SalesByPaymentCardProps {
   salesSummary: any;
@@ -67,6 +68,7 @@ export default function SalesByPaymentCard({
     <ActionCard
       title="Sales by Payment Methods"
       isLoading={isLoading}
+      skeleton={<SalesByPaymentSkeleton />}
       containerClassName={containerClassName}
       bodyStyle={{ padding: WP("3.5%") }}
       actionLabel="View Full Report"

@@ -5,6 +5,7 @@ import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
+import SalesSummaryListSkeleton from "./skeletons/SalesSummaryListSkeleton";
 
 interface SalesSummaryListCardProps {
   salesSummary: any;
@@ -32,6 +33,7 @@ export default function SalesSummaryListCard({
     <ActionCard
       title="Sales Summary"
       isLoading={isLoading}
+      skeleton={<SalesSummaryListSkeleton />}
       containerClassName={containerClassName}
       bodyStyle={{ padding: WP("3.5%") }}
       actionLabel="View Full Summary"
