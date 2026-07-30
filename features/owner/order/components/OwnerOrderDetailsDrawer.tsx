@@ -119,8 +119,14 @@ export default function OwnerOrderDetailsDrawer({
           text={formatLabel(order.status) || "Pending"}
           icon={<MaterialIcons name={statusConfig.iconName} size={12} color={statusConfig.iconColor} />}
           iconPosition="left"
-          containerClassName={statusConfig.containerClass}
-          textClassName={statusConfig.textClass}
+          containerStyle={{
+            backgroundColor: statusConfig.backgroundColor,
+            borderColor: statusConfig.borderColor,
+            borderWidth: 1,
+          }}
+          textStyle={{
+            color: statusConfig.textColor,
+          }}
         />
       </View>
 
@@ -363,8 +369,14 @@ export default function OwnerOrderDetailsDrawer({
                 text={formatLabel(order.payment_status) || "Unpaid"}
                 icon={<MaterialIcons name={payConfig.iconName} size={12} color={payConfig.iconColor} />}
                 iconPosition="left"
-                containerClassName={payConfig.containerClass}
-                textClassName={payConfig.textClass}
+                containerStyle={{
+                  backgroundColor: payConfig.backgroundColor,
+                  borderColor: payConfig.borderColor,
+                  borderWidth: 1,
+                }}
+                textStyle={{
+                  color: payConfig.textColor,
+                }}
               />
             </View>
 
