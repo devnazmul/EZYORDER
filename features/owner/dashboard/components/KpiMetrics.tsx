@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import { View } from "react-native";
-import SparklineChart from "./SparklineChart";
+import SparklineChart from "../../components/SparklineChart";
 
 interface KpiMetricsProps {
   filterBy: string;

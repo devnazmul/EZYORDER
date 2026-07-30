@@ -20,17 +20,19 @@ export default function SparklineChart({
   strokeColor = "#DC2D2A",
   gradientId = "revenueSparklineGradient",
 }: SparklineChartProps) {
-  if (!data || data.length === 0) return null;
-
+  const finalData = !data || data.length === 0 ? [0, 0] : data;
   const effectiveHeight = height - paddingTop - paddingBottom;
 
-  const minVal = Math.min(...data);
-  const maxVal = Math.max(...data);
+  const minVal = Math.min(...finalData);
+  const maxVal = Math.max(...finalData);
   const range = maxVal - minVal || 1;
 
-  const points = data.map((val, index) => {
-    const x = (index / (data.length - 1 || 1)) * width;
-    const y = paddingTop + effectiveHeight - ((val - minVal) / range) * effectiveHeight;
+  const points = finalData.map((val, index) => {
+    const x = (index / (finalData.length - 1 || 1)) * width;
+    const y =
+      maxVal === minVal
+        ? paddingTop + effectiveHeight / 2
+        : paddingTop + effectiveHeight - ((val - minVal) / range) * effectiveHeight;
     return { x, y };
   });
 

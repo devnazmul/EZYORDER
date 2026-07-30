@@ -28,4 +28,33 @@ Skeleton loaders must follow these design themes and guidelines to ensure unifie
   - Loaded card root container: `<View key="loaded" ...>`
   - Empty state container: `<View key="empty" ...>`
 
+## Responsive Styling Guidelines
+
+To ensure the user interface scales elegantly across various screen widths and device form factors (including tablets and phones), follow these responsiveness rules:
+
+- **Relative Dimensions over Hardcoded Pixels**: Avoid static values (e.g., `padding: 16`, `width: 200`, `fontSize: 14`) for container bounds, spacings, and layout gaps. Instead, use responsive viewport percentage helper utilities:
+  * Use `WP("x%")` for horizontal dimensions like `paddingHorizontal`, `width`, and icon sizes.
+  * Use `HP("y%")` for vertical dimensions like `paddingTop`, `paddingBottom`, and vertical layout spacers.
+  * Use `getResponsiveFontSize("size")` (where size is `xs`, `sm`, `md`, `lg`, `xl`, etc.) for all text typography to maintain proportional readability across screens.
+
+- **Tailwind Spacing vs. Viewport (HP/WP) Spacing**:
+  * **Use Tailwind Spacing Classes** (e.g., `p-2`, `m-1`, `gap-y-2`, `mr-1.5`) for *micro-layouts*: small container elements, margins between closely related labels, layout gaps inside a badge or row item, and minor padding. These compile faster and keep local layout elements clean.
+  * **Use HP and WP Viewport Helpers** (e.g., `style={{ paddingHorizontal: WP("4%"), marginVertical: HP("2%") }}`) for *macro-layouts*: page-level screen gutters, primary layout boundaries, outer dimensions of complex cards, major spacers between big sections, and dynamic layout constraints where exact proportional scaling is critical.
+
+- **Responsive Scroll Container Paddings**:
+  * Apply horizontal screens gutters using `style={{ paddingHorizontal: WP("4%") }}` or `WP("5%")`.
+  * Set list container bottom offsets using `contentContainerStyle={{ paddingBottom: HP("3%") }}` or `HP("5%")` to avoid text cuts at bottom safe areas.
+
+## Color & Branding Guidelines
+
+All components, layouts, charts, and state indicators must strictly conform to the defined brand color system to ensure a premium, unified aesthetic:
+
+- **Strict Brand Color Consumability**: Never use ad-hoc hex values (e.g., `#DC2D2A`, `#FFE4E6`, `#F43F5E`) directly inside UI files. Instead, consume values from the centralized colors configuration:
+  * Import `COLORS` from `@/constants/colors`.
+  * Use `COLORS.primary` (brand main color), `COLORS.accent` (secondary branding/text), and standard helper keys like `COLORS.success` or `COLORS.warning`.
+  
+- **Visual Contrast & Opacity Consistency**:
+  * Status badges and custom buttons utilizing translucent backgrounds should combine the primary hex value with standard alpha hex codes (e.g., `${COLORS.primary}15` or `${COLORS.primary}20` for a 10%–15% light brand background) or Tailwind transparency classes (`bg-primary/10`, `border-primary/20`) to prevent contrast issues.
+  * Skeletons should use standard grey background values (`#E2E8F0` / `bg-slate-200`) configured in a single place to match neutral designs.
+
 

@@ -1,12 +1,4 @@
-import KpiCard from "@/components/reports/KpiCard";
-import RevenueByOrderTypeCard from "@/components/reports/RevenueByOrderTypeCard";
-import SalesAreaChart from "@/components/reports/SalesAreaChart";
-import SalesByPaymentCard from "@/components/reports/SalesByPaymentCard";
-import SalesDailyList from "@/components/reports/SalesDailyList";
-import SalesHourlyList from "@/components/reports/SalesHourlyList";
-import SalesItemList from "@/components/reports/SalesItemList";
-import SalesSummaryListCard from "@/components/reports/SalesSummaryListCard";
-import TopProductsList from "@/components/reports/TopProductsList";
+import KpiCard from "@/components/reuseable/dashboard/KpiCard";
 import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
 import PageTitle from "@/components/reuseable/PageTitle";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
@@ -24,10 +16,19 @@ import {
 import { formatDate } from "@/utils/formatDate";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
-import { WP } from "@/utils/getResponsiveSizes";
+import { useResponsiveScreen, WP } from "@/utils/getResponsiveSizes";
 import React, { useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import SparklineChart from "../../components/SparklineChart";
+import RevenueByOrderTypeCard from "../components/RevenueByOrderTypeCard";
+import SalesAreaChart from "../components/SalesAreaChart";
+import SalesByPaymentCard from "../components/SalesByPaymentCard";
+import SalesDailyList from "../components/SalesDailyList";
+import SalesHourlyList from "../components/SalesHourlyList";
+import SalesItemList from "../components/SalesItemList";
+import SalesSummaryListCard from "../components/SalesSummaryListCard";
+import TopProductsList from "../components/TopProductsList";
 
 // Helper: Calculate Date Period Ranges aligned with calendar boundaries
 const getDateRange = (period: string) => {
@@ -58,6 +59,7 @@ const SalesReport = () => {
   const { user, token } = useAuth();
   const { settings } = useData();
   const currencySymbol = getCurrencySymbol(settings?.currency);
+  const { isLandscape } = useResponsiveScreen();
 
   const [activeTab, setActiveTab] = useState("Overview");
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -180,6 +182,11 @@ const SalesReport = () => {
   const hourlyList = hourlyData || [];
   const dailyList = dailySummaryData || [];
 
+  const sparklineData = useMemo(() => {
+    if (!trendData || !Array.isArray(trendData)) return [];
+    return trendData.map((d: any) => Number(d.sales || 0));
+  }, [trendData]);
+
   const isAnyLoading =
     isSummaryLoading ||
     isTrendLoading ||
@@ -191,18 +198,17 @@ const SalesReport = () => {
   return (
     <SafeAreaView
       edges={["left", "right"]}
-      className="flex-1 bg-base-100 py-4"
+      className="flex-1 bg-base-100 pt-4"
       style={{ paddingHorizontal: WP("4%") }}
     >
       <RefreshableScrollView onRefresh={handleRefresh} refreshing={isRefreshing}>
         {/* Header Title and Filter Trigger */}
-        <View className="flex-row justify-between items-center mb-4">
-          <PageTitle
-            title="Sales Report"
-            icon="bar-chart"
-            description="Analyze your sales performance and trends"
-          />
-        </View>
+
+        <PageTitle
+          title="Sales Report"
+          icon="bar-chart"
+          description="Analyze your sales performance and trends"
+        />
 
         {/* Tab Selection */}
         <ToggleBar
@@ -214,10 +220,10 @@ const SalesReport = () => {
           ]}
           activeId={activeTab}
           onSelect={setActiveTab}
-          containerClassName=" mb-5"
+          containerClassName=" mb-3"
         />
 
-        <View className="flex items-end justify-center">
+        <View className="flex items-end justify-center mb-3">
           <FilterDrawer
             fields={filterFields}
             values={filterValues}
@@ -227,46 +233,77 @@ const SalesReport = () => {
         </View>
 
         {isAnyLoading && !isRefreshing && (
-          <View className="py-10 justify-center items-center">
+          <View key="loading" className="py-10 justify-center items-center">
             <ActivityIndicator size="large" color="#DC2D2A" />
           </View>
         )}
 
         {!isAnyLoading && activeTab === "Overview" && (
-          <View key="overview">
-            <View className="gap-y-3 mb-6">
-              <KpiCard
-                variant="dark"
-                title="Total Sales"
-                value={formatAmount(grossSales, currencySymbol)}
-                trendText="+12.5% vs last period"
-                trendType="up"
-              />
-              <View className="flex-row gap-3">
+          <View key="overview" className="gap-y-3 pb-6">
+            <View className="flex-col gap-y-3">
+              <View className="flex-1">
                 <KpiCard
+                  variant="dark"
+                  minHeight={120}
+                  title="Total Sales"
+                  value={formatAmount(grossSales, currencySymbol)}
+                  gradientColors={["#111827", "#0F172A"]}
+                  icon="currency-pound"
+                  iconColor="#FFFFFF"
+                  iconBgColor="#10B981"
+                  rightElement={
+                    <SparklineChart
+                      data={sparklineData}
+                      width={isLandscape ? WP("22%") : WP("38%")}
+                      height={70}
+                      paddingBottom={14}
+                      strokeColor="#10B981"
+                      gradientId="salesReportSparkline"
+                    />
+                  }
+                />
+              </View>
+              <View className="flex-row gap-3 flex-1">
+                <KpiCard
+                  variant="light"
                   title="Total Orders"
                   value={totalOrders.toLocaleString()}
-                  iconName="shopping-bag"
+                  icon="shopping-bag"
+                  iconColor="#F43F5E"
+                  iconBgColor="#FFE4E6"
+                  gradientColors={["#FFE4E6", "#FECDD3"]}
                   containerClassName="flex-1"
                 />
                 <KpiCard
+                  variant="light"
                   title="Avg Order Value"
                   value={formatAmount(avgOrderValue, currencySymbol)}
-                  iconName="payments"
+                  icon="payments"
+                  iconColor="#D97706"
+                  iconBgColor="#FEF3C7"
+                  gradientColors={["#FEF3C7", "#FDE68A"]}
                   containerClassName="flex-1"
                 />
               </View>
-              <View className="flex-row gap-3">
+              <View className="flex-row gap-3 flex-1">
                 <KpiCard
+                  variant="light"
                   title="Total Discounts"
                   value={formatAmount(discounts, currencySymbol)}
-                  iconName="local-offer"
+                  icon="local-offer"
+                  iconColor="#8B5CF6"
+                  iconBgColor="#EDE9FE"
+                  gradientColors={["#EDE9FE", "#DDD6FE"]}
                   containerClassName="flex-1"
                 />
                 <KpiCard
+                  variant="light"
                   title="Net Sales"
                   value={formatAmount(netSales, currencySymbol)}
-                  iconName="account-balance-wallet"
+                  icon="account-balance-wallet"
+                  iconColor="#059669"
+                  iconBgColor="#D1FAE5"
+                  gradientColors={["#D1FAE5", "#A7F3D0"]}
                   containerClassName="flex-1"
                 />
               </View>
@@ -283,7 +320,6 @@ const SalesReport = () => {
               trendData={trendData}
               currencySymbol={currencySymbol}
               isLoading={isTrendLoading}
-              containerClassName="mb-6"
             />
 
             {/* Payment splits */}

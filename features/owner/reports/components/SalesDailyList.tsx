@@ -1,3 +1,4 @@
+import Badge from "@/components/reuseable/Badge";
 import { formatAmount } from "@/utils/formatters";
 import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import React from "react";
@@ -28,11 +29,11 @@ export default function SalesDailyList({ dailyList, currencySymbol }: SalesDaily
             <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-semibold text-neutral">
               {row.date}
             </Text>
-            <View className="bg-primary/10 px-2.5 py-0.5 rounded-full">
-              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-primary">
-                {row.orders} {row.orders === 1 ? "Order" : "Orders"}
-              </Text>
-            </View>
+            <Badge
+              text={`${row.orders} ${row.orders === 1 ? "Order" : "Orders"}`}
+              containerClassName="bg-primary/10"
+              textClassName="text-primary"
+            />
           </View>
           <View className="flex-row justify-between">
             <View>

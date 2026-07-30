@@ -186,7 +186,7 @@ export default function FilterDrawer({
       <BottomSheet
         visible={isOpen}
         onClose={() => setIsOpen(false)}
-        snapPoints={["50%", "80%"]}
+        snapPoints={["80%"]}
         keyboardBehavior="interactive"
         android_keyboardInputMode="adjustResize"
       >
@@ -205,7 +205,7 @@ export default function FilterDrawer({
 
         {/* Scrollable Fields */}
         <BottomSheetScrollView style={{ paddingHorizontal: WP("5%") }} className="flex-1 py-4">
-          <View className="gap-y-6 pb-8">
+          <View className="gap-y-6">
             {fields.map((field) => {
               if (field.type === "chips" && field.options) {
                 const selectedId = localValues[field.id] || "all";

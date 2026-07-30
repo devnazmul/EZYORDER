@@ -1,7 +1,9 @@
 import ActionCard from "@/components/reuseable/cards/ActionCard";
+import COLORS from "@/constants/colors";
 import { formatAmount } from "@/utils/formatters";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import React, { useMemo } from "react";
-import { ActivityIndicator, Dimensions, Text, View } from "react-native";
+import { Text, useWindowDimensions, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 
 interface SalesAreaChartProps {
@@ -36,7 +38,6 @@ export default function SalesAreaChart({
   isLoading = false,
   containerClassName = "",
 }: SalesAreaChartProps) {
-
   const chartData = useMemo(() => {
     if (!trendData || !Array.isArray(trendData) || trendData.length === 0) return [];
     return trendData.map((item: any) => ({
@@ -45,26 +46,46 @@ export default function SalesAreaChart({
     }));
   }, [trendData]);
 
+  const totalSales = useMemo(() => {
+    if (!trendData || !Array.isArray(trendData) || trendData.length === 0) return 0;
+    return trendData.reduce((sum: number, item: any) => sum + Number(item.sales || 0), 0);
+  }, [trendData]);
+
   const hasData = chartData.length > 0;
   const maxVal = hasData ? Math.max(...chartData.map((d) => d.value), 1) : 1;
 
-  const screenWidth = Dimensions.get("window").width;
-  const chartContainerWidth = screenWidth - 32;
-  const chartWidth = chartContainerWidth - 80;
+  const { width: screenWidth } = useWindowDimensions();
+  const chartContainerWidth = screenWidth - WP("10%"); // deduct screen margins
+  const chartWidth = chartContainerWidth - WP("15%"); // reserve space for Y-axis labels
 
-  const initialSpacing = 20;
-  const endSpacing = 25;
+  const initialSpacing = WP("5%");
+  const endSpacing = WP("6%");
 
   const spacing = useMemo(() => {
     const count = chartData.length;
     if (count <= 1) return chartWidth;
-    const span = chartWidth - 35;
+    const span = chartWidth - WP("9%");
     return Math.max(30, span / (count - 1));
   }, [chartData.length, chartWidth]);
 
   return (
     <ActionCard
-      title="Sales Trend"
+      title={
+        <View>
+          <Text
+            style={{ fontSize: getResponsiveFontSize("sm") }}
+            className="font-semibold text-neutral capitalize"
+          >
+            Sales over time
+          </Text>
+          <Text
+            style={{ fontSize: getResponsiveFontSize("sm") }}
+            className="font-extrabold text-neutral mt-0.5"
+          >
+            Total: {formatAmount(totalSales, currencySymbol)}
+          </Text>
+        </View>
+      }
       isLoading={isLoading}
       loadingText="Loading trend..."
       containerClassName={containerClassName}
@@ -80,37 +101,40 @@ export default function SalesAreaChart({
             areaChart
             data={chartData}
             width={chartWidth}
+            rulesLength={chartWidth}
+            xAxisLength={chartWidth}
             height={130}
             maxValue={maxVal > 0 ? maxVal * 1.25 : undefined}
             noOfSections={4}
             spacing={spacing}
             initialSpacing={initialSpacing}
             endSpacing={endSpacing}
-            color="#DC2D2A"
+            color={COLORS.primary}
             thickness={2.5}
-            startFillColor="#DC2D2A"
-            endFillColor="#DC2D2A"
+            startFillColor={COLORS.primary}
+            endFillColor={COLORS.primary}
             startOpacity={0.25}
             endOpacity={0.01}
-            rulesColor="#E5E7EB"
+            rulesColor={COLORS.base100}
             rulesType="solid"
             yAxisThickness={0}
             xAxisThickness={1}
-            xAxisColor="#E5E7EB"
-            yAxisTextStyle={{ color: "#6E6E6E", fontSize: 8 }}
+            xAxisColor={COLORS.base100}
+            yAxisTextStyle={{ color: COLORS.accent, fontSize: getResponsiveFontSize("xs") }}
             xAxisLabelTextStyle={{
-              color: "#6E6E6E",
-              fontSize: 8,
+              color: COLORS.accent,
+              fontSize: getResponsiveFontSize("xs"),
               fontWeight: "bold",
               textAlign: "center",
             }}
+
             pointerConfig={{
               persistPointer: true,
               pointerStripUptoDataPoint: true,
-              pointerStripColor: "lightgray",
+              pointerStripColor: COLORS.accent,
               pointerStripWidth: 1.5,
               strokeDashArray: [2, 5],
-              pointerColor: "#DC2D2A",
+              pointerColor: COLORS.primary,
               radius: 4,
               pointerLabelComponent: (items: any) => {
                 if (!items || !items.length) return null;
@@ -147,4 +171,3 @@ export default function SalesAreaChart({
     </ActionCard>
   );
 }
-
