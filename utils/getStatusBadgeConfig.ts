@@ -18,12 +18,12 @@ export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {
     case "pending":
       return {
         iconName: "schedule",
-        iconColor: COLORS.warning,
+        iconColor: COLORS.accent,
         containerClass: "",
         textClass: "",
         backgroundColor: `${COLORS.warning}15`,
         borderColor: `${COLORS.warning}`,
-        textColor: COLORS.warning,
+        textColor: COLORS.accent,
       };
     case "completed":
     case "complete":

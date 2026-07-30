@@ -2,8 +2,10 @@ import EmptyState from "@/components/reuseable/EmptyState";
 import PageTitle from "@/components/reuseable/PageTitle";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import SearchBar from "@/components/reuseable/SearchBar";
+import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
@@ -47,9 +49,14 @@ export default function KitchenScreen() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <View className="flex-1 px-4 py-4">
+      <View style={{ paddingHorizontal: WP("4%"), paddingTop: HP("2.5%") }} className="flex-1">
         {/* Title & Count Row */}
-        <PageTitle title="Kitchen Orders" icon="restaurant-menu" badgeCount={totalCount} />
+        <PageTitle
+          title="Kitchen Orders"
+          icon="restaurant-menu"
+          badgeCount={totalCount}
+          description="View all orders in kitchen"
+        />
 
         {/* Search Bar */}
         <SearchBar
@@ -61,8 +68,10 @@ export default function KitchenScreen() {
 
         {showListLoader ? (
           <View key="list-loading" className="flex-1 justify-center items-center py-10">
-            <ActivityIndicator size="large" color="#DC2D2A" />
-            <Text className="text-xs text-accent mt-3">Updating kitchen orders...</Text>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">
+              Updating kitchen orders...
+            </Text>
           </View>
         ) : orders.length === 0 ? (
           <View key="empty" className="flex-1 justify-center items-center py-10 bg-base-100">
@@ -80,7 +89,7 @@ export default function KitchenScreen() {
               await refetch();
             }}
             className="flex-1"
-            contentContainerStyle={{ paddingBottom: 40 }}
+            contentContainerStyle={{ paddingBottom: HP("5%") }}
           >
             {orders.map((order: any) => (
               <KitchenCard key={order.id} order={order} />
@@ -92,27 +101,33 @@ export default function KitchenScreen() {
                 <TouchableOpacity
                   disabled={page <= 1}
                   onPress={() => setPage((prev) => Math.max(1, prev - 1))}
-                  className={`flex-row items-center gap-1 px-4 py-2 rounded-xl bg-base-300 border border-base-200 ${
+                  style={{ paddingHorizontal: WP("4%"), paddingVertical: HP("1.2%") }}
+                  className={`flex-row items-center gap-1 rounded-xl bg-base-300 border border-base-200 ${
                     page <= 1 ? "opacity-40" : "opacity-100"
                   }`}
                 >
-                  <MaterialIcons name="chevron-left" size={16} color="#DC2D2A" />
-                  <Text className="text-xs font-bold text-neutral">Previous</Text>
+                  <MaterialIcons name="chevron-left" size={WP("4.5%")} color={COLORS.primary} />
+                  <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral">
+                    Previous
+                  </Text>
                 </TouchableOpacity>
 
-                <Text className="text-xs font-bold text-accent">
+                <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-accent">
                   Page {page} of {lastPage}
                 </Text>
 
                 <TouchableOpacity
                   disabled={page >= lastPage}
                   onPress={() => setPage((prev) => Math.min(lastPage, prev + 1))}
-                  className={`flex-row items-center gap-1 px-4 py-2 rounded-xl bg-base-300 border border-base-200 ${
+                  style={{ paddingHorizontal: WP("4%"), paddingVertical: HP("1.2%") }}
+                  className={`flex-row items-center gap-1 rounded-xl bg-base-300 border border-base-200 ${
                     page >= lastPage ? "opacity-40" : "opacity-100"
                   }`}
                 >
-                  <Text className="text-xs font-bold text-neutral">Next</Text>
-                  <MaterialIcons name="chevron-right" size={16} color="#DC2D2A" />
+                  <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral">
+                    Next
+                  </Text>
+                  <MaterialIcons name="chevron-right" size={WP("4.5%")} color={COLORS.primary} />
                 </TouchableOpacity>
               </View>
             ) : null}

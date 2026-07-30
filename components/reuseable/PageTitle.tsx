@@ -13,9 +13,9 @@ interface PageTitleProps {
 
 export default function PageTitle({ title, icon, badgeCount, description }: PageTitleProps) {
   return (
-    <View className="flex-row items-start gap-2 mb-4">
+    <View className="flex-row items-start gap-3 mb-4">
       <View className="bg-primary/10 p-3 rounded-lg">
-        <MaterialIcons name={icon} size={description ? WP("6.75%") : WP("5%")} color={COLORS.primary} />
+        <MaterialIcons name={icon} size={description ? WP("6%") : WP("5%")} color={COLORS.primary} />
       </View>
       <View className="">
         <View className="flex-row items-center gap-2">
@@ -26,7 +26,7 @@ export default function PageTitle({ title, icon, badgeCount, description }: Page
             {title}
           </Text>
           {badgeCount !== undefined && badgeCount > 0 && (
-            <View className="bg-primary px-2.5 py-0.5 rounded-full items-center justify-center">
+            <View className="bg-primary px-2.5 py-0.5 rounded-lg items-center justify-center">
               <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-white font-bold">
                 {badgeCount}
               </Text>

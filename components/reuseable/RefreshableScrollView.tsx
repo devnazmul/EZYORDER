@@ -31,7 +31,7 @@ export default function RefreshableScrollView({
 
   return (
     <ScrollView
-      className={`flex-1 px-4 py-4 ${className}`}
+      className={`flex-1 ${className}`}
       contentContainerStyle={contentContainerStyle}
       showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       refreshControl={
