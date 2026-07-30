@@ -1,3 +1,5 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import React from "react";
 import { Text, TextInput, View } from "react-native";
 
@@ -27,37 +29,58 @@ export default function NumberRangeField({
   return (
     <View>
       {label && (
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
+        <Text
+          style={{ fontSize: getResponsiveFontSize("sm") }}
+          className="font-semibold text-accent capitalize mb-3"
+        >
           {label}
         </Text>
       )}
       <View className="flex-row items-center gap-3">
         {/* Min Input */}
-        <View className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3">
+        <View
+          style={{ padding: WP("2.5%") }}
+          className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl"
+        >
           <View className="flex-1">
-            <Text className="text-[8px] font-bold text-accent uppercase">{minLabel}</Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+              className="font-semibold text-accent capitalize"
+            >
+              {minLabel}
+            </Text>
             <TextInput
               keyboardType="numeric"
               placeholder={minPlaceholder}
-              placeholderTextColor="#6E6E6E"
+              placeholderTextColor={COLORS.accent}
               value={minValue}
               onChangeText={onChangeMinText}
-              className="text-xs font-semibold text-neutral mt-0.5 p-0"
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral mt-0.5 p-0"
             />
           </View>
         </View>
 
         {/* Max Input */}
-        <View className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3">
+        <View
+          style={{ padding: WP("2.5%") }}
+          className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl"
+        >
           <View className="flex-1">
-            <Text className="text-[8px] font-bold text-accent uppercase">{maxLabel}</Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+              className="font-semibold text-accent capitalize"
+            >
+              {maxLabel}
+            </Text>
             <TextInput
               keyboardType="numeric"
               placeholder={maxPlaceholder}
-              placeholderTextColor="#6E6E6E"
+              placeholderTextColor={COLORS.accent}
               value={maxValue}
               onChangeText={onChangeMaxText}
-              className="text-xs font-semibold text-neutral mt-0.5 p-0"
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral mt-0.5 p-0"
             />
           </View>
         </View>

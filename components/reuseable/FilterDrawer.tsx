@@ -212,8 +212,8 @@ export default function FilterDrawer({
                 return (
                   <View key={field.id}>
                     <Text
-                      style={{ fontSize: getResponsiveFontSize("xs") }}
-                      className="font-bold text-accent uppercase tracking-widest mb-3"
+                      style={{ fontSize: getResponsiveFontSize("sm") }}
+                      className="font-semibold text-accent capitalize  mb-3"
                     >
                       {field.label}
                     </Text>
@@ -309,7 +309,7 @@ export default function FilterDrawer({
 
         {/* Bottom Actions */}
         <View
-          style={{ padding: WP("4%"), paddingBottom: HP("5.3%") }}
+          style={{ padding: WP("4%"), paddingBottom: HP("6%") }}
           className="flex-row items-center gap-3 border-t border-base-200 bg-base-200"
         >
           <Button
