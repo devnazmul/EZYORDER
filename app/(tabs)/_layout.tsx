@@ -122,6 +122,13 @@ export default function TabsLayout() {
             tabBarLabel: renderTabBarLabel("Orders"),
             tabBarIcon: ({ color }) => <MaterialIcons name="receipt" size={24} color={color} />,
           }}
+          listeners={({ navigation }) => ({
+            tabPress: (e) => {
+              // Explicitly navigate to the Orders root index screen when clicking the tab
+              e.preventDefault();
+              navigation.navigate("orders", { screen: "index" });
+            },
+          })}
         />
         <Tabs.Screen
           name="reports"
