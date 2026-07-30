@@ -43,6 +43,14 @@ export default function StatusBadge({
           style={{ marginRight: 2 }}
         />
       }
+      containerStyle={{
+        backgroundColor: config.backgroundColor,
+        borderColor: config.borderColor,
+        borderWidth: 1,
+      }}
+      textStyle={{
+        color: config.textColor,
+      }}
       containerClassName={resolvedContainerClass}
       textClassName={resolvedTextClass}
     />

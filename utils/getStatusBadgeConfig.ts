@@ -7,6 +7,9 @@ export interface StatusBadgeConfig {
   iconColor: string;
   containerClass: string;
   textClass: string;
+  backgroundColor: string;
+  borderColor: string;
+  textColor: string;
 }
 
 export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {
@@ -15,81 +18,114 @@ export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {
     case "pending":
       return {
         iconName: "schedule",
-        iconColor: "#EA580C",
-        containerClass: "bg-orange-50 border border-orange-100",
-        textClass: "text-orange-700",
+        iconColor: COLORS.warning,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.warning}15`,
+        borderColor: `${COLORS.warning}`,
+        textColor: COLORS.warning,
       };
     case "completed":
     case "complete":
       return {
         iconName: "check-circle",
-        iconColor: "#15803D",
-        containerClass: "bg-green-50 border border-green-100",
-        textClass: "text-green-700",
+        iconColor: COLORS.success,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.success}15`,
+        borderColor: `${COLORS.success}66`,
+        textColor: COLORS.success,
       };
     case "kitchen":
     case "preparing":
       return {
         iconName: "restaurant",
-        iconColor: "#D97706",
-        containerClass: "bg-warning/10 border border-warning/30",
-        textClass: "text-amber-700",
+        iconColor: COLORS.secondary,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.secondary}15`,
+        borderColor: `${COLORS.secondary}66`,
+        textColor: COLORS.secondary,
       };
     case "active":
       return {
         iconName: "check-circle",
-        iconColor: "#15803D",
-        containerClass: "bg-green-50 border border-green-100",
-        textClass: "text-green-700",
+        iconColor: COLORS.success,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.success}15`,
+        borderColor: `${COLORS.success}66`,
+        textColor: COLORS.success,
       };
     case "expired":
       return {
         iconName: "error-outline",
         iconColor: COLORS.error,
-        containerClass: "bg-error/10 border border-error/30",
-        textClass: "text-error",
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.error}15`,
+        borderColor: `${COLORS.error}66`,
+        textColor: COLORS.error,
       };
     case "inactive":
       return {
         iconName: "pause-circle-outline",
-        iconColor: "#6E6E6E",
-        containerClass: "bg-neutral/5 border border-neutral/20",
-        textClass: "text-accent",
+        iconColor: COLORS.accent,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.accent}15`,
+        borderColor: `${COLORS.accent}66`,
+        textColor: COLORS.accent,
       };
     case "accepted":
       return {
         iconName: "thumb-up",
-        iconColor: "#2563EB",
-        containerClass: "bg-blue-50 border border-blue-100",
-        textClass: "text-blue-700",
+        iconColor: COLORS.info,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.info}15`,
+        borderColor: `${COLORS.info}66`,
+        textColor: COLORS.info,
       };
     case "delivered":
       return {
         iconName: "local-shipping",
-        iconColor: "#2563EB",
-        containerClass: "bg-blue-50 border border-blue-100",
-        textClass: "text-blue-700",
+        iconColor: COLORS.info,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.info}15`,
+        borderColor: `${COLORS.info}66`,
+        textColor: COLORS.info,
       };
     case "paid":
       return {
         iconName: "check-circle",
-        iconColor: "#15803D",
-        containerClass: "bg-green-50 border border-green-100",
-        textClass: "text-green-700",
+        iconColor: COLORS.success,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.success}15`,
+        borderColor: `${COLORS.success}66`,
+        textColor: COLORS.success,
       };
     case "unpaid":
       return {
         iconName: "payment",
-        iconColor: "#B70E5C",
-        containerClass: "bg-pink-50 border border-pink-100",
-        textClass: "text-pink-700",
+        iconColor: COLORS.primary,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.primary}15`,
+        borderColor: `${COLORS.primary}66`,
+        textColor: COLORS.primary,
       };
     default:
       return {
         iconName: "help-outline",
-        iconColor: "#6E6E6E",
-        containerClass: "bg-neutral/5 border border-neutral/10",
-        textClass: "text-neutral",
+        iconColor: COLORS.accent,
+        containerClass: "",
+        textClass: "",
+        backgroundColor: `${COLORS.accent}15`,
+        borderColor: `${COLORS.accent}66`,
+        textColor: COLORS.accent,
       };
   }
 };
