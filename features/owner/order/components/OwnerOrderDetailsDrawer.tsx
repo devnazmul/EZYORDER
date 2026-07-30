@@ -8,6 +8,7 @@ import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { getStatusBadgeConfig } from "@/utils/getStatusBadgeConfig";
 import { getOrderTypeColor } from "@/utils/orderTypeColors";
+import COLORS from "@/constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { useMemo } from "react";
@@ -88,7 +89,7 @@ export default function OwnerOrderDetailsDrawer({
       >
         <View className="flex-row items-center gap-3">
           <View className=" rounded-lg bg-primary/10 border border-primary/20 items-center justify-center p-1.5">
-            <MaterialIcons name="receipt-long" size={WP("5%")} color="#DC2D2A" />
+            <MaterialIcons name="receipt-long" size={WP("5%")} color={COLORS.primary} />
           </View>
           <View>
             <View className="flex-row items-center gap-2">
@@ -138,7 +139,7 @@ export default function OwnerOrderDetailsDrawer({
           <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
+                <MaterialIcons name="person-outline" size={16} color={COLORS.primary} />
                 <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
                   Customer:
                 </Text>
@@ -155,7 +156,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.customer_phone || order.user?.phone ? (
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="phone" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="phone" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -177,7 +178,7 @@ export default function OwnerOrderDetailsDrawer({
                   <MaterialIcons
                     name="phone"
                     size={11}
-                    color="#DC2D2A"
+                    color={COLORS.primary}
                     style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
                   />
                   <Text
@@ -199,7 +200,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.customer_note ? (
               <View className="flex-row items-start justify-between">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="chat-bubble-outline" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="chat-bubble-outline" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -219,7 +220,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.customer_address || order.address ? (
               <View className="flex-row items-start justify-between">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="location-on" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -256,7 +257,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.table_number && parseFloat(order.table_number) > 0 ? (
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="restaurant" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="restaurant" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -275,7 +276,7 @@ export default function OwnerOrderDetailsDrawer({
 
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
+                <MaterialIcons name="schedule" size={16} color={COLORS.primary} />
                 <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
                   Placed On:
                 </Text>
@@ -287,7 +288,7 @@ export default function OwnerOrderDetailsDrawer({
 
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="devices" size={16} color="#DC2D2A" />
+                <MaterialIcons name="devices" size={16} color={COLORS.primary} />
                 <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
                   Source:
                 </Text>
@@ -302,7 +303,7 @@ export default function OwnerOrderDetailsDrawer({
 
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="badge" size={16} color="#DC2D2A" />
+                <MaterialIcons name="badge" size={16} color={COLORS.primary} />
                 <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
                   Assigned Staff:
                 </Text>
@@ -324,7 +325,7 @@ export default function OwnerOrderDetailsDrawer({
               Instructions
             </Text>
             <View className="bg-primary/5 border border-primary/20 rounded-lg p-3.5 flex-row items-start gap-2.5">
-              <MaterialIcons name="assignment-late" size={18} color="#DC2D2A" />
+              <MaterialIcons name="assignment-late" size={18} color={COLORS.primary} />
               <Text
                 style={{ fontSize: getResponsiveFontSize("xs") }}
                 className="text-neutral italic font-semibold leading-5 flex-1"
@@ -353,7 +354,7 @@ export default function OwnerOrderDetailsDrawer({
           <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="check-circle-outline" size={16} color="#DC2D2A" />
+                <MaterialIcons name="check-circle-outline" size={16} color={COLORS.primary} />
                 <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
                   Payment Status:
                 </Text>
@@ -370,7 +371,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.payment_method ? (
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="credit-card" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="credit-card" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -390,7 +391,7 @@ export default function OwnerOrderDetailsDrawer({
 
             <View className="flex-row justify-between items-center border-t border-base-200/60 pt-2.5">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="receipt" size={16} color="#DC2D2A" />
+                <MaterialIcons name="receipt" size={16} color={COLORS.primary} />
                 <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
                   Subtotal:
                 </Text>
@@ -403,7 +404,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.tax && parseFloat(order.tax) > 0 ? (
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="account-balance" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="account-balance" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -423,7 +424,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.tip_amount && parseFloat(order.tip_amount) > 0 ? (
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="volunteer-activism" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="volunteer-activism" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -443,7 +444,7 @@ export default function OwnerOrderDetailsDrawer({
             {order.discount && parseFloat(order.discount) > 0 ? (
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="local-offer" size={16} color="#DC2D2A" />
+                  <MaterialIcons name="local-offer" size={16} color={COLORS.primary} />
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="font-semibold text-accent"
@@ -462,7 +463,7 @@ export default function OwnerOrderDetailsDrawer({
 
             <View className="border-t border-base-200 pt-2.5 mt-1 flex-row justify-between items-center">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="payments" size={WP("3.75%")} color="#DC2D2A" />
+                <MaterialIcons name="payments" size={WP("3.75%")} color={COLORS.primary} />
                 <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
                   Total Amount:
                 </Text>

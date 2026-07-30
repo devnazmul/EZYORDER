@@ -5,6 +5,7 @@ import ToggleBar from "@/components/reuseable/ToggleBar";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
+import COLORS from "@/constants/colors";
 import React, { useEffect, useMemo, useState } from "react";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
@@ -337,7 +338,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
         {/* List Content */}
         {isLoading ? (
           <View key="loading" className="flex-1 justify-center items-center py-20">
-            <ActivityIndicator size="large" color="#DC2D2A" />
+            <ActivityIndicator size="large" color={COLORS.primary} />
             <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">Loading orders...</Text>
           </View>
         ) : (
@@ -349,12 +350,12 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
             refreshControl={
-              <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={["#DC2D2A"]} />
+              <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[COLORS.primary]} />
             }
             ListEmptyComponent={
               isRefetching ? (
                 <View className="py-20 items-center justify-center">
-                  <ActivityIndicator size="large" color="#DC2D2A" />
+                  <ActivityIndicator size="large" color={COLORS.primary} />
                   <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">Loading orders data...</Text>
                 </View>
               ) : (
