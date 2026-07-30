@@ -31,7 +31,7 @@ export default function KitchenActivity({ kitchenActivity = {}, isLoading }: Kit
         </Text>
       </View>
 
-      <View style={{ gap: HP("1.5%") }}>
+      <View className="gap-y-3">
         {/* Row 1: Waiting Orders & Delayed */}
         <View className="flex-row items-center border-b border-white/10 pb-3">
           <TouchableOpacity
@@ -111,8 +111,7 @@ export default function KitchenActivity({ kitchenActivity = {}, isLoading }: Kit
       <TouchableOpacity
         onPress={() => router.push("/orders/kitchen-screen")}
         activeOpacity={0.7}
-        style={{ paddingVertical: HP("1.5%"), marginTop: HP("2%") }}
-        className="w-full bg-white/10 rounded-lg flex-row items-center justify-center gap-2"
+        className="w-full bg-white/10 rounded-lg flex-row items-center justify-center gap-2 py-3 mt-4"
       >
         <MaterialIcons name="visibility" size={18} color="white" />
         <Text

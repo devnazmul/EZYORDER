@@ -1,4 +1,4 @@
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -80,7 +80,7 @@ export default function KpiCard({
         borderWidth: 1,
         borderColor: variant === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
         padding: WP("3.5%"),
-        minHeight: minHeight ?? HP("13%"),
+        minHeight: minHeight ?? 100,
       }}
       className={`flex-1 shadow-sm ${containerClassName}`}
     >

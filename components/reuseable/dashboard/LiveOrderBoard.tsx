@@ -1,5 +1,5 @@
 import COLORS from "@/constants/colors";
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
@@ -95,8 +95,8 @@ function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCa
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={handlePress}
-      style={{ paddingHorizontal: WP("4%"), paddingVertical: HP("1.75%") }}
-      className={containerClass}
+      style={{ paddingHorizontal: WP("4%") }}
+      className={`${containerClass} py-3.5`}
     >
       <Text style={{ fontSize: getResponsiveFontSize("sm") }} className={textClass}>
         {`${title} (${count})`}
@@ -126,7 +126,7 @@ export default function LiveOrderBoard({
   const unpaidCount = liveOrderBoard?.unpaid ?? 0;
 
   return (
-    <View key="loaded" style={{ gap: HP("1%") }}>
+    <View key="loaded" className="gap-y-2.5">
       <OrderStatusCard title="New Orders" count={newOrdersCount} type="new" role={role} />
       <OrderStatusCard title="Preparing" count={preparingCount} type="preparing" role={role} />
       <OrderStatusCard title="Completed" count={completedCount} type="completed" role={role} />

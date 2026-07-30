@@ -1,5 +1,5 @@
 import COLORS from "@/constants/colors";
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -31,11 +31,11 @@ export default function ToggleBar({
           <TouchableOpacity
             key={option.id}
             onPress={() => onSelect(option.id)}
-            style={{ paddingVertical: HP("1%"), paddingHorizontal: WP("2%") }}
+            style={{ paddingHorizontal: WP("2%") }}
             className={
               isActive
-                ? "flex-1 flex-row items-center justify-center gap-1.5 rounded-lg bg-primary"
-                : "flex-1 flex-row items-center justify-center gap-1.5 rounded-lg"
+                ? "flex-1 flex-row items-center justify-center gap-1.5 rounded-lg bg-primary py-2.5"
+                : "flex-1 flex-row items-center justify-center gap-1.5 rounded-lg py-2"
             }
           >
             {option.icon && (

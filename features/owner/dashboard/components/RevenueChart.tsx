@@ -213,7 +213,8 @@ export default function RevenueChart({
             </Text>
           </View>
         }
-        bodyStyle={{ paddingHorizontal: WP("4%"), paddingBottom: HP("0.25%"), paddingTop: HP("0.25%") }}
+        bodyStyle={{ paddingHorizontal: WP("4%") }}
+        bodyClassName="py-1"
       >
         {revenueChart.length === 0 ? (
           <EmptyState description="No revenue data available" pyClassName="py-8" />

@@ -60,9 +60,9 @@ export default function OwnerDashboardScreen() {
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       <ScrollView
-        className="flex-1"
-        style={{ paddingHorizontal: WP("4%"), paddingTop: HP("2%") }}
-        contentContainerStyle={{ paddingBottom: HP("4%") }}
+        className="flex-1 pt-4"
+        style={{ paddingHorizontal: WP("4%") }}
+        contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -73,7 +73,7 @@ export default function OwnerDashboardScreen() {
           />
         }
       >
-        <Pressable style={{ gap: HP("1.25%") }} onPress={() => setResetKey((k) => k + 1)}>
+        <Pressable className="gap-y-3" onPress={() => setResetKey((k) => k + 1)}>
           {/* Toggle Date Period */}
           <ToggleBar
             options={[
@@ -97,7 +97,8 @@ export default function OwnerDashboardScreen() {
             title="Live Today's Order Board"
             isLoading={liveOrderBoardQuery.isLoading || liveOrderBoardQuery.isRefetching}
             skeleton={<LiveOrderBoardSkeleton />}
-            bodyStyle={{ paddingHorizontal: WP("4%"), paddingBottom: HP("2%") }}
+            bodyStyle={{ paddingHorizontal: WP("4%") }}
+            bodyClassName="pb-4"
           >
             <LiveOrderBoard liveOrderBoard={liveOrderBoardQuery.data} />
           </ActionCard>

@@ -1,6 +1,5 @@
 import ActionCard from "@/components/reuseable/cards/ActionCard";
 import EmptyState from "@/components/reuseable/EmptyState";
-import { HP } from "@/utils/getResponsiveSizes";
 import { router } from "expo-router";
 import React from "react";
 import { View } from "react-native";
@@ -14,7 +13,7 @@ interface RecentOrdersProps {
 
 export default function RecentOrders({ recentOrders = [], isLoading }: RecentOrdersProps) {
   return (
-    <View style={{ marginBottom: HP("2.5%") }}>
+    <View className="">
       <ActionCard
         title="Recent Completed Orders"
         isLoading={isLoading}

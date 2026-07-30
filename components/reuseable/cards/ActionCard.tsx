@@ -1,4 +1,4 @@
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import React from "react";
 import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
@@ -94,8 +94,8 @@ export default function ActionCard({
     return (
       <View
         key="loading"
-        style={{ padding: WP("4%"), minHeight: HP("15%") }}
-        className={`bg-base-300 rounded-xl border border-base-200 shadow-sm justify-center items-center ${containerClassName}`}
+        style={{ padding: WP("4%") }}
+        className={`bg-base-300 rounded-xl border border-base-200 shadow-sm justify-center items-center min-h-[120px] ${containerClassName}`}
       >
         <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent capitalize">
           {loadingText}
@@ -112,8 +112,8 @@ export default function ActionCard({
       {/* Title Header */}
       {title || headerRight ? (
         <View
-          style={{ paddingHorizontal: WP("4%"), paddingVertical: HP("1.5%") }}
-          className={`border-b border-base-200 flex-row justify-between items-center ${headerClassName}`}
+          style={{ paddingHorizontal: WP("4%") }}
+          className={`border-b border-base-200 flex-row justify-between items-center py-4 ${headerClassName}`}
         >
           {typeof title === "string" ? (
             <Text
@@ -145,8 +145,7 @@ export default function ActionCard({
         <TouchableOpacity
           onPress={onActionPress}
           activeOpacity={0.75}
-          style={{ paddingVertical: HP("1.5%") }}
-          className={`w-full items-center justify-center border-t border-base-200 bg-primary ${actionClassName}`}
+          className={`w-full items-center justify-center border-t border-base-200 bg-primary py-4 ${actionClassName}`}
         >
           <Text
             style={{ fontSize: getResponsiveFontSize("xs") }}
