@@ -1,7 +1,7 @@
 import Button from "@/components/reuseable/Button";
 import InputField from "@/components/reuseable/InputField";
 import { useAuth } from "@/context/AuthContext";
-import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { useState } from "react";
@@ -238,14 +238,17 @@ const LoginScreen = () => {
                 >
                   {rememberMe && <MaterialIcons name="check" size={14} color="white" />}
                 </View>
-                <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-medium text-accent">
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("sm") - 1 }}
+                  className="font-medium text-accent"
+                >
                   Remember me
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleForgotPassword}>
                 <Text
-                  style={{ fontSize: getResponsiveFontSize("sm") }}
+                  style={{ fontSize: getResponsiveFontSize("sm") - 1 }}
                   className="font-semibold text-primary"
                 >
                   Forgot Password?
@@ -255,7 +258,12 @@ const LoginScreen = () => {
 
             {/* Primary Action Button */}
             <View className="mt-4">
-              <Button label="Log In" onPress={handleSubmit} isLoading={isLoading} />
+              <Button
+                label="Log In"
+                onPress={handleSubmit}
+                isLoading={isLoading}
+                containerStyle={{ height: Math.max(42, HP("5%")) }}
+              />
             </View>
           </View>
         </KeyboardAwareScrollView>

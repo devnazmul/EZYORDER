@@ -1,5 +1,5 @@
 import COLORS from "@/constants/colors";
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, HP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Text, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
@@ -28,20 +28,24 @@ export default function InputField({
 
   const borderClass = error ? "border-error" : isFocused ? "border-primary" : "border-base-200";
   const iconColor = error ? COLORS.error : isFocused ? COLORS.primary : COLORS.accent;
+  const iconSize = getResponsiveFontSize("sm") + 6;
 
   return (
     <View className={containerClassName}>
-      <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent mb-1.5">
+      <Text
+        style={{ fontSize: getResponsiveFontSize("sm") - 1 }}
+        className="font-semibold text-accent mb-1.5"
+      >
         {label}
       </Text>
       <View
-        style={{ height: HP("5%"), paddingHorizontal: WP("3%") }}
-        className={`flex-row items-center bg-base-100 border rounded-lg ${borderClass}`}
+        className={`flex-row items-center justify-between bg-base-100 border rounded-lg ${borderClass} px-3`}
+        style={{ height: Math.max(44, HP("5%")) }}
       >
-        {iconName && <MaterialIcons name={iconName} size={WP("4.6%")} color={iconColor} />}
+        {iconName && <MaterialIcons name={iconName} size={iconSize} color={iconColor} className="mr-1" />}
         <TextInput
           style={{ fontSize: getResponsiveFontSize("sm") }}
-          className="flex-1 h-full text-neutral ml-2"
+          className="flex-1 text-neutral "
           placeholderTextColor={COLORS.accent}
           onFocus={(e) => {
             setIsFocused(true);
@@ -54,8 +58,12 @@ export default function InputField({
           {...props}
         />
         {rightIconName && (
-          <TouchableOpacity onPress={onRightIconPress} className="p-1">
-            <MaterialIcons name={rightIconName} size={WP("4.6%")} color={iconColor} />
+          <TouchableOpacity
+            onPress={onRightIconPress}
+            className="p-1"
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <MaterialIcons name={rightIconName} size={iconSize} color={iconColor} />
           </TouchableOpacity>
         )}
       </View>
