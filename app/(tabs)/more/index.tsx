@@ -1,5 +1,7 @@
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
+import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
@@ -8,18 +10,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MoreSettingsHub() {
   const { user, logout } = useAuth();
-  console.log(user);
+
   // Generate full name from user fields
   const fullName = useMemo(() => {
-    if (!user) return "Gourmet Partner";
+    if (!user) return "Unnamed User";
     const first = user.first_Name || "";
     const last = user.last_Name || "";
-    return `${first} ${last}`.trim() || "Gourmet Partner";
+    return `${first} ${last}`.trim() || "Unnamed User";
   }, [user]);
 
   // Generate restaurant name dynamically
   const restaurantName = useMemo(() => {
-    return user?.restaurant?.[0]?.Name || "Gourmet Express";
+    return user?.restaurant?.[0]?.Name || "EZYORDER";
   }, [user]);
 
   // Generate initials from user name or fallback to owner initials
@@ -93,172 +95,239 @@ export default function MoreSettingsHub() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-
       <RefreshableScrollView className="flex-1 px-4 py-4" contentContainerStyle={{ paddingBottom: 40 }}>
         {/* 1. Header Profile Card */}
-        <View className="bg-base-300 border border-base-200 rounded-xl p-5 mb-6 shadow-sm flex-row items-center gap-4">
-          <View className="w-16 h-16 rounded-full bg-primary-container items-center justify-center border-4 border-base-100 shadow-sm overflow-hidden">
+        <View
+          style={{ padding: WP("3%"), marginBottom: WP("3%") }}
+          className="bg-base-300 border border-base-200 rounded-xl shadow-sm flex-row items-center gap-4"
+        >
+          <View
+            style={{ width: WP("13%"), height: WP("13%"), borderWidth: 2 }}
+            className="rounded-full bg-primary/10 items-center justify-center border-base-100 shadow-sm overflow-hidden"
+          >
             {user?.image ? (
               <Image source={{ uri: user.image }} className="w-full h-full" resizeMode="cover" />
             ) : (
-              <Text className="text-xl font-bold text-white">{initials}</Text>
+              <Text style={{ fontSize: getResponsiveFontSize("lg") }} className="font-bold text-primary">
+                {initials}
+              </Text>
             )}
           </View>
           <View className="flex-1">
-            <Text className="text-md font-bold text-neutral">{restaurantName}</Text>
-            <Text className="text-xs font-semibold text-accent mt-0.5">{subtitleText}</Text>
+            <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
+              {restaurantName}
+            </Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-accent mt-0.5"
+            >
+              {subtitleText}
+            </Text>
           </View>
+          <TouchableOpacity
+            onPress={handleLogout}
+            activeOpacity={0.7}
+            style={{ width: WP("8%"), height: WP("8%") }}
+            className="rounded-lg bg-primary/10 items-center justify-center border border-primary/20"
+          >
+            <MaterialIcons name="logout" size={WP("5%")} color={COLORS.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* 2. Menu Settings Sections */}
         <View className="gap-y-6">
           {/* RESTAURANT SECTION */}
           <View>
-            <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-2">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("sm") }}
+              className="font-bold text-accent capitalize tracking-wider px-1 mb-2"
+            >
               Restaurant
             </Text>
             <View className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm">
               <TouchableOpacity
                 onPress={() => handleItemPress("Menu Management")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 border-b border-base-200/50"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between border-b border-base-200/50"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-primary/10 items-center justify-center">
-                    <MaterialIcons name="restaurant-menu" size={20} color="#DC2D2A" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-primary/10 items-center justify-center"
+                  >
+                    <MaterialIcons name="restaurant-menu" size={WP("5%")} color={COLORS.primary} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">Menu Management</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    Menu Management
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => handleItemPress("Tables & Reservations")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-primary/10 items-center justify-center">
-                    <MaterialIcons name="table-restaurant" size={20} color="#DC2D2A" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-primary/10 items-center justify-center"
+                  >
+                    <MaterialIcons name="table-restaurant" size={WP("5%")} color={COLORS.primary} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">Tables & Reservations</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    Tables & Reservations
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
             </View>
           </View>
 
           {/* ADMINISTRATION SECTION */}
           <View>
-            <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-2">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("sm") }}
+              className="font-bold text-accent capitalize tracking-wider px-1 mb-2"
+            >
               Administration
             </Text>
             <View className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm">
               <TouchableOpacity
                 onPress={() => handleItemPress("Discounts & Campaigns")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 border-b border-base-200/50"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between border-b border-base-200/50"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-secondary/10 items-center justify-center">
-                    <MaterialIcons name="sell" size={20} color="#00677F" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-secondary/10 items-center justify-center"
+                  >
+                    <MaterialIcons name="sell" size={WP("5%")} color={COLORS.secondary} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">Discounts & Campaigns</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    Discounts & Campaigns
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => handleItemPress("User Management")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 border-b border-base-200/50"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between border-b border-base-200/50"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-secondary/10 items-center justify-center">
-                    <MaterialIcons name="people" size={20} color="#00677F" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-secondary/10 items-center justify-center"
+                  >
+                    <MaterialIcons name="people" size={WP("5%")} color={COLORS.secondary} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">User Management</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    User Management
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => handleItemPress("Expenses")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 border-b border-base-200/50"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between border-b border-base-200/50"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-secondary/10 items-center justify-center">
-                    <MaterialIcons name="receipt" size={20} color="#00677F" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-secondary/10 items-center justify-center"
+                  >
+                    <MaterialIcons name="receipt" size={WP("5%")} color={COLORS.secondary} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">Expenses</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    Expenses
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => handleItemPress("Partners")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 border-b border-base-200/50"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between border-b border-base-200/50"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-secondary/10 items-center justify-center">
-                    <MaterialIcons name="handshake" size={20} color="#00677F" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-secondary/10 items-center justify-center"
+                  >
+                    <MaterialIcons name="handshake" size={WP("5%")} color={COLORS.secondary} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">Partners</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    Partners
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => handleItemPress("Business Settings")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-secondary/10 items-center justify-center">
-                    <MaterialIcons name="settings" size={20} color="#00677F" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-secondary/10 items-center justify-center"
+                  >
+                    <MaterialIcons name="settings" size={WP("5%")} color={COLORS.secondary} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">Business Settings</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    Business Settings
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
             </View>
           </View>
 
           {/* ACCOUNT SECTION */}
           <View>
-            <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-2">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("sm") }}
+              className="font-bold text-accent capitalize tracking-wider px-1 mb-2"
+            >
               Account
             </Text>
             <View className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm">
               <TouchableOpacity
                 onPress={() => handleItemPress("Profile")}
                 activeOpacity={0.7}
-                className="flex-row items-center justify-between p-4 border-b border-base-200/50"
+                style={{ padding: WP("3%") }}
+                className="flex-row items-center justify-between"
               >
                 <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 rounded-lg bg-base-200 items-center justify-center">
-                    <MaterialIcons name="person" size={20} color="#6E6E6E" />
+                  <View
+                    style={{ width: WP("8%"), height: WP("8%") }}
+                    className="rounded-lg bg-base-200 items-center justify-center"
+                  >
+                    <MaterialIcons name="person" size={WP("5%")} color={COLORS.accent} />
                   </View>
-                  <Text className="text-sm font-bold text-neutral">Profile</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">
+                    Profile
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color="#6E6E6E" />
+                <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.accent} />
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-
-        {/* 3. Logout & Version Footer */}
-        <View className="mt-8 items-center gap-4">
-          <TouchableOpacity
-            onPress={handleLogout}
-            activeOpacity={0.8}
-            className="w-full border-2 border-primary py-3 rounded-lg flex-row items-center justify-center gap-2"
-          >
-            <MaterialIcons name="logout" size={18} color="#DC2D2A" />
-            <Text className="text-xs font-black text-primary uppercase">Log Out</Text>
-          </TouchableOpacity>
         </View>
       </RefreshableScrollView>
     </SafeAreaView>

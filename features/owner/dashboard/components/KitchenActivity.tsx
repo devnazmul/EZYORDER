@@ -1,4 +1,4 @@
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
@@ -16,11 +16,7 @@ export default function KitchenActivity({ kitchenActivity = {}, isLoading }: Kit
   }
 
   return (
-    <View
-      key="loaded"
-      style={{ padding: WP("4%") }}
-      className="bg-neutral rounded-2xl shadow-md"
-    >
+    <View key="loaded" style={{ padding: WP("4%") }} className="bg-neutral rounded-2xl shadow-md">
       <View className="flex-row items-center gap-2 pb-3 border-b border-white/10 mb-4">
         <MaterialIcons name="restaurant-menu" size={20} color="#F97316" />
         <Text
@@ -50,13 +46,13 @@ export default function KitchenActivity({ kitchenActivity = {}, isLoading }: Kit
             <View className="flex-row items-center gap-1.5">
               <MaterialIcons name="pending-actions" size={WP("3.75%")} color="rgba(255, 255, 255, 0.4)" />
               <Text
-                style={{ fontSize: getResponsiveFontSize("sm") }}
+                style={{ fontSize: getResponsiveFontSize("xs") + 1 }}
                 className="text-accent font-medium capitalize"
               >
                 Waiting Orders
               </Text>
             </View>
-            <Text style={{ fontSize: getResponsiveFontSize("lg") }} className="font-bold text-white">
+            <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-white">
               {kitchenActivity?.waiting || 0}
             </Text>
           </TouchableOpacity>
@@ -79,13 +75,13 @@ export default function KitchenActivity({ kitchenActivity = {}, isLoading }: Kit
             <View className="flex-row items-center gap-1.5">
               <AntDesign name="warning" size={WP("3.75%")} color="rgba(220, 45, 42, 0.6)" />
               <Text
-                style={{ fontSize: getResponsiveFontSize("sm") }}
+                style={{ fontSize: getResponsiveFontSize("xs") + 1 }}
                 className="text-accent font-medium capitalize"
               >
                 Delayed
               </Text>
             </View>
-            <Text style={{ fontSize: getResponsiveFontSize("lg") }} className="font-bold text-primary">
+            <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-primary">
               {kitchenActivity?.delayed || 0}
             </Text>
           </TouchableOpacity>
@@ -96,13 +92,13 @@ export default function KitchenActivity({ kitchenActivity = {}, isLoading }: Kit
           <View className="flex-row items-center gap-1.5">
             <MaterialCommunityIcons name="clock-fast" size={WP("3.75%")} color="rgba(255, 255, 255, 0.4)" />
             <Text
-              style={{ fontSize: getResponsiveFontSize("sm") }}
+              style={{ fontSize: getResponsiveFontSize("xs") + 1 }}
               className="text-accent font-medium capitalize"
             >
               Avg Prep Time
             </Text>
           </View>
-          <Text style={{ fontSize: getResponsiveFontSize("lg") }} className="font-bold text-green-400">
+          <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-green-400">
             {kitchenActivity?.avgPrep || "00:00"}
           </Text>
         </View>

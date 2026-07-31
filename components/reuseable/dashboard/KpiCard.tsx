@@ -143,11 +143,11 @@ export default function KpiCard({
                   }
                 />
                 <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
                   className={`font-medium capitalize truncate ${
                     trend === "up" ? "text-success" : trend === "down" ? "text-error" : "text-white/70"
                   }`}
-                  numberOfLines={1}
+                  numberOfLines={2}
                 >
                   {trendText}
                 </Text>
