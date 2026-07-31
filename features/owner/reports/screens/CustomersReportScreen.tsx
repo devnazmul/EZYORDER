@@ -3,12 +3,15 @@ import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
 import PageTitle from "@/components/reuseable/PageTitle";
 import SearchBar from "@/components/reuseable/SearchBar";
+import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
 import { useCustomersQuery } from "@/hooks/useReportsQueries";
+import { HP, WP } from "@/utils/getResponsiveSizes";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomerCard from "../components/CustomerCard";
+import CustomerCardSkeleton from "../components/skeletons/CustomerCardSkeleton";
 
 const DEFAULT_FILTERS = {
   frequency_visit: ["all"],
@@ -230,11 +233,11 @@ export default function CustomersReport() {
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       {/* Main content header */}
-      <View className="px-4 pt-4">
+      <View style={{ paddingHorizontal: WP("4%"), paddingTop: HP("2%") }}>
         <PageTitle title="Customers" icon="group" badgeCount={customers.length} />
 
         {/* Search & Filter Drawer Row */}
-        <View className="flex-row items-center gap-3 mb-4">
+        <View style={{ marginBottom: HP("1.5%") }} className="flex-row items-center gap-3">
           <SearchBar
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -251,13 +254,16 @@ export default function CustomersReport() {
       </View>
 
       {/* Main Content Area */}
-      {isLoading ? (
-        <View key="loading" className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#DC2D2A" />
-          <Text className="text-xs text-accent mt-4 font-semibold">Loading customers list...</Text>
+      {isLoading || isRefetching ? (
+        <View key="loading" style={{ paddingHorizontal: WP("4%") }} className="flex-1">
+          <CustomerCardSkeleton />
+          <CustomerCardSkeleton />
+          <CustomerCardSkeleton />
+          <CustomerCardSkeleton />
+          <CustomerCardSkeleton />
         </View>
       ) : customers.length === 0 ? (
-        <View key="empty" className="flex-1 px-4">
+        <View key="empty" style={{ paddingHorizontal: WP("4%") }} className="flex-1">
           <EmptyState description="No customers found matching your criteria" pyClassName="py-12" />
         </View>
       ) : (
@@ -265,15 +271,15 @@ export default function CustomersReport() {
           key="loaded"
           data={customers}
           keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: WP("4%"), paddingBottom: HP("4%") }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => <CustomerCard customer={item} />}
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              colors={["#DC2D2A"]}
-              tintColor="#DC2D2A"
+              colors={[COLORS.primary]}
+              tintColor={COLORS.primary}
             />
           }
         />
