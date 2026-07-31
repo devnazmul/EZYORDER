@@ -1,3 +1,4 @@
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -81,6 +82,9 @@ export default function NotificationCard({ notification, onPress }: Notification
     notification.activity_time ||
     (parsedDate ? parsedDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "");
 
+  const iconContainerSize = WP("8.5%");
+  const unreadDotSize = WP("2%");
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -92,28 +96,43 @@ export default function NotificationCard({ notification, onPress }: Notification
       }`}
     >
       {/* Icon Container */}
-      <View className={`w-10 h-10 rounded-full ${iconBg} items-center justify-center shrink-0`}>
-        <MaterialIcons name={iconName} size={20} color={iconColor} />
+      <View
+        style={{ width: iconContainerSize, height: iconContainerSize }}
+        className={`rounded-lg ${iconBg} items-center justify-center shrink-0`}
+      >
+        <MaterialIcons name={iconName} size={Math.max(24, WP("5%"))} color={iconColor} />
       </View>
 
       {/* Content wrapper */}
       <View className="flex-1 min-w-0">
         <View className="flex-row justify-between items-start">
           <Text
-            numberOfLines={1}
-            className={`text-sm shrink mr-2 text-neutral ${isUnread ? "font-bold" : "font-medium"}`}
+            numberOfLines={2}
+            style={{ fontSize: getResponsiveFontSize("sm") }}
+            className={`shrink mr-2 text-neutral ${isUnread ? "font-bold" : "font-medium"}`}
           >
             {notification.notification_title || notification.title || "Alert"}
           </Text>
-          <Text className="text-[10px] text-accent font-semibold">{timeLabel}</Text>
+          <Text style={{ fontSize: getResponsiveFontSize("xs") - 1 }} className="text-accent font-semibold">
+            {timeLabel}
+          </Text>
         </View>
-        <Text numberOfLines={2} className="text-xs text-accent mt-1 leading-4">
+        <Text
+          numberOfLines={2}
+          style={{ fontSize: getResponsiveFontSize("xs") }}
+          className="text-accent mt-1 leading-4"
+        >
           {notification.notification_description || notification.message || ""}
         </Text>
       </View>
 
       {/* Unread Dot status */}
-      {isUnread && <View className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
+      {isUnread && (
+        <View
+          style={{ width: unreadDotSize, height: unreadDotSize }}
+          className="rounded-full bg-primary mt-1.5 shrink-0"
+        />
+      )}
     </TouchableOpacity>
   );
 }

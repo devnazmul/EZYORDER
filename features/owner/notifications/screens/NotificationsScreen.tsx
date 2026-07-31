@@ -1,12 +1,16 @@
+import Button from "@/components/reuseable/Button";
 import EmptyState from "@/components/reuseable/EmptyState";
 import FilterChips from "@/components/reuseable/FilterChips";
-import LoadingScreen from "@/components/reuseable/LoadingScreen";
+import PageTitle from "@/components/reuseable/PageTitle";
+import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { RefreshControl, SectionList, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, SectionList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import NotificationCard from "../components/NotificationCard";
+import NotificationCardSkeleton from "../components/skeletons/NotificationCardSkeleton";
 import {
   useMarkAllAsReadMutation,
   useMarkNotificationAsReadMutation,
@@ -22,8 +26,6 @@ export default function Notifications() {
   const { data: notificationData, isLoading, isRefetching, refetch } = useNotificationsQuery(token || "");
   const notifications = notificationData?.list || [];
   const unreadCount = notificationData?.unreadCount || 0;
-
-  console.log("notification", notifications);
 
   // Mutations
   const markAsReadMutation = useMarkNotificationAsReadMutation(token || "");
@@ -133,10 +135,6 @@ export default function Notifications() {
     };
   };
 
-  if (isLoading) {
-    return <LoadingScreen key="loading" message="Loading notifications..." />;
-  }
-
   // Filter items
   const filteredNotifications = notifications.filter((item: any) => {
     if (activeFilter === "all") return true;
@@ -153,86 +151,87 @@ export default function Notifications() {
 
   return (
     <SafeAreaView key="loaded" edges={["left", "right"]} className="flex-1 bg-base-100">
-      <SectionList
-        className="flex-1 px-4"
-        contentContainerStyle={{ paddingBottom: 24, paddingTop: 16 }}
-        sections={sections}
-        keyExtractor={(item) => String(item.id)}
-        initialNumToRender={15}
-        maxToRenderPerBatch={15}
-        windowSize={5}
-        removeClippedSubviews={true}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor="#DC2D2A"
-            colors={["#DC2D2A"]}
-          />
-        }
-        ListHeaderComponent={
-          <View className="mb-4">
-            {/* Section Header */}
-            <View className="flex-row justify-between items-center mb-6">
-              <View className="flex-1 pr-4">
-                <Text className="text-xl font-bold text-neutral">Notifications</Text>
-                <Text className="text-xs text-accent mt-1">Stay updated with your restaurant's activity</Text>
-              </View>
-              <View className="flex-row gap-x-2">
-                <TouchableOpacity
-                  onPress={async () => {
-                    const { triggerLocalNotificationMock } = await import("@/hooks/usePushNotifications");
-                    await triggerLocalNotificationMock(
-                      "Test Assignment Alert!",
-                      "Order #5713 has been assigned to you.",
-                      { orderId: "5713" },
-                    );
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-secondary/10"
-                >
-                  <Text className="text-xs font-bold text-secondary">Test Push</Text>
-                </TouchableOpacity>
-                {unreadCount > 0 && (
-                  <TouchableOpacity
-                    onPress={handleMarkAllAsRead}
-                    className="px-3 py-1.5 rounded-lg bg-primary/10"
-                  >
-                    <Text className="text-xs font-bold text-primary">Mark all as read</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
+      <View style={{ paddingHorizontal: WP("4%") }} className="flex-1 pt-4">
+        {/* Page Header (standalone full-width) */}
+        <PageTitle
+          title="Notifications"
+          icon="notifications"
+          description="Stay updated with your restaurant's activity"
+        />
 
-            {/* Filter Chips row */}
-            <FilterChips
-              chips={[
-                { id: "all", label: "All" },
-                { id: "system", label: "System" },
-                { id: "driver", label: "Driver" },
-              ]}
-              selectedId={activeFilter}
-              onSelect={setActiveFilter}
-              containerClassName="mb-2"
+        {/* Filter Chips row */}
+        <FilterChips
+          chips={[
+            { id: "all", label: "All" },
+            { id: "system", label: "System" },
+            { id: "driver", label: "Driver" },
+          ]}
+          selectedId={activeFilter}
+          onSelect={setActiveFilter}
+          containerClassName="mb-3"
+        />
+
+        {/* Action row */}
+        {unreadCount > 0 && (
+          <View className="items-end mb-3">
+            <Button
+              label="Mark all as read"
+              onPress={handleMarkAllAsRead}
+              variant="primary"
+              containerClassName=" px-4 rounded-lg"
+              containerStyle={{ width: "auto", alignSelf: "flex-end" }}
             />
           </View>
-        }
-        renderSectionHeader={({ section: { title } }) => (
-          <View className="mb-3 mt-4 px-1 bg-base-100 py-1">
-            <Text className="text-xs font-bold text-accent uppercase tracking-wider">{title}</Text>
-          </View>
         )}
-        renderItem={({ item }) => (
-          <NotificationCard key={item.id} notification={item} onPress={() => handleNotificationPress(item)} />
+
+        {isLoading || isRefetching ? (
+          <NotificationCardSkeleton />
+        ) : (
+          <SectionList
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: 24 }}
+            sections={sections}
+            keyExtractor={(item) => String(item.id)}
+            initialNumToRender={15}
+            maxToRenderPerBatch={15}
+            windowSize={5}
+            removeClippedSubviews={true}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                tintColor={COLORS.primary}
+                colors={[COLORS.primary]}
+              />
+            }
+            renderSectionHeader={({ section: { title } }) => (
+              <View className="mb-3 px-1 bg-base-100 ">
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className=" font-semibold text-accent capitalize tracking-wide"
+                >
+                  {title}
+                </Text>
+              </View>
+            )}
+            renderItem={({ item }) => (
+              <NotificationCard
+                key={item.id}
+                notification={item}
+                onPress={() => handleNotificationPress(item)}
+              />
+            )}
+            ListEmptyComponent={
+              notifications.length === 0 ? (
+                <EmptyState description="You have no notifications yet" pyClassName="py-12" />
+              ) : totalFilteredCount === 0 ? (
+                <EmptyState description="No notifications match the filter" pyClassName="py-12" />
+              ) : null
+            }
+          />
         )}
-        ListEmptyComponent={
-          notifications.length === 0 ? (
-            <EmptyState description="You have no notifications yet" pyClassName="py-12" />
-          ) : totalFilteredCount === 0 ? (
-            <EmptyState description="No notifications match the filter" pyClassName="py-12" />
-          ) : null
-        }
-      />
+      </View>
     </SafeAreaView>
   );
 }
