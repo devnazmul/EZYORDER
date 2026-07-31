@@ -28,7 +28,7 @@ export default function KitchenItemList({ detail = [] }: KitchenItemListProps) {
             {/* Qty Badge */}
             <Badge
               text={`${qty}x`}
-              containerClassName="bg-primary/10 border border-primary/20 !px-0 py-0.5 rounded-lg mr-2 mt-0"
+              containerClassName="bg-primary/10 border border-primary/20 !px-0.5 py-1 rounded-lg mr-2 mt-0"
               textClassName="text-primary font-bold "
               textStyle={{ fontSize: getResponsiveFontSize("xs") }}
             />

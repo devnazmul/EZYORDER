@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import KitchenCard from "../components/KitchenCard";
+import KitchenCardSkeleton from "../components/skeletons/KitchenCardSkeleton";
 import { usePendingOrdersQuery } from "../hooks/queries/useOrderQueries";
 
 export default function KitchenScreen() {
@@ -67,11 +68,10 @@ export default function KitchenScreen() {
         />
 
         {showListLoader ? (
-          <View key="list-loading" className="flex-1 justify-center items-center py-10">
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-accent mt-3">
-              Updating kitchen orders...
-            </Text>
+          <View key="list-loading" className="flex-1">
+            <KitchenCardSkeleton />
+            <KitchenCardSkeleton />
+            <KitchenCardSkeleton />
           </View>
         ) : orders.length === 0 ? (
           <View key="empty" className="flex-1 justify-center items-center py-10 bg-base-100">
