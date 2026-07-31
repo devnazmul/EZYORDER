@@ -1,7 +1,10 @@
+import Badge from "@/components/reuseable/Badge";
+import COLORS from "@/constants/colors";
+import { dayWiseSlotDivide } from "@/utils/dayWiseSlotDivide";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { dayWiseSlotDivide } from "@/utils/dayWiseSlotDivide";
 
 interface MenuTimingSlotsProps {
   timeSlots?: any[];
@@ -26,9 +29,15 @@ export default function MenuTimingSlots({ timeSlots }: MenuTimingSlotsProps) {
 
   if (dividedDays.length === 0) {
     return (
-      <View className="bg-amber-500/10 border border-amber-200 rounded-xl p-4 flex-row items-center gap-3">
-        <MaterialIcons name="info-outline" size={20} color="#d97706" />
-        <Text className="text-xs text-amber-800 font-semibold flex-1">
+      <View
+        style={{ padding: WP("4%"), gap: WP("3%") }}
+        className="bg-amber-500/10 border border-amber-200 rounded-xl flex-row items-center"
+      >
+        <MaterialIcons name="info-outline" size={WP("5%")} color="#d97706" />
+        <Text
+          style={{ fontSize: getResponsiveFontSize("xs") }}
+          className="text-amber-800 font-semibold flex-1"
+        >
           This category is marked as time-based but has no operating hours slots defined.
         </Text>
       </View>
@@ -36,11 +45,17 @@ export default function MenuTimingSlots({ timeSlots }: MenuTimingSlotsProps) {
   }
 
   return (
-    <View className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm mb-4">
+    <View className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm ">
       {/* Title */}
-      <View className="px-4 py-3 bg-base-200 flex-row items-center gap-2 border-b border-base-200/50">
-        <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
-        <Text className="text-xs font-bold text-neutral uppercase tracking-widest">
+      <View
+        style={{ paddingHorizontal: WP("4%"), paddingVertical: WP("3%"), gap: WP("2%") }}
+        className="bg-base-200 flex-row items-center border-b border-base-200/50"
+      >
+        <MaterialIcons name="schedule" size={WP("4%")} color={COLORS.primary} />
+        <Text
+          style={{ fontSize: getResponsiveFontSize("xs") }}
+          className="font-semibold text-neutral capitalize tracking-wider"
+        >
           Operating Weekly Schedule
         </Text>
       </View>
@@ -50,19 +65,20 @@ export default function MenuTimingSlots({ timeSlots }: MenuTimingSlotsProps) {
         {dividedDays.map((daySlot) => {
           const dayName = DAYS[daySlot.day] || `Day ${daySlot.day}`;
           return (
-            <View key={daySlot.day} className="p-3">
-              <Text className="text-xs font-bold text-neutral mb-2">{dayName}</Text>
+            <View key={daySlot.day} style={{ paddingVertical: HP("1%"), paddingHorizontal: WP("3%") }}>
+              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral mb-2">
+                {dayName}
+              </Text>
               <View className="flex-row flex-wrap gap-2">
                 {daySlot.slots.map((slot: any, idx: number) => (
-                  <View
+                  <Badge
                     key={slot?.id || idx}
-                    className="flex-row items-center bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full gap-1.5"
-                  >
-                    <MaterialIcons name="alarm" size={10} color="#DC2D2A" />
-                    <Text className="text-[10px] font-black text-primary">
-                      {formatTime(slot?.start_time)} — {formatTime(slot?.end_time)}
-                    </Text>
-                  </View>
+                    icon={<MaterialIcons name="alarm" size={WP("3.5%")} color={COLORS.primary} />}
+                    text={`${formatTime(slot?.start_time)} — ${formatTime(slot?.end_time)}`}
+                    containerClassName="bg-primary/10 border border-primary/20 rounded-full"
+                    textClassName="text-primary capitalize"
+                    textStyle={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+                  />
                 ))}
               </View>
             </View>

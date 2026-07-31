@@ -1,8 +1,11 @@
+import Badge from "@/components/reuseable/Badge";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import ENV from "@/config/env";
+import COLORS from "@/constants/colors";
 import { useData } from "@/context/context/DataContext";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
@@ -34,19 +37,23 @@ export default function DishCard({ dish, onPress }: DishCardProps) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm mb-4"
+      style={{ padding: WP("3%") }}
+      className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm"
     >
-      <View className="flex-row p-3 gap-3">
+      <View className="flex-row gap-3">
         {/* Left Side: Dish Thumbnail Image */}
-        <View className="w-20 h-20 rounded-lg bg-base-200 overflow-hidden items-center justify-center relative flex-shrink-0">
+        <View
+          style={{ width: WP("20%"), height: WP("20%") }}
+          className="rounded-lg bg-base-200 overflow-hidden items-center justify-center relative flex-shrink-0"
+        >
           {imageUri ? (
             <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
           ) : (
-            <MaterialIcons name="restaurant" size={24} color="#A3A3A3" />
+            <MaterialIcons name="restaurant" size={WP("6%")} color={COLORS.accent} />
           )}
           {isTimeBased && (
             <View className="absolute top-1 left-1 bg-amber-500 rounded px-1 py-0.5 shadow-sm">
-              <MaterialIcons name="schedule" size={8} color="#FFFFFF" />
+              <MaterialIcons name="schedule" size={WP("2.5%")} color="#FFFFFF" />
             </View>
           )}
         </View>
@@ -55,29 +62,45 @@ export default function DishCard({ dish, onPress }: DishCardProps) {
         <View className="flex-1 justify-between py-0.5 pr-1">
           <View>
             <View className="flex-row justify-between items-start gap-2">
-              <Text className="text-sm font-bold text-neutral flex-1" numberOfLines={1}>
+              <Text
+                style={{ fontSize: getResponsiveFontSize("sm") }}
+                className="font-bold text-neutral flex-1"
+                numberOfLines={1}
+              >
                 {dish?.name || "Dish Name"}
               </Text>
               <StatusBadge status={isActive ? "active" : "inactive"} />
             </View>
-            <Text className="text-xs text-accent mt-1" numberOfLines={2}>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="text-accent font-medium mt-1"
+              numberOfLines={2}
+            >
               {dish?.description || "No description provided."}
             </Text>
             {Array.isArray(dish?.dish_variations) && dish.dish_variations.length > 0 && (
-              <View className="flex-row items-center gap-1 mt-1.5 bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md self-start">
-                <MaterialIcons name="tune" size={10} color="#DC2D2A" />
-                <Text className="text-[9px] font-black text-primary uppercase">
-                  {dish.dish_variations.length} {dish.dish_variations.length === 1 ? "option" : "options"}
-                </Text>
+              <View className="mt-1.5 self-start">
+                <Badge
+                  icon={<MaterialIcons name="tune" size={WP("3%")} color={COLORS.primary} />}
+                  text={`${dish.dish_variations.length} ${dish.dish_variations.length === 1 ? "option" : "options"}`}
+                  containerClassName="bg-primary/10 border border-primary/20 "
+                  textClassName="text-primary capitalize"
+                  textStyle={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+                />
               </View>
             )}
           </View>
 
           {/* Pricing Row */}
-          <View className="flex-row justify-between items-center mt-2 pt-1 border-t border-base-200/50">
-            <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">Eat In Rate</Text>
-            <Text className="text-sm font-black text-primary">
+          <View style={{ marginTop: HP("1%") }} className="flex-col justify-start items-end ">
+            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-primary">
               {formatAmount(dish?.price || 0, currencySymbol)}
+            </Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+              className="font-semibold text-accent capitalize tracking-wider"
+            >
+              Eat In Rate
             </Text>
           </View>
         </View>

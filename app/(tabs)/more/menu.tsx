@@ -1,14 +1,17 @@
 import CategoryCard from "@/components/menu/CategoryCard";
-import KpiCard from "@/components/reports/KpiCard";
+import KpiCard from "@/components/reuseable/dashboard/KpiCard";
+import EmptyState from "@/components/reuseable/EmptyState";
+import PageTitle from "@/components/reuseable/PageTitle";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import SearchBar from "@/components/reuseable/SearchBar";
+import CategoryCardSkeleton from "@/components/reuseable/skeletons/CategoryCardSkeleton";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useMenuAllQuery, useMenuMatrixQuery } from "@/hooks/useMenuQueries";
-import { MaterialIcons } from "@expo/vector-icons";
+import { getResponsiveFontSize } from "@/utils/getResponsiveSizes";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MenuManagement() {
@@ -26,6 +29,7 @@ export default function MenuManagement() {
   const {
     data: menuData,
     isLoading: isMenuLoading,
+    isFetching: isMenuFetching,
     refetch: refetchMenus,
   } = useMenuAllQuery(token || "", String(restaurantId || ""), menuParams);
 
@@ -48,69 +52,68 @@ export default function MenuManagement() {
   };
 
   const isLoading = isMenuLoading || isMatrixLoading;
+  const showSkeleton = isMenuLoading || isMenuFetching;
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       <RefreshableScrollView
-        className="flex-1 px-4 py-4"
+        className="flex-1 flex-col px-4 py-4"
         onRefresh={handleRefresh}
         contentContainerStyle={{ paddingBottom: 80 }}
       >
-        {/* Header Title Area inside ScrollView */}
-        <View className="flex-row items-center gap-2 mb-4">
-          <View className="bg-primary-container/10 p-1.5 rounded-lg">
-            <MaterialIcons name="restaurant" size={18} color="#DC2D2A" />
-          </View>
-          <View className="flex-row items-center gap-2">
-            <Text className="text-lg font-black text-neutral uppercase tracking-tight">ALL MENU</Text>
-            {filteredMenuList.length > 0 && (
-              <View className="bg-primary px-2.5 py-0.5 rounded-full items-center justify-center">
-                <Text className="text-white text-xs font-black">{filteredMenuList.length}</Text>
-              </View>
-            )}
-          </View>
-        </View>
+        <PageTitle
+          icon="restaurant-menu"
+          title="All Menu"
+          description="All Menu and Dishes detail"
+          badgeCount={filteredMenuList?.length || 0}
+        />
 
-        {/* Stats KPIs Summary*/}
-        <View className="mb-6">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-3">
-            Menu Stats
-          </Text>
-          <View className="flex-row flex-wrap gap-3">
-            <View className="flex-1 min-w-[45%]">
+        {/* Stats KPIs Summary - 2x2 Grid */}
+        <View className="flex-1 mb-6 gap-y-3">
+          {/* Row 1 */}
+          <View className="flex-row gap-3">
+            <View className="flex-1">
               <KpiCard
                 title="Total Menu"
                 value={String(matrixData?.total_menu ?? 0)}
-                iconName="restaurant-menu"
+                icon="restaurant-menu"
                 variant="dark"
                 gradientColors={["#2d3e56", "#1b283c"]}
+                loading={isMatrixLoading}
               />
             </View>
-            <View className="flex-1 min-w-[45%]">
+            <View className="flex-1">
               <KpiCard
                 title="Total Dishes"
                 value={String(matrixData?.total_dishes ?? 0)}
-                iconName="restaurant"
+                icon="restaurant"
                 variant="dark"
                 gradientColors={["#1e4f43", "#11322b"]}
+                loading={isMatrixLoading}
               />
             </View>
-            <View className="flex-1 min-w-[45%]">
+          </View>
+
+          {/* Row 2 */}
+          <View className="flex-row gap-3">
+            <View className="flex-1">
               <KpiCard
                 title="Dish Options"
                 value={String(matrixData?.total_dish_option ?? 0)}
-                iconName="trending-up"
+                icon="trending-up"
                 variant="dark"
                 gradientColors={["#4c3590", "#2e1e5c"]}
+                loading={isMatrixLoading}
               />
             </View>
-            <View className="flex-1 min-w-[45%]">
+            <View className="flex-1">
               <KpiCard
                 title="Total Deals"
                 value={String(matrixData?.total_deal ?? 0)}
-                iconName="local-offer"
+                icon="local-offer"
                 variant="dark"
                 gradientColors={["#6d242b", "#3d1115"]}
+                loading={isMatrixLoading}
               />
             </View>
           </View>
@@ -126,29 +129,32 @@ export default function MenuManagement() {
 
         {/* Categories Section */}
         <View className="flex-1">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-3">
+          <Text
+            className="font-bold text-accent capitalize tracking-widest px-1 mb-3"
+            style={{ fontSize: getResponsiveFontSize("sm") }}
+          >
             Menu Categories
           </Text>
 
-          {isLoading && filteredMenuList.length === 0 ? (
-            <View className="py-12 items-center justify-center">
-              <ActivityIndicator size="large" color="#DC2D2A" />
-              <Text className="text-xs text-accent mt-3">Loading menu inventory...</Text>
-            </View>
+          {showSkeleton ? (
+            <CategoryCardSkeleton key="loading" />
           ) : filteredMenuList.length === 0 ? (
-            <View className="bg-base-300 border border-base-200 rounded-xl p-8 items-center justify-center">
-              <View className="w-16 h-16 bg-primary/10 rounded-full items-center justify-center mb-3">
-                <MaterialIcons name="restaurant-menu" size={32} color="#DC2D2A" />
-              </View>
-              <Text className="text-md font-bold text-neutral">No Menus Found</Text>
-              <Text className="text-xs text-accent text-center mt-1">
-                {searchQuery
-                  ? "Try searching for a different item name"
-                  : "Your restaurant menu is currently empty"}
-              </Text>
+            <View
+              key="empty"
+              className="bg-base-300 border border-base-200 rounded-xl p-8 items-center justify-center"
+            >
+              <EmptyState
+                icon="restaurant-menu"
+                title="No Menu Category Found"
+                description={
+                  searchQuery
+                    ? "Try searching for a different item name"
+                    : "Your restaurant menu is currently empty"
+                }
+              />
             </View>
           ) : (
-            <View className="gap-y-4">
+            <View key="loaded" className="gap-y-4">
               {filteredMenuList.map((item) => (
                 <CategoryCard
                   key={item?.id || String(item?.name)}

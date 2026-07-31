@@ -5,14 +5,19 @@ import MenuTimingSlots from "@/components/menu/MenuTimingSlots";
 import EmptyState from "@/components/reuseable/EmptyState";
 import { FilterField } from "@/components/reuseable/FilterDrawer";
 import PageTitle from "@/components/reuseable/PageTitle";
+import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
+import DealCardSkeleton from "@/components/reuseable/skeletons/DealCardSkeleton";
+import DishCardSkeleton from "@/components/reuseable/skeletons/DishCardSkeleton";
+import { Bone, SkeletonContainer } from "@/components/reuseable/skeletons/Skeleton";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import ToggleBar from "@/components/reuseable/ToggleBar";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useDishesQuery, useSingleMenuQuery } from "@/hooks/useMenuQueries";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FILTER_FIELDS: FilterField[] = [
@@ -136,115 +141,139 @@ export default function DishesScreen() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
+      <RefreshableScrollView
+        className="flex-1 flex-col px-4 py-4"
+        onRefresh={handleRefresh}
+        contentContainerStyle={{ paddingBottom: 80 }}
+      >
+        <PageTitle
+          title={String("All dishes of " + menuName || "Category Menu")}
+          icon="restaurant-menu"
+          description={`Total ${listData.length} ${activeTab} found`}
+        />
 
-      <View className="flex-1 px-4 py-4">
-        <PageTitle title={String(menuName || "Category Menu")} icon="restaurant" />
-
-        {menuDetails && (
-          <View className="mb-4 gap-y-4">
-            {/* Category Details Banner */}
-            <View className="bg-base-300 border border-base-200 rounded-xl p-4 shadow-sm gap-y-2">
+        {isMenuLoading ? (
+          <View style={{ marginBottom: WP("4%") }} className="gap-y-4">
+            {/* Category Details Banner Skeleton */}
+            <SkeletonContainer
+              style={{ padding: WP("4%"), gap: WP("2%") }}
+              className="bg-base-300 border border-base-200 rounded-xl shadow-sm"
+            >
               <View className="flex-row justify-between items-center">
-                <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">
-                  Category Information
-                </Text>
-                <StatusBadge
-                  status={
-                    menuDetails?.show_in_customer === 1 || menuDetails?.show_in_customer === "1"
-                      ? "active"
-                      : "inactive"
-                  }
-                />
+                <Bone width={WP("25%")} height={12} borderRadius={4} />
+                <Bone width={WP("15%")} height={16} borderRadius={9999} />
               </View>
-              <Text className="text-md font-bold text-neutral">{menuDetails.name}</Text>
-              <Text className="text-xs text-accent/80 font-medium">
-                {menuDetails.description || "No description provided."}
-              </Text>
-            </View>
+              <Bone width={WP("40%")} height={18} borderRadius={4} className="mt-1" />
+              <Bone width={WP("80%")} height={12} borderRadius={4} className="mt-1" />
+            </SkeletonContainer>
 
-            {/* Operational Time Slots if Category is Time-Based */}
-            {menuIsTimeBased && <MenuTimingSlots timeSlots={menuDetails?.time_slots} />}
+            {/* Operating Weekly Schedule Skeleton */}
+            <SkeletonContainer className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm">
+              <View
+                style={{ paddingHorizontal: WP("4%"), paddingVertical: WP("3%"), gap: WP("2%") }}
+                className="bg-base-200 flex-row items-center border-b border-base-200/50"
+              >
+                <Bone width={16} height={16} circle />
+                <Bone width={WP("45%")} height={12} borderRadius={4} />
+              </View>
+              <View className="p-3 gap-y-3">
+                <Bone width={WP("15%")} height={12} borderRadius={4} />
+                <View className="flex-row gap-2">
+                  <Bone width={WP("30%")} height={18} borderRadius={9999} />
+                  <Bone width={WP("30%")} height={18} borderRadius={9999} />
+                </View>
+              </View>
+            </SkeletonContainer>
 
             {/* Tab Selection */}
             <ToggleBar
               options={[
-                { id: "dishes", label: `Dishes (${dishes.length})` },
-                { id: "deals", label: `Deals (${deals.length})` },
+                { id: "dishes", label: "Dishes (0)" },
+                { id: "deals", label: "Deals (0)" },
               ]}
               activeId={activeTab}
               onSelect={(id) => setActiveTab(id as any)}
             />
-
-            {/* Search & Drawer Filter Bar commented out */}
-            {/* <View className="flex-row items-center gap-3">
-              <View className="flex-1">
-                <SearchBar
-                  value={searchBarValue}
-                  onChangeText={setSearchBarValue}
-                  placeholder={`Search ${activeTab}...`}
-                />
-              </View>
-              <FilterDrawer
-                fields={FILTER_FIELDS}
-                values={filterDrawerValues}
-                onApply={handleApplyFilters}
-                onClear={handleClearFilters}
-              />
-            </View> */}
-          </View>
-        )}
-
-        {isMenuLoading ? (
-          <View key="loading" className="py-24 items-center justify-center">
-            <ActivityIndicator size="large" color="#DC2D2A" />
-            <Text className="text-xs text-accent mt-3">Loading category details...</Text>
           </View>
         ) : (
-          <FlatList
-            key="loaded"
-            data={isDishesLoading ? [] : listData}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={({ item }) =>
-              activeTab === "dishes" ? (
-                <DishCard dish={item} onPress={() => handleOpenDetails(item)} />
-              ) : (
-                <DealCard deal={item} onPress={() => handleOpenDetails(item)} />
-              )
-            }
-            contentContainerStyle={{ paddingBottom: 40 }}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefetching}
-                onRefresh={handleRefresh}
-                tintColor="#DC2D2A"
-                colors={["#DC2D2A"]}
-              />
-            }
-            ListEmptyComponent={
-              isDishesLoading ? (
-                <View className="py-16 items-center justify-center">
-                  <ActivityIndicator size="large" color="#DC2D2A" />
-                  <Text className="text-xs text-accent mt-3">Updating list...</Text>
-                </View>
-              ) : (
-                <View key="empty" className="mt-8">
-                  <EmptyState
-                    icon={activeTab === "dishes" ? "restaurant-menu" : "local-offer"}
-                    title={`No ${activeTab === "dishes" ? "Dishes" : "Deals"} Found`}
-                    description={
-                      activeFilterCount > 0 || searchBarValue
-                        ? "Try clearing filters or search queries to see all items."
-                        : `Your restaurant currently has no ${activeTab} in this category.`
+          menuDetails && (
+            <View className="gap-y-3">
+              {/* Category Details Banner */}
+              <View
+                style={{ padding: WP("3%"), gap: 3 }}
+                className="bg-base-300 border border-base-200 rounded-xl shadow-sm"
+              >
+                <View className="flex-row justify-between items-center">
+                  <Text
+                    style={{ fontSize: getResponsiveFontSize("xs") }}
+                    className="font-semibold text-accent capitalize tracking-wide"
+                  >
+                    Category Information
+                  </Text>
+                  <StatusBadge
+                    status={
+                      menuDetails?.show_in_customer === 1 || menuDetails?.show_in_customer === "1"
+                        ? "active"
+                        : "inactive"
                     }
-                    pyClassName="py-16"
                   />
                 </View>
-              )
-            }
-          />
+                <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
+                  {menuDetails.name}
+                </Text>
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className="text-accent/80 font-medium"
+                >
+                  {menuDetails.description || "No description provided."}
+                </Text>
+              </View>
+
+              {/* Operational Time Slots if Category is Time-Based */}
+              {menuIsTimeBased && <MenuTimingSlots timeSlots={menuDetails?.time_slots} />}
+
+              {/* Tab Selection */}
+              <ToggleBar
+                options={[
+                  { id: "dishes", label: `Dishes (${dishes.length})` },
+                  { id: "deals", label: `Deals (${deals.length})` },
+                ]}
+                activeId={activeTab}
+                onSelect={(id) => setActiveTab(id as any)}
+              />
+            </View>
+          )
         )}
-      </View>
+
+        {isMenuLoading || isDishesLoading || isRefetching ? (
+          <View key="loading" className="flex-1">
+            {activeTab === "dishes" ? <DishCardSkeleton /> : <DealCardSkeleton />}
+          </View>
+        ) : listData.length === 0 ? (
+          <View key="empty" className="mt-8">
+            <EmptyState
+              icon={activeTab === "dishes" ? "restaurant-menu" : "local-offer"}
+              title={`No ${activeTab === "dishes" ? "Dishes" : "Deals"} Found`}
+              description={
+                activeFilterCount > 0 || searchBarValue
+                  ? "Try clearing filters or search queries to see all items."
+                  : `Your restaurant currently has no ${activeTab} in this category.`
+              }
+              pyClassName="py-16"
+            />
+          </View>
+        ) : (
+          <View key="loaded" className="gap-y-3">
+            {listData.map((item: any) =>
+              activeTab === "dishes" ? (
+                <DishCard key={item.id} dish={item} onPress={() => handleOpenDetails(item)} />
+              ) : (
+                <DealCard key={item.id} deal={item} onPress={() => handleOpenDetails(item)} />
+              ),
+            )}
+          </View>
+        )}
+      </RefreshableScrollView>
 
       {/* Slide up details drawer */}
       <DishDetailDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} dish={selectedDish} />

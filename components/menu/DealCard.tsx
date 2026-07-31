@@ -1,11 +1,14 @@
-import React, { useMemo } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { formatAmount } from "@/utils/formatters";
-import { useData } from "@/context/context/DataContext";
-import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import Badge from "@/components/reuseable/Badge";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import ENV from "@/config/env";
+import COLORS from "@/constants/colors";
+import { useData } from "@/context/context/DataContext";
+import { formatAmount } from "@/utils/formatters";
+import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { MaterialIcons } from "@expo/vector-icons";
+import React, { useMemo } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface DealCardProps {
   deal: any;
@@ -34,15 +37,19 @@ export default function DealCard({ deal, onPress }: DealCardProps) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm mb-4"
+      style={{ padding: WP("3%") }}
+      className="bg-base-300 border border-base-200 rounded-xl overflow-hidden shadow-sm"
     >
-      <View className="flex-row p-3 gap-3">
+      <View className="flex-row gap-3" style={{ gap: WP("3%") }}>
         {/* Deal Thumbnail Image */}
-        <View className="w-20 h-20 rounded-lg bg-base-200 overflow-hidden items-center justify-center relative flex-shrink-0">
+        <View
+          style={{ width: WP("20%"), height: WP("20%") }}
+          className="rounded-lg bg-base-200 overflow-hidden items-center justify-center relative flex-shrink-0"
+        >
           {imageUri ? (
             <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
           ) : (
-            <MaterialIcons name="local-offer" size={24} color="#A3A3A3" />
+            <MaterialIcons name="local-offer" size={WP("6%")} color={COLORS.accent} />
           )}
         </View>
 
@@ -50,41 +57,69 @@ export default function DealCard({ deal, onPress }: DealCardProps) {
         <View className="flex-1 justify-between py-0.5 pr-1">
           <View>
             <View className="flex-row justify-between items-start gap-2">
-              <Text className="text-sm font-bold text-neutral flex-1" numberOfLines={1}>
+              <Text
+                style={{ fontSize: getResponsiveFontSize("sm") }}
+                className="font-bold text-neutral flex-1"
+                numberOfLines={1}
+              >
                 {deal?.name || "Deal Name"}
               </Text>
               <StatusBadge status={isActive ? "active" : "inactive"} />
             </View>
-            <Text className="text-xs text-accent mt-1" numberOfLines={1}>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="text-accent/80 font-medium mt-0.5"
+              numberOfLines={1}
+            >
               {deal?.description || "No description provided."}
             </Text>
 
             {/* Linked Dishes Bullet Items */}
             {linkedItems.length > 0 && (
-              <View className="mt-2 gap-y-1">
-                <Text className="text-[8px] font-bold text-accent uppercase tracking-wider">Included Options</Text>
-                {linkedItems.slice(0, 2).map((item: any, idx: number) => (
-                  <View key={item?.id || idx} className="flex-row items-center gap-1">
-                    <MaterialIcons name="check-circle" size={10} color="#DC2D2A" />
-                    <Text className="text-[10px] text-neutral/85 font-medium flex-1 truncate" numberOfLines={1}>
-                      {item?.dish?.name || "Dish Option"}
+              <View className="mt-3 gap-3">
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className="font-semibold text-accent capitalize tracking-wide"
+                >
+                  Included Options
+                </Text>
+                <View className="flex-row flex-wrap gap-3">
+                  {linkedItems.slice(0, 3).map((item: any, idx: number) => (
+                    <Badge
+                      key={item?.id || idx}
+
+                      text={item?.dish?.name || "Dish Option"}
+                      containerClassName="bg-primary/10 border border-primary/20 "
+                      textClassName="text-primary capitalize"
+                      textStyle={{ fontSize: getResponsiveFontSize("xs") }}
+                    />
+                  ))}
+                  {linkedItems.length > 3 && (
+                    <Text
+                      style={{ fontSize: getResponsiveFontSize("xs") }}
+                      className="text-primary font-bold italic self-center"
+                    >
+                      +{linkedItems.length - 3} More
                     </Text>
-                  </View>
-                ))}
-                {linkedItems.length > 2 && (
-                  <Text className="text-[9px] text-primary font-bold italic">
-                    +{linkedItems.length - 2} more options...
-                  </Text>
-                )}
+                  )}
+                </View>
               </View>
             )}
           </View>
 
           {/* Pricing Row */}
-          <View className="flex-row justify-between items-center mt-2 pt-1 border-t border-base-200/50">
-            <Text className="text-[9px] font-bold text-accent uppercase tracking-wider">Deal Rate</Text>
-            <Text className="text-sm font-black text-primary">
+          <View
+            style={{ marginTop: WP("2%"), paddingTop: WP("1%") }}
+            className="flex-col justify-start items-end"
+          >
+            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-primary">
               {formatAmount(deal?.price || 0, currencySymbol)}
+            </Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+              className="font-semibold text-accent capitalize tracking-wider"
+            >
+              Deal Rate
             </Text>
           </View>
         </View>
