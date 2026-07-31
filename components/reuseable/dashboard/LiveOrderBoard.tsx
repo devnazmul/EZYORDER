@@ -30,32 +30,32 @@ function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCa
   let containerClass = "";
   let textClass = "";
   let iconName: keyof typeof MaterialIcons.glyphMap = "notifications-none";
-  let iconColor = COLORS.info;
+  let iconColor: string = COLORS.info;
 
   if (type === "new") {
     containerClass =
-      "bg-blue-500/10 border-l-4 border-blue-500 flex-row justify-between items-center rounded-r-xl";
-    textClass = "font-bold text-blue-800 tracking-wider";
+      "bg-[#2563eb12] border-b-4 border-[#2563eb] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#1d4ed8] tracking-wider capitalize";
     iconName = "notifications-none";
     iconColor = "#2563eb";
   } else if (type === "preparing") {
     containerClass =
-      "bg-orange-500/10 border-l-4 border-orange-500 flex-row justify-between items-center rounded-r-xl";
-    textClass = "font-bold text-orange-800 tracking-wider";
+      "bg-[#d9770612] border-b-4 border-[#d97706] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#b45309] tracking-wider capitalize";
     iconName = "schedule";
-    iconColor = "#f97316";
+    iconColor = "#d97706";
   } else if (type === "completed") {
     containerClass =
-      "bg-gray-500/10 border-l-4 border-gray-500 flex-row justify-between items-center rounded-r-xl opacity-70";
-    textClass = "font-bold text-gray-800 tracking-wider";
+      "bg-[#47556912] border-b-4 border-[#475569] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#334155] tracking-wider capitalize";
     iconName = "history";
-    iconColor = "#4b5563";
+    iconColor = "#475569";
   } else if (type === "unpaid") {
     containerClass =
-      "bg-pink-500/10 border-l-4 border-pink-500 flex-row justify-between items-center rounded-r-xl";
-    textClass = "font-bold text-pink-800 tracking-wider";
+      "bg-[#db277712] border-b-4 border-[#db2777] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#be185d] tracking-wider capitalize";
     iconName = "history";
-    iconColor = "#ec4899";
+    iconColor = "#db2777";
   }
 
   const handlePress = () => {
