@@ -5,20 +5,12 @@ import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView"
 import ToggleBar from "@/components/reuseable/ToggleBar";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/context/DataContext";
-import {
-  useSalesByItemQuery,
-  useSalesByOrderTypeQuery,
-  useSalesDailySummaryQuery,
-  useSalesHourlyQuery,
-  useSalesSummaryQuery,
-  useSalesTrendQuery,
-} from "@/hooks/useReportsQueries";
 import { formatDate } from "@/utils/formatDate";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { useResponsiveScreen, WP } from "@/utils/getResponsiveSizes";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SparklineChart from "../../components/SparklineChart";
 import RevenueByOrderTypeCard from "../components/RevenueByOrderTypeCard";
@@ -28,10 +20,18 @@ import SalesDailyList from "../components/SalesDailyList";
 import SalesHourlyList from "../components/SalesHourlyList";
 import SalesItemList from "../components/SalesItemList";
 import SalesSummaryListCard from "../components/SalesSummaryListCard";
-import TopProductsList from "../components/TopProductsList";
 import SalesDailyListSkeleton from "../components/skeletons/SalesDailyListSkeleton";
-import SalesItemListSkeleton from "../components/skeletons/SalesItemListSkeleton";
 import SalesHourlyListSkeleton from "../components/skeletons/SalesHourlyListSkeleton";
+import SalesItemListSkeleton from "../components/skeletons/SalesItemListSkeleton";
+import TopProductsList from "../components/TopProductsList";
+import {
+  useSalesByItemQuery,
+  useSalesByOrderTypeQuery,
+  useSalesDailySummaryQuery,
+  useSalesHourlyQuery,
+  useSalesSummaryQuery,
+  useSalesTrendQuery,
+} from "../hooks/queries/useReportsQueries";
 
 // Helper: Calculate Date Period Ranges aligned with calendar boundaries
 const getDateRange = (period: string) => {

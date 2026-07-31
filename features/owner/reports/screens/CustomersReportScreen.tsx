@@ -5,13 +5,13 @@ import PageTitle from "@/components/reuseable/PageTitle";
 import SearchBar from "@/components/reuseable/SearchBar";
 import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
-import { useCustomersQuery } from "@/hooks/useReportsQueries";
 import { HP, WP } from "@/utils/getResponsiveSizes";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomerCard from "../components/CustomerCard";
 import CustomerCardSkeleton from "../components/skeletons/CustomerCardSkeleton";
+import { useCustomersQuery } from "../hooks/queries/useReportsQueries";
 
 const DEFAULT_FILTERS = {
   frequency_visit: ["all"],
