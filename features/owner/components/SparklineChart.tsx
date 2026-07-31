@@ -54,7 +54,7 @@ export default function SparklineChart({
   const areaD = `${pathD} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
 
   return (
-    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
       <Defs>
         <LinearGradient id={gradientId} x1={0} y1={0} x2={0} y2={height} gradientUnits="userSpaceOnUse">
           <Stop offset="0%" stopColor={strokeColor} stopOpacity={0.8} />

@@ -109,7 +109,7 @@ export default function KpiCard({
           </Text>
         </View>
         <View className="flex-row items-end justify-between">
-          <View>
+          <View className={`flex-1 ${rightElement ? "mr-2 max-w-[45%]" : ""}`}>
             <Text
               style={{ fontSize: getResponsiveFontSize("xl") }}
               className={`font-bold mt-1 ${
@@ -156,7 +156,9 @@ export default function KpiCard({
           </View>
 
           {/* Right Element Slot */}
-          {rightElement ? <View className="justify-end items-end">{rightElement}</View> : null}
+          {rightElement ? (
+            <View className="justify-end items-end flex-1 max-w-[49%]">{rightElement}</View>
+          ) : null}
         </View>
       </View>
     </LinearGradient>
