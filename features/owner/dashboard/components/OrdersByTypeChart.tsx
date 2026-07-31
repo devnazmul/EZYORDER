@@ -1,10 +1,11 @@
 import EmptyState from "@/components/reuseable/EmptyState";
 import ActionCard from "@/components/reuseable/cards/ActionCard";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { getOrderTypeColor } from "@/utils/orderTypeColors";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
-import { getOrderTypeColor } from "@/utils/orderTypeColors";
 import OrdersByTypeChartSkeleton from "./skeletons/OrdersByTypeChartSkeleton";
 
 interface OrderTypeItem {
@@ -82,12 +83,22 @@ export default function OrdersByTypeChart({
       ) : (
         <View className="flex-row items-center justify-between px-2 py-1">
           {/* Custom SVG Donut Pie Chart */}
-          <View className="w-24 h-24 items-center justify-center relative">
-            <View className="absolute z-10 w-24 h-24 items-center justify-center pointer-events-none">
-              <Text className="text-xs font-extrabold text-neutral">{total}</Text>
-              <Text className="text-[8px] text-accent font-bold capitalize tracking-wider">Orders</Text>
+          <View
+            style={{ width: WP("25%"), height: WP("25%") }}
+            className=" items-center justify-center relative"
+          >
+            <View className="absolute z-10 items-center justify-center pointer-events-none">
+              <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-extrabold text-neutral">
+                {total}
+              </Text>
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+                className="text-accent font-bold capitalize tracking-wider"
+              >
+                Orders
+              </Text>
             </View>
-            <Svg width={135} height={135} viewBox="0 0 96 96">
+            <Svg width={WP("32%")} height={WP("32%")} viewBox="0 0 96 96">
               {/* Background Base Ring */}
               <Circle
                 cx="48"
@@ -128,7 +139,7 @@ export default function OrdersByTypeChart({
           </View>
 
           {/* List Legend items with percentages */}
-          <View className="flex-1 ml-6 gap-y-2">
+          <View style={{ marginLeft: WP("5%") }} className="flex-1 gap-y-2">
             {sortedOrdersByType.map((t, index) => {
               const countVal = t.value || 0;
               const percent = total > 0 ? ((countVal / total) * 100).toFixed(0) : "0";
@@ -139,14 +150,26 @@ export default function OrdersByTypeChart({
                   key={index}
                   onPress={() => handleItemPress(t.name)}
                   activeOpacity={0.7}
-                  className="flex-row items-center justify-between w-[90%] py-0.5 mx-auto"
+                  className="flex-row items-center justify-between py-0.5 w-[90%] mx-auto"
                 >
-                  <View className="flex-row items-center gap-1.5">
+                  <View className="flex-row items-center gap-1.5 flex-1 mr-1">
                     <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                    <Text className="text-xs font-medium text-neutral capitalize">{t.name}</Text>
-                    <Text className="text-xs font-medium text-neutral/40">({percent}%)</Text>
+                    <Text
+                      style={{ fontSize: getResponsiveFontSize("xs") }}
+                      className="font-medium text-neutral capitalize truncate flex-1"
+                    >
+                      {t.name}
+                    </Text>
+                    <Text
+                      style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+                      className="font-medium text-neutral/40"
+                    >
+                      ({percent}%)
+                    </Text>
                   </View>
-                  <Text className="text-xs font-bold text-neutral">{countVal}</Text>
+                  <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral">
+                    {countVal}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
