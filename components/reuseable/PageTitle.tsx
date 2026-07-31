@@ -34,7 +34,7 @@ export default function PageTitle({ title, icon, badgeCount, description }: Page
           )}
         </View>
         {description !== undefined && description && (
-          <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="text-accent">
+          <Text numberOfLines={2} style={{ fontSize: getResponsiveFontSize("sm") }} className="text-accent">
             {description}
           </Text>
         )}
