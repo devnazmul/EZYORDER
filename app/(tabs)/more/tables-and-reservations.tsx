@@ -2,6 +2,7 @@ import PageTitle from "@/components/reuseable/PageTitle";
 import ToggleBar from "@/components/reuseable/ToggleBar";
 import ReservationsView from "@/components/tables-reservations/ReservationsView";
 import TablesView from "@/components/tables-reservations/TablesView";
+import { WP } from "@/utils/getResponsiveSizes";
 import React, { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,27 +16,30 @@ export default function TablesAndReservations() {
   const [activeTab, setActiveTab] = useState("tables");
   const isTablesTab = activeTab === "tables";
 
+  const header = (
+    <View className="pt-4">
+      {/* Reusable Page Title */}
+      <PageTitle
+        title="Tables & Reservations"
+        icon="table-restaurant"
+        description={`See details of ${activeTab == "tables" ? "Tables" : "Reservations"}`}
+      />
+
+      {/* Toggle Bar */}
+      <ToggleBar
+        options={TOGGLE_OPTIONS}
+        activeId={activeTab}
+        onSelect={setActiveTab}
+        containerClassName="mb-6"
+      />
+    </View>
+  );
+
   return (
-    <SafeAreaView edges={["left", "right", "bottom"]} className="flex-1 bg-base-100">
-
-      <View className="flex-1 px-4 py-4">
-        {/* Reusable Page Title */}
-        <PageTitle title="Tables & Reservations" icon="table-restaurant" />
-
-        {/* Toggle Bar */}
-        <ToggleBar
-          options={TOGGLE_OPTIONS}
-          activeId={activeTab}
-          onSelect={setActiveTab}
-          containerClassName="mb-6"
-        />
-
+    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
+      <View style={{ paddingHorizontal: WP("4%") }} className="flex-1">
         {/* Conditional Content */}
-        {isTablesTab ? (
-          <TablesView />
-        ) : (
-          <ReservationsView />
-        )}
+        {isTablesTab ? <TablesView header={header} /> : <ReservationsView header={header} />}
       </View>
     </SafeAreaView>
   );

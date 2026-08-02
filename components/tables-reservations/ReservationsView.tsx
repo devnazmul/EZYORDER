@@ -3,9 +3,11 @@ import FilterDrawer from "@/components/reuseable/FilterDrawer";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import { useAuth } from "@/context/AuthContext";
 import { useReservationsQuery } from "@/hooks/useTableReservationQueries";
+import { getResponsiveFontSize, HP } from "@/utils/getResponsiveSizes";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import ReservationCard from "./ReservationCard";
+import ReservationCardSkeleton from "./ReservationCardSkeleton";
 
 const STATUS_OPTIONS = [
   { id: "all", label: "All Statuses" },
@@ -27,7 +29,11 @@ const DEFAULT_FILTERS = {
   sort_order: "desc",
 };
 
-export default function ReservationsView() {
+interface ReservationsViewProps {
+  header?: React.ReactNode;
+}
+
+export default function ReservationsView({ header }: ReservationsViewProps) {
   const { user, token } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
@@ -58,6 +64,7 @@ export default function ReservationsView() {
   const {
     data: reservationsResponse,
     isLoading: isReservationsLoading,
+    isFetching: isReservationsFetching,
     refetch: refetchReservations,
   } = useReservationsQuery(token || "", apiParams);
 
@@ -117,11 +124,14 @@ export default function ReservationsView() {
     <RefreshableScrollView
       onRefresh={handleRefresh}
       className="flex-1"
-      contentContainerStyle={{ paddingBottom: 80 }}
+      contentContainerStyle={{ paddingBottom: HP("2%") }}
     >
+      {header}
       {/* Filter Trigger Row */}
-      <View className="flex-row items-center gap-2 mb-4 px-1 ml-auto mr-0">
-        <Text className="text-xs font-bold text-neutral">Filters:</Text>
+      <View className="mb-1 -mt-3 flex-row items-center gap-3 ml-auto mr-0">
+        <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral">
+          Filters:
+        </Text>
         <FilterDrawer
           fields={filterFields}
           values={filterValues}
@@ -131,38 +141,50 @@ export default function ReservationsView() {
       </View>
 
       {/* Reservations Section Title Header */}
-      <View className="flex-row items-center justify-between mb-4 px-1">
+      <View className="flex-row items-center justify-between mb-2 px-1">
         {activeFilterCount > 0 && (
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">
+          <Text
+            style={{ fontSize: getResponsiveFontSize("xs") }}
+            className="font-bold text-accent capitalize tracking-wider"
+          >
             Matching {reservations.length} Bookings
           </Text>
         )}
       </View>
 
       {/* Loading & List View */}
-      {isReservationsLoading ? (
-        <View className="flex-1 items-center justify-center py-20">
-          <ActivityIndicator size="large" color="#DC2D2A" />
-          <Text className="mt-3 text-xs font-semibold text-accent">Loading reservations...</Text>
+      {isReservationsLoading || isReservationsFetching ? (
+        <View key="loading" className="flex-1">
+          <FlatList
+            data={Array.from({ length: 4 }, (_, i) => ({ id: `skeleton-${i}` }))}
+            keyExtractor={(item) => item.id}
+            scrollEnabled={false}
+            contentContainerClassName="gap-2"
+            renderItem={() => <ReservationCardSkeleton />}
+          />
         </View>
       ) : reservations.length === 0 ? (
-        <EmptyState
-          icon="event-busy"
-          title="No Reservations Found"
-          description={
-            activeFilterCount > 0
-              ? "No reservations match your filter criteria."
-              : "There are no reservations booked yet."
-          }
-        />
+        <View key="empty" className="flex-1">
+          <EmptyState
+            icon="event-busy"
+            title="No Reservations Found"
+            description={
+              activeFilterCount > 0
+                ? "No reservations match your filter criteria."
+                : "There are no reservations booked yet."
+            }
+          />
+        </View>
       ) : (
-        <FlatList
-          data={reservations}
-          keyExtractor={(item) => String(item.id)}
-          scrollEnabled={false}
-          contentContainerStyle={{ gap: 12 }}
-          renderItem={({ item }) => <ReservationCard reservation={item} />}
-        />
+        <View key="loaded" className="flex-1">
+          <FlatList
+            data={reservations}
+            keyExtractor={(item) => String(item.id)}
+            scrollEnabled={false}
+            contentContainerClassName="gap-2"
+            renderItem={({ item }) => <ReservationCard reservation={item} />}
+          />
+        </View>
       )}
     </RefreshableScrollView>
   );

@@ -1,4 +1,5 @@
 import { formatDateTime, getInitials } from "@/utils/formatters";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
@@ -47,23 +48,24 @@ export default function ReservationCard({ reservation }: ReservationCardProps) {
       : "text-primary";
 
   return (
-    <View className="bg-base-300 border border-base-200 rounded-xl p-4 shadow-sm flex-col gap-3">
+    <View style={{ padding: WP("3.5%"), gap: WP("2.5%") }} className="bg-base-300 border border-base-200 rounded-xl shadow-sm flex-col">
       {/* Top: Avatar + Name/Phone + Reservation Status */}
       <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-3 flex-1 mr-2">
+        <View style={{ gap: WP("3%") }} className="flex-row items-center flex-1 mr-2">
           <View
-            className={`w-10 h-10 rounded-full ${avatarBg} items-center justify-center`}
+            style={{ width: WP("9.5%"), height: WP("9.5%"), borderRadius: 9999 }}
+            className={`${avatarBg} items-center justify-center`}
           >
-            <Text className={`text-sm font-bold ${avatarTextColor}`}>
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className={`font-bold ${avatarTextColor}`}>
               {initials}
             </Text>
           </View>
           <View className="flex-1">
-            <Text className="text-sm font-bold text-neutral" numberOfLines={1}>
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral" numberOfLines={1}>
               {reservation.customer_name || "Guest"}
             </Text>
             {reservation.phone ? (
-              <Text className="text-xs text-accent mt-0.5" numberOfLines={1}>
+              <Text style={{ fontSize: getResponsiveFontSize("xs") - 1 }} className="text-accent mt-0.5" numberOfLines={1}>
                 {reservation.phone}
               </Text>
             ) : null}
@@ -73,19 +75,19 @@ export default function ReservationCard({ reservation }: ReservationCardProps) {
       </View>
 
       {/* Middle: Details row (Guests Count & Schedule Time) */}
-      <View className="flex-row items-center gap-4">
+      <View style={{ gap: WP("4%") }} className="flex-row items-center">
         {reservation.guests_count !== undefined && (
-          <View className="flex-row items-center gap-1.5">
-            <MaterialIcons name="groups" size={16} color="#6E6E6E" />
-            <Text className="text-xs font-semibold text-accent">
+          <View style={{ gap: WP("1.5%") }} className="flex-row items-center">
+            <MaterialIcons name="groups" size={WP("4.5%")} color="#6E6E6E" />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
               {reservation.guests_count} People
             </Text>
           </View>
         )}
         {dateTimeStr !== "" && (
-          <View className="flex-row items-center gap-1.5">
-            <MaterialIcons name="schedule" size={16} color="#6E6E6E" />
-            <Text className="text-xs font-semibold text-accent">
+          <View style={{ gap: WP("1.5%") }} className="flex-row items-center">
+            <MaterialIcons name="schedule" size={WP("4.5%")} color="#6E6E6E" />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
               {dateTimeStr}
             </Text>
           </View>
@@ -94,10 +96,10 @@ export default function ReservationCard({ reservation }: ReservationCardProps) {
 
       {/* Bottom: Nested Table Info (if assigned) */}
       {reservation.table && (
-        <View className="pt-3 border-t border-base-100 flex-row items-center justify-between">
-          <View className="flex-row items-center gap-1.5">
-            <MaterialIcons name="table-restaurant" size={14} color="#6E6E6E" />
-            <Text className="text-xs font-bold text-neutral">
+        <View style={{ paddingTop: WP("3%"), marginTop: WP("1%") }} className="border-t border-base-100 flex-row items-center justify-between">
+          <View style={{ gap: WP("1.5%") }} className="flex-row items-center">
+            <MaterialIcons name="table-restaurant" size={WP("4%")} color="#6E6E6E" />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral">
               {reservation.table.table_number && reservation.table.table_number !== "Table"
                 ? reservation.table.table_number
                 : `Table ${String(reservation.table.table_no ?? "").padStart(2, "0")}`}

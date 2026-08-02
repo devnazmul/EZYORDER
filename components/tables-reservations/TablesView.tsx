@@ -1,4 +1,4 @@
-import KpiCard from "@/components/reports/KpiCard";
+import KpiCard from "@/components/reuseable/dashboard/KpiCard";
 import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer from "@/components/reuseable/FilterDrawer";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
@@ -6,9 +6,11 @@ import SearchBar from "@/components/reuseable/SearchBar";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAllTablesQuery, useTableMatrixQuery } from "@/hooks/useTableReservationQueries";
+import { getResponsiveFontSize, HP } from "@/utils/getResponsiveSizes";
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import TableCard from "./TableCard";
+import TableCardSkeleton from "./TableCardSkeleton";
 
 const STATUS_CHIPS = [
   { id: "all", label: "All Statuses" },
@@ -37,7 +39,11 @@ const DEFAULT_FILTERS = {
   capacity: "",
 };
 
-export default function TablesView() {
+interface TablesViewProps {
+  header?: React.ReactNode;
+}
+
+export default function TablesView({ header }: TablesViewProps) {
   const { token } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,6 +85,7 @@ export default function TablesView() {
   const {
     data: tablesData,
     isLoading: isTablesLoading,
+    isFetching: isTablesFetching,
     refetch: refetchTables,
   } = useAllTablesQuery(token || "", apiParams);
 
@@ -86,6 +93,7 @@ export default function TablesView() {
   const {
     data: matrixData,
     isLoading: isMatrixLoading,
+    isFetching: isMatrixFetching,
     refetch: refetchMatrix,
   } = useTableMatrixQuery(token || "");
 
@@ -151,63 +159,80 @@ export default function TablesView() {
     setFilterValues(DEFAULT_FILTERS);
   };
 
-  const isLoading = isTablesLoading || isMatrixLoading;
+  const isMatrixLoadingOrFetching = isMatrixLoading || isMatrixFetching;
 
   return (
     <RefreshableScrollView
       onRefresh={handleRefresh}
       className="flex-1"
-      contentContainerStyle={{ paddingBottom: 80 }}
+      contentContainerStyle={{ paddingBottom: HP("2%") }}
     >
+      {header}
       {/* KPI Stats Grid */}
-      {matrix && (
-        <View className="mb-6">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest px-1 mb-3">
-            Table Overview
-          </Text>
-          <View className="flex-row flex-wrap gap-3">
-            <View className="flex-1 min-w-[45%]">
-              <KpiCard
-                title="Total Tables"
-                value={String(matrix.total ?? 0)}
-                iconName="table-restaurant"
-                variant="dark"
-                gradientColors={["#2d3e56", "#1b283c"]}
-              />
+      {(matrix || isMatrixLoadingOrFetching) && (
+        <View className="mb-3">
+          <View className="flex-col gap-2">
+            {/* Row 1 */}
+            <View className="flex-row flex-1 gap-2">
+              <View className="flex-1">
+                <KpiCard
+                  title="Total Tables"
+                  value={String(matrix?.total ?? 0)}
+                  icon="restaurant"
+                  variant="dark"
+                  iconBgColor="#14B8A6"
+                  iconColor="#ffffff"
+                  gradientColors={["#2d3e56", "#1b283c"]}
+                  loading={isMatrixLoadingOrFetching}
+                />
+              </View>
+              <View className="flex-1">
+                <KpiCard
+                  title="Occupied"
+                  value={String(matrix?.occupied ?? 0)}
+                  icon="cancel"
+                  variant="dark"
+                  iconBgColor="#F43F5E"
+                  iconColor="#ffffff"
+                  gradientColors={["#1e4f43", "#11322b"]}
+                  loading={isMatrixLoadingOrFetching}
+                />
+              </View>
             </View>
-            <View className="flex-1 min-w-[45%]">
-              <KpiCard
-                title="Occupied"
-                value={String(matrix.occupied ?? 0)}
-                iconName="no-meals"
-                variant="dark"
-                gradientColors={["#1e4f43", "#11322b"]}
-              />
-            </View>
-            <View className="flex-1 min-w-[45%]">
-              <KpiCard
-                title="Reserved"
-                value={String(matrix.reserved ?? 0)}
-                iconName="event-seat"
-                variant="dark"
-                gradientColors={["#4c3590", "#2e1e5c"]}
-              />
-            </View>
-            <View className="flex-1 min-w-[45%]">
-              <KpiCard
-                title="Available"
-                value={String(matrix.free ?? 0)}
-                iconName="check-circle"
-                variant="dark"
-                gradientColors={["#6d242b", "#3d1115"]}
-              />
+
+            {/* Row 2 */}
+            <View className="flex-row flex-1 gap-2">
+              <View className="flex-1">
+                <KpiCard
+                  title="Reserved"
+                  value={String(matrix?.reserved ?? 0)}
+                  icon="event-seat"
+                  variant="dark"
+                  iconBgColor="#8B5CF6"
+                  iconColor="#ffffff"
+                  gradientColors={["#4c3590", "#2e1e5c"]}
+                  loading={isMatrixLoadingOrFetching}
+                />
+              </View>
+              <View className="flex-1">
+                <KpiCard
+                  title="Available"
+                  value={String(matrix?.free ?? 0)}
+                  icon="check-circle"
+                  variant="dark"
+                  iconBgColor="#10B981"
+                  iconColor="#ffffff"
+                  gradientColors={["#6d242b", "#3d1115"]}
+                  loading={isMatrixLoadingOrFetching}
+                />
+              </View>
             </View>
           </View>
         </View>
       )}
 
       {/* Search & Filter Header Row */}
-      <View className="flex-row items-center gap-3 mb-4">
+      <View className="flex-row items-center gap-2 mb-3">
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -225,42 +250,62 @@ export default function TablesView() {
       {/* Active Filter count label */}
       {(searchQuery.trim() !== "" || activeFilterCount > 0) && (
         <View className="flex-row items-center justify-between mb-4 px-1">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">
+          <Text
+            style={{ fontSize: getResponsiveFontSize("xs") }}
+            className="font-bold text-accent capitalize tracking-wider"
+          >
             Matching {tables.length} Tables
           </Text>
         </View>
       )}
 
       {/* Table Cards Grid */}
-      {isTablesLoading ? (
-        <View className="flex-1 items-center justify-center py-20">
-          <ActivityIndicator size="large" color="#DC2D2A" />
-          <Text className="mt-3 text-xs font-semibold text-accent">Loading tables...</Text>
+      {isTablesLoading || isTablesFetching ? (
+        <View key="loading" className="flex-1">
+          <FlatList
+            data={Array.from({ length: 6 }, (_, i) => ({ id: `skeleton-${i}` }))}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+
+            contentContainerClassName="gap-2"
+            columnWrapperClassName="gap-2"
+            scrollEnabled={false}
+            renderItem={() => (
+              <View className="flex-1">
+                <TableCardSkeleton />
+              </View>
+            )}
+          />
         </View>
       ) : tables.length === 0 ? (
-        <EmptyState
-          icon="table-restaurant"
-          title="No Tables Found"
-          description={
-            searchQuery || activeFilterCount > 0
-              ? "No tables found matching the selected filter criteria."
-              : "No restaurant tables have been configured yet."
-          }
-        />
+        <View key="empty" className="flex-1">
+          <EmptyState
+            icon="table-restaurant"
+            title="No Tables Found"
+            description={
+              searchQuery || activeFilterCount > 0
+                ? "No tables found matching the selected filter criteria."
+                : "No restaurant tables have been configured yet."
+            }
+          />
+        </View>
       ) : (
-        <FlatList
-          data={tables}
-          keyExtractor={(item) => String(item.id)}
-          numColumns={2}
-          columnWrapperStyle={{ gap: 12 }}
-          contentContainerStyle={{ gap: 12 }}
-          scrollEnabled={false}
-          renderItem={({ item }) => (
-            <View className="flex-1">
-              <TableCard table={item} />
-            </View>
-          )}
-        />
+        <View key="loaded" className="flex-1">
+          <FlatList
+            data={tables}
+            keyExtractor={(item) => String(item.id)}
+            numColumns={2}
+
+            columnWrapperClassName="gap-2"
+            contentContainerClassName="gap-2"
+            scrollEnabled={false}
+            renderItem={({ item }) => (
+              <View className="flex-1">
+                <TableCard table={item} />
+              </View>
+            )}
+          />
+        </View>
       )}
     </RefreshableScrollView>
   );
