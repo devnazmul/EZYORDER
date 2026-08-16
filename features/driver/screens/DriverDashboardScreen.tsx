@@ -90,6 +90,7 @@ export default function DriverDashboardScreen() {
         onRefresh={handleRefresh}
         contentContainerStyle={{ paddingBottom: 60, gap: 10 }}
         showsVerticalScrollIndicator={false}
+        className="px-4"
       >
         <WelcomeHeader user={activeUser} />
 
