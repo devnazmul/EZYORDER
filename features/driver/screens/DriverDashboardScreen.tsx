@@ -20,7 +20,7 @@ import {
 import { DriverOrder } from "../types";
 
 export default function DriverDashboardScreen() {
-  const { token, user, logout } = useAuth();
+  const { token, user } = useAuth();
 
   // Queries
   const {
@@ -38,9 +38,13 @@ export default function DriverDashboardScreen() {
   } = useDriverActiveAssignedOrdersQuery(token || "");
 
   const isStatsLoading = isLoadingStats || isFetchingStats || !statsData;
-  const isActiveOrdersLoading = isLoadingActiveOrders || isFetchingActiveOrders || !activeOrders;
+  const isActiveOrdersLoading =
+    isLoadingActiveOrders || isFetchingActiveOrders || !activeOrders;
 
-  const { data: profileData, refetch: refetchProfile } = useOwnerProfileQuery(token || "", user?.id || null);
+  const { data: profileData, refetch: refetchProfile } = useOwnerProfileQuery(
+    token || "",
+    user?.id || null,
+  );
 
   const profileUser = useMemo(() => {
     if (!profileData) return null;
@@ -49,9 +53,12 @@ export default function DriverDashboardScreen() {
 
   const activeUser = profileUser || user;
 
-  const [selectedOrderDetails, setSelectedOrderDetails] = useState<DriverOrder | null>(null);
+  const [selectedOrderDetails, setSelectedOrderDetails] =
+    useState<DriverOrder | null>(null);
 
-  const updateOrderStatusMutation = useUpdateDriverOrderStatusMutation(token || "");
+  const updateOrderStatusMutation = useUpdateDriverOrderStatusMutation(
+    token || "",
+  );
 
   const currencySymbol = useMemo(() => {
     if (statsData) {
@@ -62,13 +69,18 @@ export default function DriverDashboardScreen() {
   const filteredActiveOrders = useMemo(() => {
     if (!activeOrders) return [];
     return activeOrders.filter(
-      (order: DriverOrder) => order.delivery_status !== "delivered" && order.status !== "delivered",
+      (order: DriverOrder) =>
+        order.delivery_status !== "delivered" && order.status !== "delivered",
     );
   }, [activeOrders]);
 
   // Re-fetch all queries on pull-to-refresh
   const handleRefresh = async () => {
-    await Promise.all([refetchStats(), refetchActiveOrders(), refetchProfile()]);
+    await Promise.all([
+      refetchStats(),
+      refetchActiveOrders(),
+      refetchProfile(),
+    ]);
   };
 
   const orderBoard = useMemo(() => {
@@ -109,8 +121,14 @@ export default function DriverDashboardScreen() {
         />
 
         <View className="bg-base-300 p-4 rounded-3xl flex-1">
-          <Text className="mb-4 font-bold capitalize opacity-80">Live Today's Orders</Text>
-          <LiveOrderBoard liveOrderBoard={orderBoard} isLoading={isStatsLoading} role="driver" />
+          <Text className="mb-4 font-bold capitalize opacity-80">
+            Live Today's Orders
+          </Text>
+          <LiveOrderBoard
+            liveOrderBoard={orderBoard}
+            isLoading={isStatsLoading}
+            role="driver"
+          />
         </View>
 
         <AssignedOrdersFeed
