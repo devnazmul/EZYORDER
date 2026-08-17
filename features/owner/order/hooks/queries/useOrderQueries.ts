@@ -1,6 +1,10 @@
-import { QUERY_KEYS } from "@/config/queryKeys";
+import { QUERY_KEYS } from "@/constants/queryKeys";
 import { useQuery } from "@tanstack/react-query";
-import { getAllOrders, getPendingOrders, getTodayOrders } from "../../apis/orders";
+import {
+  getAllOrders,
+  getPendingOrders,
+  getTodayOrders,
+} from "../../apis/orders";
 
 export const useTodayOrdersQuery = (
   token: string,
@@ -37,8 +41,16 @@ export const usePendingOrdersQuery = (
   options?: { enabled?: boolean },
 ) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.ORDERS, "pending", restaurantId, perPage, page, orderId],
-    queryFn: () => getPendingOrders(token, restaurantId, perPage, page, orderId),
+    queryKey: [
+      QUERY_KEYS.ORDERS,
+      "pending",
+      restaurantId,
+      perPage,
+      page,
+      orderId,
+    ],
+    queryFn: () =>
+      getPendingOrders(token, restaurantId, perPage, page, orderId),
     enabled: !!token && !!restaurantId && (options?.enabled ?? true),
   });
 };

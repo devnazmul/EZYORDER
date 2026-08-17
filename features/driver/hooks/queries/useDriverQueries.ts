@@ -1,10 +1,10 @@
-import { QUERY_KEYS } from "@/config/queryKeys";
+import { QUERY_KEYS } from "@/constants/queryKeys";
 import { useQuery } from "@tanstack/react-query";
 import {
-  getDriverDashboardStats,
   getDriverActiveAssignedOrders,
-  getOrderDetailById,
+  getDriverDashboardStats,
   getDriverOrdersList,
+  getOrderDetailById,
 } from "../../apis/driver";
 
 export const useDriverDashboardStatsQuery = (token: string) => {
@@ -23,7 +23,11 @@ export const useDriverActiveAssignedOrdersQuery = (token: string) => {
   });
 };
 
-export const useOrderDetailQuery = (token: string, orderId: string | number, enabled: boolean) => {
+export const useOrderDetailQuery = (
+  token: string,
+  orderId: string | number,
+  enabled: boolean,
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.ORDER_DETAIL, orderId],
     queryFn: () => getOrderDetailById(token, orderId),
@@ -31,11 +35,13 @@ export const useOrderDetailQuery = (token: string, orderId: string | number, ena
   });
 };
 
-export const useDriverOrdersListQuery = (token: string, params: Record<string, any> = {}) => {
+export const useDriverOrdersListQuery = (
+  token: string,
+  params: Record<string, any> = {},
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.DRIVER_ORDERS_LIST, params],
     queryFn: () => getDriverOrdersList(token, params),
     enabled: !!token,
   });
 };
-

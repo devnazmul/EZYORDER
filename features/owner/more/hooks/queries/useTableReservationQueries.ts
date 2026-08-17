@@ -1,11 +1,21 @@
-import { getReservations, getSingleReservation } from "@/features/owner/more/apis/reservations";
-import { getAllTables, getSingleTable, getTableMatrix } from "@/features/owner/more/apis/tables";
-import { QUERY_KEYS } from "@/config/queryKeys";
+import { QUERY_KEYS } from "@/constants/queryKeys";
+import {
+  getReservations,
+  getSingleReservation,
+} from "@/features/owner/more/apis/reservations";
+import {
+  getAllTables,
+  getSingleTable,
+  getTableMatrix,
+} from "@/features/owner/more/apis/tables";
 import { useQuery } from "@tanstack/react-query";
 
 // ─── TABLE HOOKS ────────────────────────────────────────────────
 
-export const useAllTablesQuery = (token: string, params: Record<string, any> = {}) => {
+export const useAllTablesQuery = (
+  token: string,
+  params: Record<string, any> = {},
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.TABLES, params],
     queryFn: () => getAllTables(token, params),
@@ -31,7 +41,10 @@ export const useSingleTableQuery = (token: string, id: number | string) => {
 
 // ─── RESERVATION HOOKS ─────────────────────────────────────────
 
-export const useReservationsQuery = (token: string, params: Record<string, any> = {}) => {
+export const useReservationsQuery = (
+  token: string,
+  params: Record<string, any> = {},
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.RESERVATIONS, params],
     queryFn: () => getReservations(token, params),
@@ -39,7 +52,10 @@ export const useReservationsQuery = (token: string, params: Record<string, any> 
   });
 };
 
-export const useSingleReservationQuery = (token: string, id: number | string) => {
+export const useSingleReservationQuery = (
+  token: string,
+  id: number | string,
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.SINGLE_RESERVATION, id],
     queryFn: () => getSingleReservation(token, id),

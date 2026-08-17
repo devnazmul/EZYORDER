@@ -1,8 +1,14 @@
-import { getRestaurantPartners, getDailyOrderPartnerSales } from "@/features/owner/more/apis/partners";
-import { QUERY_KEYS } from "@/config/queryKeys";
+import { QUERY_KEYS } from "@/constants/queryKeys";
+import {
+  getDailyOrderPartnerSales,
+  getRestaurantPartners,
+} from "@/features/owner/more/apis/partners";
 import { useQuery } from "@tanstack/react-query";
 
-export const useRestaurantPartnersQuery = (token: string, restaurantId: number | string) => {
+export const useRestaurantPartnersQuery = (
+  token: string,
+  restaurantId: number | string,
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.PARTNERS, restaurantId],
     queryFn: () => getRestaurantPartners(token, restaurantId),
@@ -10,7 +16,10 @@ export const useRestaurantPartnersQuery = (token: string, restaurantId: number |
   });
 };
 
-export const useDailyOrderPartnerSalesQuery = (token: string, restaurantId: number | string) => {
+export const useDailyOrderPartnerSalesQuery = (
+  token: string,
+  restaurantId: number | string,
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.DAILY_ORDER_PARTNER_SALES, restaurantId],
     queryFn: () => getDailyOrderPartnerSales(token, restaurantId),

@@ -1,8 +1,17 @@
-import { getDishes, getMenuAll, getMenuMatrix, getSingleMenu } from "@/features/owner/more/apis/menu";
-import { QUERY_KEYS } from "@/config/queryKeys";
+import { QUERY_KEYS } from "@/constants/queryKeys";
+import {
+  getDishes,
+  getMenuAll,
+  getMenuMatrix,
+  getSingleMenu,
+} from "@/features/owner/more/apis/menu";
 import { useQuery } from "@tanstack/react-query";
 
-export const useMenuAllQuery = (token: string, restaurantId: string, params: Record<string, any> = {}) => {
+export const useMenuAllQuery = (
+  token: string,
+  restaurantId: string,
+  params: Record<string, any> = {},
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.MENU_ALL, restaurantId, params],
     queryFn: () => getMenuAll(token, restaurantId, params),
