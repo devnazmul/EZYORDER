@@ -18,23 +18,7 @@ const DriverLayout: React.FC = () => {
     return <Redirect href="/(owner)/home" />;
   }
 
-  const renderTabBarLabel =
-    (title: string) =>
-    ({ color }: { color: string }) => (
-      <Text
-        style={{
-          color,
-          fontSize: 10.5,
-          fontWeight: "600",
-          marginTop: 2,
-          textAlign: "center",
-        }}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-      >
-        {title}
-      </Text>
-    );
+
 
   return (
     <Tabs
@@ -63,7 +47,7 @@ const DriverLayout: React.FC = () => {
         name="index"
         options={{
           title: "Dashboard",
-          tabBarLabel: renderTabBarLabel("Dashboard"),
+          tabBarLabel: ({ color }) => <TabBarLabel title="Dashboard" color={color} />,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="dashboard" size={24} color={color} />
           ),
@@ -73,7 +57,7 @@ const DriverLayout: React.FC = () => {
         name="my-orders"
         options={{
           title: "My Orders",
-          tabBarLabel: renderTabBarLabel("My Orders"),
+          tabBarLabel: ({ color }) => <TabBarLabel title="My Orders" color={color} />,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="receipt" size={24} color={color} />
           ),
@@ -85,3 +69,26 @@ const DriverLayout: React.FC = () => {
 
 DriverLayout.displayName = "Driver Layout";
 export default DriverLayout;
+
+interface ITabBarLabelProps {
+  title: string;
+  color: string;
+}
+
+function TabBarLabel({ title, color }: Readonly<ITabBarLabelProps>) {
+  return (
+    <Text
+      style={{
+        color,
+        fontSize: 10.5,
+        fontWeight: "600",
+        marginTop: 2,
+        textAlign: "center",
+      }}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+    >
+      {title}
+    </Text>
+  );
+}

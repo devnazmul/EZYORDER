@@ -123,77 +123,10 @@ export default function ActiveOrderDetailsModal({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 }}
       >
-        {/* Customer Information */}
-        <View className="gap-y-2">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
-            Customer Details
-          </Text>
-          <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
-                <Text className="text-xs text-accent">Name:</Text>
-              </View>
-              <Text className="text-xs font-bold text-neutral">{activeOrder.customer_name || "N/A"}</Text>
-            </View>
-
-            {activeOrder.customer_phone && activeOrder.customer_phone !== "N/A" ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="phone" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Phone:</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(() => {});
-                  }}
-                  activeOpacity={0.7}
-                  className="flex-row items-center"
-                >
-                  <Text className="text-xs text-primary font-bold">(</Text>
-                  <MaterialIcons
-                    name="phone"
-                    size={11}
-                    color="#DC2D2A"
-                    style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
-                  />
-                  <Text className="text-xs text-primary font-bold">) </Text>
-                  <Text className="text-xs text-primary font-bold">{activeOrder.customer_phone}</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
-
-            {activeOrder.customer_note ? (
-              <View className="flex-row items-start justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="chat-bubble-outline" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Customer Note:</Text>
-                </View>
-                <Text className="text-xs font-semibold text-neutral italic max-w-[60%] text-right">
-                  "{activeOrder.customer_note}"
-                </Text>
-              </View>
-            ) : null}
-
-            <View className="flex-row items-start justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
-                <Text className="text-xs text-accent">Address:</Text>
-              </View>
-              <TouchableOpacity
-                onPress={handleDirectGps}
-                activeOpacity={0.7}
-                className="flex-1 ml-4"
-              >
-                <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
-                  {activeOrder.door_no ? `${activeOrder.door_no}, ` : ""}
-                  {activeOrder.customer_address}
-                  {activeOrder.customer_post_code ? ` — ${activeOrder.customer_post_code}` : ""}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        <ActiveCustomerSection
+          activeOrder={activeOrder}
+          handleDirectGps={handleDirectGps}
+        />
 
         {/* Instructions Section */}
         {activeOrder.initial_note ? (
@@ -215,130 +148,13 @@ export default function ActiveOrderDetailsModal({
           currencySymbol={currencySymbol}
         />
 
-        {/* Order Details Section */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Order Details</Text>
-          <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
-            {activeOrder.order_time || activeOrder.created_at ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Order Placed:</Text>
-                </View>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatUtcToLocalTime(activeOrder.order_time || activeOrder.created_at)}
-                </Text>
-              </View>
-            ) : null}
+        <ActiveOrderSection activeOrder={activeOrder} />
 
-            {activeOrder.accepted_at ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="done-all" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Accepted At:</Text>
-                </View>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatUtcToLocalTime(activeOrder.accepted_at)}
-                </Text>
-              </View>
-            ) : null}
-
-            {activeOrder.picked_up_at ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="local-shipping" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Picked Up At:</Text>
-                </View>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatUtcToLocalTime(activeOrder.picked_up_at)}
-                </Text>
-              </View>
-            ) : null}
-
-            {activeOrder.delivery_otp ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="verified" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">OTP Code:</Text>
-                </View>
-                <Text className="text-xs font-bold text-primary">{activeOrder.delivery_otp}</Text>
-              </View>
-            ) : null}
-
-            {activeOrder.remarks ? (
-              <View className="border-t border-base-200 pt-2.5 mt-1">
-                <Text className="text-[10px] font-bold text-neutral capitalize tracking-wider mb-1">
-                  Staff Remarks
-                </Text>
-                <Text className="text-xs text-neutral/70 italic leading-4 bg-white p-2.5 rounded border border-base-200">
-                  {activeOrder.remarks}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </View>
-
-        {/* Bill Summary */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Bill Summary</Text>
-          <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="receipt" size={16} color="#DC2D2A" />
-                <Text className="text-xs text-accent">Subtotal:</Text>
-              </View>
-              <Text className="text-xs font-bold text-neutral">
-                {formatAmount(totalAmount - parseFloat(activeOrder.tip_amount || "0"), currencySymbol)}
-              </Text>
-            </View>
-
-            {parseFloat(activeOrder.discount || "0") > 0 ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="local-offer" size={16} color="#059669" />
-                  <Text className="text-xs text-accent">Discount:</Text>
-                </View>
-                <Text className="text-xs font-bold text-emerald-600">
-                  -{formatAmount(parseFloat(activeOrder.discount), currencySymbol)}
-                </Text>
-              </View>
-            ) : null}
-
-            {parseFloat(activeOrder.tax || "0") > 0 ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="account-balance" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Tax:</Text>
-                </View>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatAmount(parseFloat(activeOrder.tax), currencySymbol)}
-                </Text>
-              </View>
-            ) : null}
-
-            {parseFloat(activeOrder.tip_amount || "0") > 0 ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="volunteer-activism" size={16} color="#DC2D2A" />
-                  <Text className="text-xs text-accent">Driver Tip:</Text>
-                </View>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatAmount(parseFloat(activeOrder.tip_amount), currencySymbol)}
-                </Text>
-              </View>
-            ) : null}
-
-            <View className="border-t border-base-200 pt-2.5 mt-1 flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="payments" size={16} color="#DC2D2A" />
-                <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
-              </View>
-              <Text className="text-base font-bold text-neutral">
-                {formatAmount(totalAmount, currencySymbol)}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <ActiveBillSection
+          activeOrder={activeOrder}
+          totalAmount={totalAmount}
+          currencySymbol={currencySymbol}
+        />
 
         {/* Reusable Payment Handling Component */}
         <PaymentCollectionSection
@@ -352,5 +168,230 @@ export default function ActiveOrderDetailsModal({
         />
       </BottomSheetScrollView>
     </BottomSheet>
+  );
+}
+
+interface ActiveCustomerSectionProps {
+  activeOrder: DriverOrder;
+  handleDirectGps: () => void;
+}
+
+function ActiveCustomerSection({ activeOrder, handleDirectGps }: Readonly<ActiveCustomerSectionProps>) {
+  return (
+    <View className="gap-y-2">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Customer Details
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Name:</Text>
+          </View>
+          <Text className="text-xs font-bold text-neutral">{activeOrder.customer_name || "N/A"}</Text>
+        </View>
+
+        {activeOrder.customer_phone && activeOrder.customer_phone !== "N/A" ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="phone" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Phone:</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(() => {});
+              }}
+              activeOpacity={0.7}
+              className="flex-row items-center"
+            >
+              <Text className="text-xs text-primary font-bold">(</Text>
+              <MaterialIcons
+                name="phone"
+                size={11}
+                color="#DC2D2A"
+                style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
+              />
+              <Text className="text-xs text-primary font-bold">) </Text>
+              <Text className="text-xs text-primary font-bold">{activeOrder.customer_phone}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {activeOrder.customer_note ? (
+          <View className="flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="chat-bubble-outline" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Customer Note:</Text>
+            </View>
+            <Text className="text-xs font-semibold text-neutral italic max-w-[60%] text-right">
+              "{activeOrder.customer_note}"
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="flex-row items-start justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Address:</Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleDirectGps}
+            activeOpacity={0.7}
+            className="flex-1 ml-4"
+          >
+            <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
+              {activeOrder.door_no ? `${activeOrder.door_no}, ` : ""}
+              {activeOrder.customer_address}
+              {activeOrder.customer_post_code ? ` — ${activeOrder.customer_post_code}` : ""}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface ActiveOrderSectionProps {
+  activeOrder: DriverOrder;
+}
+
+function ActiveOrderSection({ activeOrder }: Readonly<ActiveOrderSectionProps>) {
+  return (
+    <View className="gap-y-2 mt-4">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Order Details</Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
+        {activeOrder.order_time || activeOrder.created_at ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Order Placed:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatUtcToLocalTime(activeOrder.order_time || activeOrder.created_at)}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeOrder.accepted_at ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="done-all" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Accepted At:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatUtcToLocalTime(activeOrder.accepted_at)}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeOrder.picked_up_at ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="local-shipping" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Picked Up At:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatUtcToLocalTime(activeOrder.picked_up_at)}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeOrder.delivery_otp ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="verified" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">OTP Code:</Text>
+            </View>
+            <Text className="text-xs font-bold text-primary">{activeOrder.delivery_otp}</Text>
+          </View>
+        ) : null}
+
+        {activeOrder.remarks ? (
+          <View className="border-t border-base-200 pt-2.5 mt-1">
+            <Text className="text-[10px] font-bold text-neutral capitalize tracking-wider mb-1">
+              Staff Remarks
+            </Text>
+            <Text className="text-xs text-neutral/70 italic leading-4 bg-white p-2.5 rounded border border-base-200">
+              {activeOrder.remarks}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+interface ActiveBillSectionProps {
+  activeOrder: DriverOrder;
+  totalAmount: number;
+  currencySymbol: string;
+}
+
+function ActiveBillSection({ activeOrder, totalAmount, currencySymbol }: Readonly<ActiveBillSectionProps>) {
+  const tip = parseFloat(activeOrder.tip_amount || "0");
+  const discount = parseFloat(activeOrder.discount || "0");
+  const tax = parseFloat(activeOrder.tax || "0");
+
+  return (
+    <View className="gap-y-2 mt-4">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Bill Summary</Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="receipt" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Subtotal:</Text>
+          </View>
+          <Text className="text-xs font-bold text-neutral">
+            {formatAmount(totalAmount - tip, currencySymbol)}
+          </Text>
+        </View>
+
+        {discount > 0 ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="local-offer" size={16} color="#059669" />
+              <Text className="text-xs text-accent">Discount:</Text>
+            </View>
+            <Text className="text-xs font-bold text-emerald-600">
+              -{formatAmount(discount, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {tax > 0 ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="account-balance" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Tax:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatAmount(tax, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {tip > 0 ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="volunteer-activism" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Driver Tip:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatAmount(tip, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="border-t border-base-200 pt-2.5 mt-1 flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="payments" size={16} color="#DC2D2A" />
+            <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
+          </View>
+          <Text className="text-base font-bold text-neutral">
+            {formatAmount(totalAmount, currencySymbol)}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

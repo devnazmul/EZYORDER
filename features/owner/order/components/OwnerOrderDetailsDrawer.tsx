@@ -134,192 +134,12 @@ export default function OwnerOrderDetailsDrawer({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: WP("6%"), paddingTop: 16, paddingBottom: HP("6%") }}
       >
-        {/* Customer Information Section */}
-        <View className="gap-y-2 mb-4">
-          <Text
-            style={{ fontSize: getResponsiveFontSize("xs") }}
-            className="font-bold text-neutral capitalize tracking-wider"
-          >
-            Customer Details
-          </Text>
-          <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="person-outline" size={16} color={COLORS.primary} />
-                <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
-                  Customer:
-                </Text>
-              </View>
-              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
-                {order.customer_name ||
-                  order.user?.first_Name ||
-                  (order.table_number && parseFloat(order.table_number) > 0
-                    ? `Table ${parseFloat(order.table_number)}`
-                    : "Walk-in Customer")}
-              </Text>
-            </View>
-
-            {order.customer_phone || order.user?.phone ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="phone" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Phone:
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => handleCallPhone((order.customer_phone || order.user?.phone)!)}
-                  activeOpacity={0.7}
-                  className="flex-row items-center"
-                >
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="text-primary font-semibold"
-                  >
-                    (
-                  </Text>
-                  <MaterialIcons
-                    name="phone"
-                    size={11}
-                    color={COLORS.primary}
-                    style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
-                  />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="text-primary font-semibold"
-                  >
-                    ){" "}
-                  </Text>
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="text-primary font-semibold"
-                  >
-                    {order.customer_phone || order.user?.phone}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
-
-            {order.customer_note ? (
-              <View className="flex-row items-start justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="chat-bubble-outline" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Customer Note:
-                  </Text>
-                </View>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-semibold text-neutral italic max-w-[60%] text-right"
-                >
-                  "{order.customer_note}"
-                </Text>
-              </View>
-            ) : null}
-
-            {order.customer_address || order.address ? (
-              <View className="flex-row items-start justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="location-on" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Address:
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() =>
-                    handleOpenMaps(
-                      `${order.customer_address || order.address} ${order.customer_post_code || order.post_code || ""}`,
-                      order.latitude,
-                      order.longitude,
-                    )
-                  }
-                  activeOpacity={0.7}
-                  className="flex-1 ml-4"
-                >
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-primary text-right"
-                    numberOfLines={3}
-                  >
-                    {order.door_no ? `${order.door_no}, ` : ""}
-                    {order.customer_address || order.address}
-                    {order.customer_post_code || order.post_code
-                      ? ` - ${order.customer_post_code || order.post_code}`
-                      : ""}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
-
-            {order.table_number && parseFloat(order.table_number) > 0 ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="restaurant" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Table:
-                  </Text>
-                </View>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-semibold text-neutral"
-                >
-                  Table {parseFloat(order.table_number)}
-                </Text>
-              </View>
-            ) : null}
-
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="schedule" size={16} color={COLORS.primary} />
-                <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
-                  Placed On:
-                </Text>
-              </View>
-              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
-                {order.created_at ? formatDateTime(order.created_at) : "--:--"}
-              </Text>
-            </View>
-
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="devices" size={16} color={COLORS.primary} />
-                <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
-                  Source:
-                </Text>
-              </View>
-              <Text
-                style={{ fontSize: getResponsiveFontSize("xs") }}
-                className="font-semibold text-neutral capitalize"
-              >
-                {String(order.order_app || "").toLowerCase() === "pos" ? "POS" : "Client App"}
-              </Text>
-            </View>
-
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="badge" size={16} color={COLORS.primary} />
-                <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
-                  Assigned Staff:
-                </Text>
-              </View>
-              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
-                {assignedText}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <OwnerCustomerDetailsSection
+          order={order}
+          assignedText={assignedText}
+          handleCallPhone={handleCallPhone}
+          handleOpenMaps={handleOpenMaps}
+        />
 
         {/* Instructions Section */}
         {order.initial_note ? (
@@ -349,144 +169,367 @@ export default function OwnerOrderDetailsDrawer({
           containerClassName="mb-4"
         />
 
-        {/* Financial & Bill Summary Section */}
-        <View className="gap-y-2 mb-2">
-          <Text
-            style={{ fontSize: getResponsiveFontSize("xs") }}
-            className="font-bold text-neutral capitalize tracking-wider"
-          >
-            Bill Summary
-          </Text>
-          <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
-            <View className="flex-row justify-between items-center">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="check-circle-outline" size={16} color={COLORS.primary} />
-                <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
-                  Payment Status:
-                </Text>
-              </View>
-              <Badge
-                text={formatLabel(order.payment_status) || "Unpaid"}
-                icon={<MaterialIcons name={payConfig.iconName} size={12} color={payConfig.iconColor} />}
-                iconPosition="left"
-                containerStyle={{
-                  backgroundColor: payConfig.backgroundColor,
-                  borderColor: payConfig.borderColor,
-                  borderWidth: 1,
-                }}
-                textStyle={{
-                  color: payConfig.textColor,
-                }}
-              />
-            </View>
-
-            {order.payment_method ? (
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="credit-card" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Payment Method:
-                  </Text>
-                </View>
-                <Badge
-                  text={
-                    order.payment_method.toLowerCase() === "cod" ? "COD" : formatLabel(order.payment_method)
-                  }
-                  containerClassName="bg-secondary/10 border border-secondary/25"
-                  textClassName="text-neutral font-semibold"
-                />
-              </View>
-            ) : null}
-
-            <View className="flex-row justify-between items-center border-t border-base-200/60 pt-2.5">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="receipt" size={16} color={COLORS.primary} />
-                <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
-                  Subtotal:
-                </Text>
-              </View>
-              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
-                {formatAmount(order.final_price || order.amount || "0", resolvedCurrencySymbol)}
-              </Text>
-            </View>
-
-            {order.tax && parseFloat(order.tax) > 0 ? (
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="account-balance" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Tax:
-                  </Text>
-                </View>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-semibold text-neutral"
-                >
-                  {formatAmount(order.tax, resolvedCurrencySymbol)}
-                </Text>
-              </View>
-            ) : null}
-
-            {order.tip_amount && parseFloat(order.tip_amount) > 0 ? (
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="volunteer-activism" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Tip:
-                  </Text>
-                </View>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-semibold text-neutral"
-                >
-                  {formatAmount(order.tip_amount, resolvedCurrencySymbol)}
-                </Text>
-              </View>
-            ) : null}
-
-            {order.discount && parseFloat(order.discount) > 0 ? (
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="local-offer" size={16} color={COLORS.primary} />
-                  <Text
-                    style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="font-semibold text-accent"
-                  >
-                    Discount:
-                  </Text>
-                </View>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-semibold text-primary"
-                >
-                  -{formatAmount(order.discount, resolvedCurrencySymbol)}
-                </Text>
-              </View>
-            ) : null}
-
-            <View className="border-t border-base-200 pt-2.5 mt-1 flex-row justify-between items-center">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="payments" size={WP("3.75%")} color={COLORS.primary} />
-                <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
-                  Total Amount:
-                </Text>
-              </View>
-              <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-primary">
-                {formatAmount(order.amount || "0", resolvedCurrencySymbol)}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <OwnerBillSummarySection
+          order={order}
+          payConfig={payConfig}
+          resolvedCurrencySymbol={resolvedCurrencySymbol}
+        />
       </BottomSheetScrollView>
     </BottomSheet>
+  );
+}
+
+interface OwnerCustomerDetailsSectionProps {
+  order: any;
+  assignedText: string;
+  handleCallPhone: (phone: string) => void;
+  handleOpenMaps: (address: string, lat?: string | number | null, lng?: string | number | null) => void;
+}
+
+function OwnerCustomerDetailsSection({
+  order,
+  assignedText,
+  handleCallPhone,
+  handleOpenMaps,
+}: Readonly<OwnerCustomerDetailsSectionProps>) {
+  const customerName = order.customer_name ||
+    order.user?.first_Name ||
+    (order.table_number && parseFloat(order.table_number) > 0
+      ? `Table ${parseFloat(order.table_number)}`
+      : "Walk-in Customer");
+
+  return (
+    <View className="gap-y-2 mb-4">
+      <Text
+        style={{ fontSize: getResponsiveFontSize("xs") }}
+        className="font-bold text-neutral capitalize tracking-wider"
+      >
+        Customer Details
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="person-outline" size={16} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
+              Customer:
+            </Text>
+          </View>
+          <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
+            {customerName}
+          </Text>
+        </View>
+
+        {order.customer_phone || order.user?.phone ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="phone" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Phone:
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => handleCallPhone((order.customer_phone || order.user?.phone)!)}
+              activeOpacity={0.7}
+              className="flex-row items-center"
+            >
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="text-primary font-semibold"
+              >
+                (
+              </Text>
+              <MaterialIcons
+                name="phone"
+                size={11}
+                color={COLORS.primary}
+                style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
+              />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="text-primary font-semibold"
+              >
+                ){" "}
+              </Text>
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="text-primary font-semibold"
+              >
+                {order.customer_phone || order.user?.phone}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {order.customer_note ? (
+          <View className="flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="chat-bubble-outline" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Customer Note:
+              </Text>
+            </View>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral italic max-w-[60%] text-right"
+            >
+              "{order.customer_note}"
+            </Text>
+          </View>
+        ) : null}
+
+        {order.customer_address || order.address ? (
+          <View className="flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="location-on" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Address:
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() =>
+                handleOpenMaps(
+                  `${order.customer_address || order.address} ${order.customer_post_code || order.post_code || ""}`,
+                  order.latitude,
+                  order.longitude,
+                )
+              }
+              activeOpacity={0.7}
+              className="flex-1 ml-4"
+            >
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-primary text-right"
+                numberOfLines={3}
+              >
+                {order.door_no ? `${order.door_no}, ` : ""}
+                {order.customer_address || order.address}
+                {order.customer_post_code || order.post_code
+                  ? ` - ${order.customer_post_code || order.post_code}`
+                  : ""}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {order.table_number && parseFloat(order.table_number) > 0 ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="restaurant" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Table:
+              </Text>
+            </View>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral"
+            >
+              Table {parseFloat(order.table_number)}
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="schedule" size={16} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
+              Placed On:
+            </Text>
+          </View>
+          <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
+            {order.created_at ? formatDateTime(order.created_at) : "--:--"}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="devices" size={16} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
+              Source:
+            </Text>
+          </View>
+          <Text
+            style={{ fontSize: getResponsiveFontSize("xs") }}
+            className="font-semibold text-neutral capitalize"
+          >
+            {String(order.order_app || "").toLowerCase() === "pos" ? "POS" : "Client App"}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="badge" size={16} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
+              Assigned Staff:
+            </Text>
+          </View>
+          <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
+            {assignedText}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface OwnerBillSummarySectionProps {
+  order: any;
+  payConfig: any;
+  resolvedCurrencySymbol: string;
+}
+
+function OwnerBillSummarySection({
+  order,
+  payConfig,
+  resolvedCurrencySymbol,
+}: Readonly<OwnerBillSummarySectionProps>) {
+  return (
+    <View className="gap-y-2 mb-2">
+      <Text
+        style={{ fontSize: getResponsiveFontSize("xs") }}
+        className="font-bold text-neutral capitalize tracking-wider"
+      >
+        Bill Summary
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="check-circle-outline" size={16} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
+              Payment Status:
+            </Text>
+          </View>
+          <Badge
+            text={formatLabel(order.payment_status) || "Unpaid"}
+            icon={<MaterialIcons name={payConfig.iconName} size={12} color={payConfig.iconColor} />}
+            iconPosition="left"
+            containerStyle={{
+              backgroundColor: payConfig.backgroundColor,
+              borderColor: payConfig.borderColor,
+              borderWidth: 1,
+            }}
+            textStyle={{
+              color: payConfig.textColor,
+            }}
+          />
+        </View>
+
+        {order.payment_method ? (
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="credit-card" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Payment Method:
+              </Text>
+            </View>
+            <Badge
+              text={
+                order.payment_method.toLowerCase() === "cod" ? "COD" : formatLabel(order.payment_method)
+              }
+              containerClassName="bg-secondary/10 border border-secondary/25"
+              textClassName="text-neutral font-semibold"
+            />
+          </View>
+        ) : null}
+
+        <View className="flex-row justify-between items-center border-t border-base-200/60 pt-2.5">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="receipt" size={16} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-accent">
+              Subtotal:
+            </Text>
+          </View>
+          <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
+            {formatAmount(order.final_price || order.amount || "0", resolvedCurrencySymbol)}
+          </Text>
+        </View>
+
+        {order.tax && parseFloat(order.tax) > 0 ? (
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="account-balance" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Tax:
+              </Text>
+            </View>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral"
+            >
+              {formatAmount(order.tax, resolvedCurrencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {order.tip_amount && parseFloat(order.tip_amount) > 0 ? (
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="volunteer-activism" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Tip:
+              </Text>
+            </View>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral"
+            >
+              {formatAmount(order.tip_amount, resolvedCurrencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {order.discount && parseFloat(order.discount) > 0 ? (
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="local-offer" size={16} color={COLORS.primary} />
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-accent"
+              >
+                Discount:
+              </Text>
+            </View>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-primary"
+            >
+              -{formatAmount(order.discount, resolvedCurrencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="border-t border-base-200 pt-2.5 mt-1 flex-row justify-between items-center">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="payments" size={WP("3.75%")} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
+              Total Amount:
+            </Text>
+          </View>
+          <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-primary">
+            {formatAmount(order.amount || "0", resolvedCurrencySymbol)}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

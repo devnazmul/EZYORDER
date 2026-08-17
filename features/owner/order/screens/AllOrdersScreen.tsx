@@ -194,76 +194,7 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
 
   // Map filters to API parameters
   const queryParams = useMemo(() => {
-    const params: Record<string, any> = {};
-
-    if (filterValues.exclude_status) {
-      params.exclude_status = filterValues.exclude_status;
-    }
-    if (filterValues.date_filter) {
-      params.date_filter = filterValues.date_filter;
-    }
-    if (filterValues.is_schedule_order) {
-      params.is_schedule_order = filterValues.is_schedule_order;
-    }
-    if (filterValues.dish_ids) {
-      params.dish_ids = filterValues.dish_ids;
-    }
-    if (filterValues.dish_name) {
-      params.dish_name = filterValues.dish_name;
-    }
-    if (filterValues.is_delay) {
-      params.is_delay = filterValues.is_delay;
-    }
-
-    if (debouncedSearchQuery.trim()) {
-      params.order_id = debouncedSearchQuery.trim();
-    }
-
-    if (filterValues.status && Array.isArray(filterValues.status)) {
-      const activeStatuses = filterValues.status.filter((s: string) => s !== "all");
-      if (activeStatuses.length > 0) {
-        params.status = activeStatuses;
-      }
-    }
-
-    if (filterValues.payment_status && filterValues.payment_status !== "all") {
-      params.payment_status = [filterValues.payment_status];
-    }
-
-    if (filterValues.order_type && Array.isArray(filterValues.order_type)) {
-      const activeTypes = filterValues.order_type.filter((t: string) => t !== "all");
-      if (activeTypes.length > 0) {
-        params.order_type = activeTypes;
-      }
-    }
-
-    if (filterValues.customer_name?.trim()) {
-      params.customer_name = filterValues.customer_name.trim();
-    }
-
-    if (filterValues.customer_phone?.trim()) {
-      params.customer_phone = filterValues.customer_phone.trim();
-    }
-
-    if (filterValues.table_number?.trim()) {
-      params.table_number = filterValues.table_number.trim();
-    }
-
-    if (filterValues.date_range?.start) {
-      params.from_date = filterValues.date_range.start;
-    }
-    if (filterValues.date_range?.end) {
-      params.to_date = filterValues.date_range.end;
-    }
-
-    if (filterValues.amount_range?.min) {
-      params.min_amount = filterValues.amount_range.min;
-    }
-    if (filterValues.amount_range?.max) {
-      params.max_amount = filterValues.amount_range.max;
-    }
-
-    return params;
+    return buildAllOrdersQueryParams(debouncedSearchQuery, filterValues);
   }, [debouncedSearchQuery, filterValues]);
 
   // Call query hooks unconditionally at the top level
@@ -384,4 +315,75 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
       />
     </SafeAreaView>
   );
+}
+
+function buildAllOrdersQueryParams(debouncedSearchQuery: string, filterValues: any): Record<string, any> {
+  const params: Record<string, any> = {};
+
+  const directFilters = [
+    "exclude_status",
+    "date_filter",
+    "is_schedule_order",
+    "dish_ids",
+    "dish_name",
+    "is_delay",
+  ];
+
+  for (const key of directFilters) {
+    if (filterValues[key]) {
+      params[key] = filterValues[key];
+    }
+  }
+
+  const search = debouncedSearchQuery.trim();
+  if (search) {
+    params.order_id = search;
+  }
+
+  if (filterValues.status && Array.isArray(filterValues.status)) {
+    const activeStatuses = filterValues.status.filter((s: string) => s !== "all");
+    if (activeStatuses.length > 0) {
+      params.status = activeStatuses;
+    }
+  }
+
+  if (filterValues.payment_status && filterValues.payment_status !== "all") {
+    params.payment_status = [filterValues.payment_status];
+  }
+
+  if (filterValues.order_type && Array.isArray(filterValues.order_type)) {
+    const activeTypes = filterValues.order_type.filter((t: string) => t !== "all");
+    if (activeTypes.length > 0) {
+      params.order_type = activeTypes;
+    }
+  }
+
+  const customerName = filterValues.customer_name?.trim();
+  if (customerName) {
+    params.customer_name = customerName;
+  }
+
+  const customerPhone = filterValues.customer_phone?.trim();
+  if (customerPhone) {
+    params.customer_phone = customerPhone;
+  }
+
+  const tableNum = filterValues.table_number?.trim();
+  if (tableNum) {
+    params.table_number = tableNum;
+  }
+
+  const dateRange = filterValues.date_range;
+  if (dateRange) {
+    if (dateRange.start) params.from_date = dateRange.start;
+    if (dateRange.end) params.to_date = dateRange.end;
+  }
+
+  const amtRange = filterValues.amount_range;
+  if (amtRange) {
+    if (amtRange.min) params.min_amount = amtRange.min;
+    if (amtRange.max) params.max_amount = amtRange.max;
+  }
+
+  return params;
 }

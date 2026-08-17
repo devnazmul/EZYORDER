@@ -166,57 +166,7 @@ export default function CustomersReport() {
 
   // Construct query parameters
   const queryParams = useMemo<CustomerParams>(() => {
-    const params: CustomerParams = {
-      per_page: 50,
-    };
-
-    if (debouncedSearch.trim()) {
-      params.search_key = debouncedSearch.trim();
-    }
-    if (filterValues.frequency_visit && Array.isArray(filterValues.frequency_visit)) {
-      const activeVisits = filterValues.frequency_visit.filter((v: string) => v !== "all");
-      if (activeVisits.length > 0) {
-        params.frequency_visit = activeVisits.join(",");
-      }
-    }
-    if (filterValues.date_filter !== "all") {
-      params.date_filter = filterValues.date_filter;
-    }
-    if (filterValues.rating !== "all") {
-      params.rating = filterValues.rating;
-    }
-    if (filterValues.order_by !== "all") {
-      params.order_by = filterValues.order_by;
-    }
-    if (filterValues.creation_dates?.start) {
-      params.start_date = filterValues.creation_dates.start;
-    }
-    if (filterValues.creation_dates?.end) {
-      params.end_date = filterValues.creation_dates.end;
-    }
-    if (filterValues.last_visited_date) {
-      params.last_visited_date = filterValues.last_visited_date;
-    }
-    if (filterValues.email) {
-      params.email = filterValues.email.trim();
-    }
-    if (filterValues.phone) {
-      params.phone = filterValues.phone.trim();
-    }
-    if (filterValues.status !== "all") {
-      params.status = filterValues.status;
-    }
-    if (filterValues.payment_status !== "all") {
-      params.payment_status = filterValues.payment_status;
-    }
-    if (filterValues.payment_type !== "all") {
-      params.payment_type = filterValues.payment_type;
-    }
-    if (filterValues.booking_type !== "all") {
-      params.booking_type = filterValues.booking_type;
-    }
-
-    return params;
+    return buildCustomerQueryParams(debouncedSearch, filterValues);
   }, [debouncedSearch, filterValues]);
 
   // Fetch queries
@@ -286,4 +236,56 @@ export default function CustomersReport() {
       )}
     </SafeAreaView>
   );
+}
+
+function buildCustomerQueryParams(debouncedSearch: string, filterValues: any): CustomerParams {
+  const params: CustomerParams = {
+    per_page: 50,
+  };
+
+  const trimSearch = debouncedSearch.trim();
+  if (trimSearch) params.search_key = trimSearch;
+
+  const emailTrim = filterValues.email?.trim();
+  if (emailTrim) params.email = emailTrim;
+
+  const phoneTrim = filterValues.phone?.trim();
+  if (phoneTrim) params.phone = phoneTrim;
+
+  if (filterValues.last_visited_date) {
+    params.last_visited_date = filterValues.last_visited_date;
+  }
+
+  const creationDates = filterValues.creation_dates;
+  if (creationDates) {
+    if (creationDates.start) params.start_date = creationDates.start;
+    if (creationDates.end) params.end_date = creationDates.end;
+  }
+
+  const fieldsToMap: Array<[keyof typeof filterValues, keyof CustomerParams]> = [
+    ["date_filter", "date_filter"],
+    ["rating", "rating"],
+    ["order_by", "order_by"],
+    ["status", "status"],
+    ["payment_status", "payment_status"],
+    ["payment_type", "payment_type"],
+    ["booking_type", "booking_type"],
+  ];
+
+  for (const [key, paramKey] of fieldsToMap) {
+    const val = filterValues[key];
+    if (val && val !== "all") {
+      (params as any)[paramKey] = val;
+    }
+  }
+
+  const freq = filterValues.frequency_visit;
+  if (Array.isArray(freq)) {
+    const activeVisits = freq.filter((v: string) => v !== "all");
+    if (activeVisits.length > 0) {
+      params.frequency_visit = activeVisits.join(",");
+    }
+  }
+
+  return params;
 }

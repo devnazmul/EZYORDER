@@ -26,6 +26,67 @@ export interface KpiCardProps {
   onPress?: () => void;
 }
 
+interface TrendBadgeProps {
+  trend: "up" | "neutral" | "down";
+  trendText?: string;
+}
+
+function TrendBadge({ trend, trendText }: Readonly<TrendBadgeProps>) {
+  const bgClass =
+    trend === "up"
+      ? "bg-success/20"
+      : trend === "down"
+        ? "bg-error/20"
+        : "bg-white/10";
+  const iconName =
+    trend === "up"
+      ? "trending-up"
+      : trend === "down"
+        ? "trending-down"
+        : "trending-flat";
+  const iconColor =
+    trend === "up"
+      ? "#36d399"
+      : trend === "down"
+        ? "#ff8369"
+        : "rgba(255, 255, 255, 0.7)";
+  const textClass =
+    trend === "up"
+      ? "text-success"
+      : trend === "down"
+        ? "text-error"
+        : "text-white/70";
+
+  return (
+    <View className={`flex-row items-center self-start px-2 py-1 rounded-full gap-1 mt-2 ${bgClass}`}>
+      <MaterialIcons name={iconName} size={WP("3.75%")} color={iconColor} />
+      <Text
+        style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+        className={`font-medium capitalize truncate ${textClass}`}
+        numberOfLines={2}
+      >
+        {trendText}
+      </Text>
+    </View>
+  );
+}
+
+function getIconBgClass(iconBgColor?: string, variant?: string, isHexOrRgbBg?: boolean) {
+  if (!iconBgColor) {
+    return variant === "dark" ? "bg-success" : "bg-white";
+  }
+  if (isHexOrRgbBg) return "";
+  return iconBgColor.startsWith("bg-") ? iconBgColor : `bg-${iconBgColor}`;
+}
+
+function getColorsToUse(gradientColors?: string[], variant?: string) {
+  const defaultColors: [string, string, ...string[]] =
+    variant === "dark" ? ["#1E293B", "#0F172A"] : ["#FFFFFF", "#F8FAFC"];
+  return (
+    gradientColors && gradientColors.length >= 2 ? gradientColors : defaultColors
+  ) as [string, string, ...string[]];
+}
+
 export default function KpiCard({
   title = "KPI Title",
   value = "00",
@@ -49,27 +110,12 @@ export default function KpiCard({
     return <KpiCardSkeleton trend={trend} />;
   }
 
-  const defaultColors: [string, string, ...string[]] =
-    variant === "dark" ? ["#1E293B", "#0F172A"] : ["#FFFFFF", "#F8FAFC"];
-
-  const colorsToUse = (
-    gradientColors && gradientColors.length >= 2
-      ? gradientColors
-      : defaultColors
-  ) as [string, string, ...string[]];
-
   const isHexOrRgbBg =
-    iconBgColor &&
+    !!iconBgColor &&
     (iconBgColor.startsWith("#") || iconBgColor.startsWith("rgb"));
-  const iconBgClass = iconBgColor
-    ? isHexOrRgbBg
-      ? ""
-      : iconBgColor.startsWith("bg-")
-        ? iconBgColor
-        : `bg-${iconBgColor}`
-    : variant === "dark"
-      ? "bg-success"
-      : "bg-white";
+
+  const colorsToUse = getColorsToUse(gradientColors, variant);
+  const iconBgClass = getIconBgClass(iconBgColor, variant, isHexOrRgbBg);
 
   const cardContent = (
     <LinearGradient
@@ -146,48 +192,9 @@ export default function KpiCard({
             ) : null}
 
             {/* Trend Badge */}
-            {trend && (
-              <View
-                className={`flex-row items-center self-start px-2 py-1 rounded-full gap-1 mt-2 ${
-                  trend === "up"
-                    ? "bg-success/20"
-                    : trend === "down"
-                      ? "bg-error/20"
-                      : "bg-white/10"
-                }`}
-              >
-                <MaterialIcons
-                  name={
-                    trend === "up"
-                      ? "trending-up"
-                      : trend === "down"
-                        ? "trending-down"
-                        : "trending-flat"
-                  }
-                  size={WP("3.75%")}
-                  color={
-                    trend === "up"
-                      ? "#36d399"
-                      : trend === "down"
-                        ? "#ff8369"
-                        : "rgba(255, 255, 255, 0.7)"
-                  }
-                />
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
-                  className={`font-medium capitalize truncate ${
-                    trend === "up"
-                      ? "text-success"
-                      : trend === "down"
-                        ? "text-error"
-                        : "text-white/70"
-                  }`}
-                  numberOfLines={2}
-                >
-                  {trendText}
-                </Text>
-              </View>
-            )}
+            {trend ? (
+              <TrendBadge trend={trend} trendText={trendText} />
+            ) : null}
           </View>
 
           {/* Right Element Slot */}

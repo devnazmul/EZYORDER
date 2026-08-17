@@ -6,54 +6,41 @@
 export default function formatUtcToLocalTime(utcDateStr?: string | null): string {
   if (!utcDateStr) return "";
   try {
-    const parts = utcDateStr.trim().split(" ");
-    let year = 0;
-    let month = 0;
-    let day = 0;
-    let hours = 0;
-    let minutes = 0;
-    let seconds = 0;
+    const trimmed = utcDateStr.trim();
+    let year = 0, month = 0, day = 0, hours = 0, minutes = 0, seconds = 0;
+    let matched = false;
 
-    // Check if the date portion is delimited by dashes (e.g., DD-MM-YYYY or YYYY-MM-DD)
-    if (parts[0].includes("-")) {
-      const dateParts = parts[0].split("-");
-      if (dateParts.length === 3) {
-        if (dateParts[2].length === 4) {
-          // DD-MM-YYYY
-          day = parseInt(dateParts[0], 10);
-          month = parseInt(dateParts[1], 10) - 1;
-          year = parseInt(dateParts[2], 10);
-        } else {
-          // YYYY-MM-DD
-          year = parseInt(dateParts[0], 10);
-          month = parseInt(dateParts[1], 10) - 1;
-          day = parseInt(dateParts[2], 10);
-        }
-      } else {
-        return utcDateStr;
-      }
+    const matchDdmmyyyy = trimmed.match(/^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (matchDdmmyyyy) {
+      day = parseInt(matchDdmmyyyy[1], 10);
+      month = parseInt(matchDdmmyyyy[2], 10) - 1;
+      year = parseInt(matchDdmmyyyy[3], 10);
+      hours = matchDdmmyyyy[4] ? parseInt(matchDdmmyyyy[4], 10) : 0;
+      minutes = matchDdmmyyyy[5] ? parseInt(matchDdmmyyyy[5], 10) : 0;
+      seconds = matchDdmmyyyy[6] ? parseInt(matchDdmmyyyy[6], 10) : 0;
+      matched = true;
     } else {
-      // Standard ISO parser fallback
-      const parsedDate = new Date(utcDateStr);
+      const matchYyyymmdd = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+      if (matchYyyymmdd) {
+        year = parseInt(matchYyyymmdd[1], 10);
+        month = parseInt(matchYyyymmdd[2], 10) - 1;
+        day = parseInt(matchYyyymmdd[3], 10);
+        hours = matchYyyymmdd[4] ? parseInt(matchYyyymmdd[4], 10) : 0;
+        minutes = matchYyyymmdd[5] ? parseInt(matchYyyymmdd[5], 10) : 0;
+        seconds = matchYyyymmdd[6] ? parseInt(matchYyyymmdd[6], 10) : 0;
+        matched = true;
+      }
+    }
+
+    if (!matched) {
+      const parsedDate = new Date(trimmed);
       if (isNaN(parsedDate.getTime())) return utcDateStr;
       return parsedDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
-    // Extract time components if present
-    if (parts.length > 1 && parts[1].includes(":")) {
-      const timeParts = parts[1].split(":");
-      hours = parseInt(timeParts[0], 10);
-      minutes = parseInt(timeParts[1], 10);
-      if (timeParts.length > 2) {
-        seconds = parseInt(timeParts[2], 10);
-      }
-    }
-
-    // Construct Date object as a UTC timestamp
     const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
     if (isNaN(utcDate.getTime())) return utcDateStr;
 
-    // Output local time string formatted to 12-hour format automatically converted to device timezone
     return utcDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   } catch {
     return utcDateStr;

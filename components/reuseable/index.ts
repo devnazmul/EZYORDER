@@ -15,6 +15,7 @@ export { default as RefreshableScrollView } from "./RefreshableScrollView";
 export { default as SearchBar } from "./SearchBar";
 export { default as StatusBadge } from "./StatusBadge";
 export { default as ToggleBar } from "./ToggleBar";
+export { default as ServiceCard } from "./ServiceCard";
 
 // Cards
 export { default as ActionCard } from "./cards/ActionCard";

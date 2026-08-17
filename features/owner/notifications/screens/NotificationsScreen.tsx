@@ -5,6 +5,7 @@ import PageTitle from "@/components/reuseable/PageTitle";
 import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import parseDate from "@/utils/parseDate";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { RefreshControl, SectionList, Text, View } from "react-native";
@@ -61,37 +62,7 @@ export default function Notifications() {
     await markAllAsReadMutation.mutateAsync();
   };
 
-  // Safe date parsing helper for DD-MM-YYYY formats
-  const parseDate = (dateStr: string) => {
-    if (!dateStr) return null;
-    const parts = dateStr.split(" ");
-    if (parts.length >= 1) {
-      const dateParts = parts[0].split("-");
-      if (dateParts.length === 3) {
-        const day = parseInt(dateParts[0], 10);
-        const month = parseInt(dateParts[1], 10) - 1;
-        const year = parseInt(dateParts[2], 10);
 
-        let hour = 0;
-        let minute = 0;
-        let second = 0;
-
-        if (parts[1]) {
-          const timeParts = parts[1].split(":");
-          if (timeParts.length >= 2) {
-            hour = parseInt(timeParts[0], 10);
-            minute = parseInt(timeParts[1], 10);
-            if (timeParts[2]) {
-              second = parseInt(timeParts[2], 10);
-            }
-          }
-        }
-        return new Date(year, month, day, hour, minute, second);
-      }
-    }
-    const fallback = new Date(dateStr);
-    return isNaN(fallback.getTime()) ? null : fallback;
-  };
 
   // Group notifications by date
   const groupNotifications = (list: any[]) => {
@@ -235,3 +206,4 @@ export default function Notifications() {
     </SafeAreaView>
   );
 }
+
