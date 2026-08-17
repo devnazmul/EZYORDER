@@ -7,14 +7,14 @@ import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import PartnerCard from "./PartnerCard";
 
 export default function PartnersView() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
   const {
     data: partnersData,
     isLoading,
     refetch,
-  } = useRestaurantPartnersQuery(token || "", restaurantId || "");
+  } = useRestaurantPartnersQuery(restaurantId || "");
 
   const partners = useMemo(() => {
     if (!partnersData) return [];

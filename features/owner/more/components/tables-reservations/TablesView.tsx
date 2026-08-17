@@ -3,7 +3,6 @@ import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer from "@/components/reuseable/FilterDrawer";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import SearchBar from "@/components/reuseable/SearchBar";
-import { useAuth } from "@/context/AuthContext";
 import {
   useAllTablesQuery,
   useTableMatrixQuery,
@@ -47,8 +46,6 @@ interface TablesViewProps {
 }
 
 export default function TablesView({ header }: TablesViewProps) {
-  const { token } = useAuth();
-
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
@@ -91,7 +88,7 @@ export default function TablesView({ header }: TablesViewProps) {
     isLoading: isTablesLoading,
     isFetching: isTablesFetching,
     refetch: refetchTables,
-  } = useAllTablesQuery(token || "", apiParams);
+  } = useAllTablesQuery(apiParams);
 
   // Fetch tables KPI matrix
   const {
@@ -99,7 +96,7 @@ export default function TablesView({ header }: TablesViewProps) {
     isLoading: isMatrixLoading,
     isFetching: isMatrixFetching,
     refetch: refetchMatrix,
-  } = useTableMatrixQuery(token || "");
+  } = useTableMatrixQuery();
 
   // Extract tables array safely
   const tables = useMemo(() => {

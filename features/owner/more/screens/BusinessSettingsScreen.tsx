@@ -29,7 +29,7 @@ const TABS = [
 ];
 
 export default function BusinessSettingsScreen() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
   const [activeTab, setActiveTab] = useState("info");
@@ -39,19 +39,19 @@ export default function BusinessSettingsScreen() {
     data: restaurantData,
     isLoading: isRestaurantLoading,
     refetch: refetchRestaurant,
-  } = useRestaurantQuery(token || "", restaurantId || "");
+  } = useRestaurantQuery(restaurantId || "");
 
   const {
     data: timingData,
     isLoading: isTimingLoading,
     refetch: refetchTiming,
-  } = useBusinessTimingQuery(token || "", restaurantId || "");
+  } = useBusinessTimingQuery(restaurantId || "");
 
   const {
     data: expenseTypesData,
     isLoading: isExpenseTypesLoading,
     refetch: refetchExpenseTypes,
-  } = useExpenseTypesQuery(token || "", restaurantId || "", 1000);
+  } = useExpenseTypesQuery(restaurantId || "", 1000);
 
   // Extract raw timings list and sort from Monday (1) to Sunday (0)
   const timingList = useMemo(() => {

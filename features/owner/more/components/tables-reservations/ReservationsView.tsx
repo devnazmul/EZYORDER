@@ -34,7 +34,7 @@ interface ReservationsViewProps {
 }
 
 export default function ReservationsView({ header }: ReservationsViewProps) {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
   const [filterValues, setFilterValues] =
@@ -67,7 +67,7 @@ export default function ReservationsView({ header }: ReservationsViewProps) {
     isLoading: isReservationsLoading,
     isFetching: isReservationsFetching,
     refetch: refetchReservations,
-  } = useReservationsQuery(token || "", apiParams);
+  } = useReservationsQuery(apiParams);
 
   // Extract raw reservations list
   const reservations = useMemo(() => {

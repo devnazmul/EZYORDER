@@ -5,15 +5,16 @@ import {
   getRestaurant,
 } from "@/features/owner/more/apis/restaurant";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 export const useCombineDataQuery = (
-  token: string,
   businessId: number | string | null,
   userType?: string,
 ) => {
+  const { token } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.COMBINE_DATA, businessId],
-    queryFn: () => getAllCombineData(token),
+    queryFn: () => getAllCombineData(token!),
     enabled:
       !!token &&
       !!businessId &&
@@ -21,24 +22,20 @@ export const useCombineDataQuery = (
   });
 };
 
-export const useRestaurantQuery = (
-  token: string,
-  targetId: number | string | null,
-) => {
+export const useRestaurantQuery = (targetId: number | string | null) => {
+  const { token } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.RESTAURANT, targetId],
-    queryFn: () => getRestaurant(token, targetId!),
+    queryFn: () => getRestaurant(token!, targetId!),
     enabled: !!token && !!targetId,
   });
 };
 
-export const useBusinessTimingQuery = (
-  token: string,
-  targetId: number | string | null,
-) => {
+export const useBusinessTimingQuery = (targetId: number | string | null) => {
+  const { token } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.BUSINESS_TIMING, targetId],
-    queryFn: () => getBusinessTiming(token, targetId!),
+    queryFn: () => getBusinessTiming(token!, targetId!),
     enabled: !!token && !!targetId,
   });
 };

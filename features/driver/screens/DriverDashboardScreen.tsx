@@ -28,21 +28,20 @@ export default function DriverDashboardScreen() {
     isLoading: isLoadingStats,
     isFetching: isFetchingStats,
     refetch: refetchStats,
-  } = useDriverDashboardStatsQuery(token || "");
+  } = useDriverDashboardStatsQuery();
 
   const {
     data: activeOrders,
     isLoading: isLoadingActiveOrders,
     isFetching: isFetchingActiveOrders,
     refetch: refetchActiveOrders,
-  } = useDriverActiveAssignedOrdersQuery(token || "");
+  } = useDriverActiveAssignedOrdersQuery();
 
   const isStatsLoading = isLoadingStats || isFetchingStats || !statsData;
   const isActiveOrdersLoading =
     isLoadingActiveOrders || isFetchingActiveOrders || !activeOrders;
 
   const { data: profileData, refetch: refetchProfile } = useOwnerProfileQuery(
-    token || "",
     user?.id || null,
   );
 
@@ -122,7 +121,7 @@ export default function DriverDashboardScreen() {
 
         <View className="bg-base-300 p-4 rounded-3xl flex-1">
           <Text className="mb-4 font-bold capitalize opacity-80">
-            Live Today's Orders
+            Live Today&apos;s Orders
           </Text>
           <LiveOrderBoard
             liveOrderBoard={orderBoard}

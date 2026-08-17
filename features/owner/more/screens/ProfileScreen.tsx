@@ -13,13 +13,10 @@ import { Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
-  const { token, user: authUser } = useAuth();
+  const { user: authUser } = useAuth();
   const userId = authUser?.id;
 
-  const { data, isLoading, refetch } = useOwnerProfileQuery(
-    token || "",
-    userId || null,
-  );
+  const { data, isLoading, refetch } = useOwnerProfileQuery(userId || null);
 
   const profileUser = useMemo(() => {
     if (!data) return null;

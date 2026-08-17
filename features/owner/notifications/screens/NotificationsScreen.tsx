@@ -2,10 +2,9 @@ import Button from "@/components/reuseable/Button";
 import EmptyState from "@/components/reuseable/EmptyState";
 import FilterChips from "@/components/reuseable/FilterChips";
 import PageTitle from "@/components/reuseable/PageTitle";
-import COLORS from "@/constants/colors";
-import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/constants/colors";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
-import parseDate from "@/utils/parseDate";
+import { parseDate } from "@/utils/parseDate";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { RefreshControl, SectionList, Text, View } from "react-native";
@@ -19,18 +18,22 @@ import {
 } from "../hooks/queries/useNotificationQueries";
 
 export default function Notifications() {
-  const { token } = useAuth();
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState("all");
 
   // Fetch single query returning both notifications list & unread count
-  const { data: notificationData, isLoading, isRefetching, refetch } = useNotificationsQuery(token || "");
+  const {
+    data: notificationData,
+    isLoading,
+    isRefetching,
+    refetch,
+  } = useNotificationsQuery();
   const notifications = notificationData?.list || [];
   const unreadCount = notificationData?.unreadCount || 0;
 
   // Mutations
-  const markAsReadMutation = useMarkNotificationAsReadMutation(token || "");
-  const markAllAsReadMutation = useMarkAllAsReadMutation(token || "");
+  const markAsReadMutation = useMarkNotificationAsReadMutation();
+  const markAllAsReadMutation = useMarkAllAsReadMutation();
 
   const handleNotificationPress = async (notification: any) => {
     // 1. Mark as read on backend if it's currently unread
@@ -61,8 +64,6 @@ export default function Notifications() {
   const handleMarkAllAsRead = async () => {
     await markAllAsReadMutation.mutateAsync();
   };
-
-
 
   // Group notifications by date
   const groupNotifications = (list: any[]) => {
@@ -121,7 +122,11 @@ export default function Notifications() {
     .map(([title, data]) => ({ title, data }));
 
   return (
-    <SafeAreaView key="loaded" edges={["left", "right"]} className="flex-1 bg-base-100">
+    <SafeAreaView
+      key="loaded"
+      edges={["left", "right"]}
+      className="flex-1 bg-base-100"
+    >
       <View style={{ paddingHorizontal: WP("4%") }} className="flex-1 pt-4">
         {/* Page Header (standalone full-width) */}
         <PageTitle
@@ -195,9 +200,15 @@ export default function Notifications() {
             )}
             ListEmptyComponent={
               notifications.length === 0 ? (
-                <EmptyState description="You have no notifications yet" pyClassName="py-12" />
+                <EmptyState
+                  description="You have no notifications yet"
+                  pyClassName="py-12"
+                />
               ) : totalFilteredCount === 0 ? (
-                <EmptyState description="No notifications match the filter" pyClassName="py-12" />
+                <EmptyState
+                  description="No notifications match the filter"
+                  pyClassName="py-12"
+                />
               ) : null
             }
           />
@@ -206,4 +217,3 @@ export default function Notifications() {
     </SafeAreaView>
   );
 }
-

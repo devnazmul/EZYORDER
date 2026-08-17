@@ -21,7 +21,7 @@ import { CategoryCard } from "../components";
 import { CategoryCardSkeleton } from "../components/skeletons";
 
 export default function MenuManagement() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id || user?.business_id;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,14 +37,14 @@ export default function MenuManagement() {
     isLoading: isMenuLoading,
     isFetching: isMenuFetching,
     refetch: refetchMenus,
-  } = useMenuAllQuery(token || "", String(restaurantId || ""), menuParams);
+  } = useMenuAllQuery(String(restaurantId || ""), menuParams);
 
   // Fetch KPI matrix counts
   const {
     data: matrixData,
     isLoading: isMatrixLoading,
     refetch: refetchMatrix,
-  } = useMenuMatrixQuery(token || "");
+  } = useMenuMatrixQuery();
 
   const menuList = useMemo(() => {
     return Array.isArray(menuData) ? menuData : [];
@@ -57,7 +57,6 @@ export default function MenuManagement() {
     await Promise.all([refetchMenus(), refetchMatrix()]);
   };
 
-  const isLoading = isMenuLoading || isMatrixLoading;
   const showSkeleton = isMenuLoading || isMenuFetching;
 
   return (

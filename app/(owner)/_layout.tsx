@@ -49,7 +49,7 @@ export default function TabsLayout() {
   const { token, user } = useAuth();
   const pathname = usePathname();
 
-  const { data: notificationData } = useNotificationsQuery(token || "");
+  const { data: notificationData } = useNotificationsQuery();
   const unreadCount = Number(notificationData?.unreadCount || 0);
 
   if (!token) {
@@ -61,9 +61,8 @@ export default function TabsLayout() {
     return <Redirect href="/(driver)" />;
   }
 
-  const renderTabBarLabel =
-    (title: string) =>
-    ({ color }: { color: string }) => (
+  const renderTabBarLabel = (title: string) => {
+    const TabBarLabel = ({ color }: { color: string }) => (
       <Text
         style={{
           color,
@@ -78,8 +77,17 @@ export default function TabsLayout() {
         {title}
       </Text>
     );
+    TabBarLabel.displayName = `TabBarLabel(${title})`;
+    return TabBarLabel;
+  };
 
-  const rootRoutes = ["/home", "/orders", "/reports", "/notifications", "/more"];
+  const rootRoutes = [
+    "/home",
+    "/orders",
+    "/reports",
+    "/notifications",
+    "/more",
+  ];
   const showBackButton = !rootRoutes.includes(pathname);
 
   return (
@@ -112,7 +120,9 @@ export default function TabsLayout() {
           options={{
             title: "Dashboard",
             tabBarLabel: renderTabBarLabel("Dashboard"),
-            tabBarIcon: ({ color }) => <MaterialIcons name="dashboard" size={24} color={color} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="dashboard" size={24} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -120,7 +130,9 @@ export default function TabsLayout() {
           options={{
             title: "Orders",
             tabBarLabel: renderTabBarLabel("Orders"),
-            tabBarIcon: ({ color }) => <MaterialIcons name="receipt" size={24} color={color} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="receipt" size={24} color={color} />
+            ),
           }}
           listeners={({ navigation }) => ({
             tabPress: (e) => {
@@ -135,7 +147,9 @@ export default function TabsLayout() {
           options={{
             title: "Reports",
             tabBarLabel: renderTabBarLabel("Reports"),
-            tabBarIcon: ({ color }) => <MaterialIcons name="bar-chart" size={24} color={color} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="bar-chart" size={24} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -156,7 +170,9 @@ export default function TabsLayout() {
           options={{
             title: "More",
             tabBarLabel: renderTabBarLabel("More"),
-            tabBarIcon: ({ color }) => <MaterialIcons name="more-horiz" size={24} color={color} />,
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="more-horiz" size={24} color={color} />
+            ),
           }}
         />
       </Tabs>

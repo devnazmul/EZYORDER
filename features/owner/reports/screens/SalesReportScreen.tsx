@@ -59,7 +59,7 @@ const getDateRange = (period: string) => {
 };
 
 const SalesReport = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const { settings } = useData();
   const currencySymbol = getCurrencySymbol(settings?.currency);
   const { isLandscape } = useResponsiveScreen();
@@ -119,37 +119,37 @@ const SalesReport = () => {
     data: summaryData,
     isLoading: isSummaryLoading,
     refetch: refetchSummary,
-  } = useSalesSummaryQuery(token, apiParams);
+  } = useSalesSummaryQuery(apiParams);
 
   const {
     data: trendData,
     isLoading: isTrendLoading,
     refetch: refetchTrend,
-  } = useSalesTrendQuery(token, apiParams);
+  } = useSalesTrendQuery(apiParams);
 
   const {
     data: orderTypeData,
     isLoading: isOrderTypeLoading,
     refetch: refetchOrderType,
-  } = useSalesByOrderTypeQuery(token, apiParams);
+  } = useSalesByOrderTypeQuery(apiParams);
 
   const {
     data: itemData,
     isLoading: isItemLoading,
     refetch: refetchItem,
-  } = useSalesByItemQuery(token, apiParams);
+  } = useSalesByItemQuery(apiParams);
 
   const {
     data: hourlyData,
     isLoading: isHourlyLoading,
     refetch: refetchHourly,
-  } = useSalesHourlyQuery(token, apiParams);
+  } = useSalesHourlyQuery(apiParams);
 
   const {
     data: dailySummaryData,
     isLoading: isDailyLoading,
     refetch: refetchDaily,
-  } = useSalesDailySummaryQuery(token, apiParams);
+  } = useSalesDailySummaryQuery(apiParams);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -190,21 +190,16 @@ const SalesReport = () => {
     return trendData.map((d: any) => Number(d.sales || 0));
   }, [trendData]);
 
-  const isAnyLoading =
-    isSummaryLoading ||
-    isTrendLoading ||
-    isOrderTypeLoading ||
-    isItemLoading ||
-    isHourlyLoading ||
-    isDailyLoading;
-
   return (
     <SafeAreaView
       edges={["left", "right"]}
       className="flex-1 bg-base-100 pt-4"
       style={{ paddingHorizontal: WP("4%") }}
     >
-      <RefreshableScrollView onRefresh={handleRefresh} refreshing={isRefreshing}>
+      <RefreshableScrollView
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
+      >
         {/* Header Title and Filter Trigger */}
 
         <PageTitle
@@ -356,7 +351,10 @@ const SalesReport = () => {
             {isDailyLoading && !isRefreshing ? (
               <SalesDailyListSkeleton />
             ) : (
-              <SalesDailyList dailyList={dailyList} currencySymbol={currencySymbol} />
+              <SalesDailyList
+                dailyList={dailyList}
+                currencySymbol={currencySymbol}
+              />
             )}
           </View>
         )}
@@ -366,7 +364,10 @@ const SalesReport = () => {
             {isItemLoading && !isRefreshing ? (
               <SalesItemListSkeleton />
             ) : (
-              <SalesItemList itemList={itemList} currencySymbol={currencySymbol} />
+              <SalesItemList
+                itemList={itemList}
+                currencySymbol={currencySymbol}
+              />
             )}
           </View>
         )}
@@ -376,7 +377,10 @@ const SalesReport = () => {
             {isHourlyLoading && !isRefreshing ? (
               <SalesHourlyListSkeleton />
             ) : (
-              <SalesHourlyList hourlyList={hourlyList} currencySymbol={currencySymbol} />
+              <SalesHourlyList
+                hourlyList={hourlyList}
+                currencySymbol={currencySymbol}
+              />
             )}
           </View>
         )}

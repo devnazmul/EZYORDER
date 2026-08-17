@@ -2,7 +2,7 @@ import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
 import SearchBar from "@/components/reuseable/SearchBar";
 import ToggleBar from "@/components/reuseable/ToggleBar";
-import COLORS from "@/constants/colors";
+import { COLORS } from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { WP } from "@/utils/getResponsiveSizes";
@@ -13,19 +13,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import OrderCard from "../components/OrderCard";
 import OrderDetailsModal from "../components/OrderDetailsModal";
 import OrderCardSkeleton from "../components/skeletons/OrderCardSkeleton";
-import { useAllOrdersQuery, useTodayOrdersQuery } from "../hooks/queries/useOrderQueries";
+import {
+  useAllOrdersQuery,
+  useTodayOrdersQuery,
+} from "../hooks/queries/useOrderQueries";
 
 interface AllOrdersProps {
   initialTab?: "live" | "historical";
 }
 
-export default function AllOrders({ initialTab = "historical" }: AllOrdersProps) {
-  const { token, user } = useAuth();
+export default function AllOrders({
+  initialTab = "historical",
+}: AllOrdersProps) {
+  const { user } = useAuth();
   const searchParams = useLocalSearchParams();
   const pathname = usePathname();
 
   const restaurantId =
-    user?.restaurant?.length > 0 ? String(user?.restaurant[0]?.id) : String(user?.business_id || "1");
+    user?.restaurant?.length > 0
+      ? String(user?.restaurant[0]?.id)
+      : String(user?.business_id || "1");
 
   // Tab State: "live" (Today's) vs "historical" (All)
   const [activeTab, setActiveTab] = useState<"live" | "historical">(initialTab);
@@ -80,15 +87,22 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
           : searchParams.exclude_status
             ? ["pending", "kitchen"]
             : ["all"],
-        payment_status: searchParams.payment_status ? (searchParams.payment_status as string) : "all",
-        order_type: searchParams.tab ? (searchParams.tab as string).split(",") : ["all"],
+        payment_status: searchParams.payment_status
+          ? (searchParams.payment_status as string)
+          : "all",
+        order_type: searchParams.tab
+          ? (searchParams.tab as string).split(",")
+          : ["all"],
         customer_name: "",
         customer_phone: "",
         table_number: "",
         date_range: { start: "", end: "" },
         amount_range: { min: "", max: "" },
         exclude_status: searchParams.exclude_status || "",
-        date_filter: (searchParams.date_filter as string) || (searchParams.filterBy as string) || "",
+        date_filter:
+          (searchParams.date_filter as string) ||
+          (searchParams.filterBy as string) ||
+          "",
         is_schedule_order: searchParams.is_schedule_order || "",
         dish_ids: searchParams.dish_ids || "",
         dish_name: searchParams.dish_name || "",
@@ -198,10 +212,19 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
   }, [debouncedSearchQuery, filterValues]);
 
   // Call query hooks unconditionally at the top level
-  const todayQuery = useTodayOrdersQuery(token || "", restaurantId, queryParams, { enabled: isLive });
-  const allQuery = useAllOrdersQuery(token || "", restaurantId, queryParams, { enabled: !isLive });
+  const todayQuery = useTodayOrdersQuery(restaurantId, queryParams, {
+    enabled: isLive,
+  });
+  const allQuery = useAllOrdersQuery(restaurantId, queryParams, {
+    enabled: !isLive,
+  });
 
-  const { data: orders = [], isLoading, isRefetching, refetch } = isLive ? todayQuery : allQuery;
+  const {
+    data: orders = [],
+    isLoading,
+    isRefetching,
+    refetch,
+  } = isLive ? todayQuery : allQuery;
 
   const handleViewDetails = (order: any) => {
     setSelectedOrder(order);
@@ -279,11 +302,20 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
             key="loaded"
             data={isRefetching ? [] : orders}
             keyExtractor={(item) => String(item.id)}
-            renderItem={({ item }) => <OrderCard item={item} onViewDetails={() => handleViewDetails(item)} />}
+            renderItem={({ item }) => (
+              <OrderCard
+                item={item}
+                onViewDetails={() => handleViewDetails(item)}
+              />
+            )}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
             refreshControl={
-              <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[COLORS.primary]} />
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                colors={[COLORS.primary]}
+              />
             }
             ListEmptyComponent={
               isRefetching ? (
@@ -317,7 +349,10 @@ export default function AllOrders({ initialTab = "historical" }: AllOrdersProps)
   );
 }
 
-function buildAllOrdersQueryParams(debouncedSearchQuery: string, filterValues: any): Record<string, any> {
+function buildAllOrdersQueryParams(
+  debouncedSearchQuery: string,
+  filterValues: any,
+): Record<string, any> {
   const params: Record<string, any> = {};
 
   const directFilters = [
@@ -341,7 +376,9 @@ function buildAllOrdersQueryParams(debouncedSearchQuery: string, filterValues: a
   }
 
   if (filterValues.status && Array.isArray(filterValues.status)) {
-    const activeStatuses = filterValues.status.filter((s: string) => s !== "all");
+    const activeStatuses = filterValues.status.filter(
+      (s: string) => s !== "all",
+    );
     if (activeStatuses.length > 0) {
       params.status = activeStatuses;
     }
@@ -352,7 +389,9 @@ function buildAllOrdersQueryParams(debouncedSearchQuery: string, filterValues: a
   }
 
   if (filterValues.order_type && Array.isArray(filterValues.order_type)) {
-    const activeTypes = filterValues.order_type.filter((t: string) => t !== "all");
+    const activeTypes = filterValues.order_type.filter(
+      (t: string) => t !== "all",
+    );
     if (activeTypes.length > 0) {
       params.order_type = activeTypes;
     }

@@ -5,8 +5,6 @@ import {
   SearchBar,
 } from "@/components/reuseable";
 import { UserCard, UserDetailModal } from "../components";
-
-import { useAuth } from "@/context/AuthContext";
 import { useUsersQuery } from "@/features/owner/more/hooks/queries/useUserQueries";
 import { useDebounce } from "@/hooks/useDebounce";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -19,7 +17,6 @@ const DEFAULT_FILTERS = {
 };
 
 export default function UserManagementScreen() {
-  const { token } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterValues, setFilterValues] =
     useState<Record<string, any>>(DEFAULT_FILTERS);
@@ -33,7 +30,7 @@ export default function UserManagementScreen() {
     data: usersResponse,
     isLoading,
     refetch,
-  } = useUsersQuery(token || "", {
+  } = useUsersQuery({
     search_key: debouncedSearchQuery.trim() || undefined,
     role: filterValues.role !== "all" ? filterValues.role : undefined,
   });

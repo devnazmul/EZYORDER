@@ -1,7 +1,6 @@
 import Badge from "@/components/reuseable/Badge";
 import Button from "@/components/reuseable/Button";
 import StatusBadge from "@/components/reuseable/StatusBadge";
-import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/context/DataContext";
 import { useUsersQuery } from "@/features/owner/more/hooks/queries/useUserQueries";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
@@ -18,8 +17,7 @@ interface OrderCardProps {
 
 export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
   const { settings } = useData();
-  const { token } = useAuth();
-  const { data: usersResponse } = useUsersQuery(token || "");
+  const { data: usersResponse } = useUsersQuery();
 
   const usersList = useMemo(() => {
     if (!usersResponse) return [];
@@ -72,22 +70,6 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
   const orderDateTime = useMemo(() => {
     return item.created_at ? formatDateTime(item.created_at) : "--:--";
   }, [item.created_at]);
-
-  // Helper to extract items description
-  const getOrderItemsText = (order: any) => {
-    if (!order) return "";
-    if (order.items_summary) return order.items_summary;
-    const detailList = order.detail || order.details;
-    if (Array.isArray(detailList) && detailList.length > 0) {
-      return detailList
-        .map(
-          (d: any) =>
-            `${d.qty || d.quantity || 1}x ${d.dish?.name || d.dish_name || "Item"}`,
-        )
-        .join(", ");
-    }
-    return order.description || "";
-  };
 
   return (
     <View className="bg-base-300 rounded-xl border border-base-200 overflow-hidden shadow-sm mb-4">

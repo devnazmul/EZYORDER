@@ -14,7 +14,6 @@ import {
   StatusBadge,
   ToggleBar,
 } from "@/components/reuseable";
-import { FilterField } from "@/components/reuseable/FilterDrawer";
 
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -29,13 +28,8 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DealCardSkeleton, DishCardSkeleton } from "../components/skeletons";
 
-const FILTER_FIELDS: FilterField[] = [
-  { id: "search_key", label: "Search Keyword", type: "text" },
-  { id: "date_range", label: "Date Range", type: "date-range" },
-];
-
 export default function DishesScreen() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const { menuId, menuName } = useLocalSearchParams();
   const restaurantId = user?.restaurant?.[0]?.id || user?.business_id;
 
@@ -58,11 +52,7 @@ export default function DishesScreen() {
     data: menuDetails,
     isLoading: isMenuLoading,
     refetch: refetchMenu,
-  } = useSingleMenuQuery(
-    token || "",
-    String(menuId || ""),
-    String(restaurantId || ""),
-  );
+  } = useSingleMenuQuery(String(menuId || ""), String(restaurantId || ""));
 
   const debouncedSearchKey = useDebounce(searchBarValue, 500);
 
@@ -85,7 +75,7 @@ export default function DishesScreen() {
     isLoading: isDishesLoading,
     isRefetching,
     refetch: refetchDishes,
-  } = useDishesQuery(token || "", String(menuId || ""), queryParams);
+  } = useDishesQuery(String(menuId || ""), queryParams);
 
   const rawDishesList = useMemo(() => {
     return Array.isArray(dishesPayload?.data)
@@ -112,38 +102,10 @@ export default function DishesScreen() {
     await Promise.all([refetchMenu(), refetchDishes()]);
   };
 
-  const handleApplyFilters = (drawerValues: any) => {
-    setFilterValues({
-      search_key: drawerValues.search_key || "",
-      start_date: drawerValues.date_range?.start || "",
-      end_date: drawerValues.date_range?.end || "",
-    });
-  };
-
-  const handleClearFilters = () => {
-    setFilterValues({
-      search_key: "",
-      start_date: "",
-      end_date: "",
-    });
-    setSearchBarValue("");
-  };
-
   const handleOpenDetails = (item: any) => {
     setSelectedDish(item);
     setDrawerVisible(true);
   };
-
-  // Convert state filterValues into FilterDrawer values format
-  const filterDrawerValues = useMemo(() => {
-    return {
-      search_key: filterValues.search_key,
-      date_range: {
-        start: filterValues.start_date,
-        end: filterValues.end_date,
-      },
-    };
-  }, [filterValues]);
 
   // Compute active filters count
   const activeFilterCount = useMemo(() => {

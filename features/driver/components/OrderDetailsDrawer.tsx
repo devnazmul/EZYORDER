@@ -1,7 +1,6 @@
 import OrderItemList from "@/components/bottomsheet/OrderItemList";
 import Badge from "@/components/reuseable/Badge";
 import BottomSheet from "@/components/reuseable/BottomSheet";
-import { useAuth } from "@/context/AuthContext";
 import { formatLabel } from "@/utils/formatLabel";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import { getStatusBadgeConfig } from "@/utils/getStatusBadgeConfig";
@@ -26,13 +25,8 @@ export default function OrderDetailsDrawer({
   onClose,
   currencySymbol,
 }: OrderDetailsDrawerProps) {
-  const { token } = useAuth();
-
-  const { data: fullOrderDetail, isLoading: isLoadingDetails } = useOrderDetailQuery(
-    token || "",
-    order?.id || "",
-    visible,
-  );
+  const { data: fullOrderDetail, isLoading: isLoadingDetails } =
+    useOrderDetailQuery(order?.id || "", visible);
 
   if (!order) return null;
 
@@ -40,7 +34,11 @@ export default function OrderDetailsDrawer({
     Linking.openURL(`tel:${phone}`).catch(() => {});
   };
 
-  const handleOpenMaps = (address: string, lat?: string | null, lng?: string | null) => {
+  const handleOpenMaps = (
+    address: string,
+    lat?: string | null,
+    lng?: string | null,
+  ) => {
     let url = "";
     if (lat && lng) {
       url =
@@ -80,14 +78,24 @@ export default function OrderDetailsDrawer({
             <MaterialIcons name="receipt-long" size={20} color="#DC2D2A" />
           </View>
           <View>
-            <Text className="text-base font-bold text-neutral">Order #{order.id}</Text>
-            <Text className="text-[11px] text-accent font-medium mt-0.5">Assigned Delivery Details</Text>
+            <Text className="text-base font-bold text-neutral">
+              Order #{order.id}
+            </Text>
+            <Text className="text-[11px] text-accent font-medium mt-0.5">
+              Assigned Delivery Details
+            </Text>
           </View>
         </View>
 
         <Badge
           text={formatLabel(order.status) || "Pending"}
-          icon={<MaterialIcons name={statusConfig.iconName} size={12} color={statusConfig.iconColor} />}
+          icon={
+            <MaterialIcons
+              name={statusConfig.iconName}
+              size={12}
+              color={statusConfig.iconColor}
+            />
+          }
           iconPosition="left"
           containerClassName={statusConfig.containerClass}
           textClassName={statusConfig.textClass}
@@ -117,7 +125,9 @@ export default function OrderDetailsDrawer({
         {/* Instructions Section */}
         {order.initial_note ? (
           <View className="gap-y-2 mt-4">
-            <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Instructions</Text>
+            <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+              Instructions
+            </Text>
             <View className="bg-primary/5 border border-primary/20 rounded-lg p-3.5 flex-row items-start gap-2.5">
               <MaterialIcons name="assignment-late" size={18} color="#DC2D2A" />
               <Text className="text-xs text-neutral italic font-semibold leading-5 flex-1">
@@ -128,7 +138,11 @@ export default function OrderDetailsDrawer({
         ) : null}
 
         {/* Order Items Section */}
-        <OrderItemList items={detailItems} isLoading={isLoadingDetails} currencySymbol={currencySymbol} />
+        <OrderItemList
+          items={detailItems}
+          isLoading={isLoadingDetails}
+          currencySymbol={currencySymbol}
+        />
 
         {/* Bill Summary Section */}
         <DriverBillSummarySection
@@ -148,7 +162,11 @@ interface DriverPickupSectionProps {
   fullOrderDetail: any;
   order: any;
   handleCallPhone: (phone: string) => void;
-  handleOpenMaps: (address: string, lat?: string | null, lng?: string | null) => void;
+  handleOpenMaps: (
+    address: string,
+    lat?: string | null,
+    lng?: string | null,
+  ) => void;
 }
 
 function DriverPickupSection({
@@ -166,14 +184,18 @@ function DriverPickupSection({
 
   return (
     <View key="pickup-loaded" className="gap-y-2 mb-4">
-      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Pickup Details</Text>
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Pickup Details
+      </Text>
       <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <MaterialIcons name="storefront" size={16} color="#DC2D2A" />
             <Text className="text-xs text-accent">Restaurant:</Text>
           </View>
-          <Text className="text-xs font-bold text-neutral">{restaurant.Name}</Text>
+          <Text className="text-xs font-bold text-neutral">
+            {restaurant.Name}
+          </Text>
         </View>
 
         {fullOrderDetail?.created_at || order?.created_at ? (
@@ -204,10 +226,15 @@ function DriverPickupSection({
                 name="phone"
                 size={11}
                 color="#DC2D2A"
-                style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
+                style={{
+                  transform: [{ rotate: "10deg" }],
+                  marginHorizontal: -1,
+                }}
               />
               <Text className="text-xs text-primary font-bold">) </Text>
-              <Text className="text-xs text-primary font-bold">{restaurant.PhoneNumber}</Text>
+              <Text className="text-xs text-primary font-bold">
+                {restaurant.PhoneNumber}
+              </Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -229,7 +256,10 @@ function DriverPickupSection({
               activeOpacity={0.7}
               className="flex-1 ml-4"
             >
-              <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
+              <Text
+                className="text-xs font-bold text-primary text-right"
+                numberOfLines={3}
+              >
                 {restaurant.Address}
               </Text>
             </TouchableOpacity>
@@ -243,7 +273,11 @@ function DriverPickupSection({
 interface DriverCustomerSectionProps {
   order: any;
   handleCallPhone: (phone: string) => void;
-  handleOpenMaps: (address: string, lat?: string | null, lng?: string | null) => void;
+  handleOpenMaps: (
+    address: string,
+    lat?: string | null,
+    lng?: string | null,
+  ) => void;
 }
 
 function DriverCustomerSection({
@@ -253,14 +287,18 @@ function DriverCustomerSection({
 }: Readonly<DriverCustomerSectionProps>) {
   return (
     <View className="gap-y-2">
-      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Customer Details</Text>
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Customer Details
+      </Text>
       <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
             <Text className="text-xs text-accent">Name:</Text>
           </View>
-          <Text className="text-xs font-bold text-neutral">{order.customer_name || "N/A"}</Text>
+          <Text className="text-xs font-bold text-neutral">
+            {order.customer_name || "N/A"}
+          </Text>
         </View>
 
         {order.customer_phone && order.customer_phone !== "N/A" ? (
@@ -279,10 +317,15 @@ function DriverCustomerSection({
                 name="phone"
                 size={11}
                 color="#DC2D2A"
-                style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
+                style={{
+                  transform: [{ rotate: "10deg" }],
+                  marginHorizontal: -1,
+                }}
               />
               <Text className="text-xs text-primary font-bold">) </Text>
-              <Text className="text-xs text-primary font-bold">{order.customer_phone}</Text>
+              <Text className="text-xs text-primary font-bold">
+                {order.customer_phone}
+              </Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -290,11 +333,15 @@ function DriverCustomerSection({
         {order.customer_note ? (
           <View className="flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
-              <MaterialIcons name="chat-bubble-outline" size={16} color="#DC2D2A" />
+              <MaterialIcons
+                name="chat-bubble-outline"
+                size={16}
+                color="#DC2D2A"
+              />
               <Text className="text-xs text-accent">Customer Note:</Text>
             </View>
             <Text className="text-xs font-semibold text-neutral italic max-w-[60%] text-right">
-              "{order.customer_note}"
+              &quot;{order.customer_note}&quot;
             </Text>
           </View>
         ) : null}
@@ -315,7 +362,10 @@ function DriverCustomerSection({
             activeOpacity={0.7}
             className="flex-1 ml-4"
           >
-            <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
+            <Text
+              className="text-xs font-bold text-primary text-right"
+              numberOfLines={3}
+            >
               {order.door_no ? `${order.door_no}, ` : ""}
               {order.customer_address}
               {order.customer_post_code ? ` - ${order.customer_post_code}` : ""}
@@ -340,23 +390,44 @@ function DriverBillSummarySection({
   payConfig,
   currencySymbol,
 }: Readonly<DriverBillSummarySectionProps>) {
-  const subtotal = parseFloat(fullOrderDetail?.final_price || fullOrderDetail?.amount || order.amount || "0");
+  const subtotal = parseFloat(
+    fullOrderDetail?.final_price ||
+      fullOrderDetail?.amount ||
+      order.amount ||
+      "0",
+  );
   const tax = parseFloat(fullOrderDetail?.tax || order.tax || "0");
-  const tip = parseFloat(fullOrderDetail?.tip_amount || order.tip_amount || "0");
-  const discount = parseFloat(fullOrderDetail?.discount || order.discount || "0");
+  const tip = parseFloat(
+    fullOrderDetail?.tip_amount || order.tip_amount || "0",
+  );
+  const discount = parseFloat(
+    fullOrderDetail?.discount || order.discount || "0",
+  );
 
   return (
     <View className="gap-y-2 mt-4 mb-2">
-      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Bill Summary</Text>
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Bill Summary
+      </Text>
       <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
         <View className="flex-row justify-between items-center">
           <View className="flex-row items-center gap-2">
-            <MaterialIcons name="check-circle-outline" size={16} color="#DC2D2A" />
+            <MaterialIcons
+              name="check-circle-outline"
+              size={16}
+              color="#DC2D2A"
+            />
             <Text className="text-xs text-accent">Payment Status:</Text>
           </View>
           <Badge
             text={formatLabel(order.payment_status) || "Unpaid"}
-            icon={<MaterialIcons name={payConfig.iconName} size={12} color={payConfig.iconColor} />}
+            icon={
+              <MaterialIcons
+                name={payConfig.iconName}
+                size={12}
+                color={payConfig.iconColor}
+              />
+            }
             iconPosition="left"
             containerClassName={payConfig.containerClass}
             textClassName={payConfig.textClass}
@@ -406,7 +477,11 @@ function DriverBillSummarySection({
         {tip > 0 ? (
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center gap-2">
-              <MaterialIcons name="volunteer-activism" size={16} color="#DC2D2A" />
+              <MaterialIcons
+                name="volunteer-activism"
+                size={16}
+                color="#DC2D2A"
+              />
               <Text className="text-xs text-accent">Tip:</Text>
             </View>
             <Text className="text-xs font-bold text-neutral">
@@ -430,10 +505,15 @@ function DriverBillSummarySection({
         <View className="border-t border-base-200 pt-2.5 mt-1 flex-row justify-between items-center">
           <View className="flex-row items-center gap-2">
             <MaterialIcons name="payments" size={16} color="#DC2D2A" />
-            <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
+            <Text className="text-xs font-bold text-neutral">
+              Total Amount:
+            </Text>
           </View>
           <Text className="text-base font-bold text-primary">
-            {formatAmount(parseFloat(order.amount || order.total_due_amount || "0"), currencySymbol)}
+            {formatAmount(
+              parseFloat(order.amount || order.total_due_amount || "0"),
+              currencySymbol,
+            )}
           </Text>
         </View>
       </View>

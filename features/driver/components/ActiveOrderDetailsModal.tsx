@@ -1,7 +1,6 @@
 import OrderItemList from "@/components/bottomsheet/OrderItemList";
 import PaymentCollectionSection from "@/components/bottomsheet/PaymentCollectionSection";
 import BottomSheet from "@/components/reuseable/BottomSheet";
-import { useAuth } from "@/context/AuthContext";
 import { formatAmount } from "@/utils/formatters";
 import formatUtcToLocalTime from "@/utils/formatUtcToLocalTime";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -9,7 +8,6 @@ import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { UseMutationResult } from "@tanstack/react-query";
 import React from "react";
 import { Linking, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useOrderDetailQuery } from "../hooks/queries/useDriverQueries";
 import { DriverOrder } from "../types";
 
@@ -57,14 +55,8 @@ export default function ActiveOrderDetailsModal({
   handleGetRoute,
   handleQuickSMS,
 }: ActiveOrderDetailsModalProps) {
-  const insets = useSafeAreaInsets();
-
-  const { token } = useAuth();
-  const { data: fullOrderDetail, isLoading: isLoadingDetails } = useOrderDetailQuery(
-    token || "",
-    activeOrder?.id || "",
-    visible,
-  );
+  const { data: fullOrderDetail, isLoading: isLoadingDetails } =
+    useOrderDetailQuery(activeOrder?.id || "", visible);
 
   if (!activeOrder) return null;
 
@@ -84,7 +76,9 @@ export default function ActiveOrderDetailsModal({
             <MaterialIcons name="receipt-long" size={20} color="#DC2D2A" />
           </View>
           <View>
-            <Text className="text-base font-bold text-neutral">Order #{activeOrder.id}</Text>
+            <Text className="text-base font-bold text-neutral">
+              Order #{activeOrder.id}
+            </Text>
             <Text className="text-[11px] text-accent font-medium mt-0.5">
               Assigned Delivery Details
             </Text>
@@ -93,7 +87,11 @@ export default function ActiveOrderDetailsModal({
 
         <View className="flex-row items-center gap-3">
           <TouchableOpacity
-            onPress={activeOrder?.latitude && activeOrder?.longitude ? handleDirectGps : handleGetRoute}
+            onPress={
+              activeOrder?.latitude && activeOrder?.longitude
+                ? handleDirectGps
+                : handleGetRoute
+            }
             className="h-9 w-9 flex items-center justify-center rounded-md bg-primary"
           >
             <MaterialIcons name="near-me" size={20} color="#ffffff" />
@@ -101,8 +99,13 @@ export default function ActiveOrderDetailsModal({
 
           <TouchableOpacity
             onPress={() => {
-              if (activeOrder?.customer_phone && activeOrder?.customer_phone !== "N/A") {
-                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(() => {});
+              if (
+                activeOrder?.customer_phone &&
+                activeOrder?.customer_phone !== "N/A"
+              ) {
+                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(
+                  () => {},
+                );
               }
             }}
             className="h-9 w-9 flex items-center justify-center rounded-md bg-primary"
@@ -121,7 +124,11 @@ export default function ActiveOrderDetailsModal({
 
       <BottomSheetScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 }}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: 16,
+          paddingBottom: 40,
+        }}
       >
         <ActiveCustomerSection
           activeOrder={activeOrder}
@@ -131,7 +138,9 @@ export default function ActiveOrderDetailsModal({
         {/* Instructions Section */}
         {activeOrder.initial_note ? (
           <View className="gap-y-2 mt-4">
-            <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Instructions</Text>
+            <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+              Instructions
+            </Text>
             <View className="bg-primary/5 border border-primary/20 rounded-lg p-3.5 flex-row items-start gap-2.5">
               <MaterialIcons name="assignment-late" size={18} color="#DC2D2A" />
               <Text className="text-xs text-neutral italic font-semibold leading-5 flex-1">
@@ -176,7 +185,10 @@ interface ActiveCustomerSectionProps {
   handleDirectGps: () => void;
 }
 
-function ActiveCustomerSection({ activeOrder, handleDirectGps }: Readonly<ActiveCustomerSectionProps>) {
+function ActiveCustomerSection({
+  activeOrder,
+  handleDirectGps,
+}: Readonly<ActiveCustomerSectionProps>) {
   return (
     <View className="gap-y-2">
       <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
@@ -188,7 +200,9 @@ function ActiveCustomerSection({ activeOrder, handleDirectGps }: Readonly<Active
             <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
             <Text className="text-xs text-accent">Name:</Text>
           </View>
-          <Text className="text-xs font-bold text-neutral">{activeOrder.customer_name || "N/A"}</Text>
+          <Text className="text-xs font-bold text-neutral">
+            {activeOrder.customer_name || "N/A"}
+          </Text>
         </View>
 
         {activeOrder.customer_phone && activeOrder.customer_phone !== "N/A" ? (
@@ -199,7 +213,9 @@ function ActiveCustomerSection({ activeOrder, handleDirectGps }: Readonly<Active
             </View>
             <TouchableOpacity
               onPress={() => {
-                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(() => {});
+                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(
+                  () => {},
+                );
               }}
               activeOpacity={0.7}
               className="flex-row items-center"
@@ -209,10 +225,15 @@ function ActiveCustomerSection({ activeOrder, handleDirectGps }: Readonly<Active
                 name="phone"
                 size={11}
                 color="#DC2D2A"
-                style={{ transform: [{ rotate: "10deg" }], marginHorizontal: -1 }}
+                style={{
+                  transform: [{ rotate: "10deg" }],
+                  marginHorizontal: -1,
+                }}
               />
               <Text className="text-xs text-primary font-bold">) </Text>
-              <Text className="text-xs text-primary font-bold">{activeOrder.customer_phone}</Text>
+              <Text className="text-xs text-primary font-bold">
+                {activeOrder.customer_phone}
+              </Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -220,11 +241,15 @@ function ActiveCustomerSection({ activeOrder, handleDirectGps }: Readonly<Active
         {activeOrder.customer_note ? (
           <View className="flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
-              <MaterialIcons name="chat-bubble-outline" size={16} color="#DC2D2A" />
+              <MaterialIcons
+                name="chat-bubble-outline"
+                size={16}
+                color="#DC2D2A"
+              />
               <Text className="text-xs text-accent">Customer Note:</Text>
             </View>
             <Text className="text-xs font-semibold text-neutral italic max-w-[60%] text-right">
-              "{activeOrder.customer_note}"
+              &quot;{activeOrder.customer_note}&quot;
             </Text>
           </View>
         ) : null}
@@ -239,10 +264,15 @@ function ActiveCustomerSection({ activeOrder, handleDirectGps }: Readonly<Active
             activeOpacity={0.7}
             className="flex-1 ml-4"
           >
-            <Text className="text-xs font-bold text-primary text-right" numberOfLines={3}>
+            <Text
+              className="text-xs font-bold text-primary text-right"
+              numberOfLines={3}
+            >
               {activeOrder.door_no ? `${activeOrder.door_no}, ` : ""}
               {activeOrder.customer_address}
-              {activeOrder.customer_post_code ? ` — ${activeOrder.customer_post_code}` : ""}
+              {activeOrder.customer_post_code
+                ? ` — ${activeOrder.customer_post_code}`
+                : ""}
             </Text>
           </TouchableOpacity>
         </View>
@@ -255,10 +285,14 @@ interface ActiveOrderSectionProps {
   activeOrder: DriverOrder;
 }
 
-function ActiveOrderSection({ activeOrder }: Readonly<ActiveOrderSectionProps>) {
+function ActiveOrderSection({
+  activeOrder,
+}: Readonly<ActiveOrderSectionProps>) {
   return (
     <View className="gap-y-2 mt-4">
-      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Order Details</Text>
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Order Details
+      </Text>
       <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
         {activeOrder.order_time || activeOrder.created_at ? (
           <View className="flex-row items-center justify-between">
@@ -267,7 +301,9 @@ function ActiveOrderSection({ activeOrder }: Readonly<ActiveOrderSectionProps>) 
               <Text className="text-xs text-accent">Order Placed:</Text>
             </View>
             <Text className="text-xs font-bold text-neutral">
-              {formatUtcToLocalTime(activeOrder.order_time || activeOrder.created_at)}
+              {formatUtcToLocalTime(
+                activeOrder.order_time || activeOrder.created_at,
+              )}
             </Text>
           </View>
         ) : null}
@@ -302,7 +338,9 @@ function ActiveOrderSection({ activeOrder }: Readonly<ActiveOrderSectionProps>) 
               <MaterialIcons name="verified" size={16} color="#DC2D2A" />
               <Text className="text-xs text-accent">OTP Code:</Text>
             </View>
-            <Text className="text-xs font-bold text-primary">{activeOrder.delivery_otp}</Text>
+            <Text className="text-xs font-bold text-primary">
+              {activeOrder.delivery_otp}
+            </Text>
           </View>
         ) : null}
 
@@ -327,14 +365,20 @@ interface ActiveBillSectionProps {
   currencySymbol: string;
 }
 
-function ActiveBillSection({ activeOrder, totalAmount, currencySymbol }: Readonly<ActiveBillSectionProps>) {
+function ActiveBillSection({
+  activeOrder,
+  totalAmount,
+  currencySymbol,
+}: Readonly<ActiveBillSectionProps>) {
   const tip = parseFloat(activeOrder.tip_amount || "0");
   const discount = parseFloat(activeOrder.discount || "0");
   const tax = parseFloat(activeOrder.tax || "0");
 
   return (
     <View className="gap-y-2 mt-4">
-      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Bill Summary</Text>
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Bill Summary
+      </Text>
       <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
@@ -373,7 +417,11 @@ function ActiveBillSection({ activeOrder, totalAmount, currencySymbol }: Readonl
         {tip > 0 ? (
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
-              <MaterialIcons name="volunteer-activism" size={16} color="#DC2D2A" />
+              <MaterialIcons
+                name="volunteer-activism"
+                size={16}
+                color="#DC2D2A"
+              />
               <Text className="text-xs text-accent">Driver Tip:</Text>
             </View>
             <Text className="text-xs font-bold text-neutral">
@@ -385,7 +433,9 @@ function ActiveBillSection({ activeOrder, totalAmount, currencySymbol }: Readonl
         <View className="border-t border-base-200 pt-2.5 mt-1 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <MaterialIcons name="payments" size={16} color="#DC2D2A" />
-            <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
+            <Text className="text-xs font-bold text-neutral">
+              Total Amount:
+            </Text>
           </View>
           <Text className="text-base font-bold text-neutral">
             {formatAmount(totalAmount, currencySymbol)}

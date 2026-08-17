@@ -7,14 +7,14 @@ import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import PartnerSaleCard from "./PartnerSaleCard";
 
 export default function PartnersSaleView() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
   const {
     data: salesData,
     isLoading,
     refetch,
-  } = useDailyOrderPartnerSalesQuery(token || "", restaurantId || "");
+  } = useDailyOrderPartnerSalesQuery(restaurantId || "");
 
   const sales = useMemo(() => {
     if (!salesData) return [];

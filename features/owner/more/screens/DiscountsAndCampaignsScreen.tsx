@@ -3,7 +3,10 @@ import { CampaignsView, CouponsView } from "@/features/owner/more/components";
 
 import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useCampaignsQuery, useCouponsQuery } from "../hooks/queries/useDiscountQueries";
+import {
+  useCampaignsQuery,
+  useCouponsQuery,
+} from "../hooks/queries/useDiscountQueries";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
 import { Text, View } from "react-native";
@@ -15,7 +18,7 @@ const TOGGLE_OPTIONS = [
 ];
 
 export default function DiscountsAndCampaignsScreen() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
   const [activeTab, setActiveTab] = useState("coupons");
@@ -36,7 +39,7 @@ export default function DiscountsAndCampaignsScreen() {
     data: couponsResponse,
     isLoading: isCouponsLoading,
     refetch: refetchCoupons,
-  } = useCouponsQuery(token || "", restaurantId || "", 100, {
+  } = useCouponsQuery(restaurantId || "", 100, {
     search_key: debouncedCouponSearchQuery.trim() || undefined,
   });
 
@@ -45,7 +48,7 @@ export default function DiscountsAndCampaignsScreen() {
     data: campaignsResponse,
     isLoading: isCampaignsLoading,
     refetch: refetchCampaigns,
-  } = useCampaignsQuery(token || "", restaurantId || "", 100, {
+  } = useCampaignsQuery(restaurantId || "", 100, {
     search_key: debouncedCampaignSearchQuery.trim() || undefined,
     type: selectedCampaignCategory || undefined,
   });

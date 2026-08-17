@@ -6,47 +6,49 @@ import {
   getSingleMenu,
 } from "@/features/owner/more/apis/menu";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 export const useMenuAllQuery = (
-  token: string,
   restaurantId: string,
   params: Record<string, any> = {},
 ) => {
+  const { token } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.MENU_ALL, restaurantId, params],
-    queryFn: () => getMenuAll(token, restaurantId, params),
+    queryFn: () => getMenuAll(token!, restaurantId, params),
     enabled: !!token && !!restaurantId,
   });
 };
 
-export const useMenuMatrixQuery = (token: string) => {
+export const useMenuMatrixQuery = () => {
+  const { token } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.MENU_MATRIX],
-    queryFn: () => getMenuMatrix(token),
+    queryFn: () => getMenuMatrix(token!),
     enabled: !!token,
   });
 };
 
 export const useDishesQuery = (
-  token: string,
   menuId: string | number | null,
   params: Record<string, any> = {},
 ) => {
+  const { token } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.DISHES, menuId, params],
-    queryFn: () => getDishes(token, menuId!, params),
+    queryFn: () => getDishes(token!, menuId!, params),
     enabled: !!token && !!menuId,
   });
 };
 
 export const useSingleMenuQuery = (
-  token: string,
   menuId: string | number | null,
   restaurantId: string | number | null,
 ) => {
+  const { token } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.SINGLE_MENU, menuId, restaurantId],
-    queryFn: () => getSingleMenu(token, menuId!, restaurantId!),
+    queryFn: () => getSingleMenu(token!, menuId!, restaurantId!),
     enabled: !!token && !!menuId && !!restaurantId,
   });
 };

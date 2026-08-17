@@ -26,7 +26,7 @@ const DEFAULT_FILTERS = {
 };
 
 export default function ExpensesScreen() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,11 +76,11 @@ export default function ExpensesScreen() {
     data: expensesResponse,
     isLoading: isExpensesLoading,
     refetch: refetchExpenses,
-  } = useExpensesQuery(token || "", restaurantId || "", 200, apiParams);
+  } = useExpensesQuery(restaurantId || "", 200, apiParams);
 
   // Fetch Expense Types ( for category/type details display)
   const { data: typesResponse, isLoading: isTypesLoading } =
-    useExpenseTypesQuery(token || "", restaurantId || "", 1000);
+    useExpenseTypesQuery(restaurantId || "", 1000);
 
   // Extract raw lists
   const expenses = useMemo(() => {
