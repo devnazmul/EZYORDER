@@ -1,9 +1,9 @@
+import { useAuth } from "@/context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
 import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "@/context/AuthContext";
 
 const DriverLayout: React.FC = () => {
   const { token, user } = useAuth();
@@ -15,7 +15,7 @@ const DriverLayout: React.FC = () => {
 
   const role = (user?.type || "").toLowerCase().trim();
   if (role !== "driver") {
-    return <Redirect href="/(tabs)/home" />;
+    return <Redirect href="/(owner)/home" />;
   }
 
   const renderTabBarLabel =
@@ -64,7 +64,9 @@ const DriverLayout: React.FC = () => {
         options={{
           title: "Dashboard",
           tabBarLabel: renderTabBarLabel("Dashboard"),
-          tabBarIcon: ({ color }) => <MaterialIcons name="dashboard" size={24} color={color} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="dashboard" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -72,7 +74,9 @@ const DriverLayout: React.FC = () => {
         options={{
           title: "My Orders",
           tabBarLabel: renderTabBarLabel("My Orders"),
-          tabBarIcon: ({ color }) => <MaterialIcons name="receipt" size={24} color={color} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="receipt" size={24} color={color} />
+          ),
         }}
       />
     </Tabs>

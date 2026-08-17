@@ -43,7 +43,7 @@ export default function KpiCard({
   subtitle,
   rightElement,
   onPress,
-}: KpiCardProps) {
+}: Readonly<KpiCardProps>) {
   // SKELETON LOADER STATE
   if (loading) {
     return <KpiCardSkeleton trend={trend} />;
@@ -52,13 +52,15 @@ export default function KpiCard({
   const defaultColors: [string, string, ...string[]] =
     variant === "dark" ? ["#1E293B", "#0F172A"] : ["#FFFFFF", "#F8FAFC"];
 
-  const colorsToUse = (gradientColors && gradientColors.length >= 2 ? gradientColors : defaultColors) as [
-    string,
-    string,
-    ...string[],
-  ];
+  const colorsToUse = (
+    gradientColors && gradientColors.length >= 2
+      ? gradientColors
+      : defaultColors
+  ) as [string, string, ...string[]];
 
-  const isHexOrRgbBg = iconBgColor && (iconBgColor.startsWith("#") || iconBgColor.startsWith("rgb"));
+  const isHexOrRgbBg =
+    iconBgColor &&
+    (iconBgColor.startsWith("#") || iconBgColor.startsWith("rgb"));
   const iconBgClass = iconBgColor
     ? isHexOrRgbBg
       ? ""
@@ -78,14 +80,23 @@ export default function KpiCard({
       style={{
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: variant === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+        borderColor:
+          variant === "dark"
+            ? "rgba(255, 255, 255, 0.1)"
+            : "rgba(0, 0, 0, 0.05)",
         padding: WP("3.5%"),
         minHeight: minHeight ?? 110,
       }}
       className={`flex-1 shadow-sm ${containerClassName}`}
     >
-      <View className="flex-col justify-between flex-1" style={{ gap: WP("2%") }}>
-        <View className="flex-row items-center justify-start" style={{ gap: WP("2%") }}>
+      <View
+        className="flex-col justify-between flex-1"
+        style={{ gap: WP("2%") }}
+      >
+        <View
+          className="flex-row items-center justify-start"
+          style={{ gap: WP("2%") }}
+        >
           <View
             className={`rounded-xl self-start p-2 ${iconBgClass}`}
             style={{
@@ -96,7 +107,13 @@ export default function KpiCard({
             <MaterialIcons
               name={icon}
               size={WP("4%")}
-              color={iconColor ? iconColor : variant === "dark" ? "#ffffff" : "#000000"}
+              color={
+                iconColor
+                  ? iconColor
+                  : variant === "dark"
+                    ? "#ffffff"
+                    : "#000000"
+              }
             />
           </View>
           <Text
@@ -132,20 +149,38 @@ export default function KpiCard({
             {trend && (
               <View
                 className={`flex-row items-center self-start px-2 py-1 rounded-full gap-1 mt-2 ${
-                  trend === "up" ? "bg-success/20" : trend === "down" ? "bg-error/20" : "bg-white/10"
+                  trend === "up"
+                    ? "bg-success/20"
+                    : trend === "down"
+                      ? "bg-error/20"
+                      : "bg-white/10"
                 }`}
               >
                 <MaterialIcons
-                  name={trend === "up" ? "trending-up" : trend === "down" ? "trending-down" : "trending-flat"}
+                  name={
+                    trend === "up"
+                      ? "trending-up"
+                      : trend === "down"
+                        ? "trending-down"
+                        : "trending-flat"
+                  }
                   size={WP("3.75%")}
                   color={
-                    trend === "up" ? "#36d399" : trend === "down" ? "#ff8369" : "rgba(255, 255, 255, 0.7)"
+                    trend === "up"
+                      ? "#36d399"
+                      : trend === "down"
+                        ? "#ff8369"
+                        : "rgba(255, 255, 255, 0.7)"
                   }
                 />
                 <Text
                   style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
                   className={`font-medium capitalize truncate ${
-                    trend === "up" ? "text-success" : trend === "down" ? "text-error" : "text-white/70"
+                    trend === "up"
+                      ? "text-success"
+                      : trend === "down"
+                        ? "text-error"
+                        : "text-white/70"
                   }`}
                   numberOfLines={2}
                 >
@@ -157,7 +192,9 @@ export default function KpiCard({
 
           {/* Right Element Slot */}
           {rightElement ? (
-            <View className="justify-end items-end flex-1 max-w-[49%]">{rightElement}</View>
+            <View className="justify-end items-end flex-1 max-w-[49%]">
+              {rightElement}
+            </View>
           ) : null}
         </View>
       </View>
@@ -166,7 +203,11 @@ export default function KpiCard({
 
   if (onPress) {
     return (
-      <TouchableOpacity activeOpacity={0.85} onPress={onPress} className="flex-1 flex-col">
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={onPress}
+        className="flex-1 flex-col"
+      >
         {cardContent}
       </TouchableOpacity>
     );

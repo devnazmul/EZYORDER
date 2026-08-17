@@ -1,5 +1,5 @@
-import { Redirect, Stack } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import { Redirect, Stack } from "expo-router";
 import React from "react";
 
 export default function AuthLayout() {
@@ -10,7 +10,7 @@ export default function AuthLayout() {
     if (role === "driver") {
       return <Redirect href="/(driver)" />;
     }
-    return <Redirect href="/(tabs)/home" />;
+    return <Redirect href="/(owner)/home" />;
   }
 
   return (

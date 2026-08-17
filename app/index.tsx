@@ -1,5 +1,5 @@
-import { Redirect } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import { Redirect } from "expo-router";
 import React from "react";
 
 export default function Index() {
@@ -14,5 +14,5 @@ export default function Index() {
     return <Redirect href="/(driver)" />;
   }
 
-  return <Redirect href="/(tabs)/home" />;
+  return <Redirect href="/(owner)/home" />;
 }

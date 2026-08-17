@@ -17,30 +17,73 @@ interface SalesAreaChartProps {
 const formatLabel = (label: string) => {
   if (!label) return "";
   // Format YYYY-MM-DD to short date
-  let match = label.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  let match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(label);
   if (match) {
     const [_, year, month, day] = match;
-    const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+    const d = new Date(
+      Number.parseInt(year, 10),
+      Number.parseInt(month, 10) - 1,
+      Number.parseInt(day, 10),
+    );
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
   // Format DD-MM-YYYY to short date
-  match = label.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(label);
   if (match) {
     const [_, day, month, year] = match;
-    const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+    const d = new Date(
+      Number.parseInt(year, 10),
+      Number.parseInt(month, 10) - 1,
+      Number.parseInt(day, 10),
+    );
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
   return label;
 };
+
+interface PointerLabelProps {
+  readonly items: any;
+  readonly currencySymbol: string;
+}
+
+function PointerLabel({ items, currencySymbol }: PointerLabelProps) {
+  if (!items?.length) return null;
+  const tooltipText = formatAmount(items[0].value, currencySymbol);
+  return (
+    <View
+      style={{
+        backgroundColor: "#1F2937",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 80,
+        marginBottom: 6,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.5,
+        elevation: 30,
+      }}
+    >
+      <Text style={{ color: "white", fontSize: 9, fontWeight: "bold" }}>
+        {items[0].label ? `${items[0].label}: ` : ""}
+        {tooltipText}
+      </Text>
+    </View>
+  );
+}
 
 export default function SalesAreaChart({
   trendData,
   currencySymbol,
   isLoading = false,
   containerClassName = "",
-}: SalesAreaChartProps) {
+}: Readonly<SalesAreaChartProps>) {
   const chartData = useMemo(() => {
-    if (!trendData || !Array.isArray(trendData) || trendData.length === 0) return [];
+    if (!trendData || !Array.isArray(trendData) || trendData.length === 0)
+      return [];
     return trendData.map((item: any) => ({
       value: Number(item.sales || 0),
       label: formatLabel(String(item.label || "")),
@@ -48,8 +91,12 @@ export default function SalesAreaChart({
   }, [trendData]);
 
   const totalSales = useMemo(() => {
-    if (!trendData || !Array.isArray(trendData) || trendData.length === 0) return 0;
-    return trendData.reduce((sum: number, item: any) => sum + Number(item.sales || 0), 0);
+    if (!trendData || !Array.isArray(trendData) || trendData.length === 0)
+      return 0;
+    return trendData.reduce(
+      (sum: number, item: any) => sum + Number(item.sales || 0),
+      0,
+    );
   }, [trendData]);
 
   const hasData = chartData.length > 0;
@@ -94,7 +141,9 @@ export default function SalesAreaChart({
     >
       {!hasData ? (
         <View className="flex-1 items-center justify-center py-8">
-          <Text className="text-xs text-accent text-center">No sales trend recorded for this period.</Text>
+          <Text className="text-xs text-accent text-center">
+            No sales trend recorded for this period.
+          </Text>
         </View>
       ) : (
         <View className="items-center justify-center mt-4">
@@ -121,7 +170,10 @@ export default function SalesAreaChart({
             yAxisThickness={0}
             xAxisThickness={1}
             xAxisColor={COLORS.base100}
-            yAxisTextStyle={{ color: COLORS.accent, fontSize: getResponsiveFontSize("xs") }}
+            yAxisTextStyle={{
+              color: COLORS.accent,
+              fontSize: getResponsiveFontSize("xs"),
+            }}
             xAxisLabelTextStyle={{
               color: COLORS.accent,
               fontSize: getResponsiveFontSize("xs"),
@@ -136,35 +188,8 @@ export default function SalesAreaChart({
               pointerStripWidth: 1.5,
               strokeDashArray: [2, 5],
               pointerColor: COLORS.primary,
-              radius: 4,
-              pointerLabelComponent: (items: any) => {
-                if (!items || !items.length) return null;
-                const tooltipText = formatAmount(items[0].value, currencySymbol);
-                return (
-                  <View
-                    style={{
-                      backgroundColor: "#1F2937",
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      borderRadius: 4,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minWidth: 80,
-                      marginBottom: 6,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.2,
-                      shadowRadius: 1.5,
-                      elevation: 30,
-                    }}
-                  >
-                    <Text style={{ color: "white", fontSize: 9, fontWeight: "bold" }}>
-                      {items[0].label ? `${items[0].label}: ` : ""}
-                      {tooltipText}
-                    </Text>
-                  </View>
-                );
-              },
+              pointerLabelComponent: (items: any) =>
+                PointerLabel({ items, currencySymbol }),
             }}
           />
         </View>

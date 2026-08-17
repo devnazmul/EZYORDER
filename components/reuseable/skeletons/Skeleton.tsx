@@ -7,7 +7,11 @@ interface SkeletonContainerProps {
   className?: string;
 }
 
-export function SkeletonContainer({ children, style, className }: SkeletonContainerProps) {
+export function SkeletonContainer({
+  children,
+  style,
+  className,
+}: Readonly<SkeletonContainerProps>) {
   const pulse = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
@@ -52,7 +56,7 @@ export function Bone({
   circle = false,
   style,
   className = "",
-}: SkeletonProps) {
+}: Readonly<SkeletonProps>) {
   const pulse = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {

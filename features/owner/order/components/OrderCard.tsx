@@ -3,7 +3,7 @@ import Button from "@/components/reuseable/Button";
 import StatusBadge from "@/components/reuseable/StatusBadge";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/context/DataContext";
-import { useUsersQuery } from "@/hooks/useUserQueries";
+import { useUsersQuery } from "@/features/owner/more/hooks/queries/useUserQueries";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
@@ -25,7 +25,8 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
     if (!usersResponse) return [];
     if (Array.isArray(usersResponse)) return usersResponse;
     if (Array.isArray(usersResponse.data)) return usersResponse.data;
-    if (usersResponse.data && Array.isArray(usersResponse.data.data)) return usersResponse.data.data;
+    if (usersResponse.data && Array.isArray(usersResponse.data.data))
+      return usersResponse.data.data;
     return [];
   }, [usersResponse]);
 
@@ -42,18 +43,24 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
   }, [item.type]);
 
   const assignedText = useMemo(() => {
-    if (item.driver) return `Driver: ${item.driver.first_Name || item.driver.name}`;
-    if (item.waiter) return `Waiter: ${item.waiter.first_Name || item.waiter.name}`;
+    if (item.driver)
+      return `Driver: ${item.driver.first_Name || item.driver.name}`;
+    if (item.waiter)
+      return `Waiter: ${item.waiter.first_Name || item.waiter.name}`;
 
     if (item.driver_id) {
-      const match = usersList.find((u: any) => String(u.id) === String(item.driver_id));
+      const match = usersList.find(
+        (u: any) => String(u.id) === String(item.driver_id),
+      );
       if (match) {
         return `${match.first_Name} ${match.last_Name}`;
       }
     }
 
     if (item.waiter_id) {
-      const match = usersList.find((u: any) => String(u.id) === String(item.waiter_id));
+      const match = usersList.find(
+        (u: any) => String(u.id) === String(item.waiter_id),
+      );
       if (match) {
         return `${match.first_Name || match.name || match.email}`;
       }
@@ -73,7 +80,10 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
     const detailList = order.detail || order.details;
     if (Array.isArray(detailList) && detailList.length > 0) {
       return detailList
-        .map((d: any) => `${d.qty || d.quantity || 1}x ${d.dish?.name || d.dish_name || "Item"}`)
+        .map(
+          (d: any) =>
+            `${d.qty || d.quantity || 1}x ${d.dish?.name || d.dish_name || "Item"}`,
+        )
         .join(", ");
     }
     return order.description || "";
@@ -85,7 +95,10 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
         <View className="flex-row justify-between items-start">
           <View className="gap-y-1 flex-1 pr-2">
             <View className="flex-row items-center gap-2">
-              <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
+              <Text
+                style={{ fontSize: getResponsiveFontSize("md") }}
+                className="font-bold text-neutral"
+              >
                 #{item.id}
               </Text>
               <Badge
@@ -135,7 +148,9 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
                 style={{ fontSize: getResponsiveFontSize("xs") }}
                 className="font-semibold text-neutral capitalize"
               >
-                {String(item.order_app || "").toLowerCase() === "pos" ? "POS" : "Client"}
+                {String(item.order_app || "").toLowerCase() === "pos"
+                  ? "POS"
+                  : "Client"}
               </Text>
             </View>
 
@@ -146,7 +161,10 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
               >
                 Assigned:
               </Text>
-              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-semibold text-neutral">
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="font-semibold text-neutral"
+              >
                 {assignedText}
               </Text>
             </View>
@@ -165,15 +183,25 @@ export default function OrderCard({ item, onViewDetails }: OrderCardProps) {
 
         {/* Price Row */}
         <View className="flex-row justify-between items-center pt-1">
-          <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-neutral">
-            {formatAmount(item.amount || item.final_price || "0", currencySymbol)}
+          <Text
+            style={{ fontSize: getResponsiveFontSize("md") }}
+            className="font-bold text-neutral"
+          >
+            {formatAmount(
+              item.amount || item.final_price || "0",
+              currencySymbol,
+            )}
           </Text>
         </View>
       </View>
 
       {/* Button Action */}
       <View style={{ paddingHorizontal: WP("4%") }} className="pb-4">
-        <Button label="View Details" onPress={onViewDetails} variant="primary" />
+        <Button
+          label="View Details"
+          onPress={onViewDetails}
+          variant="primary"
+        />
       </View>
     </View>
   );

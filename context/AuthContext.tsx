@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import authStore, { UserData } from "@/utils/authStore";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { unregisterDeviceToken } from "@/apis/notification";
+import { unregisterDeviceToken } from "@/features/owner/notifications/apis/notification";
 
 interface AuthContextType {
   user: UserData | null;

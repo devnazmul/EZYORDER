@@ -2,7 +2,7 @@ import AppHeader from "@/components/AppHeader";
 import LiveOrderBoard from "@/components/reuseable/dashboard/LiveOrderBoard";
 import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
 import { useAuth } from "@/context/AuthContext";
-import { useOwnerProfileQuery } from "@/hooks/useUserQueries";
+import { useOwnerProfileQuery } from "@/features/owner/more/hooks/queries/useUserQueries";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import React, { useMemo, useState } from "react";
 import { Text, View } from "react-native";

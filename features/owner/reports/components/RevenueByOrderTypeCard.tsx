@@ -34,7 +34,7 @@ export default function RevenueByOrderTypeCard({
   currencySymbol,
   isLoading = false,
   containerClassName = "",
-}: RevenueByOrderTypeCardProps) {
+}: Readonly<RevenueByOrderTypeCardProps>) {
   const list = Array.isArray(orderTypeData) ? orderTypeData : [];
 
   return (
@@ -62,7 +62,7 @@ export default function RevenueByOrderTypeCard({
             const typeColor = getOrderTypeColor(item.order_type || "");
 
             return (
-              <View key={i} className="gap-y-2 mb-2">
+              <View key={item.order_type || i} className="gap-y-2 mb-2">
                 <View className="flex-row justify-between items-center">
                   <View className="flex-row gap-2 items-center flex-1 min-w-0 mr-2">
                     <MaterialIcons name={icon} size={WP("4.5%")} color={typeColor} />

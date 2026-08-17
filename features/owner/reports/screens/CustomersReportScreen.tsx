@@ -1,4 +1,4 @@
-import { CustomerParams } from "@/apis/reports";
+import { CustomerParams } from "../apis/reports";
 import EmptyState from "@/components/reuseable/EmptyState";
 import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
 import PageTitle from "@/components/reuseable/PageTitle";
