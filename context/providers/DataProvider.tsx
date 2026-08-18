@@ -3,14 +3,14 @@ import {
   useCombineDataQuery,
   useRestaurantQuery,
 } from "@/features/owner/more/hooks/queries/useRestaurantQueries";
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "@/hooks";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DataContext } from "../context/DataContext";
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [data, setData] = useState<any>({});
 
   const targetId = user?.business_id || user?.restaurant?.[0]?.id || null;
@@ -24,21 +24,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     error,
     refetch,
     isSuccess,
-  } = useCombineDataQuery(token || "", targetId, userType);
+  } = useCombineDataQuery(targetId, userType);
 
   // Fetch restaurant settings
   const {
     data: settings,
     isLoading: isSettingsLoading,
     refetch: refetchSettings,
-  } = useRestaurantQuery(token || "", targetId);
+  } = useRestaurantQuery(targetId);
 
   // Fetch business timing
   const {
     data: businessTiming,
     isLoading: isBusinessTimingLoading,
     refetch: refetchBusinessTiming,
-  } = useBusinessTimingQuery(token || "", targetId);
+  } = useBusinessTimingQuery(targetId);
 
   useEffect(() => {
     if (isError) {
@@ -55,36 +55,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [isLoading, isError, isSuccess, comBineData, error]);
 
   // Cast refetches to return any to satisfy type definition cleanly
-  const handleRefetch = async () => {
+  const handleRefetch = useCallback(async () => {
     return refetch();
-  };
+  }, [refetch]);
 
-  const handleRefetchSettings = async () => {
+  const handleRefetchSettings = useCallback(async () => {
     return refetchSettings();
-  };
+  }, [refetchSettings]);
 
-  const handleRefetchBusinessTiming = async () => {
+  const handleRefetchBusinessTiming = useCallback(async () => {
     return refetchBusinessTiming();
-  };
+  }, [refetchBusinessTiming]);
+
+  const contextValue = useMemo(
+    () => ({
+      data,
+      setData,
+      refetch: handleRefetch,
+      isDataLoading: isLoading,
+      isDataGetSuccess: isSuccess,
+      isDataHasError: isError,
+      settings: settings?.restaurant,
+      isSettingsLoading,
+      refetchSettings: handleRefetchSettings,
+      businessTiming,
+      isBusinessTimingLoading,
+      refetchBusinessTiming: handleRefetchBusinessTiming,
+    }),
+    [
+      data,
+      handleRefetch,
+      isLoading,
+      isSuccess,
+      isError,
+      settings?.restaurant,
+      isSettingsLoading,
+      handleRefetchSettings,
+      businessTiming,
+      isBusinessTimingLoading,
+      handleRefetchBusinessTiming,
+    ],
+  );
 
   return (
-    <DataContext.Provider
-      value={{
-        data,
-        setData,
-        refetch: handleRefetch,
-        isDataLoading: isLoading,
-        isDataGetSuccess: isSuccess,
-        isDataHasError: isError,
-        settings: settings?.restaurant,
-        isSettingsLoading,
-        refetchSettings: handleRefetchSettings,
-        businessTiming,
-        isBusinessTimingLoading,
-        refetchBusinessTiming: handleRefetchBusinessTiming,
-      }}
-    >
-      {children}
-    </DataContext.Provider>
+    <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>
   );
 };

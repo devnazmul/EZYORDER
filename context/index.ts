@@ -7,6 +7,7 @@ export {
 export { AuthProvider } from "./providers/AuthProvider";
 export { DataProvider } from "./providers/DataProvider";
 export {
+  ResponsiveContext,
   ResponsiveProvider,
   useResponsive,
 } from "./providers/ResponsiveProvider";

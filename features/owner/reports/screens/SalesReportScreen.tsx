@@ -7,8 +7,7 @@ import {
   RefreshableScrollView,
   ToggleBar,
 } from "@/components/reuseable";
-import { useData } from "@/context";
-import { useAuth } from "@/hooks";
+import { useAuth, useData } from "@/hooks";
 import {
   formatAmount,
   formatDate,
@@ -88,6 +87,8 @@ const INITIAL_FILTER_VALUES = {
   period: "This Week",
   dateRange: { start: "", end: "" },
 };
+
+const EMPTY_ARRAY: any[] = [];
 
 const SalesReport = () => {
   const { user } = useAuth();
@@ -321,7 +322,7 @@ const SalesReport = () => {
 
             {/* Top performing items */}
             <TopProductsList
-              itemList={itemData || []}
+              itemList={itemData || EMPTY_ARRAY}
               currencySymbol={currencySymbol}
               isLoading={isItemLoading && !isRefreshing}
               onNavigateToTab={setActiveTab}
@@ -335,7 +336,7 @@ const SalesReport = () => {
               <SalesDailyListSkeleton />
             ) : (
               <SalesDailyList
-                dailyList={dailySummaryData || []}
+                dailyList={dailySummaryData || EMPTY_ARRAY}
                 currencySymbol={currencySymbol}
               />
             )}
@@ -348,7 +349,7 @@ const SalesReport = () => {
               <SalesItemListSkeleton />
             ) : (
               <SalesItemList
-                itemList={itemData || []}
+                itemList={itemData || EMPTY_ARRAY}
                 currencySymbol={currencySymbol}
               />
             )}
@@ -361,7 +362,7 @@ const SalesReport = () => {
               <SalesHourlyListSkeleton />
             ) : (
               <SalesHourlyList
-                hourlyList={hourlyData || []}
+                hourlyList={hourlyData || EMPTY_ARRAY}
                 currencySymbol={currencySymbol}
               />
             )}
