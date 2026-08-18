@@ -1,26 +1,9 @@
-/**
- * @deprecated This monolithic AuthContext file is deprecated.
- * Please use the separated modular architecture instead:
- * - Context definition: `@/context/context/AuthContext`
- * - Provider component: `@/context/providers/AuthProvider`
- * - Custom hook: `@/hooks/useAuth`
- */
 import { unregisterDeviceToken } from "@/features/owner/notifications/apis/notification";
 import { authStore, UserData } from "@/utils";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import React, { createContext, useContext, useEffect, useState } from "react";
-
-interface AuthContextType {
-  user: UserData | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (token: string, user: UserData) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import React, { useEffect, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -102,12 +85,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };

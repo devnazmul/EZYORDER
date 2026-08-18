@@ -123,6 +123,7 @@ Use TanStack Query exclusively for server state. Do not sync server data into gl
 ## 11. Component Composition (Prefer Composition over Prop Drilling / Monolithic Components)
 
 Break large components into smaller ones and compose them using `children` or explicit slot props, rather than building one component that takes a pile of config props to control its internals.
+
 - If a component needs more than ~3-4 boolean/variant props just to toggle which children render, switch to composition (`children` or slots) instead.
 - Pairs with Rule: the parent owns `filters`/`setFilters` and passes fully-formed children down, rather than every layout component needing to know filter shape.
 - Keep composed subcomponents (`CardHeader`, `CardFooter`, etc.) colocated with their parent in the same feature/UI folder unless truly generic, in which case they belong in a shared `components/ui` folder.
@@ -164,3 +165,28 @@ Always use `dayjs` for date and time parsing, manipulation, and formatting inste
   1. Functions passed as props to memoized children (`React.memo`).
   2. Functions listed in dependency arrays of hooks like `useEffect` or custom hooks.
   3. Do NOT wrap handlers that are only used inline at the leaf component level.
+
+---
+
+## 17. Organized Imports via Barrel Files (`index.ts`)
+
+Always create and maintain `index.ts` barrel export files in major architectural folders to keep import paths clean, organized, and decoupled from internal folder restructuring:
+
+- **Global Folders**:
+  - `@/components/reuseable`: Reusable generic UI components.
+  - `@/utils`: Helper functions, date parsers, formatters, and responsive layout utilities.
+  - `@/context`: Global React contexts, state types, and providers.
+  - `@/hooks`: Global custom hooks.
+
+- **Feature-Specific Folders**:
+  - `features/<domain>/components/index.ts`: Feature domain cards, charts, lists, and corresponding skeletons.
+  - `features/<domain>/hooks/queries/index.ts` (or `features/<domain>/api/index.ts`): TanStack Query hooks.
+
+- **Import Cleanliness**:
+  - Avoid deep internal relative file path imports from external files (e.g. use `import { formatDate } from "@/utils"` instead of `import { formatDate } from "@/utils/formatDate"`).
+  - Consolidate multiple imports from the same directory into a single multiline destructuring statement from the barrel alias (e.g. `import { formatAmount, formatDate } from "@/utils"`).
+
+- **Critical Rules & Circular Dependency Prevention**:
+  1. **No Internal Self-Imports**: Files *inside* a folder must NEVER import sibling files via their own `index.ts` (e.g., `utils/formatters.ts` must import `./formatAmount`, NEVER from `@/utils` or `./index`). This causes fatal circular dependencies (`undefined` exports at runtime).
+  2. **No Monolithic Mega-Barrels**: Do NOT create a single root barrel (e.g. `src/index.ts`) exporting the whole application. Barrels must remain scoped per directory/domain.
+  3. **Strict Type-Only Re-exports**: When re-exporting TypeScript interfaces/types from barrel files, use `type` modifier (e.g., `export { type FilterField } from "./FilterDrawer"`) to enable clean compile-time stripping without runtime evaluation overhead in Metro.

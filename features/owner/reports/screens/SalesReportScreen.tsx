@@ -1,29 +1,38 @@
-import KpiCard from "@/components/reuseable/dashboard/KpiCard";
-import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
-import PageTitle from "@/components/reuseable/PageTitle";
-import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
-import ToggleBar from "@/components/reuseable/ToggleBar";
-import { useAuth } from "@/context/AuthContext";
-import { useData } from "@/context/context/DataContext";
-import { formatDate } from "@/utils/formatDate";
-import { formatAmount } from "@/utils/formatters";
-import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
-import { useResponsiveScreen, WP } from "@/utils/getResponsiveSizes";
+import {
+  ActionCard,
+  FilterDrawer,
+  FilterField,
+  KpiCard,
+  PageTitle,
+  RefreshableScrollView,
+  ToggleBar,
+} from "@/components/reuseable";
+import { useData } from "@/context";
+import { useAuth } from "@/hooks";
+import {
+  formatAmount,
+  formatDate,
+  getCurrencySymbol,
+  useResponsiveScreen,
+  WP,
+} from "@/utils";
 import React, { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SparklineChart from "../../components/SparklineChart";
-import RevenueByOrderTypeCard from "../components/RevenueByOrderTypeCard";
-import SalesAreaChart from "../components/SalesAreaChart";
-import SalesByPaymentCard from "../components/SalesByPaymentCard";
-import SalesDailyList from "../components/SalesDailyList";
-import SalesHourlyList from "../components/SalesHourlyList";
-import SalesItemList from "../components/SalesItemList";
-import SalesSummaryListCard from "../components/SalesSummaryListCard";
-import SalesDailyListSkeleton from "../components/skeletons/SalesDailyListSkeleton";
-import SalesHourlyListSkeleton from "../components/skeletons/SalesHourlyListSkeleton";
-import SalesItemListSkeleton from "../components/skeletons/SalesItemListSkeleton";
-import TopProductsList from "../components/TopProductsList";
+import { SparklineChart } from "../../components";
+import {
+  RevenueByOrderTypeCard,
+  SalesAreaChart,
+  SalesByPaymentCard,
+  SalesDailyList,
+  SalesDailyListSkeleton,
+  SalesHourlyList,
+  SalesHourlyListSkeleton,
+  SalesItemList,
+  SalesItemListSkeleton,
+  SalesSummaryListCard,
+  TopProductsList,
+} from "../components";
 import {
   useSalesByItemQuery,
   useSalesByOrderTypeQuery,
@@ -31,7 +40,7 @@ import {
   useSalesHourlyQuery,
   useSalesSummaryQuery,
   useSalesTrendQuery,
-} from "../hooks/queries/useReportsQueries";
+} from "../hooks/queries";
 
 // Helper: Calculate Date Period Ranges aligned with calendar boundaries
 const getDateRange = (period: string) => {
@@ -195,86 +204,90 @@ const SalesReport = () => {
           <FilterDrawer
             fields={filterFields}
             values={filterValues}
-            onApply={setFilterValues}
+            onApply={(values) =>
+              setFilterValues(values as typeof INITIAL_FILTER_VALUES)
+            }
             onClear={() => setFilterValues(INITIAL_FILTER_VALUES)}
           />
         </View>
 
         {activeTab === "Overview" && (
           <View key="overview" className="gap-y-3 pb-6">
-            <View className="flex-col gap-y-3">
-              <View className="flex-1">
-                <KpiCard
-                  variant="dark"
-                  minHeight={120}
-                  loading={isSummaryLoading && !isRefreshing}
-                  title="Total Sales"
-                  value={formatAmount(grossSales, currencySymbol)}
-                  gradientColors={["#111827", "#0F172A"]}
-                  icon="currency-pound"
-                  iconColor="#FFFFFF"
-                  iconBgColor="#10B981"
-                  rightElement={
-                    <SparklineChart
-                      data={sparklineData}
-                      width={isLandscape ? WP("22%") : WP("38%")}
-                      height={70}
-                      paddingBottom={14}
-                      strokeColor="#10B981"
-                      gradientId="salesReportSparkline"
-                    />
-                  }
-                />
+            <ActionCard title="Insights" bodyStyle={{ padding: WP("3.5%") }}>
+              <View className="flex-col gap-y-3">
+                <View className="flex-1">
+                  <KpiCard
+                    variant="dark"
+                    minHeight={120}
+                    loading={isSummaryLoading && !isRefreshing}
+                    title="Total Sales"
+                    value={formatAmount(grossSales, currencySymbol)}
+                    gradientColors={["#111827", "#0F172A"]}
+                    icon="currency-pound"
+                    iconColor="#FFFFFF"
+                    iconBgColor="#10B981"
+                    rightElement={
+                      <SparklineChart
+                        data={sparklineData}
+                        width={isLandscape ? WP("22%") : WP("38%")}
+                        height={70}
+                        paddingBottom={14}
+                        strokeColor="#10B981"
+                        gradientId="salesReportSparkline"
+                      />
+                    }
+                  />
+                </View>
+                <View className="flex-row gap-3 flex-1">
+                  <KpiCard
+                    variant="light"
+                    loading={isSummaryLoading && !isRefreshing}
+                    title="Total Orders"
+                    value={totalOrders.toLocaleString()}
+                    icon="shopping-bag"
+                    iconColor="#F43F5E"
+                    iconBgColor="#FFE4E6"
+                    gradientColors={["#FFE4E6", "#FECDD3"]}
+                    containerClassName="flex-1"
+                  />
+                  <KpiCard
+                    variant="light"
+                    loading={isSummaryLoading && !isRefreshing}
+                    title="Avg Order Value"
+                    value={formatAmount(avgOrderValue, currencySymbol)}
+                    icon="payments"
+                    iconColor="#D97706"
+                    iconBgColor="#FEF3C7"
+                    gradientColors={["#FEF3C7", "#FDE68A"]}
+                    containerClassName="flex-1"
+                  />
+                </View>
+                <View className="flex-row gap-3 flex-1">
+                  <KpiCard
+                    variant="light"
+                    loading={isSummaryLoading && !isRefreshing}
+                    title="Total Discounts"
+                    value={formatAmount(discounts, currencySymbol)}
+                    icon="local-offer"
+                    iconColor="#8B5CF6"
+                    iconBgColor="#EDE9FE"
+                    gradientColors={["#EDE9FE", "#DDD6FE"]}
+                    containerClassName="flex-1"
+                  />
+                  <KpiCard
+                    variant="light"
+                    loading={isSummaryLoading && !isRefreshing}
+                    title="Net Sales"
+                    value={formatAmount(netSales, currencySymbol)}
+                    icon="account-balance-wallet"
+                    iconColor="#059669"
+                    iconBgColor="#D1FAE5"
+                    gradientColors={["#D1FAE5", "#A7F3D0"]}
+                    containerClassName="flex-1"
+                  />
+                </View>
               </View>
-              <View className="flex-row gap-3 flex-1">
-                <KpiCard
-                  variant="light"
-                  loading={isSummaryLoading && !isRefreshing}
-                  title="Total Orders"
-                  value={totalOrders.toLocaleString()}
-                  icon="shopping-bag"
-                  iconColor="#F43F5E"
-                  iconBgColor="#FFE4E6"
-                  gradientColors={["#FFE4E6", "#FECDD3"]}
-                  containerClassName="flex-1"
-                />
-                <KpiCard
-                  variant="light"
-                  loading={isSummaryLoading && !isRefreshing}
-                  title="Avg Order Value"
-                  value={formatAmount(avgOrderValue, currencySymbol)}
-                  icon="payments"
-                  iconColor="#D97706"
-                  iconBgColor="#FEF3C7"
-                  gradientColors={["#FEF3C7", "#FDE68A"]}
-                  containerClassName="flex-1"
-                />
-              </View>
-              <View className="flex-row gap-3 flex-1">
-                <KpiCard
-                  variant="light"
-                  loading={isSummaryLoading && !isRefreshing}
-                  title="Total Discounts"
-                  value={formatAmount(discounts, currencySymbol)}
-                  icon="local-offer"
-                  iconColor="#8B5CF6"
-                  iconBgColor="#EDE9FE"
-                  gradientColors={["#EDE9FE", "#DDD6FE"]}
-                  containerClassName="flex-1"
-                />
-                <KpiCard
-                  variant="light"
-                  loading={isSummaryLoading && !isRefreshing}
-                  title="Net Sales"
-                  value={formatAmount(netSales, currencySymbol)}
-                  icon="account-balance-wallet"
-                  iconColor="#059669"
-                  iconBgColor="#D1FAE5"
-                  gradientColors={["#D1FAE5", "#A7F3D0"]}
-                  containerClassName="flex-1"
-                />
-              </View>
-            </View>
+            </ActionCard>
 
             <SalesSummaryListCard
               salesSummary={summaryData}
