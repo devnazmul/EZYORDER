@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { DataContext } from "../context/DataContext";
-import { useAuth } from "../AuthContext";
 import {
+  useBusinessTimingQuery,
   useCombineDataQuery,
   useRestaurantQuery,
-  useBusinessTimingQuery,
-} from "@/hooks/useRestaurantQueries";
+} from "@/features/owner/more/hooks/queries/useRestaurantQueries";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../AuthContext";
+import { DataContext } from "../context/DataContext";
 
-export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { user, token } = useAuth();
   const [data, setData] = useState<any>({});
 
@@ -45,7 +47,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setData({
         menus: comBineData?.menu || comBineData?.menus,
         dishes: comBineData?.dishes,
-        variationTypes: comBineData?.variation_types || comBineData?.variationTypes,
+        variationTypes:
+          comBineData?.variation_types || comBineData?.variationTypes,
         variations: comBineData?.variations,
       });
     }

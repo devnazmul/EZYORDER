@@ -1,4 +1,4 @@
-import { registerDeviceToken } from "@/apis/notification";
+import { registerDeviceToken } from "@/features/owner/notifications/apis/notification";
 import { useAuth } from "@/context/AuthContext";
 import { logApiResponse } from "@/utils/logApiResponse";
 import { useQueryClient } from "@tanstack/react-query";

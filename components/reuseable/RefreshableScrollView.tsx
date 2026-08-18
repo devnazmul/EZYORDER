@@ -14,7 +14,7 @@ export default function RefreshableScrollView({
   contentContainerStyle = { paddingBottom: 32 },
   showsVerticalScrollIndicator = false,
   ...props
-}: RefreshableScrollViewProps) {
+}: Readonly<RefreshableScrollViewProps>) {
   const [localRefreshing, setLocalRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -27,11 +27,11 @@ export default function RefreshableScrollView({
     }
   };
 
-  const isRefreshing = refreshing !== undefined ? refreshing : localRefreshing;
+  const isRefreshing = refreshing ?? localRefreshing;
 
   return (
     <ScrollView
-      className={`flex-1 px-4 py-4 ${className}`}
+      className={`flex-1 ${className}`}
       contentContainerStyle={contentContainerStyle}
       showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       refreshControl={

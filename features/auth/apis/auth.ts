@@ -1,5 +1,6 @@
-import axios from "axios";
 import ENV from "@/config/env";
+import { logApiResponse } from "@/utils/logApiResponse";
+import axios from "axios";
 
 const API_BASE_URL = ENV.API_BASE_URL;
 
@@ -13,8 +14,10 @@ export const loginUser = async (email: string, password: string) => {
         Accept: "application/json",
       },
       validateStatus: () => true,
-    }
+    },
   );
+
+  logApiResponse("login User", response.data);
 
   if (response.status >= 200 && response.status < 300) {
     return response.data;
@@ -36,7 +39,7 @@ export const forgotPassword = async (email: string) => {
         Accept: "application/json",
       },
       validateStatus: () => true,
-    }
+    },
   );
 
   if (response.status >= 200 && response.status < 300) {

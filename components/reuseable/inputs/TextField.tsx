@@ -1,5 +1,7 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import React from "react";
-import { Text, TextInput, View, KeyboardTypeOptions } from "react-native";
+import { KeyboardTypeOptions, Text, TextInput, View } from "react-native";
 
 interface TextFieldProps {
   label?: string;
@@ -19,18 +21,22 @@ export default function TextField({
   return (
     <View>
       {label && (
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
+        <Text
+          style={{ fontSize: getResponsiveFontSize("sm") }}
+          className="font-semibold text-accent capitalize mb-3"
+        >
           {label}
         </Text>
       )}
-      <View className="bg-base-100 border border-base-200 rounded-xl p-3">
+      <View style={{ padding: WP("3") }} className="bg-base-100 border border-base-200 rounded-xl">
         <TextInput
           keyboardType={keyboardType}
           placeholder={placeholder}
-          placeholderTextColor="#6E6E6E"
+          placeholderTextColor={COLORS.accent}
           value={value}
           onChangeText={onChangeText}
-          className="text-xs font-semibold text-neutral p-0"
+          style={{ fontSize: getResponsiveFontSize("xs") }}
+          className="font-semibold text-neutral p-0"
         />
       </View>
     </View>

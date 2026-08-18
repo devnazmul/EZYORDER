@@ -1,18 +1,16 @@
-import { useAuth } from "@/context/AuthContext";
-import { formatAmount } from "@/utils/formatters";
+import OrderItemList from "@/components/bottomsheet/OrderItemList";
+import Badge from "@/components/reuseable/Badge";
+import BottomSheet from "@/components/reuseable/BottomSheet";
+import { formatLabel } from "@/utils/formatLabel";
+import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { getStatusBadgeConfig } from "@/utils/getStatusBadgeConfig";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import React from "react";
+import { Linking, Platform, Text, TouchableOpacity, View } from "react-native";
 import { useOrderDetailQuery } from "../hooks/queries/useDriverQueries";
 import { DriverOrder } from "../types";
-import ItemsSummarySkeleton from "./skeletons/ItemsSummarySkeleton";
+import PickupDetailsSkeleton from "./skeletons/PickupDetailsSkeleton";
 
 interface OrderDetailsDrawerProps {
   order: DriverOrder | null;
@@ -27,246 +25,498 @@ export default function OrderDetailsDrawer({
   onClose,
   currencySymbol,
 }: OrderDetailsDrawerProps) {
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const insets = useSafeAreaInsets();
-  const isFirstRender = useRef(true);
-  const isOpenRef = useRef(false);
-
-  const snapPoints = useMemo(() => ["50%", "85%"], []);
-
-  const { token } = useAuth();
-  const { data: fullOrderDetail, isLoading: isLoadingDetails } = useOrderDetailQuery(
-    token || "",
-    order?.id || "",
-    visible,
-  );
-
-  const parsePrice = (val: any) => {
-    if (typeof val === "number") return val;
-    if (!val) return 0;
-    const parsed = parseFloat(String(val).replace(/[^0-9.-]/g, ""));
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  const handleClose = () => {
-    bottomSheetRef.current?.dismiss();
-  };
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.6} />
-    ),
-    [],
-  );
-
-  const handleDismiss = useCallback(() => {
-    isOpenRef.current = false;
-    onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (!visible) return;
-    }
-
-    if (visible) {
-      if (!isOpenRef.current) {
-        isOpenRef.current = true;
-        const timer = setTimeout(() => {
-          bottomSheetRef.current?.present();
-        }, 50);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      if (isOpenRef.current) {
-        isOpenRef.current = false;
-        bottomSheetRef.current?.dismiss();
-      }
-    }
-  }, [visible]);
+  const { data: fullOrderDetail, isLoading: isLoadingDetails } =
+    useOrderDetailQuery(order?.id || "", visible);
 
   if (!order) return null;
 
+  const handleCallPhone = (phone: string) => {
+    Linking.openURL(`tel:${phone}`).catch(() => {});
+  };
+
+  const handleOpenMaps = (
+    address: string,
+    lat?: string | null,
+    lng?: string | null,
+  ) => {
+    let url = "";
+    if (lat && lng) {
+      url =
+        Platform.select({
+          ios: `maps:0,0?q=${lat},${lng}`,
+          android: `geo:0,0?q=${lat},${lng}`,
+        }) || `https://maps.google.com/?q=${lat},${lng}`;
+    } else {
+      const encoded = encodeURIComponent(address);
+      url =
+        Platform.select({
+          ios: `maps:0,0?q=${encoded}`,
+          android: `geo:0,0?q=${encoded}`,
+        }) || `https://maps.google.com/?q=${encoded}`;
+    }
+    Linking.openURL(url).catch(() => {});
+  };
+
+  const detailItems = fullOrderDetail?.detail || fullOrderDetail?.details || [];
+  const restaurant = fullOrderDetail?.restaurant;
+  const statusConfig = getStatusBadgeConfig(order.status || "pending");
+  const payConfig = getStatusBadgeConfig(order.payment_status || "unpaid");
+
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      onDismiss={handleDismiss}
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
-      handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={["50%", "75%"]}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
     >
       {/* Header */}
       <View className="flex-row justify-between items-center border-b border-base-200 pb-3 px-6 pt-2">
-        <View className="gap-y-1">
-          <Text className="text-lg font-bold text-neutral">Order #{order.id}</Text>
-          <Text className="text-xs text-accent">
-            Status: <Text className="font-bold capitalize text-primary">{order.status ? order.status.replace(/_/g, " ").charAt(0).toUpperCase() + order.status.replace(/_/g, " ").slice(1).toLowerCase() : ""}</Text>
-          </Text>
+        <View className="flex-row items-center gap-3">
+          <View className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 items-center justify-center">
+            <MaterialIcons name="receipt-long" size={20} color="#DC2D2A" />
+          </View>
+          <View>
+            <Text className="text-base font-bold text-neutral">
+              Order #{order.id}
+            </Text>
+            <Text className="text-[11px] text-accent font-medium mt-0.5">
+              Assigned Delivery Details
+            </Text>
+          </View>
         </View>
-        <TouchableOpacity
-          onPress={handleClose}
-          className="w-8 h-8 rounded-full bg-base-100 items-center justify-center"
-        >
-          <MaterialIcons name="close" size={18} color="#6E6E6E" />
-        </TouchableOpacity>
+
+        <Badge
+          text={formatLabel(order.status) || "Pending"}
+          icon={
+            <MaterialIcons
+              name={statusConfig.iconName}
+              size={12}
+              color={statusConfig.iconColor}
+            />
+          }
+          iconPosition="left"
+          containerClassName={statusConfig.containerClass}
+          textClassName={statusConfig.textClass}
+        />
       </View>
 
       <BottomSheetScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
-        {/* Customer Information */}
-        <View className="gap-y-2">
-          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Customer Details</Text>
-          <View className="bg-base-100 rounded-xl p-4 gap-y-2 border border-base-200">
-            <View className="flex-row justify-between">
-              <Text className="text-xs text-accent">Name:</Text>
-              <Text className="text-xs font-bold text-neutral">{order.customer_name || "N/A"}</Text>
-            </View>
+        {/* Restaurant Pickup Section */}
+        <DriverPickupSection
+          isLoadingDetails={isLoadingDetails}
+          restaurant={restaurant}
+          fullOrderDetail={fullOrderDetail}
+          order={order}
+          handleCallPhone={handleCallPhone}
+          handleOpenMaps={handleOpenMaps}
+        />
 
-            {order.customer_phone && order.customer_phone !== "N/A" ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Phone:</Text>
-                <Text className="text-xs font-bold text-neutral">{order.customer_phone}</Text>
-              </View>
-            ) : null}
-
-            {order.customer_note ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Customer Note:</Text>
-                <Text className="text-xs font-bold text-neutral italic">"{order.customer_note}"</Text>
-              </View>
-            ) : null}
-
-            <View className="flex-row justify-between items-start">
-              <Text className="text-xs text-accent">Delivery Address:</Text>
-              <Text className="text-xs font-bold text-neutral text-right flex-1 ml-4" numberOfLines={3}>
-                {order.door_no ? `${order.door_no}, ` : ""}
-                {order.customer_address}
-                {order.customer_post_code ? ` — ${order.customer_post_code}` : ""}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Order Items Section */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Order Items</Text>
-          <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-0">
-            {isLoadingDetails ? (
-              <ItemsSummarySkeleton />
-            ) : (
-              (() => {
-                const detailItems = fullOrderDetail?.detail || fullOrderDetail?.details || [];
-                if (detailItems.length === 0) {
-                  return (
-                    <View key="items-empty" className="py-2">
-                      <Text className="text-xs text-accent text-center italic">
-                        No items found for this order.
-                      </Text>
-                    </View>
-                  );
-                }
-
-                return (
-                  <View key="items-list">
-                    {detailItems.map((item: any, index: number) => {
-                      const dishName = item.dish?.name || item.meal?.name || item.dish_name || "Item";
-                      const qty = item.qty || item.quantity || 1;
-                      const price = parsePrice(
-                        item.dish?.price || item.dish_price || item.main_price || item.price,
-                      );
-
-                      return (
-                        <View
-                          key={item.id || index}
-                          className={`flex-row justify-between items-center py-2.5 ${
-                            index < detailItems.length - 1 ? "border-b border-base-200" : ""
-                          }`}
-                        >
-                          <View className="flex-row items-center gap-2 flex-1">
-                            <View className="bg-primary/10 w-6 h-6 rounded-md items-center justify-center">
-                              <Text className="text-[10px] font-black text-primary">{qty}x</Text>
-                            </View>
-                            <View className="flex-1">
-                              <Text className="text-xs font-semibold text-neutral" numberOfLines={1}>
-                                {dishName}
-                              </Text>
-                              <Text className="text-[10px] text-accent mt-0.5">
-                                {formatAmount(price, currencySymbol)} each
-                              </Text>
-                              {item.variations && item.variations.length > 0 ? (
-                                <Text
-                                  className="text-[9px] text-secondary font-semibold mt-0.5"
-                                  numberOfLines={1}
-                                >
-                                  {item.variations
-                                    .map((v: any) => v.variation?.name || v.name || "")
-                                    .filter(Boolean)
-                                    .join(", ")}
-                                </Text>
-                              ) : null}
-                            </View>
-                          </View>
-                          <Text className="text-xs font-bold text-neutral ml-2">
-                            {formatAmount(qty * price, currencySymbol)}
-                          </Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                );
-              })()
-            )}
-          </View>
-        </View>
+        <DriverCustomerSection
+          order={order}
+          handleCallPhone={handleCallPhone}
+          handleOpenMaps={handleOpenMaps}
+        />
 
         {/* Instructions Section */}
         {order.initial_note ? (
           <View className="gap-y-2 mt-4">
-            <Text className="text-xs font-bold text-accent capitalize tracking-wider">Instructions</Text>
-            <View className="bg-base-100 rounded-xl p-4 border border-base-200">
-              <Text className="text-xs text-neutral/70 italic font-medium leading-4">
+            <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+              Instructions
+            </Text>
+            <View className="bg-primary/5 border border-primary/20 rounded-lg p-3.5 flex-row items-start gap-2.5">
+              <MaterialIcons name="assignment-late" size={18} color="#DC2D2A" />
+              <Text className="text-xs text-neutral italic font-semibold leading-5 flex-1">
                 {order.initial_note}
               </Text>
             </View>
           </View>
         ) : null}
 
+        {/* Order Items Section */}
+        <OrderItemList
+          items={detailItems}
+          isLoading={isLoadingDetails}
+          currencySymbol={currencySymbol}
+        />
+
         {/* Bill Summary Section */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-accent capitalize tracking-wider">Bill Summary</Text>
-          <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-2">
-            <View className="flex-row justify-between">
-              <Text className="text-xs text-accent">Payment Status:</Text>
-              <Text className="text-xs font-semibold text-neutral capitalize">
-                {order.payment_status ? order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1).toLowerCase() : "Unpaid"}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-xs text-accent">Payment Method:</Text>
-              <Text className="text-xs font-semibold text-neutral capitalize">
-                {order.payment_method ? (order.payment_method.toLowerCase() === "cod" ? "COD" : order.payment_method.charAt(0).toUpperCase() + order.payment_method.slice(1).toLowerCase()) : "N/A"}
-              </Text>
-            </View>
-
-            <View className="border-t border-base-200 pt-2 mt-1 flex-row justify-between items-center">
-              <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
-              <Text className="text-md font-bold text-neutral">
-                {formatAmount(parseFloat(order.amount || order.total_due_amount || "0"), currencySymbol)}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <DriverBillSummarySection
+          order={order}
+          fullOrderDetail={fullOrderDetail}
+          payConfig={payConfig}
+          currencySymbol={currencySymbol}
+        />
       </BottomSheetScrollView>
-    </BottomSheetModal>
+    </BottomSheet>
+  );
+}
+
+interface DriverPickupSectionProps {
+  isLoadingDetails: boolean;
+  restaurant: any;
+  fullOrderDetail: any;
+  order: any;
+  handleCallPhone: (phone: string) => void;
+  handleOpenMaps: (
+    address: string,
+    lat?: string | null,
+    lng?: string | null,
+  ) => void;
+}
+
+function DriverPickupSection({
+  isLoadingDetails,
+  restaurant,
+  fullOrderDetail,
+  order,
+  handleCallPhone,
+  handleOpenMaps,
+}: Readonly<DriverPickupSectionProps>) {
+  if (isLoadingDetails) {
+    return <PickupDetailsSkeleton />;
+  }
+  if (!restaurant) return null;
+
+  return (
+    <View key="pickup-loaded" className="gap-y-2 mb-4">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Pickup Details
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="storefront" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Restaurant:</Text>
+          </View>
+          <Text className="text-xs font-bold text-neutral">
+            {restaurant.Name}
+          </Text>
+        </View>
+
+        {fullOrderDetail?.created_at || order?.created_at ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Placed On:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatDateTime(fullOrderDetail?.created_at || order?.created_at)}
+            </Text>
+          </View>
+        ) : null}
+
+        {restaurant.PhoneNumber ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="phone" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Phone:</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => handleCallPhone(restaurant.PhoneNumber!)}
+              activeOpacity={0.7}
+              className="flex-row items-center"
+            >
+              <Text className="text-xs text-primary font-bold">(</Text>
+              <MaterialIcons
+                name="phone"
+                size={11}
+                color="#DC2D2A"
+                style={{
+                  transform: [{ rotate: "10deg" }],
+                  marginHorizontal: -1,
+                }}
+              />
+              <Text className="text-xs text-primary font-bold">) </Text>
+              <Text className="text-xs text-primary font-bold">
+                {restaurant.PhoneNumber}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {restaurant.Address ? (
+          <View className="flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Address:</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() =>
+                handleOpenMaps(
+                  `${restaurant.Address} ${restaurant.PostCode || ""}`,
+                  restaurant.latitude,
+                  restaurant.longitude,
+                )
+              }
+              activeOpacity={0.7}
+              className="flex-1 ml-4"
+            >
+              <Text
+                className="text-xs font-bold text-primary text-right"
+                numberOfLines={3}
+              >
+                {restaurant.Address}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+interface DriverCustomerSectionProps {
+  order: any;
+  handleCallPhone: (phone: string) => void;
+  handleOpenMaps: (
+    address: string,
+    lat?: string | null,
+    lng?: string | null,
+  ) => void;
+}
+
+function DriverCustomerSection({
+  order,
+  handleCallPhone,
+  handleOpenMaps,
+}: Readonly<DriverCustomerSectionProps>) {
+  return (
+    <View className="gap-y-2">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Customer Details
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Name:</Text>
+          </View>
+          <Text className="text-xs font-bold text-neutral">
+            {order.customer_name || "N/A"}
+          </Text>
+        </View>
+
+        {order.customer_phone && order.customer_phone !== "N/A" ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="phone" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Phone:</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => handleCallPhone(order.customer_phone!)}
+              activeOpacity={0.7}
+              className="flex-row items-center"
+            >
+              <Text className="text-xs text-primary font-bold">(</Text>
+              <MaterialIcons
+                name="phone"
+                size={11}
+                color="#DC2D2A"
+                style={{
+                  transform: [{ rotate: "10deg" }],
+                  marginHorizontal: -1,
+                }}
+              />
+              <Text className="text-xs text-primary font-bold">) </Text>
+              <Text className="text-xs text-primary font-bold">
+                {order.customer_phone}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {order.customer_note ? (
+          <View className="flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons
+                name="chat-bubble-outline"
+                size={16}
+                color="#DC2D2A"
+              />
+              <Text className="text-xs text-accent">Customer Note:</Text>
+            </View>
+            <Text className="text-xs font-semibold text-neutral italic max-w-[60%] text-right">
+              &quot;{order.customer_note}&quot;
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="flex-row items-start justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Address:</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() =>
+              handleOpenMaps(
+                `${order.customer_address} ${order.customer_post_code || ""}`,
+                order.latitude,
+                order.longitude,
+              )
+            }
+            activeOpacity={0.7}
+            className="flex-1 ml-4"
+          >
+            <Text
+              className="text-xs font-bold text-primary text-right"
+              numberOfLines={3}
+            >
+              {order.door_no ? `${order.door_no}, ` : ""}
+              {order.customer_address}
+              {order.customer_post_code ? ` - ${order.customer_post_code}` : ""}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface DriverBillSummarySectionProps {
+  order: any;
+  fullOrderDetail: any;
+  payConfig: any;
+  currencySymbol: string;
+}
+
+function DriverBillSummarySection({
+  order,
+  fullOrderDetail,
+  payConfig,
+  currencySymbol,
+}: Readonly<DriverBillSummarySectionProps>) {
+  const subtotal = parseFloat(
+    fullOrderDetail?.final_price ||
+      fullOrderDetail?.amount ||
+      order.amount ||
+      "0",
+  );
+  const tax = parseFloat(fullOrderDetail?.tax || order.tax || "0");
+  const tip = parseFloat(
+    fullOrderDetail?.tip_amount || order.tip_amount || "0",
+  );
+  const discount = parseFloat(
+    fullOrderDetail?.discount || order.discount || "0",
+  );
+
+  return (
+    <View className="gap-y-2 mt-4 mb-2">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Bill Summary
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons
+              name="check-circle-outline"
+              size={16}
+              color="#DC2D2A"
+            />
+            <Text className="text-xs text-accent">Payment Status:</Text>
+          </View>
+          <Badge
+            text={formatLabel(order.payment_status) || "Unpaid"}
+            icon={
+              <MaterialIcons
+                name={payConfig.iconName}
+                size={12}
+                color={payConfig.iconColor}
+              />
+            }
+            iconPosition="left"
+            containerClassName={payConfig.containerClass}
+            textClassName={payConfig.textClass}
+          />
+        </View>
+
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="credit-card" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Payment Method:</Text>
+          </View>
+          <Badge
+            text={
+              order.payment_method
+                ? order.payment_method.toLowerCase() === "cod"
+                  ? "COD"
+                  : formatLabel(order.payment_method)
+                : "N/A"
+            }
+            containerClassName="bg-secondary/10 border border-secondary/25"
+            textClassName="text-neutral font-semibold"
+          />
+        </View>
+
+        <View className="flex-row justify-between items-center border-t border-base-200/60 pt-2.5">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="receipt" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Subtotal:</Text>
+          </View>
+          <Text className="text-xs font-bold text-neutral">
+            {formatAmount(subtotal, currencySymbol)}
+          </Text>
+        </View>
+
+        {tax > 0 ? (
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="account-balance" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Tax:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatAmount(tax, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {tip > 0 ? (
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons
+                name="volunteer-activism"
+                size={16}
+                color="#DC2D2A"
+              />
+              <Text className="text-xs text-accent">Tip:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatAmount(tip, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {discount > 0 ? (
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="local-offer" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Discount:</Text>
+            </View>
+            <Text className="text-xs font-bold text-primary">
+              -{formatAmount(discount, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="border-t border-base-200 pt-2.5 mt-1 flex-row justify-between items-center">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="payments" size={16} color="#DC2D2A" />
+            <Text className="text-xs font-bold text-neutral">
+              Total Amount:
+            </Text>
+          </View>
+          <Text className="text-base font-bold text-primary">
+            {formatAmount(
+              parseFloat(order.amount || order.total_due_amount || "0"),
+              currencySymbol,
+            )}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

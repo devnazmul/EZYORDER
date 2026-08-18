@@ -48,3 +48,6 @@ app-example
 .env
 google-services.json
 GoogleService-Info.plist
+/.scannerwork
+/.vscode
+/sonar-project.properties

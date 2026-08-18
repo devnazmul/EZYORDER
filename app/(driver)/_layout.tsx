@@ -1,29 +1,24 @@
+import { useAuth } from "@/context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import React from "react";
 import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DriverLayout: React.FC = () => {
+  const { token, user } = useAuth();
   const insets = useSafeAreaInsets();
 
-  const renderTabBarLabel =
-    (title: string) =>
-    ({ color }: { color: string }) => (
-      <Text
-        style={{
-          color,
-          fontSize: 10.5,
-          fontWeight: "600",
-          marginTop: 2,
-          textAlign: "center",
-        }}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-      >
-        {title}
-      </Text>
-    );
+  if (!token) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  const role = (user?.type || "").toLowerCase().trim();
+  if (role !== "driver") {
+    return <Redirect href="/(owner)/home" />;
+  }
+
+
 
   return (
     <Tabs
@@ -52,16 +47,20 @@ const DriverLayout: React.FC = () => {
         name="index"
         options={{
           title: "Dashboard",
-          tabBarLabel: renderTabBarLabel("Dashboard"),
-          tabBarIcon: ({ color }) => <MaterialIcons name="dashboard" size={24} color={color} />,
+          tabBarLabel: ({ color }) => <TabBarLabel title="Dashboard" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="dashboard" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="my-orders"
         options={{
           title: "My Orders",
-          tabBarLabel: renderTabBarLabel("My Orders"),
-          tabBarIcon: ({ color }) => <MaterialIcons name="receipt" size={24} color={color} />,
+          tabBarLabel: ({ color }) => <TabBarLabel title="My Orders" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="receipt" size={24} color={color} />
+          ),
         }}
       />
     </Tabs>
@@ -70,3 +69,26 @@ const DriverLayout: React.FC = () => {
 
 DriverLayout.displayName = "Driver Layout";
 export default DriverLayout;
+
+interface ITabBarLabelProps {
+  title: string;
+  color: string;
+}
+
+function TabBarLabel({ title, color }: Readonly<ITabBarLabelProps>) {
+  return (
+    <Text
+      style={{
+        color,
+        fontSize: 10.5,
+        fontWeight: "600",
+        marginTop: 2,
+        textAlign: "center",
+      }}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+    >
+      {title}
+    </Text>
+  );
+}

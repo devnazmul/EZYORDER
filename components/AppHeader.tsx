@@ -1,4 +1,6 @@
+import COLORS from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -42,6 +44,8 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
   const restaurantName = user?.restaurant?.[0]?.Name || user?.restaurant?.[0]?.name || "EZYORDER";
   const initials = getInitials();
 
+  const avatarSize = WP("10%");
+
   return (
     <View
       style={{ paddingTop: insets.top + 12 }}
@@ -54,25 +58,22 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
             onPress={() => router.back()}
             className="p-1.5 hover:bg-base-200 rounded-full mr-1"
           >
-            <MaterialIcons name="arrow-back" size={24} color="#DC2D2A" />
+            <MaterialIcons name="arrow-back" size={WP("6%")} color={COLORS.primary} />
           </TouchableOpacity>
         )}
-        <Text className="text-md font-bold text-primary">{restaurantName}</Text>
+        <Text style={{ fontSize: getResponsiveFontSize("md") }} className="font-bold text-primary">
+          {restaurantName}
+        </Text>
       </View>
 
       {/* Right side: Notification Button & Profile Avatar Dropdown */}
       <View className="flex-row items-center gap-4">
-        {/* Notification Bell */}
-        {/* <TouchableOpacity className="relative p-2 rounded-full hover:bg-base-200">
-          <MaterialIcons name="notifications-none" size={24} color="#DC2D2A" />
-          <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-primary rounded-full border-2 border-base-300" />
-        </TouchableOpacity> */}
-
         {/* Profile Avatar Button */}
         <TouchableOpacity
           onPress={() => setShowDropdown(!showDropdown)}
           activeOpacity={0.8}
-          className="w-10 h-10 rounded-full bg-primary items-center justify-center shadow-sm overflow-hidden border border-base-200"
+          style={{ width: avatarSize, height: avatarSize }}
+          className="rounded-full bg-primary items-center justify-center shadow-sm overflow-hidden border border-base-200"
         >
           {user?.image ? (
             <Image
@@ -81,7 +82,9 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
               resizeMode="cover"
             />
           ) : (
-            <Text className="text-white font-bold text-sm">{initials}</Text>
+            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="text-white font-bold">
+              {initials}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
@@ -96,8 +99,10 @@ export default function AppHeader({ showBackButton = false }: AppHeaderProps) {
             onPress={handleLogout}
             className="flex-row items-center gap-2 p-2 hover:bg-base-200 rounded-lg w-full"
           >
-            <MaterialIcons name="exit-to-app" size={18} color="#DC2D2A" />
-            <Text className="text-xs font-bold text-neutral">Logout</Text>
+            <MaterialIcons name="exit-to-app" size={WP("4.5%")} color={COLORS.primary} />
+            <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="font-bold text-neutral">
+              Logout
+            </Text>
           </TouchableOpacity>
         </View>
       )}

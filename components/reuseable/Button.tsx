@@ -1,5 +1,7 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize } from "@/utils/getResponsiveSizes";
 import React from "react";
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Pressable, Text } from "react-native";
 
 interface ButtonProps {
   label: string;
@@ -8,7 +10,10 @@ interface ButtonProps {
   disabled?: boolean;
   isLoading?: boolean;
   containerClassName?: string;
+  containerStyle?: object | null;
   buttonClassName?: string;
+  icon?: React.ReactNode;
+  iconPosition?: "left" | "right";
 }
 
 export default function Button({
@@ -18,12 +23,20 @@ export default function Button({
   disabled = false,
   isLoading = false,
   containerClassName = "",
+  containerStyle = {},
   buttonClassName = "",
+  icon,
+  iconPosition = "left",
 }: ButtonProps) {
   const isPressable = !disabled && !isLoading;
 
-  let btnClass = "w-full py-3 rounded-lg flex-row items-center justify-center gap-2 shadow-sm";
-  let txtClass = "font-bold text-xs";
+  let btnClass = "w-full py-3 rounded-lg flex-row items-center justify-center gap-2";
+  let txtClass = "font-bold";
+
+  // Only apply shadow-sm when button is pressable (opacity is not low)
+  if (isPressable) {
+    btnClass += " shadow-sm";
+  }
 
   if (variant === "primary") {
     btnClass += isPressable ? " bg-primary" : " bg-primary/50";
@@ -41,19 +54,27 @@ export default function Button({
   }
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={isPressable ? onPress : undefined}
       disabled={!isPressable}
-      activeOpacity={0.8}
       className={`${btnClass} ${containerClassName}`}
+      style={containerStyle}
     >
       {isLoading ? (
-        <ActivityIndicator size="small" color={variant === "primary" ? "#FFFFFF" : "#DC2D2A"} />
+        <ActivityIndicator size="small" color={variant === "primary" ? COLORS.base300 : COLORS.primary} />
       ) : (
-        <Text numberOfLines={1} className={`${txtClass} ${buttonClassName} !bg-transparent`}>
-          {label}
-        </Text>
+        <>
+          {icon && iconPosition === "left" && icon}
+          <Text
+            numberOfLines={1}
+            className={`${txtClass} ${buttonClassName} !bg-transparent`}
+            style={{ fontSize: getResponsiveFontSize("xs") + 1 }}
+          >
+            {label}
+          </Text>
+          {icon && iconPosition === "right" && icon}
+        </>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }

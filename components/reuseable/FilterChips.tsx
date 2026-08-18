@@ -1,3 +1,4 @@
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
@@ -24,7 +25,7 @@ export default function FilterChips({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ flexDirection: "row", paddingRight: 16 }}
+        contentContainerStyle={{ flexDirection: "row", paddingRight: WP("4%") }}
       >
         {chips.map((chip) => {
           const isSelected = Array.isArray(selectedId)
@@ -34,20 +35,23 @@ export default function FilterChips({
             <TouchableOpacity
               key={chip.id}
               onPress={() => onSelect(chip.id)}
+              style={{
+                paddingHorizontal: WP("4%"),
+                paddingVertical: HP("0.75%"),
+                marginRight: WP("2%"),
+              }}
               className={
                 isSelected
-                  ? "px-4 py-2 rounded-lg mr-2 border border-primary/20 bg-primary items-center justify-center"
-                  : "px-4 py-2 rounded-lg mr-2 border border-primary/20 bg-base-300 items-center justify-center"
+                  ? "rounded-lg border border-primary/20 bg-primary items-center justify-center"
+                  : "rounded-lg border border-primary/20 bg-base-300 items-center justify-center"
               }
             >
               <Text
                 numberOfLines={1}
                 className={
-                  isSelected
-                    ? "text-xs font-bold text-center text-white"
-                    : "text-xs font-bold text-center text-accent"
+                  isSelected ? "font-bold text-center text-white" : "font-bold text-center text-accent"
                 }
-                style={{ flexShrink: 0 }}
+                style={{ flexShrink: 0, fontSize: getResponsiveFontSize("xs") }}
               >
                 {chip.label}
               </Text>

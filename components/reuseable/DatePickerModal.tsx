@@ -1,3 +1,5 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -118,19 +120,22 @@ export default function DatePickerModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-center items-center bg-neutral/40 px-4">
-        <View className="bg-base-300 border border-base-200 rounded-3xl w-full max-w-[340px] p-5 shadow-2xl">
+        <View
+          style={{ width: WP("85%"), padding: WP("5%") }}
+          className="bg-base-300 border border-base-200 rounded-3xl shadow-2xl"
+        >
           {/* Header */}
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-sm font-bold text-neutral">{title}</Text>
+            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-bold text-neutral">{title}</Text>
             <TouchableOpacity onPress={onClose}>
-              <MaterialIcons name="close" size={20} color="#6E6E6E" />
+              <MaterialIcons name="close" size={WP("5%")} color={COLORS.accent} />
             </TouchableOpacity>
           </View>
 
           {/* Month/Year selector */}
           <View className="flex-row justify-between items-center mb-4">
             <TouchableOpacity onPress={handlePrevMonth} className="p-1 rounded-full bg-base-100">
-              <MaterialIcons name="chevron-left" size={20} color="#000000" />
+              <MaterialIcons name="chevron-left" size={WP("5%")} color={COLORS.neutral} />
             </TouchableOpacity>
             <View className="flex-row gap-2 items-center">
               <TouchableOpacity
@@ -138,7 +143,8 @@ export default function DatePickerModal({
                 className={`px-2 py-1 rounded-md ${mode === "month" ? "bg-primary" : ""}`}
               >
                 <Text
-                  className={`text-xs font-bold ${
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className={`font-bold ${
                     mode === "month" ? "text-white" : "text-neutral"
                   }`}
                 >
@@ -150,7 +156,8 @@ export default function DatePickerModal({
                 className={`px-2 py-1 rounded-md ${mode === "year" ? "bg-primary" : ""}`}
               >
                 <Text
-                  className={`text-xs font-bold ${
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className={`font-bold ${
                     mode === "year" ? "text-white" : "text-neutral"
                   }`}
                 >
@@ -159,7 +166,7 @@ export default function DatePickerModal({
               </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={handleNextMonth} className="p-1 rounded-full bg-base-100">
-              <MaterialIcons name="chevron-right" size={20} color="#000000" />
+              <MaterialIcons name="chevron-right" size={WP("5%")} color={COLORS.neutral} />
             </TouchableOpacity>
           </View>
 
@@ -168,7 +175,11 @@ export default function DatePickerModal({
               {/* Calendar Day Labels */}
               <View className="flex-row mb-2">
                 {DAYS_OF_WEEK.map((day, idx) => (
-                  <Text key={idx} className="flex-1 text-center text-[10px] font-bold text-accent">
+                  <Text
+                    key={idx}
+                    style={{ fontSize: getResponsiveFontSize("xs") }}
+                    className="flex-1 text-center font-bold text-accent"
+                  >
                     {day}
                   </Text>
                 ))}
@@ -192,7 +203,8 @@ export default function DatePickerModal({
                       }`}
                     >
                       <Text
-                        className={`text-xs font-semibold ${
+                        style={{ fontSize: getResponsiveFontSize("xs") }}
+                        className={`font-semibold ${
                           selected ? "text-white" : "text-neutral"
                         }`}
                       >
@@ -206,7 +218,10 @@ export default function DatePickerModal({
           )}
 
           {mode === "month" && (
-            <View className="flex-row flex-wrap gap-2 justify-center py-2">
+            <View
+              style={{ gap: WP("2%") }}
+              className="flex-row flex-wrap justify-center py-2"
+            >
               {MONTHS.map((m, idx) => {
                 const isSelectedMonth = idx === currentMonth;
                 return (
@@ -216,12 +231,18 @@ export default function DatePickerModal({
                       setCurrentMonth(idx);
                       setMode("calendar");
                     }}
-                    className={`px-3 py-2 rounded-lg min-w-[28%] items-center justify-center ${
+                    style={{
+                      paddingHorizontal: WP("3%"),
+                      paddingVertical: HP("1.2%"),
+                      minWidth: WP("24%"),
+                    }}
+                    className={`rounded-lg items-center justify-center ${
                       isSelectedMonth ? "bg-primary" : "bg-base-100 active:bg-base-200"
                     }`}
                   >
                     <Text
-                      className={`text-xs font-bold ${
+                      style={{ fontSize: getResponsiveFontSize("xs") }}
+                      className={`font-bold ${
                         isSelectedMonth ? "text-white" : "text-neutral"
                       }`}
                     >
@@ -235,13 +256,13 @@ export default function DatePickerModal({
 
           {mode === "year" && (
             <ScrollView
-              style={{ maxHeight: 200 }}
+              style={{ maxHeight: HP("25%") }}
               contentContainerStyle={{
                 flexDirection: "row",
                 flexWrap: "wrap",
-                gap: 8,
+                gap: WP("2%"),
                 justifyContent: "center",
-                paddingVertical: 8,
+                paddingVertical: HP("1%"),
               }}
             >
               {years.map((y) => {
@@ -253,12 +274,18 @@ export default function DatePickerModal({
                       setCurrentYear(y);
                       setMode("calendar");
                     }}
-                    className={`px-3 py-2 rounded-lg min-w-[28%] items-center justify-center ${
+                    style={{
+                      paddingHorizontal: WP("3%"),
+                      paddingVertical: HP("1.2%"),
+                      minWidth: WP("24%"),
+                    }}
+                    className={`rounded-lg items-center justify-center ${
                       isSelectedYear ? "bg-primary" : "bg-base-100 active:bg-base-200"
                     }`}
                   >
                     <Text
-                      className={`text-xs font-bold ${
+                      style={{ fontSize: getResponsiveFontSize("xs") }}
+                      className={`font-bold ${
                         isSelectedYear ? "text-white" : "text-neutral"
                       }`}
                     >

@@ -1,6 +1,9 @@
 import Badge from "@/components/reuseable/Badge";
 import EmptyState from "@/components/reuseable/EmptyState";
+import { formatLabel } from "@/utils/formatLabel";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { getStatusBadgeConfig } from "@/utils/getStatusBadgeConfig";
+import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -14,32 +17,6 @@ interface AssignedOrdersFeedProps {
   onViewOrder: (order: DriverOrder) => void;
 }
 
-const getStatusBadgeStyles = (status: string) => {
-  const s = (status || "").toLowerCase().trim();
-  if (s === "completed" || s === "complete" || s === "delivered" || s === "paid" || s === "active") {
-    return {
-      container: "bg-green-50 border border-green-100",
-      text: "text-green-700",
-    };
-  }
-  if (s === "cancelled" || s === "failed" || s === "expired") {
-    return {
-      container: "bg-red-50 border border-red-100",
-      text: "text-red-700",
-    };
-  }
-  if (s === "unpaid") {
-    return {
-      container: "bg-pink-50 border border-pink-100",
-      text: "text-pink-700",
-    };
-  }
-  return {
-    container: "bg-orange-50 border border-orange-100",
-    text: "text-orange-700",
-  };
-};
-
 export default function AssignedOrdersFeed({
   orders,
   isLoading,
@@ -51,20 +28,20 @@ export default function AssignedOrdersFeed({
   }
 
   return (
-    <View className="bg-base-300 rounded-3xl overflow-hidden border border-base-200 shadow-sm">
+    <View className="bg-base-300 rounded-3xl overflow-hidden  shadow-sm">
       <View className="p-4 pb-2">
         <Text className="text-sm font-bold text-neutral">My Assigned Orders</Text>
       </View>
       {orders.length === 0 ? (
-        <View className="border-t border-base-200">
+        <View>
           <EmptyState icon="inbox" description="No orders assigned yet." pyClassName="py-8" />
         </View>
       ) : (
-        <View className="divide-y divide-base-200 border-t border-base-200">
+        <View className="divide-y divide-base-200 ">
           {orders.slice(0, 5).map((order, index) => {
             const totalAmount = parseFloat(order.amount || order.total_due_amount || "0");
             const orderTime = order.created_at ? formatDateTime(order.created_at) : order.order_time || "";
-            const badgeStyles = getStatusBadgeStyles(order.status);
+            const statusConfig = getStatusBadgeConfig(order.status);
 
             return (
               <TouchableOpacity
@@ -83,14 +60,18 @@ export default function AssignedOrdersFeed({
                     {orderTime ? ` • ${orderTime}` : ""}
                   </Text>
                 </View>
-                <View className="flex-row items-center gap-4">
+                <View className="flex-row items-center gap-3">
                   <Text className="text-xs font-bold text-neutral">
                     {formatAmount(totalAmount, currencySymbol)}
                   </Text>
                   <Badge
-                    text={order.status}
-                    containerClassName={badgeStyles.container}
-                    textClassName={badgeStyles.text}
+                    text={formatLabel(order.status) || "Pending"}
+                    icon={
+                      <MaterialIcons name={statusConfig.iconName} size={12} color={statusConfig.iconColor} />
+                    }
+                    iconPosition="left"
+                    containerClassName={statusConfig.containerClass}
+                    textClassName={statusConfig.textClass}
                   />
                 </View>
               </TouchableOpacity>

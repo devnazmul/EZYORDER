@@ -1,6 +1,8 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 
 interface DateRangeFieldProps {
   label?: string;
@@ -26,7 +28,10 @@ export default function DateRangeField({
   return (
     <View>
       {label && (
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
+        <Text
+          style={{ fontSize: getResponsiveFontSize("sm") }}
+          className="font-semibold text-accent capitalize mb-3"
+        >
           {label}
         </Text>
       )}
@@ -35,30 +40,48 @@ export default function DateRangeField({
         <TouchableOpacity
           onPress={onSelectStartDate}
           activeOpacity={0.8}
-          className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3"
+          style={{ padding: WP("2.5%") }}
+          className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl"
         >
           <View>
-            <Text className="text-[8px] font-bold text-accent uppercase">{startLabel}</Text>
-            <Text className="text-xs font-semibold text-neutral mt-0.5">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+              className="font-semibold text-accent capitalize"
+            >
+              {startLabel}
+            </Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral mt-0.5"
+            >
               {formatDateLabel(startDateValue)}
             </Text>
           </View>
-          <MaterialIcons name="calendar-today" size={16} color="#DC2D2A" />
+          <MaterialIcons name="calendar-today" size={WP("4.5%")} color={COLORS.primary} />
         </TouchableOpacity>
 
         {/* End Date */}
         <TouchableOpacity
           onPress={onSelectEndDate}
           activeOpacity={0.8}
-          className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl p-3"
+          style={{ padding: WP("2.5%") }}
+          className="flex-1 flex-row items-center justify-between bg-base-100 border border-base-200 rounded-xl"
         >
           <View>
-            <Text className="text-[8px] font-bold text-accent uppercase">{endLabel}</Text>
-            <Text className="text-xs font-semibold text-neutral mt-0.5">
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
+              className="font-semibold text-accent capitalize"
+            >
+              {endLabel}
+            </Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("xs") }}
+              className="font-semibold text-neutral mt-0.5"
+            >
               {formatDateLabel(endDateValue)}
             </Text>
           </View>
-          <MaterialIcons name="calendar-today" size={16} color="#DC2D2A" />
+          <MaterialIcons name="calendar-today" size={WP("4.5%")} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
     </View>

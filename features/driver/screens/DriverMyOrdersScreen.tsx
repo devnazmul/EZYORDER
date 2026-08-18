@@ -12,11 +12,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import DriverOrderFeedCard from "../components/DriverOrderFeedCard";
 import OrderDetailsDrawer from "../components/OrderDetailsDrawer";
 import DriverOrderFeedCardSkeleton from "../components/skeletons/DriverOrderFeedCardSkeleton";
-import { useDriverDashboardStatsQuery, useDriverOrdersListQuery } from "../hooks/queries/useDriverQueries";
+import {
+  useDriverDashboardStatsQuery,
+  useDriverOrdersListQuery,
+} from "../hooks/queries/useDriverQueries";
 import { DriverOrder } from "../types";
 
 export default function DriverMyOrdersScreen() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
@@ -35,7 +38,7 @@ export default function DriverMyOrdersScreen() {
   const [isDetailsVisible, setIsDetailsVisible] = useState(false);
 
   // Fetch Stats (for Currency Symbol)
-  const { data: statsData } = useDriverDashboardStatsQuery(token || "");
+  const { data: statsData } = useDriverDashboardStatsQuery();
   const currencySymbol = useMemo(() => {
     if (statsData?.currency_symbol) {
       return getCurrencySymbol(statsData.currency_symbol);
@@ -101,7 +104,9 @@ export default function DriverMyOrdersScreen() {
     }
 
     if (filterValues.status && Array.isArray(filterValues.status)) {
-      const activeStatuses = filterValues.status.filter((s: string) => s !== "all");
+      const activeStatuses = filterValues.status.filter(
+        (s: string) => s !== "all",
+      );
       if (activeStatuses.length > 0) {
         params.status = activeStatuses;
       }
@@ -142,12 +147,13 @@ export default function DriverMyOrdersScreen() {
     isLoading,
     isRefetching,
     refetch,
-  } = useDriverOrdersListQuery(token || "", queryParams);
+  } = useDriverOrdersListQuery(queryParams);
 
   // Safe Extraction of Orders List
   const orders: DriverOrder[] = useMemo(() => {
     if (!rawOrdersData) return [];
-    const rawList = rawOrdersData.data?.data || rawOrdersData.data || rawOrdersData;
+    const rawList =
+      rawOrdersData.data?.data || rawOrdersData.data || rawOrdersData;
     return Array.isArray(rawList) ? rawList : [];
   }, [rawOrdersData]);
 
@@ -222,7 +228,11 @@ export default function DriverMyOrdersScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
             refreshControl={
-              <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={["#DC2D2A"]} />
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                colors={["#DC2D2A"]}
+              />
             }
             ListEmptyComponent={
               <View key="empty" className="mt-8">

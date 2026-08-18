@@ -1,20 +1,13 @@
-import Button from "@/components/reuseable/Button";
-import { useAuth } from "@/context/AuthContext";
+import OrderItemList from "@/components/bottomsheet/OrderItemList";
+import PaymentCollectionSection from "@/components/bottomsheet/PaymentCollectionSection";
+import BottomSheet from "@/components/reuseable/BottomSheet";
 import { formatAmount } from "@/utils/formatters";
 import formatUtcToLocalTime from "@/utils/formatUtcToLocalTime";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { UseMutationResult } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React from "react";
 import { Linking, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import ItemsSummarySkeleton from "../components/skeletons/ItemsSummarySkeleton";
 import { useOrderDetailQuery } from "../hooks/queries/useDriverQueries";
 import { DriverOrder } from "../types";
 
@@ -62,111 +55,67 @@ export default function ActiveOrderDetailsModal({
   handleGetRoute,
   handleQuickSMS,
 }: ActiveOrderDetailsModalProps) {
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const insets = useSafeAreaInsets();
-  const isFirstRender = useRef(true);
-  const isOpenRef = useRef(false);
-
-  const snapPoints = useMemo(() => ["45%", "85%"], []);
-
-  const { token } = useAuth();
-  const { data: fullOrderDetail, isLoading: isLoadingDetails } = useOrderDetailQuery(
-    token || "",
-    activeOrder?.id || "",
-    visible,
-  );
-
-  const parsePrice = (val: any) => {
-    if (typeof val === "number") return val;
-    if (!val) return 0;
-    const parsed = parseFloat(String(val).replace(/[^0-9.-]/g, ""));
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  const handleClose = () => {
-    bottomSheetRef.current?.dismiss();
-  };
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.6} />
-    ),
-    [],
-  );
-
-  const handleDismiss = useCallback(() => {
-    isOpenRef.current = false;
-    onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (!visible) return;
-    }
-
-    if (visible) {
-      if (!isOpenRef.current) {
-        isOpenRef.current = true;
-        const timer = setTimeout(() => {
-          bottomSheetRef.current?.present();
-        }, 50);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      if (isOpenRef.current) {
-        isOpenRef.current = false;
-        bottomSheetRef.current?.dismiss();
-      }
-    }
-  }, [visible]);
+  const { data: fullOrderDetail, isLoading: isLoadingDetails } =
+    useOrderDetailQuery(activeOrder?.id || "", visible);
 
   if (!activeOrder) return null;
 
   return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      enableDynamicSizing={false}
-      enablePanDownToClose
-      onDismiss={handleDismiss}
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
-      handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={["55%", "75%"]}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
     >
       {/* Header */}
       <View className="flex-row justify-between items-center border-b border-base-200 pb-3 px-6 pt-2">
-        <View className="gap-y-1">
-          <Text className="text-lg font-bold text-neutral">Order #{activeOrder.id}</Text>
-          <Text className="text-xs text-accent">
-            Type: <Text className="font-bold capitalize text-primary">{activeOrder.type ? (activeOrder.type.charAt(0).toUpperCase() + activeOrder.type.slice(1).toLowerCase()) : "Delivery"}</Text>
-          </Text>
+        <View className="flex-row items-center gap-3">
+          <View className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 items-center justify-center">
+            <MaterialIcons name="receipt-long" size={20} color="#DC2D2A" />
+          </View>
+          <View>
+            <Text className="text-base font-bold text-neutral">
+              Order #{activeOrder.id}
+            </Text>
+            <Text className="text-[11px] text-accent font-medium mt-0.5">
+              Assigned Delivery Details
+            </Text>
+          </View>
         </View>
+
         <View className="flex-row items-center gap-3">
           <TouchableOpacity
-            onPress={activeOrder?.latitude && activeOrder?.longitude ? handleDirectGps : handleGetRoute}
-            className="h-9 w-9 flex items-center justify-center rounded-md  bg-primary"
+            onPress={
+              activeOrder?.latitude && activeOrder?.longitude
+                ? handleDirectGps
+                : handleGetRoute
+            }
+            className="h-9 w-9 flex items-center justify-center rounded-md bg-primary"
           >
             <MaterialIcons name="near-me" size={20} color="#ffffff" />
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => {
-              if (activeOrder?.customer_phone && activeOrder?.customer_phone !== "N/A") {
-                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(() => {});
+              if (
+                activeOrder?.customer_phone &&
+                activeOrder?.customer_phone !== "N/A"
+              ) {
+                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(
+                  () => {},
+                );
               }
             }}
-            className="h-9 w-9 flex items-center justify-center rounded-md  bg-primary"
+            className="h-9 w-9 flex items-center justify-center rounded-md bg-primary"
           >
             <MaterialIcons name="phone" size={20} color="#ffffff" />
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => handleQuickSMS("I am on my way with your order.")}
-            className="h-9 w-9 flex items-center justify-center rounded-md  bg-primary"
+            className="h-9 w-9 flex items-center justify-center rounded-md bg-primary"
           >
             <MaterialIcons name="message" size={19} color="#ffffff" />
           </TouchableOpacity>
@@ -175,301 +124,324 @@ export default function ActiveOrderDetailsModal({
 
       <BottomSheetScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: 16,
+          paddingBottom: 40,
+        }}
       >
-        {/* Customer Information */}
-        <View className="gap-y-2">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Customer Details</Text>
-          <View className="bg-base-100 rounded-xl p-4 gap-y-2 border border-base-200">
-            <View className="flex-row justify-between">
-              <Text className="text-xs text-accent">Name:</Text>
-              <Text className="text-xs font-bold text-neutral">{activeOrder.customer_name || "N/A"}</Text>
+        <ActiveCustomerSection
+          activeOrder={activeOrder}
+          handleDirectGps={handleDirectGps}
+        />
+
+        {/* Instructions Section */}
+        {activeOrder.initial_note ? (
+          <View className="gap-y-2 mt-4">
+            <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+              Instructions
+            </Text>
+            <View className="bg-primary/5 border border-primary/20 rounded-lg p-3.5 flex-row items-start gap-2.5">
+              <MaterialIcons name="assignment-late" size={18} color="#DC2D2A" />
+              <Text className="text-xs text-neutral italic font-semibold leading-5 flex-1">
+                {activeOrder.initial_note}
+              </Text>
             </View>
-
-            {activeOrder.customer_phone && activeOrder.customer_phone !== "N/A" ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Phone:</Text>
-                <Text className="text-xs font-bold text-neutral">{activeOrder.customer_phone}</Text>
-              </View>
-            ) : null}
-
-            {activeOrder.customer_note ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Customer Note:</Text>
-                <Text className="text-xs font-bold text-neutral italic">"{activeOrder.customer_note}"</Text>
-              </View>
-            ) : null}
-
-            <View className="flex-row justify-between items-start">
-              <Text className="text-xs text-accent">Delivery Address:</Text>
-              <View className="flex-row items-center gap-1.5 flex-1 justify-end ml-4">
-                <Text className="text-xs font-bold text-neutral text-right flex-1" numberOfLines={2}>
-                  {activeOrder.door_no ? `${activeOrder.door_no}, ` : ""}
-                  {activeOrder.customer_address}
-                  {activeOrder.customer_post_code ? ` — ${activeOrder.customer_post_code}` : ""}
-                </Text>
-                {activeOrder?.latitude && activeOrder?.longitude ? (
-                  <TouchableOpacity
-                    key="gps-directions-btn"
-                    onPress={handleDirectGps}
-                    className="w-5 h-5 rounded bg-emerald-100 items-center justify-center shrink-0"
-                  >
-                    <MaterialIcons name="directions" size={12} color="#36d399" />
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            </View>
-
-            {activeOrder.initial_note ? (
-              <TouchableOpacity
-                key="delivery-instructions-toggle"
-                onPress={() => setIsNoteExpanded(!isNoteExpanded)}
-                activeOpacity={0.7}
-                className="border-t border-base-200 pt-2 mt-1"
-              >
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-xs text-accent">Delivery instructions</Text>
-                  <MaterialIcons
-                    name={isNoteExpanded ? "expand-less" : "expand-more"}
-                    size={16}
-                    color="#6E6E6E"
-                  />
-                </View>
-                {isNoteExpanded && (
-                  <Text
-                    key="delivery-instructions-text"
-                    className="text-xs text-neutral/70 mt-1 italic font-medium leading-4"
-                  >
-                    {activeOrder.initial_note}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ) : null}
           </View>
-        </View>
+        ) : null}
 
         {/* Order Items Section */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Order Items</Text>
-          <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-0">
-            {isLoadingDetails ? (
-              <ItemsSummarySkeleton />
-            ) : (
-              (() => {
-                const detailItems = fullOrderDetail?.detail || fullOrderDetail?.details || [];
-                if (detailItems.length === 0) {
-                  return (
-                    <View key="items-empty" className="py-2">
-                      <Text className="text-xs text-accent text-center italic">
-                        No items found for this order.
-                      </Text>
-                    </View>
-                  );
-                }
+        <OrderItemList
+          items={fullOrderDetail?.detail || fullOrderDetail?.details || []}
+          isLoading={isLoadingDetails}
+          currencySymbol={currencySymbol}
+        />
 
-                return (
-                  <View key="items-list">
-                    {detailItems.map((item: any, index: number) => {
-                      const dishName = item.dish?.name || item.meal?.name || item.dish_name || "Item";
-                      const qty = item.qty || item.quantity || 1;
-                      const price = parsePrice(
-                        item.dish?.price || item.dish_price || item.main_price || item.price,
-                      );
+        <ActiveOrderSection activeOrder={activeOrder} />
 
-                      return (
-                        <View
-                          key={item.id || index}
-                          className={`flex-row justify-between items-center py-2.5 ${
-                            index < detailItems.length - 1 ? "border-b border-base-200" : ""
-                          }`}
-                        >
-                          <View className="flex-row items-center gap-2 flex-1">
-                            <View className="bg-primary/10 w-6 h-6 rounded-md items-center justify-center">
-                              <Text className="text-[10px] font-black text-primary">{qty}x</Text>
-                            </View>
-                            <View className="flex-1">
-                              <Text className="text-xs font-semibold text-neutral" numberOfLines={1}>
-                                {dishName}
-                              </Text>
-                              <Text className="text-[10px] text-accent mt-0.5">
-                                {formatAmount(price, currencySymbol)} each
-                              </Text>
-                              {item.variations && item.variations.length > 0 ? (
-                                <Text
-                                  className="text-[9px] text-secondary font-semibold mt-0.5"
-                                  numberOfLines={1}
-                                >
-                                  {item.variations
-                                    .map((v: any) => v.variation?.name || v.name || "")
-                                    .filter(Boolean)
-                                    .join(", ")}
-                                </Text>
-                              ) : null}
-                            </View>
-                          </View>
-                          <Text className="text-xs font-bold text-neutral ml-2">
-                            {formatAmount(qty * price, currencySymbol)}
-                          </Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                );
-              })()
-            )}
-          </View>
-        </View>
+        <ActiveBillSection
+          activeOrder={activeOrder}
+          totalAmount={totalAmount}
+          currencySymbol={currencySymbol}
+        />
 
-        {/* Order Details Section */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Order Details</Text>
-          <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-2">
-            {activeOrder.order_time || activeOrder.created_at ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Order Placed:</Text>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatUtcToLocalTime(activeOrder.order_time || activeOrder.created_at)}
-                </Text>
-              </View>
-            ) : null}
-
-            {activeOrder.accepted_at ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Accepted At:</Text>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatUtcToLocalTime(activeOrder.accepted_at)}
-                </Text>
-              </View>
-            ) : null}
-
-            {activeOrder.picked_up_at ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Picked Up At:</Text>
-                <Text className="text-xs font-bold text-neutral">
-                  {formatUtcToLocalTime(activeOrder.picked_up_at)}
-                </Text>
-              </View>
-            ) : null}
-
-            {activeOrder.delivery_otp ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">OTP Code:</Text>
-                <Text className="text-xs font-bold text-emerald-600">{activeOrder.delivery_otp}</Text>
-              </View>
-            ) : null}
-
-            {activeOrder.remarks ? (
-              <View className="border-t border-base-200 pt-2 mt-1">
-                <Text className="text-[10px] font-bold text-neutral capitalize tracking-wider mb-1">
-                  Staff Remarks
-                </Text>
-                <Text className="text-xs text-neutral/70 italic leading-4 bg-white/50 p-2.5 rounded border border-base-200">
-                  {activeOrder.remarks}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </View>
-
-        {/* Bill Summary */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Bill Summary</Text>
-          <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-2">
-            <View className="flex-row justify-between">
-              <Text className="text-xs text-accent">Subtotal:</Text>
-              <Text className="text-xs font-semibold text-neutral">
-                {formatAmount(totalAmount - parseFloat(activeOrder.tip_amount || "0"), currencySymbol)}
-              </Text>
-            </View>
-
-            {parseFloat(activeOrder.tip_amount || "0") > 0 ? (
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-accent">Driver Tip:</Text>
-                <Text className="text-xs font-semibold text-neutral">
-                  {formatAmount(parseFloat(activeOrder.tip_amount), currencySymbol)}
-                </Text>
-              </View>
-            ) : null}
-
-            <View className="border-t border-base-200 pt-2 mt-1 flex-row justify-between items-center">
-              <Text className="text-xs font-bold text-neutral">Total Amount:</Text>
-              <Text className="text-md font-bold text-primary">
-                {formatAmount(totalAmount, currencySymbol)}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Payment Handling Section */}
-        <View className="gap-y-2 mt-4">
-          <Text className="text-xs font-bold text-neutral capitalize tracking-wider">Payment handling</Text>
-          <View className="bg-base-100 rounded-xl p-4 border border-base-200 gap-y-3">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-xs text-accent">Payment Method:</Text>
-              <Text className="text-xs font-semibold text-neutral">
-                {paymentMethod === "Cash" ? "Cash on delivery" : "Prepaid"}
-              </Text>
-            </View>
-
-            {paymentMethod === "Cash" ? (
-              <View key="cash-payment-container" className="gap-y-3">
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-xs text-accent">Cash to collect:</Text>
-                  <Text className="text-sm font-bold text-neutral">
-                    {formatAmount(totalAmount, currencySymbol)}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() => setCollectedAmount(totalAmount.toFixed(2))}
-                  activeOpacity={0.7}
-                  className="bg-primary border border-primary rounded-lg px-2.5 py-1.5 self-start"
-                >
-                  <Text className="text-[10px] font-semibold text-white capitalize">
-                    Exact — {formatAmount(totalAmount, currencySymbol)}
-                  </Text>
-                </TouchableOpacity>
-
-                <View className="flex-row items-center bg-white border border-base-200 rounded-lg px-3 py-2.5">
-                  <Text className="font-semibold text-accent mr-2 text-sm">{currencySymbol}</Text>
-                  <BottomSheetTextInput
-                    value={collectedAmount}
-                    onChangeText={setCollectedAmount}
-                    placeholder="0.00"
-                    keyboardType="numeric"
-                    placeholderTextColor="#6E6E6E"
-                    className="flex-1 text-neutral font-bold text-sm p-0 m-0"
-                    editable={!updateStatusMutation.isPending}
-                  />
-                </View>
-
-                <Button
-                  label={updateStatusMutation.isPending ? "Confirming..." : "Confirm payment"}
-                  onPress={handleConfirmPayment}
-                  disabled={updateStatusMutation.isPending}
-                  variant="primary"
-                  containerClassName="mt-2"
-                />
-              </View>
-            ) : (
-              <View
-                key="prepaid-payment-container"
-                className="bg-emerald-50 border border-emerald-100 rounded-lg p-3.5 flex-row items-center gap-3"
-              >
-                <MaterialIcons name="security" size={18} color="#059669" />
-                <View className="flex-1">
-                  <Text className="font-bold text-emerald-800 text-[11px] capitalize tracking-wider">
-                    Payment already collected
-                  </Text>
-                  <Text className="text-[10px] text-emerald-600 font-semibold mt-0.5">
-                    This order is prepaid and fully settled.
-                  </Text>
-                </View>
-              </View>
-            )}
-          </View>
-        </View>
+        {/* Reusable Payment Handling Component */}
+        <PaymentCollectionSection
+          paymentMethod={paymentMethod}
+          totalAmount={totalAmount}
+          collectedAmount={collectedAmount}
+          setCollectedAmount={setCollectedAmount}
+          currencySymbol={currencySymbol}
+          isPending={updateStatusMutation.isPending}
+          onConfirmPayment={handleConfirmPayment}
+        />
       </BottomSheetScrollView>
-    </BottomSheetModal>
+    </BottomSheet>
+  );
+}
+
+interface ActiveCustomerSectionProps {
+  activeOrder: DriverOrder;
+  handleDirectGps: () => void;
+}
+
+function ActiveCustomerSection({
+  activeOrder,
+  handleDirectGps,
+}: Readonly<ActiveCustomerSectionProps>) {
+  return (
+    <View className="gap-y-2">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Customer Details
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 gap-y-3 border border-base-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="person-outline" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Name:</Text>
+          </View>
+          <Text className="text-xs font-bold text-neutral">
+            {activeOrder.customer_name || "N/A"}
+          </Text>
+        </View>
+
+        {activeOrder.customer_phone && activeOrder.customer_phone !== "N/A" ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="phone" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Phone:</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                Linking.openURL(`tel:${activeOrder.customer_phone}`).catch(
+                  () => {},
+                );
+              }}
+              activeOpacity={0.7}
+              className="flex-row items-center"
+            >
+              <Text className="text-xs text-primary font-bold">(</Text>
+              <MaterialIcons
+                name="phone"
+                size={11}
+                color="#DC2D2A"
+                style={{
+                  transform: [{ rotate: "10deg" }],
+                  marginHorizontal: -1,
+                }}
+              />
+              <Text className="text-xs text-primary font-bold">) </Text>
+              <Text className="text-xs text-primary font-bold">
+                {activeOrder.customer_phone}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {activeOrder.customer_note ? (
+          <View className="flex-row items-start justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons
+                name="chat-bubble-outline"
+                size={16}
+                color="#DC2D2A"
+              />
+              <Text className="text-xs text-accent">Customer Note:</Text>
+            </View>
+            <Text className="text-xs font-semibold text-neutral italic max-w-[60%] text-right">
+              &quot;{activeOrder.customer_note}&quot;
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="flex-row items-start justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="location-on" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Address:</Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleDirectGps}
+            activeOpacity={0.7}
+            className="flex-1 ml-4"
+          >
+            <Text
+              className="text-xs font-bold text-primary text-right"
+              numberOfLines={3}
+            >
+              {activeOrder.door_no ? `${activeOrder.door_no}, ` : ""}
+              {activeOrder.customer_address}
+              {activeOrder.customer_post_code
+                ? ` — ${activeOrder.customer_post_code}`
+                : ""}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface ActiveOrderSectionProps {
+  activeOrder: DriverOrder;
+}
+
+function ActiveOrderSection({
+  activeOrder,
+}: Readonly<ActiveOrderSectionProps>) {
+  return (
+    <View className="gap-y-2 mt-4">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Order Details
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
+        {activeOrder.order_time || activeOrder.created_at ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="schedule" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Order Placed:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatUtcToLocalTime(
+                activeOrder.order_time || activeOrder.created_at,
+              )}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeOrder.accepted_at ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="done-all" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Accepted At:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatUtcToLocalTime(activeOrder.accepted_at)}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeOrder.picked_up_at ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="local-shipping" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Picked Up At:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatUtcToLocalTime(activeOrder.picked_up_at)}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeOrder.delivery_otp ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="verified" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">OTP Code:</Text>
+            </View>
+            <Text className="text-xs font-bold text-primary">
+              {activeOrder.delivery_otp}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeOrder.remarks ? (
+          <View className="border-t border-base-200 pt-2.5 mt-1">
+            <Text className="text-[10px] font-bold text-neutral capitalize tracking-wider mb-1">
+              Staff Remarks
+            </Text>
+            <Text className="text-xs text-neutral/70 italic leading-4 bg-white p-2.5 rounded border border-base-200">
+              {activeOrder.remarks}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+interface ActiveBillSectionProps {
+  activeOrder: DriverOrder;
+  totalAmount: number;
+  currencySymbol: string;
+}
+
+function ActiveBillSection({
+  activeOrder,
+  totalAmount,
+  currencySymbol,
+}: Readonly<ActiveBillSectionProps>) {
+  const tip = parseFloat(activeOrder.tip_amount || "0");
+  const discount = parseFloat(activeOrder.discount || "0");
+  const tax = parseFloat(activeOrder.tax || "0");
+
+  return (
+    <View className="gap-y-2 mt-4">
+      <Text className="text-xs font-bold text-neutral capitalize tracking-wider">
+        Bill Summary
+      </Text>
+      <View className="bg-slate-50 rounded-lg p-3.5 border border-base-200 shadow-sm gap-y-3">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="receipt" size={16} color="#DC2D2A" />
+            <Text className="text-xs text-accent">Subtotal:</Text>
+          </View>
+          <Text className="text-xs font-bold text-neutral">
+            {formatAmount(totalAmount - tip, currencySymbol)}
+          </Text>
+        </View>
+
+        {discount > 0 ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="local-offer" size={16} color="#059669" />
+              <Text className="text-xs text-accent">Discount:</Text>
+            </View>
+            <Text className="text-xs font-bold text-emerald-600">
+              -{formatAmount(discount, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {tax > 0 ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="account-balance" size={16} color="#DC2D2A" />
+              <Text className="text-xs text-accent">Tax:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatAmount(tax, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        {tip > 0 ? (
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons
+                name="volunteer-activism"
+                size={16}
+                color="#DC2D2A"
+              />
+              <Text className="text-xs text-accent">Driver Tip:</Text>
+            </View>
+            <Text className="text-xs font-bold text-neutral">
+              {formatAmount(tip, currencySymbol)}
+            </Text>
+          </View>
+        ) : null}
+
+        <View className="border-t border-base-200 pt-2.5 mt-1 flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <MaterialIcons name="payments" size={16} color="#DC2D2A" />
+            <Text className="text-xs font-bold text-neutral">
+              Total Amount:
+            </Text>
+          </View>
+          <Text className="text-base font-bold text-neutral">
+            {formatAmount(totalAmount, currencySymbol)}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

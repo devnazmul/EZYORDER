@@ -1,12 +1,11 @@
 import LoadingScreen from "@/components/reuseable/LoadingScreen";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { DataProvider } from "@/context/providers/DataProvider";
-import { allowedUserTypes, checkUserType } from "@/features/auth";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as NavigationBar from "expo-navigation-bar";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { Platform } from "react-native";
@@ -14,40 +13,16 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
+import { ResponsiveProvider } from "@/context/providers/ResponsiveProvider";
 import "../global.css";
 
 const queryClient = new QueryClient();
 
 function RootNavigation() {
-  const { token, user, isLoading } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
+  const { isLoading } = useAuth();
 
   // Initialize push notification listeners and backend auto-registration
   usePushNotifications();
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    const inAuthGroup = segments[0] === "(auth)";
-
-    if (!token) {
-      if (!inAuthGroup) {
-        router.replace("/(auth)/login");
-      }
-    } else {
-      if (inAuthGroup) {
-        if (checkUserType(user, allowedUserTypes)) {
-          const userType = (user?.type || "").toLowerCase().trim();
-          if (userType === "driver") {
-            router.replace("/(driver)");
-          } else {
-            router.replace("/(tabs)/home");
-          }
-        }
-      }
-    }
-  }, [token, isLoading, segments, user]);
 
   if (isLoading) {
     return <LoadingScreen message="Restoring session..." />;
@@ -57,7 +32,7 @@ function RootNavigation() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(owner)" />
       <Stack.Screen name="(driver)" />
     </Stack>
   );
@@ -73,16 +48,18 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <DataProvider>
-            <BottomSheetModalProvider>
-              <StatusBar style="dark" />
-              <RootNavigation />
-            </BottomSheetModalProvider>
-          </DataProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <ResponsiveProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <DataProvider>
+              <BottomSheetModalProvider>
+                <StatusBar style="dark" />
+                <RootNavigation />
+              </BottomSheetModalProvider>
+            </DataProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ResponsiveProvider>
     </GestureHandlerRootView>
   );
 }

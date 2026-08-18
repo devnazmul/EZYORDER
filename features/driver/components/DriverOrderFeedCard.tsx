@@ -1,6 +1,9 @@
+import Badge from "@/components/reuseable/Badge";
 import Button from "@/components/reuseable/Button";
-import StatusBadge from "@/components/reuseable/StatusBadge";
+import { formatLabel } from "@/utils/formatLabel";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
+import { getStatusBadgeConfig } from "@/utils/getStatusBadgeConfig";
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { Text, View } from "react-native";
 import { DriverOrder } from "../types";
@@ -20,6 +23,9 @@ export default function DriverOrderFeedCard({
     return order.created_at ? formatDateTime(order.created_at) : (order.order_time || "--:--");
   }, [order.created_at, order.order_time]);
 
+  const statusConfig = useMemo(() => getStatusBadgeConfig(order.status), [order.status]);
+  const paymentStatusConfig = useMemo(() => getStatusBadgeConfig(order.payment_status), [order.payment_status]);
+
   return (
     <View className="bg-base-300 rounded-xl border border-base-200 overflow-hidden shadow-sm mb-4">
       <View className="p-4 gap-y-3">
@@ -30,8 +36,20 @@ export default function DriverOrderFeedCard({
           </View>
 
           <View className="items-end gap-y-1.5">
-            <StatusBadge status={order.status} />
-            <StatusBadge status={order.payment_status} />
+            <Badge
+              text={formatLabel(order.status) || "Pending"}
+              icon={<MaterialIcons name={statusConfig.iconName} size={12} color={statusConfig.iconColor} />}
+              iconPosition="left"
+              containerClassName={statusConfig.containerClass}
+              textClassName={statusConfig.textClass}
+            />
+            <Badge
+              text={formatLabel(order.payment_status) || "Unpaid"}
+              icon={<MaterialIcons name={paymentStatusConfig.iconName} size={12} color={paymentStatusConfig.iconColor} />}
+              iconPosition="left"
+              containerClassName={paymentStatusConfig.containerClass}
+              textClassName={paymentStatusConfig.textClass}
+            />
           </View>
         </View>
 

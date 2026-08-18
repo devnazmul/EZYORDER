@@ -1,3 +1,6 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -26,28 +29,33 @@ interface OrderStatusCardProps {
 function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCardProps) {
   let containerClass = "";
   let textClass = "";
-  let circleClass = "";
+  let iconName: keyof typeof MaterialIcons.glyphMap = "notifications-none";
+  let iconColor: string = COLORS.info;
 
   if (type === "new") {
     containerClass =
-      "bg-blue-500/10 border-l-4 border-blue-500 p-4 flex-row justify-between items-center rounded-r-xl";
-    textClass = "text-xs font-bold text-blue-800 tracking-wider";
-    circleClass = "w-6 h-6 items-center justify-center rounded-full bg-blue-500";
+      "bg-[#2563eb12] border-b-4 border-[#2563eb] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#1d4ed8] tracking-wider capitalize";
+    iconName = "notifications-none";
+    iconColor = "#2563eb";
   } else if (type === "preparing") {
     containerClass =
-      "bg-orange-500/10 border-l-4 border-orange-500 p-4 flex-row justify-between items-center rounded-r-xl";
-    textClass = "text-xs font-bold text-orange-800 tracking-wider";
-    circleClass = "bg-orange-500 w-6 h-6 items-center justify-center rounded-full";
+      "bg-[#d9770612] border-b-4 border-[#d97706] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#b45309] tracking-wider capitalize";
+    iconName = "schedule";
+    iconColor = "#d97706";
   } else if (type === "completed") {
     containerClass =
-      "bg-gray-500/10 border-l-4 border-gray-500 p-4 flex-row justify-between items-center rounded-r-xl opacity-60";
-    textClass = "text-xs font-bold text-gray-800 tracking-wider";
-    circleClass = "bg-gray-500 w-6 h-6 items-center justify-center rounded-full";
+      "bg-[#47556912] border-b-4 border-[#475569] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#334155] tracking-wider capitalize";
+    iconName = "history";
+    iconColor = "#475569";
   } else if (type === "unpaid") {
     containerClass =
-      "bg-pink-500/10 border-l-4 border-pink-500 p-4 flex-row justify-between items-center rounded-r-xl";
-    textClass = "text-xs font-bold text-pink-800 tracking-wider";
-    circleClass = "bg-pink-500 w-6 h-6 items-center justify-center rounded-full";
+      "bg-[#db277712] border-b-4 border-[#db2777] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#be185d] tracking-wider capitalize";
+    iconName = "history";
+    iconColor = "#db2777";
   }
 
   const handlePress = () => {
@@ -81,12 +89,24 @@ function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCa
     });
   };
 
+  const isFlippedIcon = type === "completed" || type === "unpaid";
+
   return (
-    <TouchableOpacity activeOpacity={0.8} onPress={handlePress} className={containerClass}>
-      <Text className={textClass}>{title}</Text>
-      <View className={circleClass}>
-        <Text className="text-white text-[11px] font-extrabold">{count}</Text>
-      </View>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={handlePress}
+      style={{ paddingHorizontal: WP("4%") }}
+      className={`${containerClass} py-3.5`}
+    >
+      <Text style={{ fontSize: getResponsiveFontSize("sm") }} className={textClass}>
+        {`${title} (${count})`}
+      </Text>
+      <MaterialIcons
+        name={iconName}
+        size={WP("5.5%")}
+        color={iconColor}
+        style={isFlippedIcon ? { transform: [{ scaleX: -1 }] } : undefined}
+      />
     </TouchableOpacity>
   );
 }
@@ -106,7 +126,7 @@ export default function LiveOrderBoard({
   const unpaidCount = liveOrderBoard?.unpaid ?? 0;
 
   return (
-    <View key="loaded" className="gap-y-2">
+    <View key="loaded" className="gap-y-2.5">
       <OrderStatusCard title="New Orders" count={newOrdersCount} type="new" role={role} />
       <OrderStatusCard title="Preparing" count={preparingCount} type="preparing" role={role} />
       <OrderStatusCard title="Completed" count={completedCount} type="completed" role={role} />

@@ -1,12 +1,17 @@
+import BottomSheet from "@/components/reuseable/BottomSheet";
+import Button from "@/components/reuseable/Button";
 import FilterChips from "@/components/reuseable/FilterChips";
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, ScrollView, Text, TouchableOpacity, View, KeyboardTypeOptions } from "react-native";
+import { KeyboardTypeOptions, Text, TouchableOpacity, View } from "react-native";
 import DatePickerModal from "./DatePickerModal";
+import DateField from "./inputs/DateField";
 import DateRangeField from "./inputs/DateRangeField";
 import NumberRangeField from "./inputs/NumberRangeField";
 import TextField from "./inputs/TextField";
-import DateField from "./inputs/DateField";
 
 export interface FilterField {
   id: string;
@@ -33,7 +38,7 @@ export default function FilterDrawer({
   triggerClassName = "",
 }: FilterDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // Local scratch state to modify before applying
   const [localValues, setLocalValues] = useState<Record<string, any>>(values);
   const [activeDatePicker, setActiveDatePicker] = useState<{
@@ -170,7 +175,7 @@ export default function FilterDrawer({
         activeOpacity={0.8}
         className={`relative bg-base-300 border border-base-200 rounded-lg p-2.5 items-center justify-center ${triggerClassName}`}
       >
-        <MaterialIcons name="filter-list" size={20} color="#DC2D2A" />
+        <MaterialIcons name="filter-list" size={WP("4.75%")} color={COLORS.primary} />
         {activeFilterCount > 0 && (
           <View className="absolute -top-1 -right-1 bg-primary w-5 h-5 rounded-full items-center justify-center border-2 border-base-300">
             <Text className="text-[8px] font-bold text-white">{activeFilterCount}</Text>
@@ -178,138 +183,144 @@ export default function FilterDrawer({
         )}
       </TouchableOpacity>
 
-      <Modal visible={isOpen} transparent animationType="slide" onRequestClose={() => setIsOpen(false)}>
-        <View className="flex-1 justify-end bg-neutral/40">
-          <View className="bg-base-300 border-t border-base-200 rounded-t-3xl h-[80%] flex-col">
-            {/* Header */}
-            <View className="flex-row justify-between items-center px-5 py-4 border-b border-base-200">
-              <Text className="text-base font-black text-neutral uppercase tracking-tight">Filters</Text>
-              <TouchableOpacity onPress={() => setIsOpen(false)} className="p-1">
-                <MaterialIcons name="close" size={24} color="#6E6E6E" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Scrollable Fields */}
-            <ScrollView className="flex-1 px-5 py-4">
-              <View className="gap-y-6 pb-8">
-                {fields.map((field) => {
-                  if (field.type === "chips" && field.options) {
-                    const selectedId = localValues[field.id] || "all";
-                    return (
-                      <View key={field.id}>
-                        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3">
-                          {field.label}
-                        </Text>
-                        <FilterChips
-                          chips={field.options}
-                          selectedId={selectedId}
-                          onSelect={(optionId) => handleChipSelect(field, optionId)}
-                        />
-                      </View>
-                    );
-                  }
-
-                  if (field.type === "date-range") {
-                    const range = localValues[field.id] || { start: "", end: "" };
-                    return (
-                      <DateRangeField
-                        key={field.id}
-                        label={field.label}
-                        startDateValue={range.start}
-                        endDateValue={range.end}
-                        onSelectStartDate={() => setActiveDatePicker({ fieldId: field.id, type: "start" })}
-                        onSelectEndDate={() => setActiveDatePicker({ fieldId: field.id, type: "end" })}
-                        formatDateLabel={formatDateLabel}
-                      />
-                    );
-                  }
-
-                  if (field.type === "number-range") {
-                    const range = localValues[field.id] || { min: "", max: "" };
-                    return (
-                      <NumberRangeField
-                        key={field.id}
-                        label={field.label}
-                        minValue={range.min}
-                        maxValue={range.max}
-                        onChangeMinText={(text) => {
-                          setLocalValues((prev) => ({
-                            ...prev,
-                            [field.id]: {
-                              ...(prev[field.id] || { min: "", max: "" }),
-                              min: text,
-                            },
-                          }));
-                        }}
-                        onChangeMaxText={(text) => {
-                          setLocalValues((prev) => ({
-                            ...prev,
-                            [field.id]: {
-                              ...(prev[field.id] || { min: "", max: "" }),
-                              max: text,
-                            },
-                          }));
-                        }}
-                      />
-                    );
-                  }
-
-                  if (field.type === "text") {
-                    const textVal = localValues[field.id] || "";
-                    return (
-                      <TextField
-                        key={field.id}
-                        label={field.label}
-                        value={textVal}
-                        keyboardType={field.keyboardType || "default"}
-                        onChangeText={(text) => {
-                          setLocalValues((prev) => ({
-                            ...prev,
-                            [field.id]: text,
-                          }));
-                        }}
-                      />
-                    );
-                  }
-
-                  if (field.type === "date") {
-                    const dateVal = localValues[field.id] || "";
-                    return (
-                      <DateField
-                        key={field.id}
-                        label={field.label}
-                        value={dateVal}
-                        onPress={() => setActiveDatePicker({ fieldId: field.id, type: "single" })}
-                        formatDateLabel={formatDateLabel}
-                      />
-                    );
-                  }
-
-                  return null;
-                })}
-              </View>
-            </ScrollView>
-
-            {/* Bottom Actions */}
-            <View className="flex-row items-center gap-3 p-4 border-t border-base-200 bg-base-200">
-              <TouchableOpacity
-                onPress={handleClear}
-                activeOpacity={0.8}
-                className="flex-1 border border-accent py-3.5 rounded-xl items-center justify-center bg-base-300"
-              >
-                <Text className="text-xs font-bold text-accent uppercase tracking-wider">Clear All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleApply}
-                activeOpacity={0.8}
-                className="flex-1 bg-primary py-3.5 rounded-xl items-center justify-center"
-              >
-                <Text className="text-xs font-bold text-white uppercase tracking-wider">Apply Filters</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+      <BottomSheet
+        visible={isOpen}
+        onClose={() => setIsOpen(false)}
+        snapPoints={["80%"]}
+        keyboardBehavior="interactive"
+        android_keyboardInputMode="adjustResize"
+      >
+        {/* Header */}
+        <View
+          style={{ paddingHorizontal: WP("5%") }}
+          className="flex-row justify-between items-center py-2 border-b border-base-200"
+        >
+          <Text
+            style={{ fontSize: getResponsiveFontSize("lg") }}
+            className="font-bold text-neutral capitalize "
+          >
+            Filters
+          </Text>
         </View>
-      </Modal>
+
+        {/* Scrollable Fields */}
+        <BottomSheetScrollView style={{ paddingHorizontal: WP("5%") }} className="flex-1 py-4">
+          <View className="gap-y-6">
+            {fields.map((field) => {
+              if (field.type === "chips" && field.options) {
+                const selectedId = localValues[field.id] || "all";
+                return (
+                  <View key={field.id}>
+                    <Text
+                      style={{ fontSize: getResponsiveFontSize("sm") }}
+                      className="font-semibold text-accent capitalize  mb-3"
+                    >
+                      {field.label}
+                    </Text>
+                    <FilterChips
+                      chips={field.options}
+                      selectedId={selectedId}
+                      onSelect={(optionId) => handleChipSelect(field, optionId)}
+                    />
+                  </View>
+                );
+              }
+
+              if (field.type === "date-range") {
+                const range = localValues[field.id] || { start: "", end: "" };
+                return (
+                  <DateRangeField
+                    key={field.id}
+                    label={field.label}
+                    startDateValue={range.start}
+                    endDateValue={range.end}
+                    onSelectStartDate={() => setActiveDatePicker({ fieldId: field.id, type: "start" })}
+                    onSelectEndDate={() => setActiveDatePicker({ fieldId: field.id, type: "end" })}
+                    formatDateLabel={formatDateLabel}
+                  />
+                );
+              }
+
+              if (field.type === "number-range") {
+                const range = localValues[field.id] || { min: "", max: "" };
+                return (
+                  <NumberRangeField
+                    key={field.id}
+                    label={field.label}
+                    minValue={range.min}
+                    maxValue={range.max}
+                    onChangeMinText={(text) => {
+                      setLocalValues((prev) => ({
+                        ...prev,
+                        [field.id]: {
+                          ...(prev[field.id] || { min: "", max: "" }),
+                          min: text,
+                        },
+                      }));
+                    }}
+                    onChangeMaxText={(text) => {
+                      setLocalValues((prev) => ({
+                        ...prev,
+                        [field.id]: {
+                          ...(prev[field.id] || { min: "", max: "" }),
+                          max: text,
+                        },
+                      }));
+                    }}
+                  />
+                );
+              }
+
+              if (field.type === "text") {
+                const textVal = localValues[field.id] || "";
+                return (
+                  <TextField
+                    key={field.id}
+                    label={field.label}
+                    value={textVal}
+                    keyboardType={field.keyboardType || "default"}
+                    onChangeText={(text) => {
+                      setLocalValues((prev) => ({
+                        ...prev,
+                        [field.id]: text,
+                      }));
+                    }}
+                  />
+                );
+              }
+
+              if (field.type === "date") {
+                const dateVal = localValues[field.id] || "";
+                return (
+                  <DateField
+                    key={field.id}
+                    label={field.label}
+                    value={dateVal}
+                    onPress={() => setActiveDatePicker({ fieldId: field.id, type: "single" })}
+                    formatDateLabel={formatDateLabel}
+                  />
+                );
+              }
+
+              return null;
+            })}
+          </View>
+        </BottomSheetScrollView>
+
+        {/* Bottom Actions */}
+        <View
+          style={{ padding: WP("4%"), paddingBottom: HP("6%") }}
+          className="flex-row items-center gap-3 border-t border-base-200 bg-base-200"
+        >
+          <Button
+            label="Clear All"
+            onPress={handleClear}
+            variant="outline"
+            containerClassName="flex-1 !shadow-none"
+          />
+          <Button label="Apply Filters" onPress={handleApply} variant="primary" containerClassName="flex-1" />
+        </View>
+      </BottomSheet>
 
       {/* Embedded Date Picker Modal */}
       {activeDatePicker && (

@@ -1,14 +1,18 @@
 import Button from "@/components/reuseable/Button";
 import InputField from "@/components/reuseable/InputField";
 import { useAuth } from "@/context/AuthContext";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { allowedUserTypes } from "../constants/allowedUserTypes";
 import { useLoginMutation } from "../hooks/mutations/useAuthMutations";
 import { checkUserType } from "../utils/checkUserType";
+
+const logoImage = require("@/assets/images/icon.png");
 
 const LoginScreen = () => {
   const { login } = useAuth();
@@ -29,7 +33,7 @@ const LoginScreen = () => {
 
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email.trim())) {
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email.trim())) {
       newErrors.email = "Invalid email address";
     }
 
@@ -104,40 +108,86 @@ const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100">
+    <View className="flex-1 bg-base-100">
       <Stack.Screen options={{ headerShown: false }} />
 
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
-        <ScrollView
+      <SafeAreaView className="flex-1">
+        <KeyboardAwareScrollView
           contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-          className="w-full px-6"
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          extraScrollHeight={25}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          style={{ paddingHorizontal: WP("4%") }}
+          className="w-full"
         >
-          {/* Header Branding */}
-          <View className="items-center mt-8 mb-6">
+          <View className="items-center my-4">
+            {/* Header Branding */}
+
             <View className="w-16 h-16 bg-primary rounded-lg items-center justify-center shadow-lg mb-4">
               <MaterialIcons name="restaurant" size={36} color="white" />
             </View>
-            <Text className="text-2xl font-bold text-neutral">EZYORDER</Text>
-            <Text className="text-sm text-accent mt-1">Manage your restaurant, anywhere</Text>
+            <Text
+              style={{ fontSize: getResponsiveFontSize("2xl") }}
+              className="text-2xl font-bold text-neutral"
+            >
+              EZYORDER
+            </Text>
+
+            <Text
+              style={{ fontSize: getResponsiveFontSize("lg") }}
+              className="font-medium tracking-wide text-center"
+            >
+              Manage your restaurant, anywhere
+            </Text>
           </View>
 
-          {/* Form Card */}
-          <View className="bg-base-300 rounded-3xl shadow-xl p-6 mb-8 border border-base-200">
+          {/* Modern Glassmorphic Form Card */}
+          <View
+            style={{
+              padding: WP("5%"),
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: "rgba(255, 255, 255, 0.5)",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.25,
+              shadowRadius: 15,
+              elevation: 10,
+            }}
+            className="mb-6"
+          >
             {errorBanner && (
-              <View className="flex-row items-center bg-error/15 border border-error/30 rounded-lg p-3 mb-6 gap-3 animate-pulse">
+              <View
+                style={{ gap: WP("3%") }}
+                className="flex-row items-center bg-error/15 border border-error/30 rounded-lg animate-pulse p-3 mb-4"
+              >
                 <MaterialIcons name="error" size={20} color="#DC2D2A" />
-                <Text className="flex-1 text-xs font-semibold text-primary leading-4">{errorBanner}</Text>
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("xs") }}
+                  className="flex-1 font-semibold text-primary leading-4"
+                >
+                  {errorBanner}
+                </Text>
               </View>
             )}
 
-            <View className="mb-6">
-              <Text className="text-xl font-bold text-neutral">Welcome Back</Text>
-              <Text className="text-sm text-accent mt-1">Log in to continue</Text>
+            <View className="mb-4">
+              <Text style={{ fontSize: getResponsiveFontSize("xl") }} className="font-bold text-neutral">
+                Welcome Back
+              </Text>
+              <Text
+                style={{ fontSize: getResponsiveFontSize("sm") }}
+                className="text-accent font-medium mt-1"
+              >
+                Log in to continue
+              </Text>
             </View>
 
             {/* Fields List */}
-            <View className="space-y-4">
+            <View className="gap-y-3.5">
               {/* Email Field */}
               <InputField
                 label="Email"
@@ -175,26 +225,50 @@ const LoginScreen = () => {
                 activeOpacity={0.8}
               >
                 <View
-                  className={`w-5 h-5 border rounded items-center justify-center mr-2 ${
+                  style={{
+                    width: WP("3.5%"),
+                    height: WP("3.5%"),
+                    minWidth: 18,
+                    minHeight: 18,
+                    marginRight: WP("2%"),
+                  }}
+                  className={`border rounded items-center justify-center ${
                     rememberMe ? "bg-primary border-primary" : "border-accent bg-transparent"
                   }`}
                 >
                   {rememberMe && <MaterialIcons name="check" size={14} color="white" />}
                 </View>
-                <Text className="text-xs font-medium text-accent">Remember me</Text>
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("sm") - 1 }}
+                  className="font-medium text-accent"
+                >
+                  Remember me
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleForgotPassword}>
-                <Text className="text-xs font-semibold text-secondary">Forgot Password?</Text>
+                <Text
+                  style={{ fontSize: getResponsiveFontSize("sm") - 1 }}
+                  className="font-semibold text-primary"
+                >
+                  Forgot Password?
+                </Text>
               </TouchableOpacity>
             </View>
 
             {/* Primary Action Button */}
-            <Button label="Log In" onPress={handleSubmit} isLoading={isLoading} containerClassName="mt-6" />
+            <View className="mt-4">
+              <Button
+                label="Log In"
+                onPress={handleSubmit}
+                isLoading={isLoading}
+                containerStyle={{ height: Math.max(42, HP("5%")) }}
+              />
+            </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 
