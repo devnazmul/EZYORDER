@@ -6,7 +6,7 @@ export { default as Button } from "./Button";
 export { default as DatePickerModal } from "./DatePickerModal";
 export { default as EmptyState } from "./EmptyState";
 export { default as FilterChips } from "./FilterChips";
-export { default as FilterDrawer } from "./FilterDrawer";
+export { default as FilterDrawer, type FilterField } from "./FilterDrawer";
 export { default as InputField } from "./InputField";
 export { default as LoadingScreen } from "./LoadingScreen";
 export { default as MenuCard } from "./MenuCard";

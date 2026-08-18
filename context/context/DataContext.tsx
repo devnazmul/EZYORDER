@@ -15,7 +15,9 @@ export interface DataContextType {
   refetchBusinessTiming: () => Promise<any>;
 }
 
-export const DataContext = createContext<DataContextType | undefined>(undefined);
+export const DataContext = createContext<DataContextType | undefined>(
+  undefined,
+);
 
 export const useData = () => {
   const context = useContext(DataContext);

@@ -1,7 +1,6 @@
 import LoadingScreen from "@/components/reuseable/LoadingScreen";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { DataProvider } from "@/context/providers/DataProvider";
-import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { AuthProvider, DataProvider, ResponsiveProvider } from "@/context";
+import { useAuth, usePushNotifications } from "@/hooks";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as NavigationBar from "expo-navigation-bar";
@@ -13,7 +12,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
-import { ResponsiveProvider } from "@/context/providers/ResponsiveProvider";
 import "../global.css";
 
 const queryClient = new QueryClient();

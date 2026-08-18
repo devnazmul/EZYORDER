@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { useWindowDimensions } from "react-native";
 
 interface ResponsiveContextType {
@@ -7,7 +7,7 @@ interface ResponsiveContextType {
   isLandscape: boolean;
 }
 
-const ResponsiveContext = createContext<ResponsiveContextType>({
+export const ResponsiveContext = createContext<ResponsiveContextType>({
   width: 0,
   height: 0,
   isLandscape: false,
@@ -16,12 +16,19 @@ const ResponsiveContext = createContext<ResponsiveContextType>({
 /**
  * Root Responsive Provider to auto-trigger app-wide style recalculations on screen rotation
  */
-export const ResponsiveProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ResponsiveProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
+  const value = useMemo(
+    () => ({ width, height, isLandscape }),
+    [width, height, isLandscape],
+  );
+
   return (
-    <ResponsiveContext.Provider value={{ width, height, isLandscape }}>
+    <ResponsiveContext.Provider value={value}>
       {children}
     </ResponsiveContext.Provider>
   );
