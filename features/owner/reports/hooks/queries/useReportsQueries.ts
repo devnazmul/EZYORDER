@@ -16,7 +16,7 @@ import {
 export const useSalesSummaryQuery = (params: SalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_SUMMARY, params, token],
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_SUMMARY, params],
     queryFn: () => getSalesSummary(token!, params),
     enabled: !!token && !!params.restaurant_id,
   });
@@ -25,7 +25,7 @@ export const useSalesSummaryQuery = (params: SalesParams) => {
 export const useSalesTrendQuery = (params: SalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_TREND, params, token],
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_TREND, params],
     queryFn: () => getSalesTrend(token!, params),
     enabled: !!token && !!params.restaurant_id,
   });
@@ -34,12 +34,7 @@ export const useSalesTrendQuery = (params: SalesParams) => {
 export const useSalesByOrderTypeQuery = (params: SalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [
-      QUERY_KEYS.REPORTS,
-      QUERY_KEYS.SALES_BY_ORDER_TYPE,
-      params,
-      token,
-    ],
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_BY_ORDER_TYPE, params],
     queryFn: () => getSalesByOrderType(token!, params),
     enabled: !!token && !!params.restaurant_id,
   });
@@ -48,7 +43,7 @@ export const useSalesByOrderTypeQuery = (params: SalesParams) => {
 export const useCustomersQuery = (params: CustomerParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.CUSTOMERS, params, token],
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.CUSTOMERS, params],
     queryFn: () => getCustomers(token!, params),
     enabled: !!token,
   });
@@ -57,7 +52,7 @@ export const useCustomersQuery = (params: CustomerParams) => {
 export const useSalesByItemQuery = (params: SalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_BY_ITEM, params, token],
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_BY_ITEM, params],
     queryFn: () => getSalesByItem(token!, params),
     enabled: !!token && !!params.restaurant_id,
   });
@@ -66,7 +61,7 @@ export const useSalesByItemQuery = (params: SalesParams) => {
 export const useSalesHourlyQuery = (params: SalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_HOURLY, params, token],
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_HOURLY, params],
     queryFn: () => getSalesHourly(token!, params),
     enabled: !!token && !!params.restaurant_id,
   });
@@ -75,12 +70,7 @@ export const useSalesHourlyQuery = (params: SalesParams) => {
 export const useSalesDailySummaryQuery = (params: SalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [
-      QUERY_KEYS.REPORTS,
-      QUERY_KEYS.SALES_DAILY_SUMMARY,
-      params,
-      token,
-    ],
+    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_DAILY_SUMMARY, params],
     queryFn: () => getSalesDailySummary(token!, params),
     enabled: !!token && !!params.restaurant_id,
   });
