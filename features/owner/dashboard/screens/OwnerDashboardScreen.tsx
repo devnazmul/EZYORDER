@@ -2,11 +2,17 @@ import ActionCard from "@/components/reuseable/cards/ActionCard";
 import LiveOrderBoard from "@/components/reuseable/dashboard/LiveOrderBoard";
 import LiveOrderBoardSkeleton from "@/components/reuseable/skeletons/LiveOrderBoardSkeleton";
 import ToggleBar from "@/components/reuseable/ToggleBar";
-import COLORS from "@/constants/colors";
+import { COLORS } from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
-import { HP, WP } from "@/utils/getResponsiveSizes";
+import { WP } from "@/utils/getResponsiveSizes";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView } from "react-native";
+import {
+  Keyboard,
+  RefreshControl,
+  ScrollView,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import KitchenActivity from "../components/KitchenActivity";
 import KpiMetrics from "../components/KpiMetrics";
@@ -27,9 +33,10 @@ import {
 } from "../hooks/queries/useDashboardQueries";
 
 export default function OwnerDashboardScreen() {
-  const [filterBy, setFilterBy] = useState<"this_week" | "this_month">("this_week");
+  const [filterBy, setFilterBy] = useState<"this_week" | "this_month">(
+    "this_week",
+  );
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
   const { token } = useAuth();
 
   // Queries
@@ -64,6 +71,7 @@ export default function OwnerDashboardScreen() {
         style={{ paddingHorizontal: WP("4%") }}
         contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -73,70 +81,87 @@ export default function OwnerDashboardScreen() {
           />
         }
       >
-        <Pressable className="gap-y-3" onPress={() => setResetKey((k) => k + 1)}>
-          {/* Toggle Date Period */}
-          <ToggleBar
-            options={[
-              { id: "this_week", label: "This Week" },
-              { id: "this_month", label: "This Month" },
-            ]}
-            activeId={filterBy}
-            onSelect={setFilterBy}
-            containerClassName=""
-          />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View className="gap-y-3">
+            {/* Toggle Date Period */}
+            <ToggleBar
+              options={[
+                { id: "this_week", label: "This Week" },
+                { id: "this_month", label: "This Month" },
+              ]}
+              activeId={filterBy}
+              onSelect={setFilterBy}
+              containerClassName=""
+            />
 
-          <KpiMetrics
-            filterBy={filterBy}
-            metrics={metricsQuery.data}
-            revenueChart={revenueChartQuery.data}
-            isLoading={metricsQuery.isLoading || metricsQuery.isRefetching}
-          />
+            <KpiMetrics
+              filterBy={filterBy}
+              metrics={metricsQuery.data}
+              revenueChart={revenueChartQuery.data}
+              isLoading={metricsQuery.isLoading || metricsQuery.isRefetching}
+            />
 
-          {/* Live Order Board ActionCard */}
-          <ActionCard
-            title="Live Today's Order Board"
-            isLoading={liveOrderBoardQuery.isLoading || liveOrderBoardQuery.isRefetching}
-            skeleton={<LiveOrderBoardSkeleton />}
-            bodyStyle={{ paddingHorizontal: WP("4%") }}
-            bodyClassName="pb-4"
-          >
-            <LiveOrderBoard liveOrderBoard={liveOrderBoardQuery.data} />
-          </ActionCard>
+            {/* Live Order Board ActionCard */}
+            <ActionCard
+              title="Live Today's Order Board"
+              isLoading={
+                liveOrderBoardQuery.isLoading ||
+                liveOrderBoardQuery.isRefetching
+              }
+              skeleton={<LiveOrderBoardSkeleton />}
+              bodyStyle={{ paddingHorizontal: WP("4%") }}
+              bodyClassName="pb-4"
+            >
+              <LiveOrderBoard liveOrderBoard={liveOrderBoardQuery.data} />
+            </ActionCard>
 
-          {/* Charts & Top Dishes */}
-          <RevenueChart
-            filterBy={filterBy}
-            revenueChart={revenueChartQuery.data}
-            isLoading={
-              metricsQuery.isLoading || revenueChartQuery.isLoading || revenueChartQuery.isRefetching
-            }
-            resetKey={resetKey}
-          />
-          <OrdersByTypeChart
-            filterBy={filterBy}
-            ordersByType={ordersByTypeQuery.data}
-            isLoading={ordersByTypeQuery.isLoading || ordersByTypeQuery.isRefetching}
-          />
-          <TopDishes
-            filterBy={filterBy}
-            topDishes={topDishesQuery.data}
-            isLoading={topDishesQuery.isLoading || topDishesQuery.isRefetching}
-          />
+            {/* Charts & Top Dishes */}
+            <RevenueChart
+              filterBy={filterBy}
+              revenueChart={revenueChartQuery.data}
+              isLoading={
+                metricsQuery.isLoading ||
+                revenueChartQuery.isLoading ||
+                revenueChartQuery.isRefetching
+              }
+            />
+            <OrdersByTypeChart
+              filterBy={filterBy}
+              ordersByType={ordersByTypeQuery.data}
+              isLoading={
+                ordersByTypeQuery.isLoading || ordersByTypeQuery.isRefetching
+              }
+            />
+            <TopDishes
+              filterBy={filterBy}
+              topDishes={topDishesQuery.data}
+              isLoading={
+                topDishesQuery.isLoading || topDishesQuery.isRefetching
+              }
+            />
 
-          {/* Kitchen Activity, Promotions & Recent Orders */}
-          <KitchenActivity
-            kitchenActivity={kitchenActivityQuery.data}
-            isLoading={kitchenActivityQuery.isLoading || kitchenActivityQuery.isRefetching}
-          />
-          <Promotions
-            promotions={promotionsQuery.data}
-            isLoading={promotionsQuery.isLoading || promotionsQuery.isRefetching}
-          />
-          <RecentOrders
-            recentOrders={recentOrdersQuery.data}
-            isLoading={recentOrdersQuery.isLoading || recentOrdersQuery.isRefetching}
-          />
-        </Pressable>
+            {/* Kitchen Activity, Promotions & Recent Orders */}
+            <KitchenActivity
+              kitchenActivity={kitchenActivityQuery.data}
+              isLoading={
+                kitchenActivityQuery.isLoading ||
+                kitchenActivityQuery.isRefetching
+              }
+            />
+            <Promotions
+              promotions={promotionsQuery.data}
+              isLoading={
+                promotionsQuery.isLoading || promotionsQuery.isRefetching
+              }
+            />
+            <RecentOrders
+              recentOrders={recentOrdersQuery.data}
+              isLoading={
+                recentOrdersQuery.isLoading || recentOrdersQuery.isRefetching
+              }
+            />
+          </View>
+        </TouchableWithoutFeedback>
       </ScrollView>
     </SafeAreaView>
   );

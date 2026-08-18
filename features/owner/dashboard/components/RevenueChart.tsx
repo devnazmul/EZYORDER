@@ -8,86 +8,93 @@ import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import RevenueChartSkeleton from "./skeletons/RevenueChartSkeleton";
 
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 
 interface RevenueChartProps {
   filterBy: string;
   revenueChart: any[];
   isLoading: boolean;
-  resetKey?: number;
 }
 
 export default function RevenueChart({
   filterBy,
   revenueChart = [],
   isLoading,
-  resetKey,
 }: RevenueChartProps) {
   const { settings } = useData();
   const { width: screenWidth } = useWindowDimensions();
-  const [focusedBarIndex, setFocusedBarIndex] = useState<number | undefined>(undefined);
+  const [focusedBarIndex, setFocusedBarIndex] = useState<number | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     setFocusedBarIndex(undefined);
-  }, [resetKey]);
+  }, [filterBy]);
 
-  // Resolve currency symbol
-  const currencySymbol = useMemo(() => {
-    return getCurrencySymbol(settings?.currency);
-  }, [settings?.currency]);
-
-  // Calculate total revenue
-  const totalRevenue = useMemo(() => {
-    return revenueChart.reduce((sum: number, d: any) => sum + (parseFloat(d.value) || 0), 0);
-  }, [revenueChart]);
-
-  if (isLoading) {
-    return <RevenueChartSkeleton />;
-  }
+  // Direct calculations (O(1) / simple lookups - no useMemo overhead needed)
+  const currencySymbol = getCurrencySymbol(settings?.currency);
+  const safeRevenueChart = revenueChart || [];
+  const totalRevenue = safeRevenueChart.reduce(
+    (sum: number, d: any) => sum + (parseFloat(d.value) || 0),
+    0,
+  );
 
   // Dimension helpers
   const chartHeight = 210;
-  const isMonthFilter = revenueChart.length > 7;
+  const isMonthFilter = safeRevenueChart.length > 7;
   // Card padding is p-4 (32px total). Deduct padding + Y-axis margin.
   const chartWidth = screenWidth - 32;
   const availableChartArea = chartWidth - 50; // Reserve ~50px for Y-axis text & labels
 
   // Dynamically compute bar width & spacing so both weekly and monthly charts are justified across the screen
   const { barWidth, barSpacing, initialSpacing } = useMemo(() => {
-    const count = revenueChart.length || 1;
+    const count = safeRevenueChart.length || 1;
     if (isMonthFilter) {
       const initSpace = 4;
       const spaceBetween = count > 20 ? 2 : 4;
       const availableForBars = availableChartArea - initSpace * 2;
-      const computedWidth = (availableForBars - spaceBetween * (count - 1)) / count;
-      const finalBarWidth = Math.max(3, Math.min(20, Math.floor(computedWidth)));
+      const computedWidth =
+        (availableForBars - spaceBetween * (count - 1)) / count;
+      const finalBarWidth = Math.max(
+        3,
+        Math.min(20, Math.floor(computedWidth)),
+      );
       const finalSpacing = Math.max(
         1,
-        Math.floor((availableForBars - finalBarWidth * count) / Math.max(1, count - 1)),
+        Math.floor(
+          (availableForBars - finalBarWidth * count) / Math.max(1, count - 1),
+        ),
       );
-      return { barWidth: finalBarWidth, barSpacing: finalSpacing, initialSpacing: initSpace };
+      return {
+        barWidth: finalBarWidth,
+        barSpacing: finalSpacing,
+        initialSpacing: initSpace,
+      };
     }
 
     // Weekly View (e.g. 7 days): Justify bars across availableChartArea with generous width and spacing
     const initSpace = 12;
     const availableForBars = availableChartArea - initSpace * 2;
     const targetSpacing = 20;
-    const computedWidth = (availableForBars - targetSpacing * (count - 1)) / count;
+    const computedWidth =
+      (availableForBars - targetSpacing * (count - 1)) / count;
     const finalBarWidth = Math.max(12, Math.min(28, Math.floor(computedWidth)));
     const finalSpacing = Math.max(
       8,
-      Math.floor((availableForBars - finalBarWidth * count) / Math.max(1, count - 1)),
+      Math.floor(
+        (availableForBars - finalBarWidth * count) / Math.max(1, count - 1),
+      ),
     );
     return {
       barWidth: finalBarWidth,
       barSpacing: finalSpacing,
       initialSpacing: initSpace,
     };
-  }, [revenueChart.length, isMonthFilter, availableChartArea]);
+  }, [safeRevenueChart.length, isMonthFilter, availableChartArea]);
 
-  // Prepare chart data mapped for react-native-gifted-charts
+  // Prepare chart data mapped for react-native-gifted-charts (Heavy: maps array, instantiates sub-components)
   const data = useMemo(() => {
-    return revenueChart.map((d: any, index: number) => {
+    return safeRevenueChart.map((d: any, index: number) => {
       const val = parseFloat(d.value) || 0;
       const item: any = {
         value: val,
@@ -108,7 +115,8 @@ export default function RevenueChart({
       if (isMonthFilter) {
         // Extract day number (e.g. "01 Jul" -> 1, "05 Jul" -> 5, or fallback to index + 1)
         const parsedDay = parseInt(String(d.name || "").replace(/\D/g, ""), 10);
-        const dayNum = !isNaN(parsedDay) && parsedDay > 0 ? parsedDay : index + 1;
+        const dayNum =
+          !isNaN(parsedDay) && parsedDay > 0 ? parsedDay : index + 1;
 
         // Display labels only every 5 days (e.g. 1, 5, 10, 15, 20, 25, 30)
         const showLabel = dayNum === 1 || dayNum % 5 === 0;
@@ -116,8 +124,22 @@ export default function RevenueChart({
         const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
 
         item.labelComponent = () => (
-          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center", marginTop: 8 }}>
-            <Text style={{ fontSize: 8, color: "#6E6E6E", fontWeight: "600", textAlign: "center" }}>
+          <View
+            style={{
+              width: targetLabelWidth,
+              marginLeft,
+              alignItems: "center",
+              marginTop: 8,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 8,
+                color: "#6E6E6E",
+                fontWeight: "600",
+                textAlign: "center",
+              }}
+            >
               {showLabel ? String(dayNum) : ""}
             </Text>
           </View>
@@ -127,8 +149,22 @@ export default function RevenueChart({
         const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
 
         item.labelComponent = () => (
-          <View style={{ width: targetLabelWidth, marginLeft, alignItems: "center", marginTop: 8 }}>
-            <Text style={{ fontSize: 8, color: "#6E6E6E", fontWeight: "600", textAlign: "center" }}>
+          <View
+            style={{
+              width: targetLabelWidth,
+              marginLeft,
+              alignItems: "center",
+              marginTop: 8,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 8,
+                color: "#6E6E6E",
+                fontWeight: "600",
+                textAlign: "center",
+              }}
+            >
               {d.name}
             </Text>
           </View>
@@ -137,22 +173,19 @@ export default function RevenueChart({
 
       return item;
     });
-  }, [revenueChart, isMonthFilter, barWidth, barSpacing]);
+  }, [safeRevenueChart, isMonthFilter, barWidth, barSpacing]);
 
-  // Compute maximum value in dataset to prevent tooltip clipping at the top
-  const maxDataValue = useMemo(() => {
-    return Math.max(...data.map((d: any) => d.value), 0);
-  }, [data]);
+  // Derived values from data
+  const maxDataValue =
+    data.length > 0 ? Math.max(...data.map((d: any) => d.value), 0) : 0;
+  const focusedItem =
+    focusedBarIndex !== undefined &&
+    focusedBarIndex >= 0 &&
+    data[focusedBarIndex]
+      ? data[focusedBarIndex]
+      : undefined;
 
-  // Derived focused item
-  const focusedItem = useMemo(() => {
-    if (focusedBarIndex === undefined || focusedBarIndex < 0 || !data[focusedBarIndex]) {
-      return undefined;
-    }
-    return data[focusedBarIndex];
-  }, [focusedBarIndex, data]);
-
-  // Absolutely positioned tooltip coordinates
+  // Absolutely positioned tooltip coordinates (recomputes coordinate math only when focus or dimensions change)
   const tooltipPos = useMemo(() => {
     if (focusedBarIndex === undefined || !focusedItem) return undefined;
 
@@ -162,14 +195,21 @@ export default function RevenueChart({
     const estimatedTooltipWidth = Math.max(48, longestLineLen * 5.5 + 16);
 
     // Center tooltip over focused bar within availableChartArea
-    const barCenterX = initialSpacing + focusedBarIndex * (barWidth + barSpacing) + barWidth / 2;
+    const barCenterX =
+      initialSpacing + focusedBarIndex * (barWidth + barSpacing) + barWidth / 2;
     const idealLeft = barCenterX - estimatedTooltipWidth / 2;
-    const clampedLeft = Math.max(4, Math.min(idealLeft, availableChartArea - estimatedTooltipWidth - 4));
+    const clampedLeft = Math.max(
+      4,
+      Math.min(idealLeft, availableChartArea - estimatedTooltipWidth - 4),
+    );
 
     // Calculate Y position relative to chart height container
     const graphHeight = chartHeight - 85;
     const maxValue = maxDataValue > 0 ? maxDataValue * 1.2 : 1;
-    const barHeightRatio = Math.min(1, Math.max(0, focusedItem.value / maxValue));
+    const barHeightRatio = Math.min(
+      1,
+      Math.max(0, focusedItem.value / maxValue),
+    );
     const barHeightPixels = barHeightRatio * graphHeight;
 
     const barTopY = graphHeight - barHeightPixels + 15;
@@ -194,6 +234,10 @@ export default function RevenueChart({
     currencySymbol,
   ]);
 
+  if (isLoading) {
+    return <RevenueChartSkeleton />;
+  }
+
   return (
     <Pressable key="loaded" onPress={() => setFocusedBarIndex(undefined)}>
       <ActionCard
@@ -217,7 +261,10 @@ export default function RevenueChart({
         bodyClassName="py-1"
       >
         {revenueChart.length === 0 ? (
-          <EmptyState description="No revenue data available" pyClassName="py-8" />
+          <EmptyState
+            description="No revenue data available"
+            pyClassName="py-8"
+          />
         ) : (
           <View
             style={{
@@ -244,7 +291,9 @@ export default function RevenueChart({
               disableScroll={true}
               focusedBarIndex={focusedBarIndex}
               onPress={(_item: any, index: number) => {
-                setFocusedBarIndex((prev) => (prev === index ? undefined : index));
+                setFocusedBarIndex((prev) =>
+                  prev === index ? undefined : index,
+                );
               }}
               noOfSections={4}
               rulesColor="#E5E7EB"
@@ -300,7 +349,14 @@ export default function RevenueChart({
                   shadowRadius: 3,
                 }}
               >
-                <Text style={{ color: "white", fontSize: 9, fontWeight: "bold", textAlign: "left" }}>
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 9,
+                    fontWeight: "bold",
+                    textAlign: "left",
+                  }}
+                >
                   {tooltipPos.line1}
                 </Text>
                 <Text
