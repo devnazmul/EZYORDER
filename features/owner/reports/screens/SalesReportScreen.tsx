@@ -9,7 +9,7 @@ import { formatDate } from "@/utils/formatDate";
 import { formatAmount } from "@/utils/formatters";
 import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
 import { useResponsiveScreen, WP } from "@/utils/getResponsiveSizes";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SparklineChart from "../../components/SparklineChart";
@@ -38,9 +38,7 @@ const getDateRange = (period: string) => {
   const end = new Date();
   const start = new Date();
 
-  if (period === "Today") {
-    // Current day range
-  } else if (period === "Yesterday") {
+  if (period === "Yesterday") {
     start.setDate(start.getDate() - 1);
     end.setDate(end.getDate() - 1);
   } else if (period === "This Week") {
@@ -58,6 +56,30 @@ const getDateRange = (period: string) => {
   };
 };
 
+const filterFields: FilterField[] = [
+  {
+    id: "period",
+    label: "Filter by Date",
+    type: "chips",
+    options: [
+      { id: "Today", label: "Today" },
+      { id: "Yesterday", label: "Yesterday" },
+      { id: "This Week", label: "This Week" },
+      { id: "This Month", label: "This Month" },
+    ],
+  },
+  {
+    id: "dateRange",
+    label: "Custom Date Range",
+    type: "date-range",
+  },
+];
+
+const INITIAL_FILTER_VALUES = {
+  period: "This Week",
+  dateRange: { start: "", end: "" },
+};
+
 const SalesReport = () => {
   const { user } = useAuth();
   const { settings } = useData();
@@ -66,53 +88,18 @@ const SalesReport = () => {
 
   const [activeTab, setActiveTab] = useState("Overview");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [filterValues, setFilterValues] = useState(INITIAL_FILTER_VALUES);
 
-  const [filterValues, setFilterValues] = useState({
-    period: "This Week",
-    dateRange: { start: "", end: "" },
-  });
+  const { period, dateRange } = filterValues;
+  const isCustomRange = Boolean(dateRange.start && dateRange.end);
+  const defaultRange = isCustomRange ? null : getDateRange(period);
 
-  const filterFields: FilterField[] = [
-    {
-      id: "period",
-      label: "Filter by Date",
-      type: "chips",
-      options: [
-        { id: "Today", label: "Today" },
-        { id: "Yesterday", label: "Yesterday" },
-        { id: "This Week", label: "This Week" },
-        { id: "This Month", label: "This Month" },
-      ],
-    },
-    {
-      id: "dateRange",
-      label: "Custom Date Range",
-      type: "date-range",
-    },
-  ];
-
-  const apiParams = useMemo(() => {
-    const restaurantId = user?.restaurant?.[0]?.id || "";
-    let startDate = "";
-    let endDate = "";
-
-    const { period, dateRange } = filterValues;
-    if (dateRange.start && dateRange.end) {
-      startDate = dateRange.start;
-      endDate = dateRange.end;
-    } else {
-      const range = getDateRange(period);
-      startDate = range.start_date;
-      endDate = range.end_date;
-    }
-
-    return {
-      restaurant_id: restaurantId,
-      start_date: startDate,
-      end_date: endDate,
-      group_by: (period === "This Month" ? "week" : "day") as "day" | "week",
-    };
-  }, [user, filterValues]);
+  const apiParams = {
+    restaurant_id: user?.restaurant?.[0]?.id || "",
+    start_date: isCustomRange ? dateRange.start : defaultRange!.start_date,
+    end_date: isCustomRange ? dateRange.end : defaultRange!.end_date,
+    group_by: (period === "This Month" ? "week" : "day") as "day" | "week",
+  };
 
   // Fetch report data
   const {
@@ -164,31 +151,15 @@ const SalesReport = () => {
     setIsRefreshing(false);
   };
 
-  const handleApplyFilters = (newValues: any) => {
-    setFilterValues(newValues);
-  };
-
-  const handleClearFilters = () => {
-    setFilterValues({
-      period: "This Week",
-      dateRange: { start: "", end: "" },
-    });
-  };
-
   const grossSales = summaryData?.gross_sales ?? 0;
   const netSales = summaryData?.net_sales ?? 0;
   const totalOrders = summaryData?.total_orders ?? 0;
   const discounts = summaryData?.discounts ?? 0;
   const avgOrderValue = totalOrders > 0 ? grossSales / totalOrders : 0;
 
-  const itemList = itemData || [];
-  const hourlyList = hourlyData || [];
-  const dailyList = dailySummaryData || [];
-
-  const sparklineData = useMemo(() => {
-    if (!trendData || !Array.isArray(trendData)) return [];
-    return trendData.map((d: any) => Number(d.sales || 0));
-  }, [trendData]);
+  const sparklineData = Array.isArray(trendData)
+    ? trendData.map((d: any) => Number(d.sales || 0))
+    : [];
 
   return (
     <SafeAreaView
@@ -201,7 +172,6 @@ const SalesReport = () => {
         refreshing={isRefreshing}
       >
         {/* Header Title and Filter Trigger */}
-
         <PageTitle
           title="Sales Report"
           icon="bar-chart"
@@ -218,15 +188,15 @@ const SalesReport = () => {
           ]}
           activeId={activeTab}
           onSelect={setActiveTab}
-          containerClassName=" mb-3"
+          containerClassName="mb-3"
         />
 
         <View className="flex items-end justify-center mb-3">
           <FilterDrawer
             fields={filterFields}
             values={filterValues}
-            onApply={handleApplyFilters}
-            onClear={handleClearFilters}
+            onApply={setFilterValues}
+            onClear={() => setFilterValues(INITIAL_FILTER_VALUES)}
           />
         </View>
 
@@ -338,7 +308,7 @@ const SalesReport = () => {
 
             {/* Top performing items */}
             <TopProductsList
-              itemList={itemList}
+              itemList={itemData || []}
               currencySymbol={currencySymbol}
               isLoading={isItemLoading && !isRefreshing}
               onNavigateToTab={setActiveTab}
@@ -352,7 +322,7 @@ const SalesReport = () => {
               <SalesDailyListSkeleton />
             ) : (
               <SalesDailyList
-                dailyList={dailyList}
+                dailyList={dailySummaryData || []}
                 currencySymbol={currencySymbol}
               />
             )}
@@ -365,7 +335,7 @@ const SalesReport = () => {
               <SalesItemListSkeleton />
             ) : (
               <SalesItemList
-                itemList={itemList}
+                itemList={itemData || []}
                 currencySymbol={currencySymbol}
               />
             )}
@@ -378,7 +348,7 @@ const SalesReport = () => {
               <SalesHourlyListSkeleton />
             ) : (
               <SalesHourlyList
-                hourlyList={hourlyList}
+                hourlyList={hourlyData || []}
                 currencySymbol={currencySymbol}
               />
             )}
