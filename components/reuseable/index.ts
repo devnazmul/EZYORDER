@@ -8,6 +8,7 @@ export { default as EmptyState } from "./EmptyState";
 export { default as FilterChips } from "./FilterChips";
 export { default as FilterDrawer, type IFilterField } from "./FilterDrawer";
 export { default as InputField } from "./InputField";
+export { default as LabelValueRow } from "./LabelValueRow";
 export { default as LoadingScreen } from "./LoadingScreen";
 export { default as MenuCard } from "./MenuCard";
 export { default as PageTitle } from "./PageTitle";
