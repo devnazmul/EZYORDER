@@ -1,31 +1,40 @@
 import BottomSheet from "@/components/reuseable/BottomSheet";
 import Button from "@/components/reuseable/Button";
 import FilterChips from "@/components/reuseable/FilterChips";
-import COLORS from "@/constants/colors";
+import { COLORS } from "@/constants/colors";
 import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { useEffect, useMemo, useState } from "react";
-import { KeyboardTypeOptions, Text, TouchableOpacity, View } from "react-native";
+import {
+  KeyboardTypeOptions,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import DatePickerModal from "./DatePickerModal";
 import DateField from "./inputs/DateField";
 import DateRangeField from "./inputs/DateRangeField";
 import NumberRangeField from "./inputs/NumberRangeField";
 import TextField from "./inputs/TextField";
 
-export interface FilterField {
+export interface IFilterField {
   id: string;
   label: string;
   type: "chips" | "date-range" | "number-range" | "text" | "date";
   options?: { id: string; label: string }[]; // For chips type
   keyboardType?: KeyboardTypeOptions;
   isMultiSelect?: boolean;
+  onFieldChange?: (
+    value: unknown,
+    currentValues: Record<string, unknown>,
+  ) => Record<string, unknown> | void;
 }
 
-interface FilterDrawerProps {
-  fields: FilterField[];
-  values: Record<string, any>;
-  onApply: (values: Record<string, any>) => void;
+export interface IFilterDrawerProps {
+  fields: IFilterField[];
+  values: Record<string, unknown>;
+  onApply: (values: Record<string, unknown>) => void;
   onClear: () => void;
   triggerClassName?: string;
 }
@@ -36,11 +45,12 @@ export default function FilterDrawer({
   onApply,
   onClear,
   triggerClassName = "",
-}: FilterDrawerProps) {
+}: Readonly<IFilterDrawerProps>) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Local scratch state to modify before applying
-  const [localValues, setLocalValues] = useState<Record<string, any>>(values);
+  const [localValues, setLocalValues] =
+    useState<Record<string, unknown>>(values);
   const [activeDatePicker, setActiveDatePicker] = useState<{
     fieldId: string;
     type: "start" | "end" | "single";
@@ -58,13 +68,12 @@ export default function FilterDrawer({
     let count = 0;
     Object.keys(values).forEach((key) => {
       const val = values[key];
-      if (val === "all") return;
-      if (Array.isArray(val)) {
-        if (val.length > 0 && !val.includes("all")) count++;
+      if (val === "all" || (Array.isArray(val) && val.includes("all"))) {
         return;
       }
       if (typeof val === "object" && val !== null) {
-        if (val.start || val.end || val.min || val.max) count++;
+        const obj = val as Record<string, unknown>;
+        if (obj.start || obj.end || obj.min || obj.max) count++;
       } else if (val) {
         count++;
       }
@@ -72,17 +81,30 @@ export default function FilterDrawer({
     return count;
   }, [values]);
 
-  const handleChipSelect = (field: FilterField, optionId: string) => {
+  const handleChipSelect = (field: IFilterField, optionId: string) => {
     if (!field.isMultiSelect) {
-      setLocalValues((prev) => ({
-        ...prev,
-        [field.id]: optionId,
-      }));
+      setLocalValues((prev) => {
+        let updated: Record<string, unknown> = {
+          ...prev,
+          [field.id]: optionId,
+        };
+        if (field.onFieldChange) {
+          const sideEffects = field.onFieldChange(optionId, updated);
+          if (sideEffects) {
+            updated = { ...updated, ...sideEffects };
+          }
+        }
+        return updated;
+      });
       return;
     }
 
     setLocalValues((prev) => {
-      const current = Array.isArray(prev[field.id]) ? prev[field.id] : [prev[field.id] || "all"];
+      const prevFieldVal = prev[field.id];
+      const current = Array.isArray(prevFieldVal)
+        ? (prevFieldVal as string[])
+        : [typeof prevFieldVal === "string" ? prevFieldVal : "all"];
+
       if (optionId === "all") {
         return {
           ...prev,
@@ -100,10 +122,18 @@ export default function FilterDrawer({
       if (next.length === 0) {
         next = ["all"];
       }
-      return {
+
+      let updated: Record<string, unknown> = {
         ...prev,
         [field.id]: next,
       };
+      if (field.onFieldChange) {
+        const sideEffects = field.onFieldChange(next, updated);
+        if (sideEffects) {
+          updated = { ...updated, ...sideEffects };
+        }
+      }
+      return updated;
     });
   };
 
@@ -118,7 +148,10 @@ export default function FilterDrawer({
       }));
     } else {
       setLocalValues((prev) => {
-        const currentRange = prev[fieldId] || { start: "", end: "" };
+        const currentRange = (prev[fieldId] as {
+          start?: string;
+          end?: string;
+        }) || { start: "", end: "" };
         return {
           ...prev,
           [fieldId]: {
@@ -132,7 +165,7 @@ export default function FilterDrawer({
   };
 
   const handleClear = () => {
-    const cleared: Record<string, any> = {};
+    const cleared: Record<string, unknown> = {};
     fields.forEach((f) => {
       if (f.type === "chips") {
         cleared[f.id] = f.isMultiSelect ? ["all"] : "all";
@@ -140,9 +173,7 @@ export default function FilterDrawer({
         cleared[f.id] = { start: "", end: "" };
       } else if (f.type === "number-range") {
         cleared[f.id] = { min: "", max: "" };
-      } else if (f.type === "text") {
-        cleared[f.id] = "";
-      } else if (f.type === "date") {
+      } else if (f.type === "text" || f.type === "date") {
         cleared[f.id] = "";
       }
     });
@@ -160,8 +191,16 @@ export default function FilterDrawer({
     try {
       const parts = dateStr.split("-");
       if (parts.length === 3) {
-        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-        return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        const d = new Date(
+          Number.parseInt(parts[0], 10),
+          Number.parseInt(parts[1], 10) - 1,
+          Number.parseInt(parts[2], 10),
+        );
+        return d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
       }
     } catch {}
     return dateStr;
@@ -175,10 +214,16 @@ export default function FilterDrawer({
         activeOpacity={0.8}
         className={`relative bg-base-300 border border-base-200 rounded-lg p-2.5 items-center justify-center ${triggerClassName}`}
       >
-        <MaterialIcons name="filter-list" size={WP("4.75%")} color={COLORS.primary} />
+        <MaterialIcons
+          name="filter-list"
+          size={WP("4.75%")}
+          color={COLORS.primary}
+        />
         {activeFilterCount > 0 && (
           <View className="absolute -top-1 -right-1 bg-primary w-5 h-5 rounded-full items-center justify-center border-2 border-base-300">
-            <Text className="text-[8px] font-bold text-white">{activeFilterCount}</Text>
+            <Text className="text-[8px] font-bold text-white">
+              {activeFilterCount}
+            </Text>
           </View>
         )}
       </TouchableOpacity>
@@ -204,11 +249,15 @@ export default function FilterDrawer({
         </View>
 
         {/* Scrollable Fields */}
-        <BottomSheetScrollView style={{ paddingHorizontal: WP("5%") }} className="flex-1 py-4">
+        <BottomSheetScrollView
+          style={{ paddingHorizontal: WP("5%") }}
+          className="flex-1 py-4"
+        >
           <View className="gap-y-6">
             {fields.map((field) => {
               if (field.type === "chips" && field.options) {
-                const selectedId = localValues[field.id] || "all";
+                const selectedId =
+                  (localValues[field.id] as string | string[]) || "all";
                 return (
                   <View key={field.id}>
                     <Text
@@ -221,28 +270,39 @@ export default function FilterDrawer({
                       chips={field.options}
                       selectedId={selectedId}
                       onSelect={(optionId) => handleChipSelect(field, optionId)}
+                      isBottomSheet={true}
                     />
                   </View>
                 );
               }
 
               if (field.type === "date-range") {
-                const range = localValues[field.id] || { start: "", end: "" };
+                const range = (localValues[field.id] as {
+                  start?: string;
+                  end?: string;
+                }) || { start: "", end: "" };
                 return (
                   <DateRangeField
                     key={field.id}
                     label={field.label}
                     startDateValue={range.start}
                     endDateValue={range.end}
-                    onSelectStartDate={() => setActiveDatePicker({ fieldId: field.id, type: "start" })}
-                    onSelectEndDate={() => setActiveDatePicker({ fieldId: field.id, type: "end" })}
+                    onSelectStartDate={() =>
+                      setActiveDatePicker({ fieldId: field.id, type: "start" })
+                    }
+                    onSelectEndDate={() =>
+                      setActiveDatePicker({ fieldId: field.id, type: "end" })
+                    }
                     formatDateLabel={formatDateLabel}
                   />
                 );
               }
 
               if (field.type === "number-range") {
-                const range = localValues[field.id] || { min: "", max: "" };
+                const range = (localValues[field.id] as {
+                  min?: string;
+                  max?: string;
+                }) || { min: "", max: "" };
                 return (
                   <NumberRangeField
                     key={field.id}
@@ -253,7 +313,10 @@ export default function FilterDrawer({
                       setLocalValues((prev) => ({
                         ...prev,
                         [field.id]: {
-                          ...(prev[field.id] || { min: "", max: "" }),
+                          ...((prev[field.id] as {
+                            min?: string;
+                            max?: string;
+                          }) || { min: "", max: "" }),
                           min: text,
                         },
                       }));
@@ -262,7 +325,10 @@ export default function FilterDrawer({
                       setLocalValues((prev) => ({
                         ...prev,
                         [field.id]: {
-                          ...(prev[field.id] || { min: "", max: "" }),
+                          ...((prev[field.id] as {
+                            min?: string;
+                            max?: string;
+                          }) || { min: "", max: "" }),
                           max: text,
                         },
                       }));
@@ -272,7 +338,10 @@ export default function FilterDrawer({
               }
 
               if (field.type === "text") {
-                const textVal = localValues[field.id] || "";
+                const textVal =
+                  typeof localValues[field.id] === "string"
+                    ? (localValues[field.id] as string)
+                    : "";
                 return (
                   <TextField
                     key={field.id}
@@ -290,13 +359,18 @@ export default function FilterDrawer({
               }
 
               if (field.type === "date") {
-                const dateVal = localValues[field.id] || "";
+                const dateVal =
+                  typeof localValues[field.id] === "string"
+                    ? (localValues[field.id] as string)
+                    : "";
                 return (
                   <DateField
                     key={field.id}
                     label={field.label}
                     value={dateVal}
-                    onPress={() => setActiveDatePicker({ fieldId: field.id, type: "single" })}
+                    onPress={() =>
+                      setActiveDatePicker({ fieldId: field.id, type: "single" })
+                    }
                     formatDateLabel={formatDateLabel}
                   />
                 );
@@ -318,7 +392,12 @@ export default function FilterDrawer({
             variant="outline"
             containerClassName="flex-1 !shadow-none"
           />
-          <Button label="Apply Filters" onPress={handleApply} variant="primary" containerClassName="flex-1" />
+          <Button
+            label="Apply Filters"
+            onPress={handleApply}
+            variant="primary"
+            containerClassName="flex-1"
+          />
         </View>
       </BottomSheet>
 
@@ -330,8 +409,13 @@ export default function FilterDrawer({
           title={`Select Date`}
           selectedDate={
             activeDatePicker.type === "single"
-              ? localValues[activeDatePicker.fieldId]
-              : localValues[activeDatePicker.fieldId]?.[activeDatePicker.type]
+              ? (localValues[activeDatePicker.fieldId] as string)
+              : (
+                  localValues[activeDatePicker.fieldId] as Record<
+                    string,
+                    string
+                  >
+                )?.[activeDatePicker.type]
           }
           onSelectDate={handleDateSelect}
         />

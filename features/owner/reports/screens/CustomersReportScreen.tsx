@@ -1,6 +1,8 @@
 import { ICustomerParams } from "../apis/reports";
 import EmptyState from "@/components/reuseable/EmptyState";
-import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
+import FilterDrawer, {
+  IFilterField,
+} from "@/components/reuseable/FilterDrawer";
 import PageTitle from "@/components/reuseable/PageTitle";
 import SearchBar from "@/components/reuseable/SearchBar";
 import { COLORS } from "@/constants/colors";
@@ -144,7 +146,7 @@ export default function CustomersReport() {
   }, [searchQuery]);
 
   // Configure FilterDrawer fields using all API schema options
-  const filterFields = useMemo<FilterField[]>(() => {
+  const filterFields = useMemo<IFilterField[]>(() => {
     return [
       {
         id: "frequency_visit",

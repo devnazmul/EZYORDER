@@ -1,6 +1,6 @@
 import {
   FilterDrawer,
-  FilterField,
+  IFilterField,
   PageTitle,
   RefreshableScrollView,
   ToggleBar,
@@ -67,7 +67,7 @@ const getDateRange = (period: string) => {
   };
 };
 
-const filterFields: FilterField[] = [
+const filterFields: IFilterField[] = [
   {
     id: "period",
     label: "Filter by Date",
@@ -78,6 +78,15 @@ const filterFields: FilterField[] = [
       { id: "This Week", label: "This Week" },
       { id: "This Month", label: "This Month" },
     ],
+    onFieldChange: (selectedPeriod: unknown) => {
+      const range = getDateRange(String(selectedPeriod));
+      return {
+        dateRange: {
+          start: range.start_date,
+          end: range.end_date,
+        },
+      };
+    },
   },
   {
     id: "dateRange",
@@ -86,9 +95,13 @@ const filterFields: FilterField[] = [
   },
 ];
 
+const initialWeekRange = getDateRange("This Week");
 const INITIAL_FILTER_VALUES = {
   period: "This Week",
-  dateRange: { start: "", end: "" },
+  dateRange: {
+    start: initialWeekRange.start_date,
+    end: initialWeekRange.end_date,
+  },
 };
 
 const EMPTY_ARRAY: readonly never[] = [];
