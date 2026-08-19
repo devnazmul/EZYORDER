@@ -1,5 +1,6 @@
 export { default as CustomerCard } from "./CustomerCard";
 export { default as CustomerDetailsBottomSheet } from "./CustomerDetailsBottomSheet";
+export { default as KPICardGrid } from "./KPICardGrid";
 export { default as RevenueByOrderTypeCard } from "./RevenueByOrderTypeCard";
 export { default as SalesAreaChart } from "./SalesAreaChart";
 export { default as SalesBarChart } from "./SalesBarChart";

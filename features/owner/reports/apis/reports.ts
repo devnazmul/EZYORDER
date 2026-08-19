@@ -1,4 +1,4 @@
-import ENV from "@/config/env";
+import { ENV } from "@/config/env";
 import axios from "axios";
 
 const API_BASE_URL = ENV.API_BASE_URL;
@@ -8,44 +8,65 @@ const getHeaders = (token: string) => ({
   Accept: "application/json",
 });
 
-export interface SalesParams {
+export interface ISalesParams {
   restaurant_id: string;
   start_date: string;
   end_date: string;
   group_by?: "day" | "week" | "month";
 }
 
-export const getSalesSummary = async (token: string, params: SalesParams) => {
+export const getSalesSummary = async (token: string, params: ISalesParams) => {
   const response = await axios.get(`${API_BASE_URL}/reports/sales/summary`, {
     headers: getHeaders(token),
     params,
     validateStatus: () => true,
   });
-  console.log(response.data);
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
 };
 
-export const getSalesTrend = async (token: string, params: SalesParams) => {
+export const getOrderSummary = async (token: string, params: ISalesParams) => {
+  const response = await axios.get(`${API_BASE_URL}/v1.0/orders/summary`, {
+    headers: getHeaders(token),
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : response.data?.data || null;
+};
+
+export const getSalesTrend = async (token: string, params: ISalesParams) => {
   const response = await axios.get(`${API_BASE_URL}/reports/sales/trend`, {
     headers: getHeaders(token),
     params,
     validateStatus: () => true,
   });
 
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
 };
 
-export const getSalesByOrderType = async (token: string, params: SalesParams) => {
-  const response = await axios.get(`${API_BASE_URL}/reports/sales/by-order-type`, {
-    headers: getHeaders(token),
-    params,
-    validateStatus: () => true,
-  });
-  console.log(response.data);
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+export const getSalesByOrderType = async (
+  token: string,
+  params: ISalesParams,
+) => {
+  const response = await axios.get(
+    `${API_BASE_URL}/reports/sales/by-order-type`,
+    {
+      headers: getHeaders(token),
+      params,
+      validateStatus: () => true,
+    },
+  );
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
 };
 
-export interface CustomerParams {
+export interface ICustomerParams {
   per_page: number | string;
   start_date?: string;
   end_date?: string;
@@ -64,55 +85,71 @@ export interface CustomerParams {
   booking_type?: string;
 }
 
-export const getCustomers = async (token: string, params: CustomerParams) => {
+export const getCustomers = async (token: string, params: ICustomerParams) => {
   const headers = getHeaders(token);
   const queryString = Object.keys(params)
-    .filter((key) => params[key as keyof CustomerParams] !== undefined && params[key as keyof CustomerParams] !== "")
-    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(String(params[key as keyof CustomerParams]))}`)
+    .filter(
+      (key) =>
+        params[key as keyof ICustomerParams] !== undefined &&
+        params[key as keyof ICustomerParams] !== "",
+    )
+    .map(
+      (key) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(params[key as keyof ICustomerParams]))}`,
+    )
     .join("&");
-  const completeUrl = `${API_BASE_URL}/v1.0/customers${queryString ? "?" + queryString : ""}`;
 
-  console.log("Customers Request Sent:", {
-    url: completeUrl,
-    headers: headers,
-  });
-
-  const response = await axios.get(`${API_BASE_URL}/v1.0/customers`, {
-    headers,
-    params,
-    validateStatus: () => true,
-  });
-  console.log("Customer Response", response.data);
-  return response.status === 200 && Array.isArray(response.data?.data) ? response.data.data : [];
+  const response = await axios.get(
+    `${API_BASE_URL}/v1.0/customers${queryString ? "?" + queryString : ""}`,
+    {
+      headers,
+      params,
+      validateStatus: () => true,
+    },
+  );
+  return response.status === 200 && Array.isArray(response.data?.data)
+    ? response.data.data
+    : [];
 };
 
 // Fetch sales breakdown by individual menu items
-export const getSalesByItem = async (token: string, params: SalesParams) => {
+export const getSalesByItem = async (token: string, params: ISalesParams) => {
   const response = await axios.get(`${API_BASE_URL}/reports/sales/by-item`, {
     headers: getHeaders(token),
     params,
     validateStatus: () => true,
   });
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
 };
 
 // Fetch hourly sales breakdown
-export const getSalesHourly = async (token: string, params: SalesParams) => {
+export const getSalesHourly = async (token: string, params: ISalesParams) => {
   const response = await axios.get(`${API_BASE_URL}/reports/sales/hourly`, {
     headers: getHeaders(token),
     params,
     validateStatus: () => true,
   });
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
 };
 
 // Fetch day-by-day sales summary breakdown
-export const getSalesDailySummary = async (token: string, params: SalesParams) => {
-  const response = await axios.get(`${API_BASE_URL}/reports/sales/daily-summary`, {
-    headers: getHeaders(token),
-    params,
-    validateStatus: () => true,
-  });
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+export const getSalesDailySummary = async (
+  token: string,
+  params: ISalesParams,
+) => {
+  const response = await axios.get(
+    `${API_BASE_URL}/reports/sales/daily-summary`,
+    {
+      headers: getHeaders(token),
+      params,
+      validateStatus: () => true,
+    },
+  );
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
 };
-

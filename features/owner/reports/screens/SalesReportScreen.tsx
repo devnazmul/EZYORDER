@@ -1,25 +1,18 @@
 import {
-  ActionCard,
   FilterDrawer,
   FilterField,
-  KpiCard,
   PageTitle,
   RefreshableScrollView,
   ToggleBar,
 } from "@/components/reuseable";
 import { useAuth, useData } from "@/hooks";
-import {
-  formatAmount,
-  formatDate,
-  getCurrencySymbol,
-  useResponsiveScreen,
-  WP,
-} from "@/utils";
+import { getCurrencySymbol, WP } from "@/utils";
+import dayjs from "dayjs";
 import React, { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SparklineChart } from "../../components";
 import {
+  KPICardGrid,
   RevenueByOrderTypeCard,
   SalesAreaChart,
   SalesByPaymentCard,
@@ -33,6 +26,7 @@ import {
   TopProductsList,
 } from "../components";
 import {
+  useOrderSummaryQuery,
   useSalesByItemQuery,
   useSalesByOrderTypeQuery,
   useSalesDailySummaryQuery,
@@ -41,26 +35,35 @@ import {
   useSalesTrendQuery,
 } from "../hooks/queries";
 
-// Helper: Calculate Date Period Ranges aligned with calendar boundaries
+// Helper: Calculate Date Period Ranges aligned with calendar boundaries using dayjs
 const getDateRange = (period: string) => {
-  const end = new Date();
-  const start = new Date();
+  const now = dayjs();
 
   if (period === "Yesterday") {
-    start.setDate(start.getDate() - 1);
-    end.setDate(end.getDate() - 1);
-  } else if (period === "This Week") {
-    start.setDate(start.getDate() - start.getDay());
-    end.setDate(end.getDate() + (6 - end.getDay()));
-  } else if (period === "This Month") {
-    start.setDate(1);
-    end.setMonth(end.getMonth() + 1);
-    end.setDate(0);
+    const yesterday = now.subtract(1, "day");
+    return {
+      start_date: yesterday.format("YYYY-MM-DD"),
+      end_date: yesterday.format("YYYY-MM-DD"),
+    };
+  }
+
+  if (period === "This Week") {
+    return {
+      start_date: now.startOf("week").format("YYYY-MM-DD"),
+      end_date: now.endOf("week").format("YYYY-MM-DD"),
+    };
+  }
+
+  if (period === "This Month") {
+    return {
+      start_date: now.startOf("month").format("YYYY-MM-DD"),
+      end_date: now.endOf("month").format("YYYY-MM-DD"),
+    };
   }
 
   return {
-    start_date: formatDate(start),
-    end_date: formatDate(end),
+    start_date: now.format("YYYY-MM-DD"),
+    end_date: now.format("YYYY-MM-DD"),
   };
 };
 
@@ -88,13 +91,12 @@ const INITIAL_FILTER_VALUES = {
   dateRange: { start: "", end: "" },
 };
 
-const EMPTY_ARRAY: any[] = [];
+const EMPTY_ARRAY: readonly never[] = [];
 
 const SalesReport = () => {
   const { user } = useAuth();
   const { settings } = useData();
   const currencySymbol = getCurrencySymbol(settings?.currency);
-  const { isLandscape } = useResponsiveScreen();
 
   const [activeTab, setActiveTab] = useState("Overview");
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -117,6 +119,12 @@ const SalesReport = () => {
     isLoading: isSummaryLoading,
     refetch: refetchSummary,
   } = useSalesSummaryQuery(apiParams);
+
+  const {
+    data: orderSummaryData,
+    isLoading: isOrderSummaryLoading,
+    refetch: refetchOrderSummary,
+  } = useOrderSummaryQuery(apiParams);
 
   const {
     data: trendData,
@@ -152,6 +160,7 @@ const SalesReport = () => {
     setIsRefreshing(true);
     await Promise.all([
       refetchSummary(),
+      refetchOrderSummary(),
       refetchTrend(),
       refetchOrderType(),
       refetchItem(),
@@ -161,14 +170,29 @@ const SalesReport = () => {
     setIsRefreshing(false);
   };
 
+  const isKpiLoading =
+    (isSummaryLoading || isOrderSummaryLoading) && !isRefreshing;
+
+  // Order summary metrics
+  const orderStats = orderSummaryData || {};
+  const totalOrders = orderStats.total_orders ?? summaryData?.total_orders ?? 0;
+  const completedOrders = orderStats.completed_orders ?? 0;
+  const pendingOrders = orderStats.pending?.total ?? 0;
+  const cancelledOrders = orderStats.cancelled?.total ?? 0;
+  const avgOrderValue =
+    orderStats.sales?.average_order_value ??
+    (totalOrders > 0 ? (summaryData?.gross_sales ?? 0) / totalOrders : 0);
+
+  // Sales Summary Metrics
   const grossSales = summaryData?.gross_sales ?? 0;
-  const netSales = summaryData?.net_sales ?? 0;
-  const totalOrders = summaryData?.total_orders ?? 0;
   const discounts = summaryData?.discounts ?? 0;
-  const avgOrderValue = totalOrders > 0 ? grossSales / totalOrders : 0;
+  const netSales = summaryData?.net_sales ?? 0;
+  const totalTax = summaryData?.total_tax ?? summaryData?.tax ?? 0;
+  const totalExpenses =
+    summaryData?.total_expenses ?? summaryData?.expenses ?? 0;
 
   const sparklineData = Array.isArray(trendData)
-    ? trendData.map((d: any) => Number(d.sales || 0))
+    ? trendData.map((d: { sales?: number | string }) => Number(d.sales || 0))
     : [];
 
   return (
@@ -214,81 +238,21 @@ const SalesReport = () => {
 
         {activeTab === "Overview" && (
           <View key="overview" className="gap-y-3 pb-6">
-            <ActionCard title="Insights" bodyStyle={{ padding: WP("3.5%") }}>
-              <View className="flex-col gap-y-3">
-                <View className="flex-1">
-                  <KpiCard
-                    variant="dark"
-                    minHeight={120}
-                    loading={isSummaryLoading && !isRefreshing}
-                    title="Total Sales"
-                    value={formatAmount(grossSales, currencySymbol)}
-                    gradientColors={["#111827", "#0F172A"]}
-                    icon="currency-pound"
-                    iconColor="#FFFFFF"
-                    iconBgColor="#10B981"
-                    rightElement={
-                      <SparklineChart
-                        data={sparklineData}
-                        width={isLandscape ? WP("22%") : WP("38%")}
-                        height={70}
-                        paddingBottom={14}
-                        strokeColor="#10B981"
-                        gradientId="salesReportSparkline"
-                      />
-                    }
-                  />
-                </View>
-                <View className="flex-row gap-3 flex-1">
-                  <KpiCard
-                    variant="light"
-                    loading={isSummaryLoading && !isRefreshing}
-                    title="Total Orders"
-                    value={totalOrders.toLocaleString()}
-                    icon="shopping-bag"
-                    iconColor="#F43F5E"
-                    iconBgColor="#FFE4E6"
-                    gradientColors={["#FFE4E6", "#FECDD3"]}
-                    containerClassName="flex-1"
-                  />
-                  <KpiCard
-                    variant="light"
-                    loading={isSummaryLoading && !isRefreshing}
-                    title="Avg Order Value"
-                    value={formatAmount(avgOrderValue, currencySymbol)}
-                    icon="payments"
-                    iconColor="#D97706"
-                    iconBgColor="#FEF3C7"
-                    gradientColors={["#FEF3C7", "#FDE68A"]}
-                    containerClassName="flex-1"
-                  />
-                </View>
-                <View className="flex-row gap-3 flex-1">
-                  <KpiCard
-                    variant="light"
-                    loading={isSummaryLoading && !isRefreshing}
-                    title="Total Discounts"
-                    value={formatAmount(discounts, currencySymbol)}
-                    icon="local-offer"
-                    iconColor="#8B5CF6"
-                    iconBgColor="#EDE9FE"
-                    gradientColors={["#EDE9FE", "#DDD6FE"]}
-                    containerClassName="flex-1"
-                  />
-                  <KpiCard
-                    variant="light"
-                    loading={isSummaryLoading && !isRefreshing}
-                    title="Net Sales"
-                    value={formatAmount(netSales, currencySymbol)}
-                    icon="account-balance-wallet"
-                    iconColor="#059669"
-                    iconBgColor="#D1FAE5"
-                    gradientColors={["#D1FAE5", "#A7F3D0"]}
-                    containerClassName="flex-1"
-                  />
-                </View>
-              </View>
-            </ActionCard>
+            <KPICardGrid
+              grossSales={grossSales}
+              totalOrders={totalOrders}
+              completedOrders={completedOrders}
+              pendingOrders={pendingOrders}
+              cancelledOrders={cancelledOrders}
+              avgOrderValue={avgOrderValue}
+              discounts={discounts}
+              netSales={netSales}
+              totalTax={totalTax}
+              totalExpenses={totalExpenses}
+              sparklineData={sparklineData}
+              currencySymbol={currencySymbol}
+              isLoading={isKpiLoading}
+            />
 
             <SalesSummaryListCard
               salesSummary={summaryData}
