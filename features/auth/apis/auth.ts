@@ -1,50 +1,29 @@
-import ENV from "@/config/env";
-import { logApiResponse } from "@/utils/logApiResponse";
-import axios from "axios";
+import axiosClient from "@/config/axiosClient";
+import { ILoginFormData } from "../schema";
 
-const API_BASE_URL = ENV.API_BASE_URL;
+export interface ILoginResponse {
+  token?: string;
+  [key: string]: any;
+}
 
-export const loginUser = async (email: string, password: string) => {
-  const response = await axios.post(
-    `${API_BASE_URL}/auth`,
-    { email, password },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      validateStatus: () => true,
-    },
-  );
+export interface IForgotPasswordResponse {
+  message?: string;
+  [key: string]: any;
+}
 
-  logApiResponse("login User", response.data);
-
-  if (response.status >= 200 && response.status < 300) {
-    return response.data;
-  } else {
-    throw response;
-  }
+export const loginUser = async (
+  payload: ILoginFormData,
+): Promise<ILoginResponse> => {
+  const response = await axiosClient.post("/auth", payload);
+  return response.data;
 };
 
-export const forgotPassword = async (email: string) => {
-  const response = await axios.post(
-    `${API_BASE_URL}/v1.0/forget-password`,
-    {
-      email,
-      client_site: "dashboard",
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      validateStatus: () => true,
-    },
-  );
-
-  if (response.status >= 200 && response.status < 300) {
-    return response.data;
-  } else {
-    throw response;
-  }
+export const forgotPassword = async (
+  email: string,
+): Promise<IForgotPasswordResponse> => {
+  const response = await axiosClient.post("/v1.0/forget-password", {
+    email,
+    client_site: "dashboard",
+  });
+  return response.data;
 };

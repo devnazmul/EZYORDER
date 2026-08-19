@@ -1,4 +1,4 @@
-export { default as authStore, type UserData } from "./authStore";
+export { default as authStore, type IUserData } from "./authStore";
 export {
   default as dayWiseSlotDivide,
   type DaySlots,

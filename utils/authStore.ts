@@ -1,9 +1,9 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 const TOKEN_KEY = "auth_token";
 const USER_KEY = "user_data";
 
-export interface UserData {
+export interface IUserData {
   id: number;
   name: string;
   email: string;
@@ -13,11 +13,11 @@ export interface UserData {
 }
 
 export const authStore = {
-  async saveSession(token: string, user: UserData): Promise<void> {
+  async saveSession(token: string, user: IUserData): Promise<void> {
     try {
-      await AsyncStorage.multiSet([
-        [TOKEN_KEY, token],
-        [USER_KEY, JSON.stringify(user)],
+      await Promise.all([
+        SecureStore.setItemAsync(TOKEN_KEY, token),
+        SecureStore.setItemAsync(USER_KEY, JSON.stringify(user)),
       ]);
     } catch (error) {
       console.error("Error saving auth session:", error);
@@ -26,16 +26,16 @@ export const authStore = {
 
   async getToken(): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem(TOKEN_KEY);
+      return await SecureStore.getItemAsync(TOKEN_KEY);
     } catch (error) {
       console.error("Error getting auth token:", error);
       return null;
     }
   },
 
-  async getUser(): Promise<UserData | null> {
+  async getUser(): Promise<IUserData | null> {
     try {
-      const userStr = await AsyncStorage.getItem(USER_KEY);
+      const userStr = await SecureStore.getItemAsync(USER_KEY);
       return userStr ? JSON.parse(userStr) : null;
     } catch (error) {
       console.error("Error getting user data:", error);
@@ -45,7 +45,10 @@ export const authStore = {
 
   async clearSession(): Promise<void> {
     try {
-      await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+      await Promise.all([
+        SecureStore.deleteItemAsync(TOKEN_KEY),
+        SecureStore.deleteItemAsync(USER_KEY),
+      ]);
     } catch (error) {
       console.error("Error clearing auth session:", error);
     }

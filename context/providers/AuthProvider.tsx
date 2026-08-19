@@ -1,14 +1,14 @@
 import { unregisterDeviceToken } from "@/features/owner/notifications/apis/notification";
-import { authStore, UserData } from "@/utils";
+import { authStore, IUserData } from "@/utils";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<IUserData | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     restoreSession();
   }, []);
 
-  const login = async (newToken: string, userData: UserData) => {
+  const login = useCallback(async (newToken: string, userData: IUserData) => {
     try {
       await authStore.saveSession(newToken, userData);
       setToken(newToken);
@@ -41,9 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Error during Context login:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       if (token) {
         try {
@@ -69,20 +69,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Error during Context logout:", error);
       throw error;
     }
-  };
+  }, [token]);
+
+  const contextValue = useMemo(
+    () => ({
+      user,
+      token,
+      isAuthenticated: !!token,
+      isLoading,
+      login,
+      logout,
+    }),
+    [user, token, isLoading, login, logout],
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isAuthenticated: !!token,
-        isLoading,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };

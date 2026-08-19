@@ -45,6 +45,7 @@ export default {
         },
       ],
       "expo-notifications",
+      "expo-secure-store",
     ],
     experiments: {
       typedRoutes: true,

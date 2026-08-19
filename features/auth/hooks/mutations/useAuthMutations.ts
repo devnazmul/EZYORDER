@@ -1,15 +1,28 @@
 import { useMutation } from "@tanstack/react-query";
-import { loginUser, forgotPassword } from "../../apis/auth";
+import { AxiosError } from "axios";
+import {
+  forgotPassword,
+  IForgotPasswordResponse,
+  ILoginResponse,
+  loginUser,
+} from "../../apis";
+import { ILoginFormData } from "../../schema";
 
-export const useLoginMutation = (onSuccess: (response: any) => void, onError: (error: any) => void) => {
+export const useLoginMutation = (
+  onSuccess: (response: ILoginResponse) => void,
+  onError: (error: AxiosError | Error) => void,
+) => {
   return useMutation({
-    mutationFn: ({ email, password }: any) => loginUser(email, password),
+    mutationFn: (payload: ILoginFormData) => loginUser(payload),
     onSuccess,
     onError,
   });
 };
 
-export const useForgotPasswordMutation = (onSuccess: (response: any) => void, onError: (error: any) => void) => {
+export const useForgotPasswordMutation = (
+  onSuccess: (response: IForgotPasswordResponse) => void,
+  onError: (error: AxiosError | Error) => void,
+) => {
   return useMutation({
     mutationFn: (email: string) => forgotPassword(email),
     onSuccess,
