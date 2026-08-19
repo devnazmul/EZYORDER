@@ -1,17 +1,29 @@
+import { LabelValueRow } from "@/components/reuseable";
 import ActionCard from "@/components/reuseable/cards/ActionCard";
-import COLORS from "@/constants/colors";
-import { formatAmount } from "@/utils/formatters";
-import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
-import { MaterialIcons } from "@expo/vector-icons";
+import { COLORS } from "@/constants/colors";
+import { WP } from "@/utils/getResponsiveSizes";
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import SalesSummaryListSkeleton from "./skeletons/SalesSummaryListSkeleton";
 
-interface SalesSummaryListCardProps {
-  salesSummary: any;
+export interface ISalesSummaryData {
+  gross_sales?: number | string;
+  discounts?: number | string;
+  discount?: number | string;
+  refunds?: number | string;
+  net_sales?: number | string;
+  total_expenses?: number | string;
+  expenses?: number | string;
+  total_tax?: number | string;
+  tax?: number | string;
+  tax_collected?: number | string;
+  profit?: number | string;
+}
+
+export interface ISalesSummaryListCardProps {
+  salesSummary?: ISalesSummaryData | null;
   currencySymbol: string;
   isLoading?: boolean;
-  onNavigateToTab: (tab: string) => void;
   containerClassName?: string;
 }
 
@@ -19,14 +31,23 @@ export default function SalesSummaryListCard({
   salesSummary,
   currencySymbol,
   isLoading = false,
-  onNavigateToTab,
   containerClassName = "",
-}: SalesSummaryListCardProps) {
+}: Readonly<ISalesSummaryListCardProps>) {
   const grossSales = Number(salesSummary?.gross_sales ?? 0);
-  const discounts = Number(salesSummary?.discounts ?? salesSummary?.discount ?? 0);
+  const discounts = Number(
+    salesSummary?.discounts ?? salesSummary?.discount ?? 0,
+  );
   const returns = Number(salesSummary?.refunds ?? 0);
   const netSales = Number(salesSummary?.net_sales ?? 0);
-  const tax = Number(salesSummary?.tax ?? salesSummary?.tax_collected ?? 0);
+  const expenses = Number(
+    salesSummary?.total_expenses ?? salesSummary?.expenses ?? 0,
+  );
+  const tax = Number(
+    salesSummary?.total_tax ??
+      salesSummary?.tax ??
+      salesSummary?.tax_collected ??
+      0,
+  );
   const profit = Number(salesSummary?.profit ?? 0);
 
   return (
@@ -37,104 +58,77 @@ export default function SalesSummaryListCard({
       containerClassName={containerClassName}
       bodyStyle={{ padding: WP("3.5%") }}
       actionLabel="View Full Summary"
-      onActionPress={() => onNavigateToTab("Daily")}
     >
       <View className="gap-y-4">
         {/* Gross Sales */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row gap-2 items-center">
-            <MaterialIcons name="trending-up" size={WP("4.5%")} color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-semibold text-neutral">
-              Gross Sales
-            </Text>
-          </View>
-          <Text
-            style={{ fontSize: getResponsiveFontSize("sm"), color: COLORS.neutral }}
-            className="font-semibold"
-          >
-            {formatAmount(grossSales, currencySymbol)}
-          </Text>
-        </View>
+        <LabelValueRow
+          label="Gross Sales"
+          icon="trending-up"
+          iconColor={COLORS.primary}
+          value={grossSales}
+          valueType="currency"
+          currencySymbol={currencySymbol}
+        />
 
         {/* Total Discounts */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row gap-2 items-center">
-            <MaterialIcons name="local-offer" size={WP("4.5%")} color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-semibold text-neutral">
-              Total Discounts
-            </Text>
-          </View>
-          <Text
-            style={{ fontSize: getResponsiveFontSize("sm"), color: COLORS.primary }}
-            className="font-semibold"
-          >
-            -{formatAmount(discounts, currencySymbol)}
-          </Text>
-        </View>
+        <LabelValueRow
+          label="Total Discounts"
+          icon="local-offer"
+          iconColor={COLORS.primary}
+          value={-discounts}
+          valueType="currency"
+          currencySymbol={currencySymbol}
+        />
 
         {/* Returns */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row gap-2 items-center">
-            <MaterialIcons name="undo" size={WP("4.5%")} color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-semibold text-neutral">
-              Returns
-            </Text>
-          </View>
-          <Text
-            style={{ fontSize: getResponsiveFontSize("sm"), color: COLORS.primary }}
-            className="font-semibold"
-          >
-            -{formatAmount(returns, currencySymbol)}
-          </Text>
-        </View>
+        <LabelValueRow
+          label="Returns"
+          icon="undo"
+          iconColor={COLORS.primary}
+          value={-returns}
+          valueType="currency"
+          currencySymbol={currencySymbol}
+        />
 
         {/* Net Sales */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row gap-2 items-center">
-            <MaterialIcons name="account-balance-wallet" size={WP("4.5%")} color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-semibold text-neutral">
-              Net Sales
-            </Text>
-          </View>
-          <Text
-            style={{ fontSize: getResponsiveFontSize("sm"), color: COLORS.neutral }}
-            className="font-semibold"
-          >
-            {formatAmount(netSales, currencySymbol)}
-          </Text>
-        </View>
+        <LabelValueRow
+          label="Net Sales"
+          icon="account-balance-wallet"
+          iconColor={COLORS.primary}
+          value={netSales}
+          valueType="currency"
+          currencySymbol={currencySymbol}
+        />
+
+        {/* Expenses */}
+        <LabelValueRow
+          label="Expenses"
+          icon="receipt"
+          iconColor={COLORS.primary}
+          value={-expenses}
+          valueType="currency"
+          currencySymbol={currencySymbol}
+        />
 
         {/* Tax Collected */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row gap-2 items-center">
-            <MaterialIcons name="account-balance" size={WP("4.5%")} color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-semibold text-neutral">
-              Tax Collected
-            </Text>
-          </View>
-          <Text
-            style={{ fontSize: getResponsiveFontSize("sm"), color: COLORS.neutral }}
-            className="font-semibold"
-          >
-            {formatAmount(tax, currencySymbol)}
-          </Text>
-        </View>
+        <LabelValueRow
+          label="Tax Collected"
+          icon="account-balance"
+          iconColor={COLORS.primary}
+          value={tax}
+          valueType="currency"
+          currencySymbol={currencySymbol}
+        />
 
         {/* Total Profit */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row gap-2 items-center">
-            <MaterialIcons name="attach-money" size={WP("4.5%")} color={COLORS.primary} />
-            <Text style={{ fontSize: getResponsiveFontSize("sm") }} className="font-semibold text-neutral">
-              Total Profit (Est.)
-            </Text>
-          </View>
-          <Text
-            style={{ fontSize: getResponsiveFontSize("sm"), color: COLORS.neutral }}
-            className="font-semibold"
-          >
-            {formatAmount(profit, currencySymbol)}
-          </Text>
-        </View>
+        <LabelValueRow
+          label="Total Profit (Est.)"
+          icon="attach-money"
+          iconColor={COLORS.primary}
+          value={profit}
+          valueType="currency"
+          currencySymbol={currencySymbol}
+        />
       </View>
     </ActionCard>
   );

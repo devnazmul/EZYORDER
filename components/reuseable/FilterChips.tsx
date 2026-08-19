@@ -1,17 +1,19 @@
 import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-interface ChipItem {
+export interface IChipItem {
   id: string;
   label: string;
 }
 
-interface FilterChipsProps {
-  chips: ChipItem[];
+export interface IFilterChipsProps {
+  chips: IChipItem[];
   selectedId: string | string[];
   onSelect: (id: string) => void;
   containerClassName?: string;
+  isBottomSheet?: boolean;
 }
 
 export default function FilterChips({
@@ -19,10 +21,12 @@ export default function FilterChips({
   selectedId,
   onSelect,
   containerClassName = "",
-}: FilterChipsProps) {
+  isBottomSheet = false,
+}: Readonly<IFilterChipsProps>) {
+  const ScrollComponent = isBottomSheet ? BottomSheetScrollView : ScrollView;
   return (
     <View className={containerClassName}>
-      <ScrollView
+      <ScrollComponent
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ flexDirection: "row", paddingRight: WP("4%") }}
@@ -49,7 +53,9 @@ export default function FilterChips({
               <Text
                 numberOfLines={1}
                 className={
-                  isSelected ? "font-bold text-center text-white" : "font-bold text-center text-accent"
+                  isSelected
+                    ? "font-bold text-center text-white"
+                    : "font-bold text-center text-accent"
                 }
                 style={{ flexShrink: 0, fontSize: getResponsiveFontSize("xs") }}
               >
@@ -58,7 +64,7 @@ export default function FilterChips({
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </ScrollComponent>
     </View>
   );
 }

@@ -1,10 +1,11 @@
-import { CustomerParams } from "../apis/reports";
+import { ICustomerParams } from "../apis/reports";
 import EmptyState from "@/components/reuseable/EmptyState";
-import FilterDrawer, { FilterField } from "@/components/reuseable/FilterDrawer";
+import FilterDrawer, {
+  IFilterField,
+} from "@/components/reuseable/FilterDrawer";
 import PageTitle from "@/components/reuseable/PageTitle";
 import SearchBar from "@/components/reuseable/SearchBar";
-import COLORS from "@/constants/colors";
-import { useAuth } from "@/context/AuthContext";
+import { COLORS } from "@/constants/colors";
 import { HP, WP } from "@/utils/getResponsiveSizes";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
@@ -13,7 +14,27 @@ import CustomerCard from "../components/CustomerCard";
 import CustomerCardSkeleton from "../components/skeletons/CustomerCardSkeleton";
 import { useCustomersQuery } from "../hooks/queries/useReportsQueries";
 
-const DEFAULT_FILTERS = {
+interface ICustomerCreationDates {
+  start: string;
+  end: string;
+}
+
+interface ICustomerFilterState {
+  frequency_visit: string[];
+  date_filter: string;
+  rating: string;
+  order_by: string;
+  creation_dates: ICustomerCreationDates;
+  last_visited_date: string;
+  email: string;
+  phone: string;
+  status: string;
+  payment_status: string;
+  payment_type: string;
+  booking_type: string;
+}
+
+const DEFAULT_FILTERS: ICustomerFilterState = {
   frequency_visit: ["all"],
   date_filter: "all",
   rating: "all",
@@ -28,13 +49,93 @@ const DEFAULT_FILTERS = {
   booking_type: "all",
 };
 
-export default function CustomersReport() {
-  const { token } = useAuth();
+interface ICustomerItem {
+  id: string | number;
+  first_Name?: string;
+  last_Name?: string;
+  image?: string;
+  type?: string;
+  completed_orders_count?: number;
+  total_revenue_takeaway?: string;
+  total_revenue_delivery?: string;
+  total_revenue_eat_in?: string;
+  [key: string]: unknown;
+}
 
+interface ICustomerListContentProps {
+  isLoadingOrRefetching: boolean;
+  customers: ICustomerItem[];
+  isRefetching: boolean;
+  onRefresh: () => void;
+}
+
+function CustomerListContent({
+  isLoadingOrRefetching,
+  customers,
+  isRefetching,
+  onRefresh,
+}: Readonly<ICustomerListContentProps>) {
+  if (isLoadingOrRefetching) {
+    return (
+      <View
+        key="loading"
+        style={{ paddingHorizontal: WP("4%") }}
+        className="flex-1"
+      >
+        <CustomerCardSkeleton />
+        <CustomerCardSkeleton />
+        <CustomerCardSkeleton />
+        <CustomerCardSkeleton />
+        <CustomerCardSkeleton />
+      </View>
+    );
+  }
+
+  if (customers.length === 0) {
+    return (
+      <View
+        key="empty"
+        style={{ paddingHorizontal: WP("4%") }}
+        className="flex-1"
+      >
+        <EmptyState
+          description="No customers found matching your criteria"
+          pyClassName="py-12"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      key="loaded"
+      data={customers}
+      keyExtractor={(item) => String(item.id)}
+      contentContainerStyle={{
+        paddingHorizontal: WP("4%"),
+        paddingBottom: HP("4%"),
+      }}
+      showsVerticalScrollIndicator={false}
+      renderItem={({ item }) => <CustomerCard customer={item} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={onRefresh}
+          colors={[COLORS.primary]}
+          tintColor={COLORS.primary}
+        />
+      }
+    />
+  );
+}
+
+export default function CustomersReport() {
   // State for search and advanced filters
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [filterValues, setFilterValues] = useState<Record<string, any>>(DEFAULT_FILTERS);
+  const [filterValues, setFilterValues] = useState<Record<string, unknown>>(
+    DEFAULT_FILTERS as unknown as Record<string, unknown>,
+  );
 
   // Debounce search query to prevent rapid API requests
   useEffect(() => {
@@ -45,7 +146,7 @@ export default function CustomersReport() {
   }, [searchQuery]);
 
   // Configure FilterDrawer fields using all API schema options
-  const filterFields = useMemo<FilterField[]>(() => {
+  const filterFields = useMemo<IFilterField[]>(() => {
     return [
       {
         id: "frequency_visit",
@@ -165,29 +266,41 @@ export default function CustomersReport() {
   }, []);
 
   // Construct query parameters
-  const queryParams = useMemo<CustomerParams>(() => {
+  const queryParams = useMemo<ICustomerParams>(() => {
     return buildCustomerQueryParams(debouncedSearch, filterValues);
   }, [debouncedSearch, filterValues]);
 
   // Fetch queries
-  const { data: customers = [], isLoading, isRefetching, refetch } = useCustomersQuery(token, queryParams);
+  const {
+    data: customers = [],
+    isLoading,
+    isRefetching,
+    refetch,
+  } = useCustomersQuery(queryParams);
 
-  const handleApplyFilters = (newValues: Record<string, any>) => {
+  const handleApplyFilters = (newValues: Record<string, unknown>) => {
     setFilterValues(newValues);
   };
 
   const handleClearFilters = () => {
-    setFilterValues(DEFAULT_FILTERS);
+    setFilterValues(DEFAULT_FILTERS as unknown as Record<string, unknown>);
   };
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       {/* Main content header */}
       <View style={{ paddingHorizontal: WP("4%"), paddingTop: HP("2%") }}>
-        <PageTitle title="Customers" icon="group" badgeCount={customers.length} />
+        <PageTitle
+          title="Customers"
+          icon="group"
+          badgeCount={customers.length}
+        />
 
         {/* Search & Filter Drawer Row */}
-        <View style={{ marginBottom: HP("1.5%") }} className="flex-row items-center gap-3">
+        <View
+          style={{ marginBottom: HP("1.5%") }}
+          className="flex-row items-center gap-3"
+        >
           <SearchBar
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -204,84 +317,69 @@ export default function CustomersReport() {
       </View>
 
       {/* Main Content Area */}
-      {isLoading || isRefetching ? (
-        <View key="loading" style={{ paddingHorizontal: WP("4%") }} className="flex-1">
-          <CustomerCardSkeleton />
-          <CustomerCardSkeleton />
-          <CustomerCardSkeleton />
-          <CustomerCardSkeleton />
-          <CustomerCardSkeleton />
-        </View>
-      ) : customers.length === 0 ? (
-        <View key="empty" style={{ paddingHorizontal: WP("4%") }} className="flex-1">
-          <EmptyState description="No customers found matching your criteria" pyClassName="py-12" />
-        </View>
-      ) : (
-        <FlatList
-          key="loaded"
-          data={customers}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={{ paddingHorizontal: WP("4%"), paddingBottom: HP("4%") }}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => <CustomerCard customer={item} />}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              colors={[COLORS.primary]}
-              tintColor={COLORS.primary}
-            />
-          }
-        />
-      )}
+      <CustomerListContent
+        isLoadingOrRefetching={isLoading || isRefetching}
+        customers={customers as ICustomerItem[]}
+        isRefetching={isRefetching}
+        onRefresh={refetch}
+      />
     </SafeAreaView>
   );
 }
 
-function buildCustomerQueryParams(debouncedSearch: string, filterValues: any): CustomerParams {
-  const params: CustomerParams = {
+const FILTER_MAPPING: [string, keyof ICustomerParams][] = [
+  ["date_filter", "date_filter"],
+  ["rating", "rating"],
+  ["order_by", "order_by"],
+  ["status", "status"],
+  ["payment_status", "payment_status"],
+  ["payment_type", "payment_type"],
+  ["booking_type", "booking_type"],
+];
+
+function buildCustomerQueryParams(
+  debouncedSearch: string,
+  filterValues: Record<string, unknown>,
+): ICustomerParams {
+  const params: ICustomerParams = {
     per_page: 50,
   };
 
   const trimSearch = debouncedSearch.trim();
   if (trimSearch) params.search_key = trimSearch;
 
-  const emailTrim = filterValues.email?.trim();
+  const emailTrim =
+    typeof filterValues.email === "string" ? filterValues.email.trim() : "";
   if (emailTrim) params.email = emailTrim;
 
-  const phoneTrim = filterValues.phone?.trim();
+  const phoneTrim =
+    typeof filterValues.phone === "string" ? filterValues.phone.trim() : "";
   if (phoneTrim) params.phone = phoneTrim;
 
-  if (filterValues.last_visited_date) {
+  if (
+    typeof filterValues.last_visited_date === "string" &&
+    filterValues.last_visited_date
+  ) {
     params.last_visited_date = filterValues.last_visited_date;
   }
 
-  const creationDates = filterValues.creation_dates;
-  if (creationDates) {
-    if (creationDates.start) params.start_date = creationDates.start;
-    if (creationDates.end) params.end_date = creationDates.end;
-  }
+  const creationDates = filterValues.creation_dates as
+    ICustomerCreationDates | undefined;
+  if (creationDates?.start) params.start_date = creationDates.start;
+  if (creationDates?.end) params.end_date = creationDates.end;
 
-  const fieldsToMap: Array<[keyof typeof filterValues, keyof CustomerParams]> = [
-    ["date_filter", "date_filter"],
-    ["rating", "rating"],
-    ["order_by", "order_by"],
-    ["status", "status"],
-    ["payment_status", "payment_status"],
-    ["payment_type", "payment_type"],
-    ["booking_type", "booking_type"],
-  ];
-
-  for (const [key, paramKey] of fieldsToMap) {
+  for (const [key, paramKey] of FILTER_MAPPING) {
     const val = filterValues[key];
-    if (val && val !== "all") {
-      (params as any)[paramKey] = val;
+    if (typeof val === "string" && val && val !== "all") {
+      (params as Record<keyof ICustomerParams, unknown>)[paramKey] = val;
     }
   }
 
   const freq = filterValues.frequency_visit;
   if (Array.isArray(freq)) {
-    const activeVisits = freq.filter((v: string) => v !== "all");
+    const activeVisits = freq.filter(
+      (v): v is string => typeof v === "string" && v !== "all",
+    );
     if (activeVisits.length > 0) {
       params.frequency_visit = activeVisits.join(",");
     }

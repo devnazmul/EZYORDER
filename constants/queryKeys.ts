@@ -40,6 +40,7 @@ export const QUERY_KEYS = {
   // Reports keys
   REPORTS: "reports",
   SALES_SUMMARY: "salesSummary",
+  ORDER_SUMMARY: "orderSummary",
   SALES_TREND: "salesTrend",
   SALES_BY_ORDER_TYPE: "salesByOrderType",
   CUSTOMERS: "customers",
@@ -53,4 +54,3 @@ export const QUERY_KEYS = {
   DRIVER_ORDERS_LIST: "driverOrdersList",
   ORDER_DETAIL: "orderDetail",
 } as const;
-
