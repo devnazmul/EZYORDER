@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import BottomSheet from "@/components/reuseable/BottomSheet";
 import Button from "@/components/reuseable/Button";
 import FilterChips from "@/components/reuseable/FilterChips";
@@ -188,22 +189,8 @@ export default function FilterDrawer({
 
   const formatDateLabel = (dateStr?: string) => {
     if (!dateStr) return "Select Date";
-    try {
-      const parts = dateStr.split("-");
-      if (parts.length === 3) {
-        const d = new Date(
-          Number.parseInt(parts[0], 10),
-          Number.parseInt(parts[1], 10) - 1,
-          Number.parseInt(parts[2], 10),
-        );
-        return d.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        });
-      }
-    } catch {}
-    return dateStr;
+    const parsed = dayjs(dateStr);
+    return parsed.isValid() ? parsed.format("MMM D, YYYY") : dateStr;
   };
 
   return (
