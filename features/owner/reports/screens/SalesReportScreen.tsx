@@ -3,7 +3,6 @@ import {
   IFilterField,
   PageTitle,
   RefreshableScrollView,
-  ToggleBar,
 } from "@/components/reuseable";
 import { useAuth, useData } from "@/hooks";
 import { getCurrencySymbol, WP } from "@/utils";
@@ -16,12 +15,6 @@ import {
   RevenueByOrderTypeCard,
   SalesAreaChart,
   SalesByPaymentCard,
-  SalesDailyList,
-  SalesDailyListSkeleton,
-  SalesHourlyList,
-  SalesHourlyListSkeleton,
-  SalesItemList,
-  SalesItemListSkeleton,
   SalesSummaryListCard,
   TopProductsList,
 } from "../components";
@@ -29,8 +22,6 @@ import {
   useOrderSummaryQuery,
   useSalesByItemQuery,
   useSalesByOrderTypeQuery,
-  useSalesDailySummaryQuery,
-  useSalesHourlyQuery,
   useSalesSummaryQuery,
   useSalesTrendQuery,
 } from "../hooks/queries";
@@ -111,7 +102,6 @@ const SalesReport = () => {
   const { settings } = useData();
   const currencySymbol = getCurrencySymbol(settings?.currency);
 
-  const [activeTab, setActiveTab] = useState("Overview");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [filterValues, setFilterValues] = useState(INITIAL_FILTER_VALUES);
 
@@ -157,18 +147,6 @@ const SalesReport = () => {
     refetch: refetchItem,
   } = useSalesByItemQuery(apiParams);
 
-  const {
-    data: hourlyData,
-    isLoading: isHourlyLoading,
-    refetch: refetchHourly,
-  } = useSalesHourlyQuery(apiParams);
-
-  const {
-    data: dailySummaryData,
-    isLoading: isDailyLoading,
-    refetch: refetchDaily,
-  } = useSalesDailySummaryQuery(apiParams);
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
@@ -177,8 +155,6 @@ const SalesReport = () => {
       refetchTrend(),
       refetchOrderType(),
       refetchItem(),
-      refetchHourly(),
-      refetchDaily(),
     ]);
     setIsRefreshing(false);
   };
@@ -225,19 +201,6 @@ const SalesReport = () => {
           description="Analyze your sales performance and trends"
         />
 
-        {/* Tab Selection */}
-        <ToggleBar
-          options={[
-            { id: "Overview", label: "Overview" },
-            { id: "Daily", label: "Daily" },
-            { id: "Items", label: "Items" },
-            { id: "Hourly", label: "Hourly" },
-          ]}
-          activeId={activeTab}
-          onSelect={setActiveTab}
-          containerClassName="mb-3"
-        />
-
         <View className="flex items-end justify-center mb-3">
           <FilterDrawer
             fields={filterFields}
@@ -249,102 +212,58 @@ const SalesReport = () => {
           />
         </View>
 
-        {activeTab === "Overview" && (
-          <View key="overview" className="gap-y-3 pb-6">
-            <KPICardGrid
-              grossSales={grossSales}
-              totalOrders={totalOrders}
-              completedOrders={completedOrders}
-              pendingOrders={pendingOrders}
-              cancelledOrders={cancelledOrders}
-              avgOrderValue={avgOrderValue}
-              discounts={discounts}
-              netSales={netSales}
-              totalTax={totalTax}
-              totalExpenses={totalExpenses}
-              sparklineData={sparklineData}
-              currencySymbol={currencySymbol}
-              isLoading={isKpiLoading}
-            />
+        <View key="overview" className="gap-y-3 pb-6">
+          <KPICardGrid
+            grossSales={grossSales}
+            totalOrders={totalOrders}
+            completedOrders={completedOrders}
+            pendingOrders={pendingOrders}
+            cancelledOrders={cancelledOrders}
+            avgOrderValue={avgOrderValue}
+            discounts={discounts}
+            netSales={netSales}
+            totalTax={totalTax}
+            totalExpenses={totalExpenses}
+            sparklineData={sparklineData}
+            currencySymbol={currencySymbol}
+            isLoading={isKpiLoading}
+          />
 
-            <SalesSummaryListCard
-              salesSummary={summaryData}
-              currencySymbol={currencySymbol}
-              isLoading={isSummaryLoading && !isRefreshing}
-              onNavigateToTab={setActiveTab}
-            />
+          <SalesSummaryListCard
+            salesSummary={summaryData}
+            currencySymbol={currencySymbol}
+            isLoading={isSummaryLoading && !isRefreshing}
+          />
 
-            {/* Daily/Weekly Revenue Trend Chart */}
-            <SalesAreaChart
-              trendData={trendData}
-              currencySymbol={currencySymbol}
-              isLoading={isTrendLoading && !isRefreshing}
-            />
+          {/* Daily/Weekly Revenue Trend Chart */}
+          <SalesAreaChart
+            trendData={trendData}
+            currencySymbol={currencySymbol}
+            isLoading={isTrendLoading && !isRefreshing}
+          />
 
-            {/* Payment splits */}
-            <SalesByPaymentCard
-              salesSummary={summaryData}
-              currencySymbol={currencySymbol}
-              isLoading={isSummaryLoading && !isRefreshing}
-              onNavigateToTab={setActiveTab}
-            />
+          {/* Payment splits */}
+          <SalesByPaymentCard
+            salesSummary={summaryData}
+            currencySymbol={currencySymbol}
+            isLoading={isSummaryLoading && !isRefreshing}
+          />
 
-            {/* Order types splits */}
-            <RevenueByOrderTypeCard
-              orderTypeData={orderTypeData}
-              netSales={netSales}
-              currencySymbol={currencySymbol}
-              isLoading={isOrderTypeLoading && !isRefreshing}
-            />
+          {/* Order types splits */}
+          <RevenueByOrderTypeCard
+            orderTypeData={orderTypeData}
+            netSales={netSales}
+            currencySymbol={currencySymbol}
+            isLoading={isOrderTypeLoading && !isRefreshing}
+          />
 
-            {/* Top performing items */}
-            <TopProductsList
-              itemList={itemData || EMPTY_ARRAY}
-              currencySymbol={currencySymbol}
-              isLoading={isItemLoading && !isRefreshing}
-              onNavigateToTab={setActiveTab}
-            />
-          </View>
-        )}
-
-        {activeTab === "Daily" && (
-          <View key="daily">
-            {isDailyLoading && !isRefreshing ? (
-              <SalesDailyListSkeleton />
-            ) : (
-              <SalesDailyList
-                dailyList={dailySummaryData || EMPTY_ARRAY}
-                currencySymbol={currencySymbol}
-              />
-            )}
-          </View>
-        )}
-
-        {activeTab === "Items" && (
-          <View key="items">
-            {isItemLoading && !isRefreshing ? (
-              <SalesItemListSkeleton />
-            ) : (
-              <SalesItemList
-                itemList={itemData || EMPTY_ARRAY}
-                currencySymbol={currencySymbol}
-              />
-            )}
-          </View>
-        )}
-
-        {activeTab === "Hourly" && (
-          <View key="hourly">
-            {isHourlyLoading && !isRefreshing ? (
-              <SalesHourlyListSkeleton />
-            ) : (
-              <SalesHourlyList
-                hourlyList={hourlyData || EMPTY_ARRAY}
-                currencySymbol={currencySymbol}
-              />
-            )}
-          </View>
-        )}
+          {/* Top performing items */}
+          <TopProductsList
+            itemList={itemData || EMPTY_ARRAY}
+            currencySymbol={currencySymbol}
+            isLoading={isItemLoading && !isRefreshing}
+          />
+        </View>
       </RefreshableScrollView>
     </SafeAreaView>
   );

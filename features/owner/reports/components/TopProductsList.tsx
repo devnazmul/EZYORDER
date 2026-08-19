@@ -6,23 +6,31 @@ import React from "react";
 import { Text, View } from "react-native";
 import TopProductsListSkeleton from "./skeletons/TopProductsListSkeleton";
 
-interface TopProductsListProps {
-  itemList: any[];
+export interface ITopProductItem {
+  item_name?: string;
+  quantity_sold?: number | string;
+  net_sales?: number | string;
+  percent?: string;
+  [key: string]: unknown;
+}
+
+export interface ITopProductsListProps {
+  itemList?: ITopProductItem[];
   currencySymbol: string;
   isLoading?: boolean;
-  onNavigateToTab: (tab: string) => void;
   containerClassName?: string;
 }
 
 export default function TopProductsList({
-  itemList,
+  itemList = [],
   currencySymbol,
   isLoading = false,
-  onNavigateToTab,
   containerClassName = "",
-}: TopProductsListProps) {
-  const totalItemSales = itemList?.reduce((acc, item) => acc + Number(item.net_sales || 0), 0) || 0;
-  const displayList = itemList && itemList.length > 0 ? itemList.slice(0, 5) : [];
+}: Readonly<ITopProductsListProps>) {
+  const totalItemSales =
+    itemList?.reduce((acc, item) => acc + Number(item.net_sales || 0), 0) || 0;
+  const displayList =
+    itemList && itemList.length > 0 ? itemList.slice(0, 5) : [];
 
   return (
     <ActionCard
@@ -32,7 +40,6 @@ export default function TopProductsList({
       containerClassName={containerClassName}
       bodyStyle={{ padding: WP("3.5%") }}
       actionLabel="View Full Product Report"
-      onActionPress={() => onNavigateToTab("Items")}
     >
       <View className="gap-y-3">
         {displayList.length === 0 ? (

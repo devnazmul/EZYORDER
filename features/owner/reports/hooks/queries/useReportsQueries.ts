@@ -6,8 +6,6 @@ import {
   getOrderSummary,
   getSalesByItem,
   getSalesByOrderType,
-  getSalesDailySummary,
-  getSalesHourly,
   getSalesSummary,
   getSalesTrend,
   ICustomerParams,
@@ -69,29 +67,6 @@ export const useSalesByItemQuery = (params: ISalesParams) => {
   return useQuery({
     queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_BY_ITEM, token, params],
     queryFn: () => getSalesByItem(token!, params),
-    enabled: !!token && !!params.restaurant_id,
-  });
-};
-
-export const useSalesHourlyQuery = (params: ISalesParams) => {
-  const { token } = useAuth();
-  return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_HOURLY, token, params],
-    queryFn: () => getSalesHourly(token!, params),
-    enabled: !!token && !!params.restaurant_id,
-  });
-};
-
-export const useSalesDailySummaryQuery = (params: ISalesParams) => {
-  const { token } = useAuth();
-  return useQuery({
-    queryKey: [
-      QUERY_KEYS.REPORTS,
-      QUERY_KEYS.SALES_DAILY_SUMMARY,
-      token,
-      params,
-    ],
-    queryFn: () => getSalesDailySummary(token!, params),
     enabled: !!token && !!params.restaurant_id,
   });
 };

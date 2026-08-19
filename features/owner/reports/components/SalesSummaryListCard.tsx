@@ -24,7 +24,6 @@ export interface ISalesSummaryListCardProps {
   salesSummary?: ISalesSummaryData | null;
   currencySymbol: string;
   isLoading?: boolean;
-  onNavigateToTab: (tab: string) => void;
   containerClassName?: string;
 }
 
@@ -32,7 +31,6 @@ export default function SalesSummaryListCard({
   salesSummary,
   currencySymbol,
   isLoading = false,
-  onNavigateToTab,
   containerClassName = "",
 }: Readonly<ISalesSummaryListCardProps>) {
   const grossSales = Number(salesSummary?.gross_sales ?? 0);
@@ -60,7 +58,6 @@ export default function SalesSummaryListCard({
       containerClassName={containerClassName}
       bodyStyle={{ padding: WP("3.5%") }}
       actionLabel="View Full Summary"
-      onActionPress={() => onNavigateToTab("Daily")}
     >
       <View className="gap-y-4">
         {/* Gross Sales */}

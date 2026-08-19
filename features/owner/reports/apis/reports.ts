@@ -123,33 +123,3 @@ export const getSalesByItem = async (token: string, params: ISalesParams) => {
     ? response.data.data
     : null;
 };
-
-// Fetch hourly sales breakdown
-export const getSalesHourly = async (token: string, params: ISalesParams) => {
-  const response = await axios.get(`${API_BASE_URL}/reports/sales/hourly`, {
-    headers: getHeaders(token),
-    params,
-    validateStatus: () => true,
-  });
-  return response.status === 200 && response.data?.success
-    ? response.data.data
-    : null;
-};
-
-// Fetch day-by-day sales summary breakdown
-export const getSalesDailySummary = async (
-  token: string,
-  params: ISalesParams,
-) => {
-  const response = await axios.get(
-    `${API_BASE_URL}/reports/sales/daily-summary`,
-    {
-      headers: getHeaders(token),
-      params,
-      validateStatus: () => true,
-    },
-  );
-  return response.status === 200 && response.data?.success
-    ? response.data.data
-    : null;
-};
