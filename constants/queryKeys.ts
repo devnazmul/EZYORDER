@@ -1,3 +1,27 @@
+import type {
+  ICustomerParams,
+  IOrderTypeReportParams,
+  IOrdersReportParams,
+  ISalesParams,
+} from "@/features/owner/reports/types";
+
+/**
+ * ============================================================================
+ * ARCHITECTURAL GUIDELINE & MIGRATION NOTE FOR AGENTS & PR REVIEWERS:
+ * ============================================================================
+ * This file is undergoing phased refactoring to strictly adhere to the guidelines
+ * defined in `.agents/rules/gemini.md` (Rule #1: Domain-Shaped Query Key Factories).
+ *
+ * Current State:
+ * - Domain factories (e.g. `REPORT_KEYS` below) follow the strict rule pattern:
+ *   returning typed `as const` key tuples with query parameter scopes to enable
+ *   targeted cache invalidation and type safety.
+ * - Legacy keys in `QUERY_KEYS` are intentionally retained in their current shape
+ *   to avoid breaking legacy screens during ongoing development. They will be
+ *   gradually migrated to domain-shaped query key factories feature-by-feature.
+ * ============================================================================
+ */
+
 export const QUERY_KEYS = {
   // Table keys
   TABLES: "tables",
@@ -37,20 +61,59 @@ export const QUERY_KEYS = {
   MENU_ALL: "menuAll",
   MENU_MATRIX: "menuMatrix",
 
-  // Reports keys
-  REPORTS: "reports",
-  SALES_SUMMARY: "salesSummary",
-  ORDER_SUMMARY: "orderSummary",
-  SALES_TREND: "salesTrend",
-  SALES_BY_ORDER_TYPE: "salesByOrderType",
-  CUSTOMERS: "customers",
-  SALES_BY_ITEM: "salesByItem",
-  SALES_HOURLY: "salesHourly",
-  SALES_DAILY_SUMMARY: "salesDailySummary",
-
   // Driver keys
   DRIVER_DASHBOARD_STATS: "driverDashboardStats",
   DRIVER_ACTIVE_ASSIGNED_ORDERS: "driverActiveAssignedOrders",
   DRIVER_ORDERS_LIST: "driverOrdersList",
   ORDER_DETAIL: "orderDetail",
+} as const;
+
+type IReportQueryParams<T> = { token?: string | null } & Partial<T>;
+
+/**
+ * Domain-Shaped Query Key Factory for Reports.
+ * Strictly typed according to Rule #1 & Rule #7 in gemini.md.
+ */
+export const REPORT_KEYS = {
+  all: ["reports"] as const,
+
+  // Sales Summary
+  salesSummaries: () => [...REPORT_KEYS.all, "salesSummary"] as const,
+  salesSummary: (params: IReportQueryParams<ISalesParams>) =>
+    [...REPORT_KEYS.salesSummaries(), params] as const,
+
+  // Order Summary
+  orderSummaries: () => [...REPORT_KEYS.all, "orderSummary"] as const,
+  orderSummary: (params: IReportQueryParams<ISalesParams>) =>
+    [...REPORT_KEYS.orderSummaries(), params] as const,
+
+  // Sales Trend
+  salesTrends: () => [...REPORT_KEYS.all, "salesTrend"] as const,
+  salesTrend: (params: IReportQueryParams<ISalesParams>) =>
+    [...REPORT_KEYS.salesTrends(), params] as const,
+
+  // Sales by Order Type
+  salesByOrderTypes: () => [...REPORT_KEYS.all, "salesByOrderType"] as const,
+  salesByOrderType: (params: IReportQueryParams<ISalesParams>) =>
+    [...REPORT_KEYS.salesByOrderTypes(), params] as const,
+
+  // Customers
+  customers: () => [...REPORT_KEYS.all, "customers"] as const,
+  customerList: (params: IReportQueryParams<ICustomerParams>) =>
+    [...REPORT_KEYS.customers(), params] as const,
+
+  // Sales by Item
+  salesByItems: () => [...REPORT_KEYS.all, "salesByItem"] as const,
+  salesByItem: (params: IReportQueryParams<ISalesParams>) =>
+    [...REPORT_KEYS.salesByItems(), params] as const,
+
+  // Order Type Report
+  orderTypeReports: () => [...REPORT_KEYS.all, "orderTypeReport"] as const,
+  orderTypeReport: (params: IReportQueryParams<IOrderTypeReportParams>) =>
+    [...REPORT_KEYS.orderTypeReports(), params] as const,
+
+  // Orders Report List (Paginated & Filtered)
+  ordersReports: () => [...REPORT_KEYS.all, "ordersReportList"] as const,
+  ordersReportList: (params: IReportQueryParams<IOrdersReportParams>) =>
+    [...REPORT_KEYS.ordersReports(), params] as const,
 } as const;
