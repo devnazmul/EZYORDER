@@ -1,103 +1,31 @@
-import { ENV } from "@/config/env";
-import axios from "axios";
+import axiosClient from "@/config/axiosClient";
+import {
+  ICustomerListResponse,
+  ICustomerParams,
+  IOrderSummaryData,
+  IOrderTypeReportData,
+  IOrderTypeReportParams,
+  IOrdersReportListResponse,
+  IOrdersReportParams,
+  ISalesByOrderTypeItem,
+  ISalesParams,
+  ISalesSummaryData,
+  ISalesTrendItem,
+  ITopProductItem,
+} from "../types";
 
-const API_BASE_URL = ENV.API_BASE_URL;
+// ============================================================================
+// 1. SALES REPORT APIS (SalesReportScreen)
+// ============================================================================
 
-const getHeaders = (token: string) => ({
-  Authorization: `Bearer ${token}`,
-  Accept: "application/json",
-});
-
-export interface ISalesParams {
-  restaurant_id: string;
-  start_date: string;
-  end_date: string;
-  group_by?: "day" | "week" | "month";
-}
-
-export interface ISalesSummaryData {
-  gross_sales?: number | string;
-  discounts?: number | string;
-  discount?: number | string;
-  refunds?: number | string;
-  net_sales?: number | string;
-  total_expenses?: number | string;
-  expenses?: number | string;
-  total_tax?: number | string;
-  tax?: number | string;
-  tax_collected?: number | string;
-  profit?: number | string;
-  total_orders?: number;
-  [key: string]: unknown;
-}
-
-export interface IOrderSummaryData {
-  total_orders?: number;
-  completed_orders?: number;
-  pending?: {
-    total?: number;
-    [key: string]: unknown;
-  };
-  cancelled?: {
-    total?: number;
-    [key: string]: unknown;
-  };
-  sales?: {
-    average_order_value?: number;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-export interface ISalesTrendItem {
-  date?: string;
-  label?: string;
-  sales?: number | string;
-  orders?: number | string;
-  [key: string]: unknown;
-}
-
-export interface ISalesByOrderTypeItem {
-  order_type?: string;
-  total_sales?: number | string;
-  total_orders?: number | string;
-  percentage?: number | string;
-  [key: string]: unknown;
-}
-
-export interface ITopProductItem {
-  item_name?: string;
-  quantity_sold?: number | string;
-  net_sales?: number | string;
-  percent?: string;
-  [key: string]: unknown;
-}
-
-export interface ICustomerData {
-  id?: string | number;
-  first_Name?: string;
-  last_Name?: string;
-  email?: string;
-  phone?: string;
-  image?: string;
-  total_orders?: number | string;
-  total_revenue_takeaway?: number | string;
-  total_revenue_delivery?: number | string;
-  total_revenue_eat_in?: number | string;
-  rating?: number | string;
-  frequency_visit?: string;
-  last_visited_date?: string;
-  created_at?: string;
-  status?: string;
-  [key: string]: unknown;
-}
-
+/**
+ * Fetch overall sales financial summary (gross sales, net sales, taxes, expenses, profits, discounts).
+ * Endpoint: GET /reports/sales/summary
+ */
 export const getSalesSummary = async (
-  token: string,
-  params: ISalesParams,
+  params?: ISalesParams,
 ): Promise<ISalesSummaryData | null> => {
-  const response = await axios.get(`${API_BASE_URL}/reports/sales/summary`, {
-    headers: getHeaders(token),
+  const response = await axiosClient.get("/reports/sales/summary", {
     params,
     validateStatus: () => true,
   });
@@ -106,26 +34,14 @@ export const getSalesSummary = async (
     : null;
 };
 
-export const getOrderSummary = async (
-  token: string,
-  params: ISalesParams,
-): Promise<IOrderSummaryData | null> => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/orders/summary`, {
-    headers: getHeaders(token),
-    params,
-    validateStatus: () => true,
-  });
-  return response.status === 200 && response.data?.success
-    ? response.data.data
-    : response.data?.data || null;
-};
-
+/**
+ * Fetch sales trend over time for trend / area charts.
+ * Endpoint: GET /reports/sales/trend
+ */
 export const getSalesTrend = async (
-  token: string,
-  params: ISalesParams,
+  params?: ISalesParams,
 ): Promise<ISalesTrendItem[] | null> => {
-  const response = await axios.get(`${API_BASE_URL}/reports/sales/trend`, {
-    headers: getHeaders(token),
+  const response = await axiosClient.get("/reports/sales/trend", {
     params,
     validateStatus: () => true,
   });
@@ -135,83 +51,112 @@ export const getSalesTrend = async (
     : null;
 };
 
+/**
+ * Fetch revenue breakdown by order type.
+ * Endpoint: GET /reports/sales/by-order-type
+ *
+ * @deprecated In the web app, the `/reports/sales/by-order-type` endpoint was removed in favor of
+ * the embedded `order_type_summary` object returned by `GET /reports/sales/summary`.
+ * This function is temporarily retained for mobile backward compatibility and will be deprecated
+ * in upcoming versions.
+ */
 export const getSalesByOrderType = async (
-  token: string,
-  params: ISalesParams,
+  params?: ISalesParams,
 ): Promise<ISalesByOrderTypeItem[] | Record<string, unknown> | null> => {
-  const response = await axios.get(
-    `${API_BASE_URL}/reports/sales/by-order-type`,
-    {
-      headers: getHeaders(token),
-      params,
-      validateStatus: () => true,
-    },
-  );
-  return response.status === 200 && response.data?.success
-    ? response.data.data
-    : null;
-};
-
-export interface ICustomerParams {
-  per_page: number | string;
-  start_date?: string;
-  end_date?: string;
-  search_key?: string;
-  rating?: number | string;
-  frequency_visit?: string;
-  date_filter?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  order_by?: "ASC" | "DESC" | "asc" | "desc";
-  last_visited_date?: string;
-  status?: string;
-  payment_status?: string;
-  payment_type?: string;
-  booking_type?: string;
-}
-
-export const getCustomers = async (
-  token: string,
-  params: ICustomerParams,
-): Promise<ICustomerData[]> => {
-  const headers = getHeaders(token);
-  const queryString = Object.keys(params)
-    .filter(
-      (key) =>
-        params[key as keyof ICustomerParams] !== undefined &&
-        params[key as keyof ICustomerParams] !== "",
-    )
-    .map(
-      (key) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(params[key as keyof ICustomerParams]))}`,
-    )
-    .join("&");
-
-  const response = await axios.get(
-    `${API_BASE_URL}/v1.0/customers${queryString ? "?" + queryString : ""}`,
-    {
-      headers,
-      params,
-      validateStatus: () => true,
-    },
-  );
-  return response.status === 200 && Array.isArray(response.data?.data)
-    ? response.data.data
-    : [];
-};
-
-// Fetch sales breakdown by individual menu items
-export const getSalesByItem = async (
-  token: string,
-  params: ISalesParams,
-): Promise<ITopProductItem[] | null> => {
-  const response = await axios.get(`${API_BASE_URL}/reports/sales/by-item`, {
-    headers: getHeaders(token),
+  const response = await axiosClient.get("/reports/sales/by-order-type", {
     params,
     validateStatus: () => true,
   });
   return response.status === 200 && response.data?.success
     ? response.data.data
+    : null;
+};
+
+/**
+ * Fetch sales breakdown by individual menu items / top products.
+ * Endpoint: GET /reports/sales/by-item
+ */
+export const getSalesByItem = async (
+  params?: ISalesParams,
+): Promise<ITopProductItem[] | null> => {
+  const response = await axiosClient.get("/reports/sales/by-item", {
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
+};
+
+// ============================================================================
+// 2. CUSTOMER REPORT APIS (CustomersReportScreen)
+// ============================================================================
+
+/**
+ * Fetch paginated & filtered customer list with visit metrics, revenue, and ratings.
+ * Endpoint: GET /v1.0/customers
+ */
+export const getCustomers = async (
+  params?: ICustomerParams,
+): Promise<ICustomerListResponse | null> => {
+  const response = await axiosClient.get("/v1.0/customers", {
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success
+    ? response.data
+    : null;
+};
+
+// ============================================================================
+// 3. ORDERS REPORT APIS (OrdersReportScreen)
+// ============================================================================
+
+/**
+ * Fetch order summary counts (total, completed, pending, cancelled, average order value).
+ * Used in Orders Report (and Sales Report) for order distribution & volume metrics.
+ * Endpoint: GET /v1.0/orders/summary
+ */
+export const getOrderSummary = async (
+  params?: ISalesParams,
+): Promise<IOrderSummaryData | null> => {
+  const response = await axiosClient.get("/v1.0/orders/summary", {
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
+};
+
+/**
+ * Fetch order type report breakdown (order counts & sales per channel: eat_in, delivery, take_away, walk_in).
+ * Endpoint: GET /v1.0/orders/type-report
+ */
+export const getOrderTypeReport = async (
+  params?: IOrderTypeReportParams,
+): Promise<IOrderTypeReportData | null> => {
+  const response = await axiosClient.get("/v1.0/orders/type-report", {
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
+};
+
+/**
+ * Fetch all orders for reports with pagination, date filtering, and multi-criteria search.
+ * Endpoint: GET /v1.0/orders
+ */
+export const getAllOrdersForReports = async (
+  params?: IOrdersReportParams,
+): Promise<IOrdersReportListResponse | null> => {
+  const response = await axiosClient.get("/v1.0/orders", {
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success
+    ? response.data
     : null;
 };

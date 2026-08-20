@@ -1,22 +1,29 @@
-import { QUERY_KEYS } from "@/constants/queryKeys";
+import { REPORT_KEYS } from "@/constants";
 import { useAuth } from "@/hooks";
 import { useQuery } from "@tanstack/react-query";
 import {
+  getAllOrdersForReports,
   getCustomers,
   getOrderSummary,
+  getOrderTypeReport,
   getSalesByItem,
+  // NOSONAR: Temporarily retained for backward compatibility
   getSalesByOrderType,
   getSalesSummary,
   getSalesTrend,
-  ICustomerParams,
-  ISalesParams,
 } from "../../apis/reports";
+import {
+  ICustomerParams,
+  IOrderTypeReportParams,
+  IOrdersReportParams,
+  ISalesParams,
+} from "../../types";
 
 export const useSalesSummaryQuery = (params: ISalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_SUMMARY, token, params],
-    queryFn: () => getSalesSummary(token!, params),
+    queryKey: REPORT_KEYS.salesSummary({ token, ...params }),
+    queryFn: () => getSalesSummary(params),
     enabled: !!token && !!params.restaurant_id,
   });
 };
@@ -24,8 +31,8 @@ export const useSalesSummaryQuery = (params: ISalesParams) => {
 export const useOrderSummaryQuery = (params: ISalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.ORDER_SUMMARY, token, params],
-    queryFn: () => getOrderSummary(token!, params),
+    queryKey: REPORT_KEYS.orderSummary({ token, ...params }),
+    queryFn: () => getOrderSummary(params),
     enabled: !!token && !!params.restaurant_id,
   });
 };
@@ -33,8 +40,8 @@ export const useOrderSummaryQuery = (params: ISalesParams) => {
 export const useSalesTrendQuery = (params: ISalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_TREND, token, params],
-    queryFn: () => getSalesTrend(token!, params),
+    queryKey: REPORT_KEYS.salesTrend({ token, ...params }),
+    queryFn: () => getSalesTrend(params),
     enabled: !!token && !!params.restaurant_id,
   });
 };
@@ -42,13 +49,9 @@ export const useSalesTrendQuery = (params: ISalesParams) => {
 export const useSalesByOrderTypeQuery = (params: ISalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [
-      QUERY_KEYS.REPORTS,
-      QUERY_KEYS.SALES_BY_ORDER_TYPE,
-      token,
-      params,
-    ],
-    queryFn: () => getSalesByOrderType(token!, params),
+    queryKey: REPORT_KEYS.salesByOrderType({ token, ...params }),
+    // NOSONAR: Temporarily retained for backward compatibility
+    queryFn: () => getSalesByOrderType(params),
     enabled: !!token && !!params.restaurant_id,
   });
 };
@@ -56,8 +59,8 @@ export const useSalesByOrderTypeQuery = (params: ISalesParams) => {
 export const useCustomersQuery = (params: ICustomerParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.CUSTOMERS, token, params],
-    queryFn: () => getCustomers(token!, params),
+    queryKey: REPORT_KEYS.customerList({ token, ...params }),
+    queryFn: () => getCustomers(params),
     enabled: !!token,
   });
 };
@@ -65,8 +68,29 @@ export const useCustomersQuery = (params: ICustomerParams) => {
 export const useSalesByItemQuery = (params: ISalesParams) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.REPORTS, QUERY_KEYS.SALES_BY_ITEM, token, params],
-    queryFn: () => getSalesByItem(token!, params),
+    queryKey: REPORT_KEYS.salesByItem({ token, ...params }),
+    queryFn: () => getSalesByItem(params),
     enabled: !!token && !!params.restaurant_id,
+  });
+};
+
+export const useOrderTypeReportQuery = (params: IOrderTypeReportParams) => {
+  const { token } = useAuth();
+  return useQuery({
+    queryKey: REPORT_KEYS.orderTypeReport({ token, ...params }),
+    queryFn: () => getOrderTypeReport(params),
+    enabled: !!token,
+  });
+};
+
+export const useOrdersReportListQuery = (
+  params: IOrdersReportParams,
+  options?: { enabled?: boolean },
+) => {
+  const { token } = useAuth();
+  return useQuery({
+    queryKey: REPORT_KEYS.ordersReportList({ token, ...params }),
+    queryFn: () => getAllOrdersForReports(params),
+    enabled: !!token && (options?.enabled ?? true),
   });
 };
