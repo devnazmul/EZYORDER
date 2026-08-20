@@ -1,9 +1,19 @@
 export { default as Badge } from "./Badge";
+export {
+  default as BarChart,
+  type IBarChartDataItem,
+  type IBarChartProps,
+} from "./BarChart";
 export { default as BottomSheet } from "./BottomSheet";
 export { default as BrandAlertModal } from "./BrandAlertModal";
 export { default as BrandPopupModal } from "./BrandPopupModal";
 export { default as Button } from "./Button";
 export { default as DatePickerModal } from "./DatePickerModal";
+export {
+  default as DoughnutChart,
+  type IDoughnutChartItem,
+  type IDoughnutChartProps,
+} from "./DoughnutChart";
 export { default as EmptyState } from "./EmptyState";
 export { default as FilterChips } from "./FilterChips";
 export { default as FilterDrawer, type IFilterField } from "./FilterDrawer";
