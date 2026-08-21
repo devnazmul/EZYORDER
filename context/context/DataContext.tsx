@@ -1,21 +1,36 @@
+import {
+  IBusinessTimingResponse,
+  IDish,
+  IMenuItem,
+  IRestaurant,
+  IVariationItem,
+  IVariationType,
+} from "@/shared/types";
 import React, { createContext, useContext } from "react";
 
-export interface DataContextType {
-  data: any;
-  setData: React.Dispatch<React.SetStateAction<any>>;
-  refetch: () => Promise<any>;
+export interface IDataContextData {
+  menus?: IMenuItem[];
+  dishes?: IDish[];
+  variationTypes?: IVariationType[];
+  variations?: IVariationItem[];
+}
+
+export interface IDataContextType {
+  data: IDataContextData;
+  setData: React.Dispatch<React.SetStateAction<IDataContextData>>;
+  refetch: () => Promise<unknown>;
   isDataLoading: boolean;
   isDataGetSuccess: boolean;
   isDataHasError: boolean;
-  settings: any;
+  settings?: IRestaurant;
   isSettingsLoading: boolean;
-  refetchSettings: () => Promise<any>;
-  businessTiming: any;
+  refetchSettings: () => Promise<unknown>;
+  businessTiming?: IBusinessTimingResponse | null;
   isBusinessTimingLoading: boolean;
-  refetchBusinessTiming: () => Promise<any>;
+  refetchBusinessTiming: () => Promise<unknown>;
 }
 
-export const DataContext = createContext<DataContextType | undefined>(
+export const DataContext = createContext<IDataContextType | undefined>(
   undefined,
 );
 

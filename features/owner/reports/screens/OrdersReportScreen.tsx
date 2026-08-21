@@ -11,7 +11,7 @@ import {
   OrderCardSkeleton,
   OwnerOrderDetailsDrawer,
 } from "@/features/owner/components/order";
-import { useAuth, useData } from "@/hooks";
+import { useAuth, useRestaurantQuery } from "@/hooks";
 
 import { getCurrencySymbol, getDateRange, HP } from "@/utils";
 
@@ -60,14 +60,18 @@ const INITIAL_FILTER_VALUES: IOrderReportFilterValues = {
 
 export default function OrdersReportScreen() {
   const { user } = useAuth();
-  // FIXME: In coming versions, this will be migrated to TanStack Query (e.g. useBusinessSettingsQuery) for cached business settings instead of React context provider. Currently using useData() to maintain consistency across legacy screens.
-  const { settings } = useData();
-  const currencySymbol = getCurrencySymbol(settings?.currency);
 
   const restaurantId =
     user?.restaurant?.length > 0
       ? String(user?.restaurant[0]?.id)
       : String(user?.business_id || "1");
+
+  // Query: Restaurant Settings (Cached via TanStack Query)
+  const { data: restaurantResponse } = useRestaurantQuery({
+    restaurant_id: restaurantId,
+  });
+  const settings = restaurantResponse?.restaurant;
+  const currencySymbol = getCurrencySymbol(settings?.currency);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");

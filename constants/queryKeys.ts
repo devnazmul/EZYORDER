@@ -4,6 +4,11 @@ import type {
   IOrdersReportParams,
   ISalesParams,
 } from "@/features/owner/reports/types";
+import type {
+  IBusinessTimingQueryParams,
+  IMenuQueryParams,
+  IRestaurantQueryParams,
+} from "@/shared/types";
 
 /**
  * ============================================================================
@@ -13,9 +18,9 @@ import type {
  * defined in `.agents/rules/gemini.md` (Rule #1: Domain-Shaped Query Key Factories).
  *
  * Current State:
- * - Domain factories (e.g. `REPORT_KEYS` below) follow the strict rule pattern:
- *   returning typed `as const` key tuples with query parameter scopes to enable
- *   targeted cache invalidation and type safety.
+ * - Domain factories (e.g. `REPORT_KEYS`, `RESTAURANT_KEYS`, `BUSINESS_TIMING_KEYS`,
+ *   `MENU_KEYS` below) follow the strict rule pattern: returning typed `as const` key
+ *   tuples with query parameter scopes to enable targeted cache invalidation and type safety.
  * - Legacy keys in `QUERY_KEYS` are intentionally retained in their current shape
  *   to avoid breaking legacy screens during ongoing development. They will be
  *   gradually migrated to domain-shaped query key factories feature-by-feature.
@@ -72,7 +77,6 @@ type IReportQueryParams<T> = { token?: string | null } & Partial<T>;
 
 /**
  * Domain-Shaped Query Key Factory for Reports.
- * Strictly typed according to Rule #1 & Rule #7 in gemini.md.
  */
 export const REPORT_KEYS = {
   all: ["reports"] as const,
@@ -116,4 +120,34 @@ export const REPORT_KEYS = {
   ordersReports: () => [...REPORT_KEYS.all, "ordersReportList"] as const,
   ordersReportList: (params: IReportQueryParams<IOrdersReportParams>) =>
     [...REPORT_KEYS.ordersReports(), params] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Restaurant.
+ */
+export const RESTAURANT_KEYS = {
+  all: ["restaurant"] as const,
+  details: () => [...RESTAURANT_KEYS.all, "detail"] as const,
+  detail: (params?: IRestaurantQueryParams) =>
+    [...RESTAURANT_KEYS.details(), params] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Business Operating Timing.
+ */
+export const BUSINESS_TIMING_KEYS = {
+  all: ["businessTiming"] as const,
+  details: () => [...BUSINESS_TIMING_KEYS.all, "detail"] as const,
+  detail: (params?: IBusinessTimingQueryParams) =>
+    [...BUSINESS_TIMING_KEYS.details(), params] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Menu & Catalog.
+ */
+export const MENU_KEYS = {
+  all: ["menu"] as const,
+  catalogs: () => [...MENU_KEYS.all, "catalog"] as const,
+  catalog: (params?: IMenuQueryParams) =>
+    [...MENU_KEYS.catalogs(), params] as const,
 } as const;
