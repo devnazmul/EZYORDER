@@ -9,6 +9,7 @@ export { formatLabel } from "./formatLabel";
 export * from "./formatters";
 export { default as formatUtcToLocalTime } from "./formatUtcToLocalTime";
 export { getCurrencySymbol } from "./getCurrencySymbol";
+export { default as getDateRange, type IDateRangeResult } from "./getDateRange";
 export * from "./getResponsiveSizes";
 export * from "./getStatusBadgeConfig";
 export { handleCallPhone } from "./handleCallPhone";
