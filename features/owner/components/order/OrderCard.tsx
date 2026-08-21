@@ -10,7 +10,7 @@ import {
   getResponsiveFontSize,
   WP,
 } from "@/utils";
-import React, { useMemo } from "react";
+import React from "react";
 import { Text, View } from "react-native";
 
 export interface IOrderCardProps {
@@ -25,72 +25,52 @@ export default function OrderCard({
   const { settings } = useData();
   const { data: usersResponse } = useUsersQuery();
 
-  const usersList = useMemo(() => {
-    if (!usersResponse) return [];
-    if (Array.isArray(usersResponse)) return usersResponse;
-    if (Array.isArray(usersResponse.data)) return usersResponse.data;
-    if (usersResponse.data && Array.isArray(usersResponse.data.data))
-      return usersResponse.data.data;
-    return [];
-  }, [usersResponse]);
+  let usersList: {
+    id?: string | number;
+    first_Name?: string;
+    last_Name?: string;
+    name?: string;
+    email?: string;
+  }[] = [];
+  if (Array.isArray(usersResponse)) {
+    usersList = usersResponse;
+  } else if (Array.isArray(usersResponse?.data)) {
+    usersList = usersResponse.data;
+  } else if (Array.isArray(usersResponse?.data?.data)) {
+    usersList = usersResponse.data.data;
+  }
 
-  const currencySymbol = useMemo(() => {
-    return getCurrencySymbol(settings?.currency);
-  }, [settings?.currency]);
+  const currencySymbol = getCurrencySymbol(settings?.currency);
+  const orderTypeColor = getOrderTypeColor(item.type as string);
+  const orderTypeText = (item.type || "Delivery").replaceAll("_", " ");
 
-  const orderTypeColor = useMemo(() => {
-    return getOrderTypeColor(item.type as string);
-  }, [item.type]);
-
-  const orderTypeText = useMemo(() => {
-    return (item.type || "Delivery").replaceAll("_", " ");
-  }, [item.type]);
-
-  const assignedText = useMemo(() => {
-    if (item.driver)
-      return `Driver: ${item.driver.first_Name || item.driver.name}`;
-    if (item.waiter)
-      return `Waiter: ${item.waiter.first_Name || item.waiter.name}`;
-
-    if (item.driver_id) {
-      const match = usersList.find(
-        (u: {
-          id?: string | number;
-          first_Name?: string;
-          last_Name?: string;
-          name?: string;
-        }) => String(u?.id) === String(item.driver_id),
-      );
-      if (match) {
-        return (
-          `${match.first_Name || ""} ${match.last_Name || ""}`.trim() ||
-          match.name ||
-          "Driver"
-        );
-      }
+  let assignedText = "Unassigned";
+  if (item.driver) {
+    assignedText = `Driver: ${item.driver.first_Name || item.driver.name}`;
+  } else if (item.waiter) {
+    assignedText = `Waiter: ${item.waiter.first_Name || item.waiter.name}`;
+  } else if (item.driver_id) {
+    const match = usersList.find(
+      (u) => String(u?.id) === String(item.driver_id),
+    );
+    if (match) {
+      assignedText =
+        `${match.first_Name || ""} ${match.last_Name || ""}`.trim() ||
+        match.name ||
+        "Driver";
     }
-
-    if (item.waiter_id) {
-      const match = usersList.find(
-        (u: {
-          id?: string | number;
-          first_Name?: string;
-          last_Name?: string;
-          name?: string;
-          email?: string;
-        }) => String(u?.id) === String(item.waiter_id),
-      );
-      if (match) {
-        return `${match.first_Name || match.name || match.email || "Waiter"}`;
-      }
+  } else if (item.waiter_id) {
+    const match = usersList.find(
+      (u) => String(u?.id) === String(item.waiter_id),
+    );
+    if (match) {
+      assignedText = `${match.first_Name || match.name || match.email || "Waiter"}`;
     }
+  }
 
-    return "Unassigned";
-  }, [item.driver, item.waiter, item.driver_id, item.waiter_id, usersList]);
-
-  const orderDateTime = useMemo(() => {
-    return item.created_at ? formatDateTime(item.created_at) : "--:--";
-  }, [item.created_at]);
+  const orderDateTime = item.created_at
+    ? formatDateTime(item.created_at)
+    : "--:--";
 
   return (
     <View className="bg-base-300 rounded-xl border border-base-200 overflow-hidden shadow-sm mb-4">

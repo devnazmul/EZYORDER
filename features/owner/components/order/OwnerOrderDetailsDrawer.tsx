@@ -17,7 +17,7 @@ import {
 } from "@/utils";
 import { MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import React, { useMemo } from "react";
+import React from "react";
 import { Linking, Platform, Text, TouchableOpacity, View } from "react-native";
 
 export type IMapCoordinate = string | number | null | undefined;
@@ -37,12 +37,10 @@ export default function OwnerOrderDetailsDrawer({
 }: Readonly<IOwnerOrderDetailsDrawerProps>) {
   const { settings } = useData();
 
-  const resolvedCurrencySymbol = useMemo(() => {
-    if (customCurrencySymbol) return customCurrencySymbol;
-    return getCurrencySymbol(settings?.currency);
-  }, [customCurrencySymbol, settings?.currency]);
-
   if (!order) return null;
+
+  const resolvedCurrencySymbol =
+    customCurrencySymbol || getCurrencySymbol(settings?.currency);
 
   const detailItems = order.detail || [];
   const statusConfig = getStatusBadgeConfig(order.status || "pending");
