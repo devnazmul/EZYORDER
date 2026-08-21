@@ -84,14 +84,11 @@ export default function OrdersReportScreen() {
   const resolvedDateRange = isCustomRange ? dateRange : getDateRange(period);
 
   // API Params for Summary & Type Report
-  const summaryParams = useMemo(
-    () => ({
-      restaurant_id: restaurantId,
-      start_date: resolvedDateRange.start_date,
-      end_date: resolvedDateRange.end_date,
-    }),
-    [restaurantId, resolvedDateRange],
-  );
+  const summaryParams = {
+    restaurant_id: restaurantId,
+    start_date: resolvedDateRange.start_date,
+    end_date: resolvedDateRange.end_date,
+  };
 
   // Query: Order Summary
   const {
@@ -102,50 +99,46 @@ export default function OrdersReportScreen() {
   } = useOrderSummaryQuery(summaryParams);
 
   // API Params for Paginated Orders List
-  const ordersListParams: IOrdersReportParams = useMemo(() => {
-    const p: IOrdersReportParams = {
-      restaurant_id: restaurantId,
-      per_page: 15,
-      page,
-      from_date: resolvedDateRange.start_date,
-      to_date: resolvedDateRange.end_date,
-      search_key: searchQuery.trim(),
-    };
+  const ordersListParams: IOrdersReportParams = {
+    restaurant_id: restaurantId,
+    per_page: 15,
+    page,
+    from_date: resolvedDateRange.start_date,
+    to_date: resolvedDateRange.end_date,
+    search_key: searchQuery.trim(),
+  };
 
-    if (
-      filterValues.status &&
-      !filterValues.status.includes("all") &&
-      filterValues.status.length > 0
-    ) {
-      p.status = filterValues.status.join(",");
-    }
+  if (
+    filterValues.status &&
+    !filterValues.status.includes("all") &&
+    filterValues.status.length > 0
+  ) {
+    ordersListParams.status = filterValues.status.join(",");
+  }
 
-    if (
-      filterValues.type &&
-      !filterValues.type.includes("all") &&
-      filterValues.type.length > 0
-    ) {
-      p.type = filterValues.type.join(",");
-    }
+  if (
+    filterValues.type &&
+    !filterValues.type.includes("all") &&
+    filterValues.type.length > 0
+  ) {
+    ordersListParams.type = filterValues.type.join(",");
+  }
 
-    if (filterValues.amount_range?.min) {
-      p.min_amount = filterValues.amount_range.min;
-    }
-    if (filterValues.amount_range?.max) {
-      p.max_amount = filterValues.amount_range.max;
-    }
-    if (filterValues.customer_name) {
-      p.customer_name = filterValues.customer_name;
-    }
-    if (filterValues.customer_phone) {
-      p.customer_phone = filterValues.customer_phone;
-    }
-    if (filterValues.table_number) {
-      p.table_number = filterValues.table_number;
-    }
-
-    return p;
-  }, [restaurantId, page, resolvedDateRange, searchQuery, filterValues]);
+  if (filterValues.amount_range?.min) {
+    ordersListParams.min_amount = filterValues.amount_range.min;
+  }
+  if (filterValues.amount_range?.max) {
+    ordersListParams.max_amount = filterValues.amount_range.max;
+  }
+  if (filterValues.customer_name) {
+    ordersListParams.customer_name = filterValues.customer_name;
+  }
+  if (filterValues.customer_phone) {
+    ordersListParams.customer_phone = filterValues.customer_phone;
+  }
+  if (filterValues.table_number) {
+    ordersListParams.table_number = filterValues.table_number;
+  }
 
   // Query: Paginated Orders List
   const {
@@ -184,8 +177,8 @@ export default function OrdersReportScreen() {
           const range = getDateRange(periodKey);
           return {
             dateRange: {
-              start: range.start_date,
-              end: range.end_date,
+              start_date: range.start_date,
+              end_date: range.end_date,
             },
           };
         },
