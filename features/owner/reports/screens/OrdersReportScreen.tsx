@@ -15,7 +15,7 @@ import { useAuth, useRestaurantQuery } from "@/hooks";
 
 import { getCurrencySymbol, getDateRange, HP } from "@/utils";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -56,6 +56,135 @@ const INITIAL_FILTER_VALUES: IOrderReportFilterValues = {
   customer_name: "",
   customer_phone: "",
   table_number: "",
+};
+
+const FILTER_FIELDS: IFilterField[] = [
+  {
+    id: "period",
+    label: "Filter by Date",
+    type: "chips",
+    options: [
+      { id: "Today", label: "Today" },
+      { id: "Yesterday", label: "Yesterday" },
+      { id: "This Week", label: "This Week" },
+      { id: "This Month", label: "This Month" },
+      { id: "All Time", label: "All Time" },
+    ],
+    onFieldChange: (selectedPeriod: unknown) => {
+      const periodKey =
+        typeof selectedPeriod === "string" ? selectedPeriod : "This Month";
+      const range = getDateRange(periodKey);
+      return {
+        dateRange: {
+          start_date: range.start_date,
+          end_date: range.end_date,
+        },
+      };
+    },
+  },
+  {
+    id: "dateRange",
+    label: "Custom Date Range",
+    type: "date-range",
+  },
+  {
+    id: "status",
+    label: "Order Status",
+    type: "chips",
+    isMultiSelect: true,
+    options: [
+      { id: "all", label: "All Statuses" },
+      { id: "pending", label: "Pending" },
+      { id: "completed", label: "Completed" },
+      { id: "kitchen", label: "Kitchen" },
+    ],
+  },
+  {
+    id: "type",
+    label: "Order Type",
+    type: "chips",
+    isMultiSelect: true,
+    options: [
+      { id: "all", label: "All Channels" },
+      { id: "eat_in", label: "Eat In" },
+      { id: "delivery", label: "Delivery" },
+      { id: "take_away", label: "Take Away" },
+      { id: "walk_in", label: "Walk In" },
+    ],
+  },
+  {
+    id: "amount_range",
+    label: "Amount Range",
+    type: "number-range",
+  },
+  {
+    id: "customer_name",
+    label: "Customer Name",
+    type: "text",
+  },
+  {
+    id: "customer_phone",
+    label: "Customer Phone",
+    type: "text",
+    keyboardType: "phone-pad",
+  },
+  {
+    id: "table_number",
+    label: "Table Number",
+    type: "text",
+    keyboardType: "numeric",
+  },
+];
+
+const buildOrdersListParams = (
+  restaurantId: string,
+  page: number,
+  resolvedDateRange: { start_date: string; end_date: string },
+  searchQuery: string,
+  filterValues: IOrderReportFilterValues,
+): IOrdersReportParams => {
+  const p: IOrdersReportParams = {
+    restaurant_id: restaurantId,
+    per_page: 15,
+    page,
+    from_date: resolvedDateRange.start_date,
+    to_date: resolvedDateRange.end_date,
+    search_key: searchQuery.trim(),
+  };
+
+  if (
+    filterValues.status &&
+    !filterValues.status.includes("all") &&
+    filterValues.status.length > 0
+  ) {
+    p.status = filterValues.status.join(",");
+  }
+
+  if (
+    filterValues.type &&
+    !filterValues.type.includes("all") &&
+    filterValues.type.length > 0
+  ) {
+    p.type = filterValues.type.join(",");
+  }
+
+  if (filterValues.amount_range?.min) {
+    p.min_amount = filterValues.amount_range.min;
+  }
+  if (filterValues.amount_range?.max) {
+    p.max_amount = filterValues.amount_range.max;
+  }
+  if (filterValues.customer_name) {
+    p.customer_name = filterValues.customer_name;
+  }
+  if (filterValues.customer_phone) {
+    p.customer_phone = filterValues.customer_phone;
+  }
+  if (filterValues.table_number) {
+    p.table_number = filterValues.table_number;
+  }
+
+  return p;
 };
 
 export default function OrdersReportScreen() {
@@ -103,48 +232,16 @@ export default function OrdersReportScreen() {
   } = useOrderSummaryQuery(summaryParams);
 
   // API Params for Paginated Orders List
-  const ordersListParams: IOrdersReportParams = {
-    restaurant_id: restaurantId,
-    per_page: 15,
+  const ordersListParams = buildOrdersListParams(
+    restaurantId,
     page,
-    from_date: resolvedDateRange.start_date,
-    to_date: resolvedDateRange.end_date,
-    search_key: searchQuery.trim(),
-  };
-
-  if (
-    filterValues.status &&
-    !filterValues.status.includes("all") &&
-    filterValues.status.length > 0
-  ) {
-    ordersListParams.status = filterValues.status.join(",");
-  }
-
-  if (
-    filterValues.type &&
-    !filterValues.type.includes("all") &&
-    filterValues.type.length > 0
-  ) {
-    ordersListParams.type = filterValues.type.join(",");
-  }
-
-  if (filterValues.amount_range?.min) {
-    ordersListParams.min_amount = filterValues.amount_range.min;
-  }
-  if (filterValues.amount_range?.max) {
-    ordersListParams.max_amount = filterValues.amount_range.max;
-  }
-  if (filterValues.customer_name) {
-    ordersListParams.customer_name = filterValues.customer_name;
-  }
-  if (filterValues.customer_phone) {
-    ordersListParams.customer_phone = filterValues.customer_phone;
-  }
-  if (filterValues.table_number) {
-    ordersListParams.table_number = filterValues.table_number;
-  }
+    resolvedDateRange,
+    searchQuery,
+    filterValues,
+  );
 
   // Query: Paginated Orders List
+  // FIXME: In coming versions, migrate this query to either useInfiniteQuery for infinite scroll or implement trigger-based "Load More" pagination.
   const {
     data: ordersResponse,
     isLoading: isOrdersLoading,
@@ -160,89 +257,6 @@ export default function OrdersReportScreen() {
   const handleRefresh = async () => {
     await Promise.allSettled([refetchSummary(), refetchOrders()]);
   };
-
-  // Filter Drawer Definition
-  const filterFields: IFilterField[] = useMemo(
-    () => [
-      {
-        id: "period",
-        label: "Filter by Date",
-        type: "chips",
-        options: [
-          { id: "Today", label: "Today" },
-          { id: "Yesterday", label: "Yesterday" },
-          { id: "This Week", label: "This Week" },
-          { id: "This Month", label: "This Month" },
-          { id: "All Time", label: "All Time" },
-        ],
-        onFieldChange: (selectedPeriod: unknown) => {
-          const periodKey =
-            typeof selectedPeriod === "string" ? selectedPeriod : "This Month";
-          const range = getDateRange(periodKey);
-          return {
-            dateRange: {
-              start_date: range.start_date,
-              end_date: range.end_date,
-            },
-          };
-        },
-      },
-
-      {
-        id: "dateRange",
-        label: "Custom Date Range",
-        type: "date-range",
-      },
-      {
-        id: "status",
-        label: "Order Status",
-        type: "chips",
-        isMultiSelect: true,
-        options: [
-          { id: "all", label: "All Statuses" },
-          { id: "pending", label: "Pending" },
-          { id: "completed", label: "Completed" },
-          { id: "kitchen", label: "Kitchen" },
-        ],
-      },
-      {
-        id: "type",
-        label: "Order Type",
-        type: "chips",
-        isMultiSelect: true,
-        options: [
-          { id: "all", label: "All Channels" },
-          { id: "eat_in", label: "Eat In" },
-          { id: "delivery", label: "Delivery" },
-          { id: "take_away", label: "Take Away" },
-          { id: "walk_in", label: "Walk In" },
-        ],
-      },
-      {
-        id: "amount_range",
-        label: "Amount Range",
-        type: "number-range",
-      },
-      {
-        id: "customer_name",
-        label: "Customer Name",
-        type: "text",
-      },
-      {
-        id: "customer_phone",
-        label: "Customer Phone",
-        type: "text",
-        keyboardType: "phone-pad",
-      },
-      {
-        id: "table_number",
-        label: "Table Number",
-        type: "text",
-        keyboardType: "numeric",
-      },
-    ],
-    [],
-  );
 
   const renderHeader = () => (
     <View className="gap-y-5 mb-4">
@@ -266,7 +280,7 @@ export default function OrdersReportScreen() {
           />
         </View>
         <FilterDrawer
-          fields={filterFields}
+          fields={FILTER_FIELDS}
           values={filterValues as unknown as Record<string, unknown>}
           onApply={(newFilters) => {
             setFilterValues(newFilters as unknown as IOrderReportFilterValues);
