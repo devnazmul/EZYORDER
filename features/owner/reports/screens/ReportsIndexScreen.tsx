@@ -1,5 +1,4 @@
-import MenuCard from "@/components/reuseable/MenuCard";
-import PageTitle from "@/components/reuseable/PageTitle";
+import { MenuCard, PageTitle } from "@/components/reuseable";
 import { router } from "expo-router";
 import React from "react";
 import { ScrollView, View } from "react-native";
@@ -7,6 +6,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ReportsHub() {
   const menuOptions = [
+    {
+      id: "orders",
+      title: "Orders Report",
+      description: "Order metrics & channel history",
+      icon: "receipt" as const,
+      route: "/reports/orders" as const,
+    },
     {
       id: "sales",
       title: "Sales Report",
