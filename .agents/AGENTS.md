@@ -190,3 +190,12 @@ Always create and maintain `index.ts` barrel export files in major architectural
   1. **No Internal Self-Imports**: Files *inside* a folder must NEVER import sibling files via their own `index.ts` (e.g., `utils/formatters.ts` must import `./formatAmount`, NEVER from `@/utils` or `./index`). This causes fatal circular dependencies (`undefined` exports at runtime).
   2. **No Monolithic Mega-Barrels**: Do NOT create a single root barrel (e.g. `src/index.ts`) exporting the whole application. Barrels must remain scoped per directory/domain.
   3. **Strict Type-Only Re-exports**: When re-exporting TypeScript interfaces/types from barrel files, use `type` modifier (e.g., `export { type FilterField } from "./FilterDrawer"`) to enable clean compile-time stripping without runtime evaluation overhead in Metro.
+
+---
+
+## 18. Type and Interface File Organization & Naming (`*.types.ts`)
+
+- **Organization**: Domain- and feature-level TypeScript interfaces and types must be placed in a dedicated `types/` folder within their respective feature directory (e.g., `features/<domain>/types/`).
+- **File Naming (`*.types.ts`)**: Type files must explicitly follow the `[name].types.ts` naming convention (e.g., `order.types.ts`, `report.types.ts`). The `index.ts` file within the `types/` folder must be reserved exclusively as a barrel export file.
+- **Strict `I` Prefix for Interfaces**: All TypeScript `interface` definitions MUST be prefixed with a capital `I` (e.g., `IUserData`, `IOrderReportFilterValues`, `IOrdersReportParams`). TypeScript `type` aliases do not use the `I` prefix.
+- **Type-Only Exports/Imports**: Always use `export type { ... }` and `import type { ... }` (or inline `type` modifiers) to ensure zero runtime overhead during Metro bundling.
