@@ -166,7 +166,7 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
                   })()
                 : itemColors.map((color, colorIdx) => (
                     <Stop
-                      key={colorIdx}
+                      key={color}
                       offset={`${(colorIdx / (itemColors.length - 1)) * 100}%`}
                       stopColor={color}
                     />
@@ -219,7 +219,7 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
                   })()
                 : itemColors.map((color, colorIdx) => (
                     <Stop
-                      key={colorIdx}
+                      key={color}
                       offset={`${(colorIdx / (itemColors.length - 1)) * 100}%`}
                       stopColor={color}
                     />
@@ -300,15 +300,16 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
   const renderLegend = (): React.JSX.Element | null => {
     if (!showLegend) return null;
 
+    let legendContainerClass = "w-full flex-col gap-y-2.5 mt-4";
+    if (legendPosition === "right") {
+      legendContainerClass = "flex-1 flex-col gap-y-2.5 ml-4";
+    } else if (legendPosition === "left") {
+      legendContainerClass = "flex-1 flex-col gap-y-2.5 mr-2 pl-4";
+    }
+
     return (
       <View
-        className={
-          legendPosition === "right"
-            ? "flex-1 flex-col gap-y-2.5 ml-4"
-            : legendPosition === "left"
-              ? "flex-1 flex-col gap-y-2.5 mr-2 pl-4"
-              : "w-full flex-col gap-y-2.5 mt-4"
-        }
+        className={legendContainerClass}
         style={
           legendPosition === "right" || legendPosition === "left"
             ? { maxWidth: WP("50%") }

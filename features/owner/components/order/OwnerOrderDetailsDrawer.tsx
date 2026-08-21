@@ -3,6 +3,7 @@ import { Badge, BottomSheet } from "@/components/reuseable";
 import { COLORS } from "@/constants";
 import { useData } from "@/context/context/DataContext";
 import { IOrder } from "@/features/owner/reports/types";
+import { getCustomerFullAddress } from "@/features/owner/utils";
 import {
   formatAmount,
   formatDateTime,
@@ -234,6 +235,23 @@ function OwnerCustomerDetailsSection({
       ? `Table ${Number.parseFloat(order.table_number)}`
       : "Walk-in Customer");
 
+  const fullDisplayAddress = getCustomerFullAddress(order);
+  let streetAddress = "";
+  if (typeof order.customer_address === "string") {
+    streetAddress = order.customer_address;
+  } else if (typeof order.address === "string") {
+    streetAddress = order.address;
+  }
+
+  let postCode = "";
+  if (typeof order.customer_post_code === "string") {
+    postCode = order.customer_post_code;
+  } else if (typeof order.post_code === "string") {
+    postCode = order.post_code;
+  }
+
+  const mapsSearchQuery = `${streetAddress} ${postCode}`.trim();
+
   return (
     <View className="gap-y-2 mb-4">
       <Text
@@ -336,7 +354,7 @@ function OwnerCustomerDetailsSection({
           </View>
         ) : null}
 
-        {order.customer_address || order.address ? (
+        {fullDisplayAddress ? (
           <View className="flex-row items-start justify-between">
             <View className="flex-row items-center gap-2">
               <MaterialIcons
@@ -353,11 +371,7 @@ function OwnerCustomerDetailsSection({
             </View>
             <TouchableOpacity
               onPress={() =>
-                handleOpenMaps(
-                  `${String(order.customer_address || order.address || "")} ${String(order.customer_post_code || order.post_code || "")}`.trim(),
-                  order.latitude,
-                  order.longitude,
-                )
+                handleOpenMaps(mapsSearchQuery, order.latitude, order.longitude)
               }
               activeOpacity={0.7}
               className="flex-1 ml-4"
@@ -367,7 +381,7 @@ function OwnerCustomerDetailsSection({
                 className="font-semibold text-primary text-right"
                 numberOfLines={3}
               >
-                {`${order.door_no ? `${String(order.door_no)}, ` : ""}${String(order.customer_address || order.address || "")}${order.customer_post_code || order.post_code ? ` - ${String(order.customer_post_code || order.post_code)}` : ""}`}
+                {fullDisplayAddress}
               </Text>
             </TouchableOpacity>
           </View>

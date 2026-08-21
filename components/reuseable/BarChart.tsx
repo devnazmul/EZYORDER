@@ -1,4 +1,4 @@
-import { formatAmount } from "@/utils/formatters";
+import { formatAmount } from "@/utils";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   DimensionValue,
@@ -121,7 +121,7 @@ export default function BarChart({
       const val =
         typeof d.value === "number"
           ? d.value
-          : parseFloat(String(d.value)) || 0;
+          : Number.parseFloat(String(d.value)) || 0;
       const itemFrontColor = d.frontColor || frontColor;
       const itemGradientColor = d.gradientColor || gradientColor;
 
@@ -142,9 +142,12 @@ export default function BarChart({
       };
 
       if (isDenseFilter) {
-        const parsedDay = parseInt(String(d.name || "").replace(/\D/g, ""), 10);
+        const parsedDay = Number.parseInt(
+          String(d.name || "").replace(/\D/g, ""),
+          10,
+        );
         const dayNum =
-          !isNaN(parsedDay) && parsedDay > 0 ? parsedDay : index + 1;
+          !Number.isNaN(parsedDay) && parsedDay > 0 ? parsedDay : index + 1;
         const showLabel = dayNum === 1 || dayNum % 5 === 0;
         const targetLabelWidth = 28;
         const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
