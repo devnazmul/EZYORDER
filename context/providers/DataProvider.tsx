@@ -1,17 +1,31 @@
+import { useAuth } from "@/hooks";
 import {
   useBusinessTimingQuery,
-  useCombineDataQuery,
+  useMenuCatalogQuery,
   useRestaurantQuery,
-} from "@/features/owner/more/hooks/queries/useRestaurantQueries";
-import { useAuth } from "@/hooks";
+} from "@/shared/hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { DataContext } from "../context/DataContext";
+import { DataContext, IDataContextData } from "../context/DataContext";
 
+/**
+ * @deprecated
+ * DEPRECATED: This DataProvider wraps TanStack Query hooks and duplicates server state into a global
+ * React Context / useState. This causes excessive root-level re-renders and violates Rule #10
+ * ("Keep Server State out of Global Client State").
+ *
+ * NOTE FOR REVIEWERS & DEVELOPERS:
+ * This provider is kept temporarily to avoid breaking legacy screens during the active TanStack Query
+ * migration. Do NOT use `useData()` in new screens or features. Instead, consume domain-specific
+ * TanStack Query hooks directly (e.g. `useRestaurantQuery`, `useCombineDataQuery`, `useBusinessTimingQuery`).
+ *
+ * FIXME: Migrate all remaining legacy consumers of `useData()` to targeted TanStack Query hooks
+ * and remove `DataProvider` and `DataContext` on an urgent basis.
+ */
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
-  const [data, setData] = useState<any>({});
+  const [data, setData] = useState<IDataContextData>({});
 
   const targetId = user?.business_id || user?.restaurant?.[0]?.id || null;
   const userType = user?.type;
@@ -24,31 +38,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     error,
     refetch,
     isSuccess,
-  } = useCombineDataQuery(targetId, userType);
+  } = useMenuCatalogQuery({ business_id: targetId, user_type: userType });
 
   // Fetch restaurant settings
   const {
     data: settings,
     isLoading: isSettingsLoading,
     refetch: refetchSettings,
-  } = useRestaurantQuery(targetId);
+  } = useRestaurantQuery({ restaurant_id: targetId });
 
   // Fetch business timing
   const {
     data: businessTiming,
     isLoading: isBusinessTimingLoading,
     refetch: refetchBusinessTiming,
-  } = useBusinessTimingQuery(targetId);
+  } = useBusinessTimingQuery({ restaurant_id: targetId });
 
   useEffect(() => {
     if (isError) {
       console.error("DataProvider: Error fetching combined data:", error);
     } else if (isSuccess && comBineData) {
       setData({
-        menus: comBineData?.menu || comBineData?.menus,
+        menus: comBineData?.menu,
         dishes: comBineData?.dishes,
-        variationTypes:
-          comBineData?.variation_types || comBineData?.variationTypes,
+        variationTypes: comBineData?.variation_types,
         variations: comBineData?.variations,
       });
     }
