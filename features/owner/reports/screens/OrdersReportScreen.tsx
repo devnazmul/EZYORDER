@@ -11,7 +11,8 @@ import {
   OrderCardSkeleton,
   OwnerOrderDetailsDrawer,
 } from "@/features/owner/components/order";
-import { useAuth, useRestaurantQuery } from "@/hooks";
+import { useAuth } from "@/hooks";
+import { useRestaurantQuery } from "@/shared/hooks";
 
 import { getCurrencySymbol, getDateRange, HP } from "@/utils";
 

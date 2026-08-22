@@ -1,9 +1,9 @@
+import { useAuth } from "@/hooks";
 import {
-  useAuth,
   useBusinessTimingQuery,
   useMenuCatalogQuery,
   useRestaurantQuery,
-} from "@/hooks";
+} from "@/shared/hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DataContext, IDataContextData } from "../context/DataContext";
 
