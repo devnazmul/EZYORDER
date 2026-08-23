@@ -5,7 +5,35 @@ module.exports = {
     "scope-enum": [
       2,
       "always",
-      ["app", "api", "owner", "auth", "driver", "config", "deps", "assets"],
+      [
+        // Global / App level
+        "app",
+        "api",
+        "config",
+        "deps",
+        "assets",
+        "core",
+        "shared",
+
+        // Features
+        "auth",
+        "coupon-and-campaign",
+        "dashboard",
+        "driver",
+        "expenses",
+        "menu",
+        "more",
+        "notifications",
+        "order",
+        "owner",
+        "partners",
+        "profile",
+        "reports",
+        "restaurants",
+        "settings",
+        "tables-and-reservations",
+        "user-management",
+      ],
     ],
   },
 };
