@@ -86,6 +86,11 @@ export const REPORT_KEYS = {
   salesSummary: (params: IReportQueryParams<ISalesParams>) =>
     [...REPORT_KEYS.salesSummaries(), params] as const,
 
+  // Payment Summary
+  paymentSummaries: () => [...REPORT_KEYS.all, "paymentSummary"] as const,
+  paymentSummary: (params: IReportQueryParams<ISalesParams>) =>
+    [...REPORT_KEYS.paymentSummaries(), params] as const,
+
   // Order Summary
   orderSummaries: () => [...REPORT_KEYS.all, "orderSummary"] as const,
   orderSummary: (params: IReportQueryParams<ISalesParams>) =>

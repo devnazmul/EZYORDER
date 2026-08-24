@@ -1,5 +1,4 @@
-import { COLORS } from "@/constants";
-import { getResponsiveFontSize, WP } from "@/utils";
+// 1. React / React Native
 import React, { useState } from "react";
 import {
   StyleProp,
@@ -8,7 +7,13 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+
+// 3. External libraries
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
+
+// 7. Constants / utils
+import { COLORS } from "@/constants";
+import { getResponsiveFontSize, WP } from "@/utils";
 
 export type IDoughnutChartItem = {
   label: string;
@@ -48,7 +53,7 @@ const polar = (
   y: cy + r * Math.sin(angle),
 });
 
-const DoughnutChart: React.FC<IDoughnutChartProps> = ({
+export default function DoughnutChart({
   items,
   totalValue,
   label = "Total",
@@ -59,9 +64,9 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
   showLegend = false,
   legendPosition = "right",
   style,
-  className,
+  className = "",
   showCenterText = true,
-}): React.JSX.Element => {
+}: Readonly<IDoughnutChartProps>): React.JSX.Element {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const center = size / 2;
   const rOut = size / 2 - 2;
@@ -331,13 +336,7 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
               key={`${item.label}-${index}`}
               onPress={() => setSelectedIndex(index)}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  opacity,
-                }}
-              >
+              <View className="flex-row items-center" style={{ opacity }}>
                 {item.legendValue !== undefined && item.legendValue !== null ? (
                   <View
                     style={{
@@ -354,7 +353,6 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
                     <Text
                       style={{
                         fontSize: getResponsiveFontSize("xs") - 1,
-                        fontWeight: "bold",
                         color: "#ffffff",
                       }}
                       className="font-bold"
@@ -373,21 +371,21 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
                     }}
                   />
                 )}
-                <Text className="flex-1">
+                <View className="flex-1 flex-col justify-center min-w-0">
                   <Text
-                    style={{ fontSize: getResponsiveFontSize("sm") }}
-                    className="text-neutral font-bold"
+                    style={{ fontSize: getResponsiveFontSize("sm") - 1 }}
+                    className="text-neutral font-bold capitalize"
+                    numberOfLines={1}
                   >
-                    {item.value}
+                    {item.label}
                   </Text>
                   <Text
                     style={{ fontSize: getResponsiveFontSize("xs") }}
-                    className="text-neutral font-semibold capitalize"
+                    className="text-neutral font-semibold"
                   >
-                    {" "}
-                    {item.label}
+                    {item.value}
                   </Text>
-                </Text>
+                </View>
               </View>
             </TouchableWithoutFeedback>
           );
@@ -396,20 +394,19 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
     );
   };
 
-  const containerClasses = [
+  const layoutDirectionClass =
     showLegend && (legendPosition === "right" || legendPosition === "left")
       ? "flex-row items-center justify-between"
-      : "flex-col items-center",
-    className || "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+      : "flex-col items-center";
 
   const containerStyle = [!showLegend && { width: size, height: size }, style];
 
   return (
     <TouchableWithoutFeedback onPress={() => setSelectedIndex(null)}>
-      <View className={containerClasses} style={containerStyle}>
+      <View
+        className={`${layoutDirectionClass} ${className}`}
+        style={containerStyle}
+      >
         {legendPosition === "left" && renderLegend()}
         <View
           className="items-center justify-center relative"
@@ -439,7 +436,4 @@ const DoughnutChart: React.FC<IDoughnutChartProps> = ({
       </View>
     </TouchableWithoutFeedback>
   );
-};
-
-DoughnutChart.displayName = "DoughnutChart";
-export default DoughnutChart;
+}

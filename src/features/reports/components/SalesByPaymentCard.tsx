@@ -1,40 +1,46 @@
-import ActionCard from "@/components/reuseable/cards/ActionCard";
-import { COLORS } from "@/constants/colors";
-import { formatAmount } from "@/utils/formatters";
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
-import { MaterialIcons } from "@expo/vector-icons";
+// 1. React / React Native
 import React from "react";
-import { Text, View } from "react-native";
-import { ISalesSummaryData } from "./SalesSummaryListCard";
+import { View } from "react-native";
+
+// 4. Shared components
+import { EmptyState, ErrorState } from "@/components/reuseable";
+import ActionCard from "@/components/reuseable/cards/ActionCard";
+import DoughnutChart, {
+  IDoughnutChartItem,
+} from "@/components/reuseable/DoughnutChart";
+
+// 5. Feature components/hooks
 import SalesByPaymentSkeleton from "./skeletons/SalesByPaymentSkeleton";
 
-export interface IPaymentSummary {
-  cash?: number | string;
-  card?: number | string;
-  online?: number | string;
-}
+// 6. Types
+import type { IPaymentSummaryData } from "../types";
 
-export interface ISalesByPaymentSummaryData extends ISalesSummaryData {
-  payment_summary?: IPaymentSummary;
-}
+// 7. Constants/utils
+import { COLORS } from "@/constants/colors";
+import { formatAmount } from "@/utils/formatters";
+import { WP } from "@/utils/getResponsiveSizes";
 
 export interface ISalesByPaymentCardProps {
-  salesSummary?: ISalesByPaymentSummaryData | null;
+  paymentSummary?: IPaymentSummaryData | null;
   currencySymbol: string;
   isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   containerClassName?: string;
 }
 
 export default function SalesByPaymentCard({
-  salesSummary,
+  paymentSummary,
   currencySymbol,
   isLoading = false,
+  isError = false,
+  onRetry,
   containerClassName = "",
 }: Readonly<ISalesByPaymentCardProps>) {
-  const cash = Number(salesSummary?.payment_summary?.cash ?? 0);
-  const card = Number(salesSummary?.payment_summary?.card ?? 0);
-  const online = Number(salesSummary?.payment_summary?.online ?? 0);
-  const total = cash + card + online;
+  const cash = Number(paymentSummary?.cash ?? 0);
+  const card = Number(paymentSummary?.card ?? 0);
+  const online = Number(paymentSummary?.online ?? 0);
+  const total = Number(paymentSummary?.total ?? cash + card + online);
 
   const cashPercent =
     total > 0 ? Math.min(Math.round((cash / total) * 100), 100) : 0;
@@ -49,32 +55,66 @@ export default function SalesByPaymentCard({
       label: "Cash",
       value: cash,
       percent: cashPercent,
-      icon: "payments" as const,
-      colorClass: "bg-success",
-      iconBgClass: "bg-success/15",
-      iconColor: COLORS.success,
+      color: COLORS.payment.cash,
     },
     {
       key: "card",
       label: "Card Payment",
       value: card,
       percent: cardPercent,
-      icon: "credit-card" as const,
-      colorClass: "bg-primary",
-      iconBgClass: "bg-primary/10",
-      iconColor: COLORS.primary,
+      color: COLORS.payment.card,
     },
     {
       key: "online",
       label: "Online",
       value: online,
       percent: onlinePercent,
-      icon: "language" as const,
-      colorClass: "bg-secondary",
-      iconBgClass: "bg-secondary/10",
-      iconColor: COLORS.secondary,
+      color: COLORS.payment.online,
     },
   ];
+
+  const chartItems: IDoughnutChartItem[] = paymentMethods.map((item) => ({
+    label: item.label,
+    value: item.value,
+    color: item.color,
+    legendValue: `${item.percent}%`,
+  }));
+
+  const renderContent = () => {
+    if (isError) {
+      return (
+        <ErrorState
+          message="Failed to load payment summary data."
+          onRetry={onRetry}
+          pyClassName="py-4"
+        />
+      );
+    }
+
+    if (total === 0) {
+      return (
+        <EmptyState
+          icon="payments"
+          description="No payment data for this period."
+          pyClassName="py-4"
+        />
+      );
+    }
+
+    return (
+      <View className="items-center justify-center py-2">
+        <DoughnutChart
+          items={chartItems}
+          totalValue={formatAmount(total, currencySymbol)}
+          label="Total"
+          showLegend={true}
+          legendPosition="right"
+          size={WP("34%")}
+          thickness={WP("5%")}
+        />
+      </View>
+    );
+  };
 
   return (
     <ActionCard
@@ -85,57 +125,7 @@ export default function SalesByPaymentCard({
       bodyStyle={{ padding: WP("3.5%") }}
       actionLabel="View Full Report"
     >
-      <View className="flex flex-col gap-4">
-        {paymentMethods.map((item) => {
-          return (
-            <View key={item.key} className="gap-y-2 mb-2">
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row gap-2.5 items-center">
-                  <View
-                    className={`rounded-lg p-2 ${item.iconBgClass} items-center justify-center`}
-                  >
-                    <MaterialIcons
-                      name={item.icon}
-                      size={WP("5%")}
-                      color={item.iconColor}
-                    />
-                  </View>
-                  <View>
-                    <Text
-                      style={{ fontSize: getResponsiveFontSize("sm") }}
-                      className="font-semibold text-neutral"
-                    >
-                      {item.label}
-                    </Text>
-                    <Text
-                      style={{ fontSize: getResponsiveFontSize("xs") }}
-                      className="text-accent font-semibold"
-                    >
-                      {item.percent}% of total sales
-                    </Text>
-                  </View>
-                </View>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("sm") }}
-                  className="font-bold text-neutral"
-                >
-                  {formatAmount(item.value, currencySymbol)}
-                </Text>
-              </View>
-
-              <View
-                style={{ height: HP("1%") }}
-                className="w-full bg-base-200 rounded-full overflow-hidden"
-              >
-                <View
-                  style={{ width: `${item.percent}%` }}
-                  className={`h-full ${item.colorClass} rounded-full`}
-                />
-              </View>
-            </View>
-          );
-        })}
-      </View>
+      <View className="gap-y-4">{renderContent()}</View>
     </ActionCard>
   );
 }
