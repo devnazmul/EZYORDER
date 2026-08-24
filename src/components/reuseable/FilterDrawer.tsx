@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import BottomSheet from "@/components/reuseable/BottomSheet";
 import Button from "@/components/reuseable/Button";
 import FilterChips from "@/components/reuseable/FilterChips";
@@ -6,6 +5,7 @@ import { COLORS } from "@/constants/colors";
 import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import dayjs from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   KeyboardTypeOptions,
@@ -239,6 +239,7 @@ export default function FilterDrawer({
         <BottomSheetScrollView
           style={{ paddingHorizontal: WP("5%") }}
           className="flex-1 py-4"
+          contentContainerStyle={{ paddingBottom: HP("6%") }}
         >
           <View className="gap-y-6">
             {fields.map((field) => {

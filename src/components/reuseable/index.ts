@@ -14,6 +14,11 @@ export {
   type IDoughnutChartItem,
   type IDoughnutChartProps,
 } from "./DoughnutChart";
+export {
+  default as Dropdown,
+  type IDropdownOption,
+  type IDropdownProps,
+} from "./Dropdown";
 export { default as EmptyState } from "./EmptyState";
 export { default as ErrorState, type IErrorStateProps } from "./ErrorState";
 export { default as FilterChips } from "./FilterChips";
@@ -34,7 +39,10 @@ export { default as StatusBadge } from "./StatusBadge";
 export { default as ToggleBar } from "./ToggleBar";
 
 // Cards
-export { default as ActionCard } from "./cards/ActionCard";
+export {
+  default as ActionCard,
+  type IActionCardProps,
+} from "./cards/ActionCard";
 
 // Dashboard
 export { default as KpiCard } from "./dashboard/KpiCard";
