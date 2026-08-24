@@ -3,10 +3,12 @@ import { RefreshControl, ScrollView, View } from "react-native";
 
 // 3. External libraries
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // 6. Types
 import type { ReactNode } from "react";
 import type { ScrollViewProps, StyleProp, ViewStyle } from "react-native";
+import type { Edge } from "react-native-safe-area-context";
 
 // 7. Constants/utils
 import COLORS from "@/constants/colors";
@@ -21,6 +23,9 @@ export interface IScreenContainerProps extends ScrollViewProps {
   withKeyboardAvoiding?: boolean;
   extraScrollHeight?: number;
   enableOnAndroid?: boolean;
+  withSafeArea?: boolean;
+  safeAreaEdges?: Edge[];
+  safeAreaClassName?: string;
 }
 
 export const ScreenContainer: React.FC<IScreenContainerProps> = ({
@@ -32,6 +37,9 @@ export const ScreenContainer: React.FC<IScreenContainerProps> = ({
   withKeyboardAvoiding = false,
   extraScrollHeight = 25,
   enableOnAndroid = true,
+  withSafeArea = true,
+  safeAreaEdges = ["left", "right"],
+  safeAreaClassName = "flex-1 bg-base-100",
   contentContainerStyle,
   style,
   keyboardShouldPersistTaps = "handled",
@@ -50,7 +58,7 @@ export const ScreenContainer: React.FC<IScreenContainerProps> = ({
       }
     : {};
 
-  return (
+  const content = (
     <ContainerComponent
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[
@@ -74,19 +82,29 @@ export const ScreenContainer: React.FC<IScreenContainerProps> = ({
         },
         style,
       ]}
-      className={`flex-1 bg-base-200 ${className}`.trim()}
+      className={`flex-1 bg-base-100 ${className}`.trim()}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       {...keyboardProps}
       {...scrollViewProps}
     >
       <View
-        style={[{ paddingBottom: 40 }, contentStyle]}
+        style={contentStyle}
         className={`flex-col gap-y-5 ${contentClassName}`.trim()}
       >
         {children}
       </View>
     </ContainerComponent>
   );
+
+  if (withSafeArea) {
+    return (
+      <SafeAreaView edges={safeAreaEdges} className={safeAreaClassName}>
+        {content}
+      </SafeAreaView>
+    );
+  }
+
+  return content;
 };
 
 export default ScreenContainer;
