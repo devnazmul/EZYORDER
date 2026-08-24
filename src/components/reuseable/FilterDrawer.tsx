@@ -1,11 +1,4 @@
-import BottomSheet from "@/components/reuseable/BottomSheet";
-import Button from "@/components/reuseable/Button";
-import FilterChips from "@/components/reuseable/FilterChips";
-import { COLORS } from "@/constants/colors";
-import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
-import { MaterialIcons } from "@expo/vector-icons";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import dayjs from "dayjs";
+// 1. React / React Native
 import React, { useEffect, useMemo, useState } from "react";
 import {
   KeyboardTypeOptions,
@@ -13,11 +6,27 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+// 2. Expo / Navigation
+import { MaterialIcons } from "@expo/vector-icons";
+
+// 3. External libraries
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import dayjs from "dayjs";
+
+// 4. Shared components
+import BottomSheet from "@/components/reuseable/BottomSheet";
+import Button from "@/components/reuseable/Button";
 import DatePickerModal from "./DatePickerModal";
+import FilterChips from "./FilterChips";
 import DateField from "./inputs/DateField";
 import DateRangeField from "./inputs/DateRangeField";
 import NumberRangeField from "./inputs/NumberRangeField";
 import TextField from "./inputs/TextField";
+
+// 7. Constants / utils
+import { COLORS } from "@/constants/colors";
+import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 
 export interface IFilterField {
   id: string;
