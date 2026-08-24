@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import { RefreshControl, ScrollView, ScrollViewProps } from "react-native";
 
-interface RefreshableScrollViewProps extends ScrollViewProps {
+interface IRefreshableScrollViewProps extends ScrollViewProps {
   onRefresh?: () => Promise<void> | void;
   refreshing?: boolean;
 }
 
+/**
+ * @deprecated
+ * DEPRECATED: `RefreshableScrollView` is deprecated. Please use `ScreenContainer` from `@/components/reuseable` instead.
+ * `ScreenContainer` provides integrated pull-to-refresh capabilities, safe area handling, and keyboard scrolling.
+ *
+ * FIXME: Remove this component in future versions after migrating all remaining consumers to `ScreenContainer`.
+ */
 export default function RefreshableScrollView({
   children,
   onRefresh,
@@ -14,7 +21,7 @@ export default function RefreshableScrollView({
   contentContainerStyle = { paddingBottom: 32 },
   showsVerticalScrollIndicator = false,
   ...props
-}: Readonly<RefreshableScrollViewProps>) {
+}: Readonly<IRefreshableScrollViewProps>) {
   const [localRefreshing, setLocalRefreshing] = useState(false);
 
   const handleRefresh = async () => {
