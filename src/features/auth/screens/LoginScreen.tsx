@@ -37,23 +37,25 @@ export default function LoginScreen() {
   };
 
   const onLoginError = (error: any) => {
-    let errorMessage = "Invalid credentials";
+    const status = error?.response?.status || error?.status;
+
+    // We let CustomForm handle 422 validation errors, but set the banner for others
+    if (status === 422) return;
+
     const data = error?.response?.data;
-    if (error?.response?.status === 401 || error?.status === 401) {
+    let errorMessage = "Invalid credentials";
+
+    if (status === 401) {
+      errorMessage = "Invalid email or password";
+    } else if (data?.message?.toLowerCase().includes("unauthenticated")) {
       errorMessage = "Invalid email or password";
     } else if (data?.message) {
       errorMessage = data.message;
-      if (errorMessage.toLowerCase().includes("unauthenticated")) {
-        errorMessage = "Invalid email or password";
-      }
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }
 
-    // We let CustomForm handle 422 validation errors, but set the banner for others
-    if (error?.response?.status !== 422 && error?.status !== 422) {
-      setErrorBanner(errorMessage);
-    }
+    setErrorBanner(errorMessage);
   };
 
   const loginMutation = useLoginMutation(onLoginSuccess, onLoginError);
