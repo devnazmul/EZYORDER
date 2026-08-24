@@ -70,8 +70,8 @@ export const ScreenContainer: React.FC<IScreenContainerProps> = ({
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[COLORS.secondary]}
-            tintColor={COLORS.secondary}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
           />
         ) : undefined
       }
