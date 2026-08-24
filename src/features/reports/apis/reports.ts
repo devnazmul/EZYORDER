@@ -7,6 +7,7 @@ import {
   IOrderTypeReportParams,
   IOrdersReportListResponse,
   IOrdersReportParams,
+  IPaymentSummaryData,
   ISalesByOrderTypeItem,
   ISalesParams,
   ISalesSummaryData,
@@ -54,11 +55,6 @@ export const getSalesTrend = async (
 /**
  * Fetch revenue breakdown by order type.
  * Endpoint: GET /reports/sales/by-order-type
- *
- * @deprecated In the web app, the `/reports/sales/by-order-type` endpoint was removed in favor of
- * the embedded `order_type_summary` object returned by `GET /reports/sales/summary`.
- * This function is temporarily retained for mobile backward compatibility and will be deprecated
- * in upcoming versions.
  */
 export const getSalesByOrderType = async (
   params?: ISalesParams,
@@ -80,6 +76,22 @@ export const getSalesByItem = async (
   params?: ISalesParams,
 ): Promise<ITopProductItem[] | null> => {
   const response = await axiosClient.get("/reports/sales/by-item", {
+    params,
+    validateStatus: () => true,
+  });
+  return response.status === 200 && response.data?.success
+    ? response.data.data
+    : null;
+};
+
+/**
+ * Fetch sales payment summary breakdown (cash, card, online, total).
+ * Endpoint: GET /reports/sales/payment-summary
+ */
+export const getSalesPaymentSummary = async (
+  params?: ISalesParams,
+): Promise<IPaymentSummaryData | null> => {
+  const response = await axiosClient.get("/reports/sales/payment-summary", {
     params,
     validateStatus: () => true,
   });

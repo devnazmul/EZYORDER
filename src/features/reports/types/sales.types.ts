@@ -79,3 +79,16 @@ export interface ISalesByItemResponse {
   message: string;
   data: ITopProductItem[];
 }
+
+export interface IPaymentSummaryData {
+  cash?: number;
+  card?: number;
+  online?: number;
+  total?: number;
+}
+
+export interface IPaymentSummaryResponse {
+  success: boolean;
+  message: string;
+  data: IPaymentSummaryData;
+}

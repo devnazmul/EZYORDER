@@ -7,8 +7,8 @@ import {
   getOrderSummary,
   getOrderTypeReport,
   getSalesByItem,
-  // NOSONAR: Temporarily retained for backward compatibility
   getSalesByOrderType,
+  getSalesPaymentSummary,
   getSalesSummary,
   getSalesTrend,
 } from "../../apis/reports";
@@ -24,6 +24,15 @@ export const useSalesSummaryQuery = (params: ISalesParams) => {
   return useQuery({
     queryKey: REPORT_KEYS.salesSummary({ token, ...params }),
     queryFn: () => getSalesSummary(params),
+    enabled: !!token && !!params.restaurant_id,
+  });
+};
+
+export const usePaymentSummaryQuery = (params: ISalesParams) => {
+  const { token } = useAuth();
+  return useQuery({
+    queryKey: REPORT_KEYS.paymentSummary({ token, ...params }),
+    queryFn: () => getSalesPaymentSummary(params),
     enabled: !!token && !!params.restaurant_id,
   });
 };
@@ -50,7 +59,6 @@ export const useSalesByOrderTypeQuery = (params: ISalesParams) => {
   const { token } = useAuth();
   return useQuery({
     queryKey: REPORT_KEYS.salesByOrderType({ token, ...params }),
-    // NOSONAR: Temporarily retained for backward compatibility
     queryFn: () => getSalesByOrderType(params),
     enabled: !!token && !!params.restaurant_id,
   });
