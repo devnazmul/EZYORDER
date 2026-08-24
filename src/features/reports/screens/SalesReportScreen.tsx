@@ -1,15 +1,19 @@
+// 1. React / React Native
+import React, { useState } from "react";
+import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// 2. Shared components / hooks
 import {
   FilterDrawer,
   IFilterField,
   PageTitle,
   RefreshableScrollView,
 } from "@/components/reuseable";
-import { useAuth, useData } from "@/hooks";
-import { getCurrencySymbol, WP } from "@/utils";
-import dayjs from "dayjs";
-import React, { useState } from "react";
-import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "@/hooks";
+
+// 3. Feature components / hooks
+import { useRestaurantQuery } from "@/features/restaurants/hooks/queries/useRestaurantQueries";
 import {
   KPICardGrid,
   RevenueByOrderTypeCard,
@@ -26,39 +30,10 @@ import {
   useSalesTrendQuery,
 } from "../hooks/queries";
 
-// Helper: Calculate Date Period Ranges aligned with calendar boundaries using dayjs
-const getDateRange = (period: string) => {
-  const now = dayjs();
+// 4. Constants / utils
+import { getCurrencySymbol, getDateRange, WP } from "@/utils";
 
-  if (period === "Yesterday") {
-    const yesterday = now.subtract(1, "day");
-    return {
-      start_date: yesterday.format("YYYY-MM-DD"),
-      end_date: yesterday.format("YYYY-MM-DD"),
-    };
-  }
-
-  if (period === "This Week") {
-    return {
-      start_date: now.startOf("week").format("YYYY-MM-DD"),
-      end_date: now.endOf("week").format("YYYY-MM-DD"),
-    };
-  }
-
-  if (period === "This Month") {
-    return {
-      start_date: now.startOf("month").format("YYYY-MM-DD"),
-      end_date: now.endOf("month").format("YYYY-MM-DD"),
-    };
-  }
-
-  return {
-    start_date: now.format("YYYY-MM-DD"),
-    end_date: now.format("YYYY-MM-DD"),
-  };
-};
-
-const filterFields: IFilterField[] = [
+const FILTER_FIELDS: IFilterField[] = [
   {
     id: "period",
     label: "Filter by Date",
@@ -99,7 +74,16 @@ const EMPTY_ARRAY: readonly never[] = [];
 
 const SalesReport = () => {
   const { user } = useAuth();
-  const { settings } = useData();
+
+  const restaurantId =
+    user?.restaurant && user.restaurant.length > 0
+      ? String(user.restaurant[0]?.id)
+      : String(user?.business_id || "");
+
+  const { data: restaurantResponse } = useRestaurantQuery({
+    restaurant_id: restaurantId,
+  });
+  const settings = restaurantResponse?.restaurant;
   const currencySymbol = getCurrencySymbol(settings?.currency);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -110,7 +94,7 @@ const SalesReport = () => {
   const defaultRange = isCustomRange ? null : getDateRange(period);
 
   const apiParams = {
-    restaurant_id: user?.restaurant?.[0]?.id || "",
+    restaurant_id: restaurantId,
     start_date: isCustomRange ? dateRange.start : defaultRange!.start_date,
     end_date: isCustomRange ? dateRange.end : defaultRange!.end_date,
     group_by: (period === "This Month" ? "week" : "day") as "day" | "week",
@@ -203,7 +187,7 @@ const SalesReport = () => {
 
         <View className="flex items-end justify-center mb-3">
           <FilterDrawer
-            fields={filterFields}
+            fields={FILTER_FIELDS}
             values={filterValues}
             onApply={(values) =>
               setFilterValues(values as typeof INITIAL_FILTER_VALUES)
