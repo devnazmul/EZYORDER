@@ -15,6 +15,7 @@ export {
   type IDoughnutChartProps,
 } from "./DoughnutChart";
 export { default as EmptyState } from "./EmptyState";
+export { default as ErrorState, type IErrorStateProps } from "./ErrorState";
 export { default as FilterChips } from "./FilterChips";
 export { default as FilterDrawer, type IFilterField } from "./FilterDrawer";
 export { default as InputField } from "./InputField";
