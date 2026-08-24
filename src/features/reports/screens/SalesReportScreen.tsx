@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 
+// 3. External libraries
+import { useQueryClient } from "@tanstack/react-query";
+
 // 4. Shared components
 import {
   FilterDrawer,
@@ -34,6 +37,7 @@ import {
 import type { ISalesParams, ISalesTrendItem, ITopProductItem } from "../types";
 
 // 7. Constants/utils
+import { REPORT_KEYS } from "@/constants";
 import { getCurrencySymbol, getDateRange } from "@/utils";
 
 const FILTER_FIELDS: IFilterField[] = [
@@ -76,6 +80,7 @@ const INITIAL_FILTER_VALUES = {
 const EMPTY_TOP_PRODUCTS: readonly ITopProductItem[] = [];
 
 const SalesReport = () => {
+  const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const restaurantId =
@@ -121,7 +126,6 @@ const SalesReport = () => {
     data: summaryData,
     isLoading: isSummaryLoading,
     isFetching: isSummaryFetching,
-    refetch: refetchSummary,
   } = useSalesSummaryQuery(apiParams);
 
   const {
@@ -136,7 +140,6 @@ const SalesReport = () => {
     data: orderSummaryData,
     isLoading: isOrderSummaryLoading,
     isFetching: isOrderSummaryFetching,
-    refetch: refetchOrderSummary,
   } = useOrderSummaryQuery(apiParams);
 
   const {
@@ -168,14 +171,7 @@ const SalesReport = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([
-      refetchSummary(),
-      refetchPayment(),
-      refetchOrderSummary(),
-      refetchTrend(),
-      refetchOrderType(),
-      refetchItem(),
-    ]);
+    await queryClient.invalidateQueries({ queryKey: REPORT_KEYS.all });
     setIsRefreshing(false);
   };
 
