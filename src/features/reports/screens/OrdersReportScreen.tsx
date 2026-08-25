@@ -6,7 +6,7 @@ import { FlatList, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // 4. Shared components
-import { EmptyState, PageTitle } from "@/components/reuseable";
+import { EmptyState, ErrorState, PageTitle } from "@/components/reuseable";
 
 // 5. Feature components/hooks
 import {
@@ -14,16 +14,13 @@ import {
   OrderCardSkeleton,
   OwnerOrderDetailsDrawer,
 } from "@/features/components/order";
-import { IOrderFilterValues, OrderFilterPanel } from "@/features/order";
+import { OrderFilterPanel } from "@/features/order";
 import {
   OrderReportKPIGrid,
   OrderSalesMetricsCard,
   OrderStatusDistributionCard,
 } from "../components";
 import { useOrdersReport } from "../hooks/useOrdersReport";
-
-// 6. Types
-import { type IOrderReportFilterValues } from "../state/ordersReport.reducer";
 
 // 7. Constants/utils
 import { COLORS } from "@/constants";
@@ -40,11 +37,15 @@ export default function OrdersReportScreen() {
     totalOrdersCount,
     isSummaryLoading,
     isOrdersLoading,
+    isOrdersError,
     isRefreshing,
     handleRefresh,
     setSearchQuery,
     setFilterValues,
     setSelectedOrder,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useOrdersReport();
 
   const renderHeader = () => (
@@ -60,10 +61,8 @@ export default function OrdersReportScreen() {
       <OrderFilterPanel
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        filterValues={filterValues as IOrderFilterValues}
-        setFilterValues={(newFilters) =>
-          setFilterValues(newFilters as IOrderReportFilterValues)
-        }
+        filterValues={filterValues}
+        setFilterValues={setFilterValues}
       />
 
       {/* KPI Cards Grid */}
@@ -97,21 +96,33 @@ export default function OrdersReportScreen() {
     </View>
   );
 
+  const handleEndReached = () => {
+    if (
+      hasNextPage &&
+      !isFetchingNextPage &&
+      !isOrdersLoading &&
+      !isOrdersError
+    ) {
+      fetchNextPage();
+    }
+  };
+
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       <View className="flex-1 px-4 pt-4">
-        {/*
-          FIXME: [Note]
-          I plan to implement the next page functionality (using either infinite scroll with
-          useInfiniteQuery / onEndReached or a dedicated "Load More" button) in the next stage.
-        */}
         <FlatList
           key="orders-report-list"
-          data={isOrdersLoading || isRefreshing ? [] : orders}
+          data={
+            isOrdersLoading && !isFetchingNextPage && !isRefreshing
+              ? []
+              : orders
+          }
           keyExtractor={(item) => String(item.id)}
           ListHeaderComponent={renderHeader}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: HP("6%") }}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
           renderItem={({ item }) => (
             <OrderCard
               item={item}
@@ -119,19 +130,35 @@ export default function OrdersReportScreen() {
             />
           )}
           ListFooterComponent={
-            isOrdersLoading || isRefreshing ? (
-              <View key="loading-skeletons">
+            isOrdersLoading && !isFetchingNextPage && !isRefreshing ? (
+              <View key="initial-loading-skeletons">
                 <OrderCardSkeleton />
                 <OrderCardSkeleton />
+                <OrderCardSkeleton />
+              </View>
+            ) : isFetchingNextPage ? (
+              <View key="next-page-loading-skeleton" className="py-2">
                 <OrderCardSkeleton />
               </View>
             ) : null
           }
           ListEmptyComponent={
-            !isOrdersLoading && !isRefreshing ? (
+            isOrdersError ? (
+              <View key="error-state" className="py-6">
+                <ErrorState
+                  title="Failed to Load Orders"
+                  message="We couldn't retrieve the orders list. Please check your connection and try again."
+                  onRetry={handleRefresh}
+                  retryLabel="Retry"
+                  pyClassName="py-4"
+                />
+              </View>
+            ) : !isOrdersLoading && !isRefreshing && !isFetchingNextPage ? (
               <View key="empty" className="py-8">
                 <EmptyState
-                  description="No orders found matching the specified filters or date range."
+                  icon="receipt-long"
+                  title="No Orders Found"
+                  description="No orders match the specified search keywords, filters, or date range."
                   pyClassName="py-6"
                 />
               </View>

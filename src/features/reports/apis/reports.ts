@@ -1,4 +1,5 @@
 import axiosClient from "@/config/axiosClient";
+import { logApiResponse } from "@/utils";
 import {
   ICustomerListResponse,
   ICustomerParams,
@@ -168,6 +169,7 @@ export const getAllOrdersForReports = async (
     params,
     validateStatus: () => true,
   });
+  logApiResponse("orders", response.data);
   return response.status === 200 && response.data?.success
     ? response.data
     : null;

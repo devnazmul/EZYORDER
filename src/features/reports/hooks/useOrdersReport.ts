@@ -1,5 +1,8 @@
 // 1. React / React Native
-import { useReducer } from "react";
+import { useMemo, useReducer } from "react";
+
+// 3. External libraries
+import { useQueryClient } from "@tanstack/react-query";
 
 // 4. Shared hooks
 import { useAuth } from "@/hooks";
@@ -13,7 +16,7 @@ import {
   ordersReportReducer,
 } from "../state/ordersReport.reducer";
 import {
-  useOrdersReportListQuery,
+  useOrdersReportListInfiniteQuery,
   useOrderSummaryQuery,
 } from "./queries/useReportsQueries";
 
@@ -21,12 +24,12 @@ import {
 import { type IOrder } from "../types";
 
 // 7. Constants/utils
-import { getCurrencySymbol, getDateRange } from "@/utils";
-
-const initialRange = getDateRange("This Month");
+import { REPORT_KEYS } from "@/constants";
+import { getCurrencySymbol } from "@/utils";
 
 export function useOrdersReport() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const restaurantId =
     user?.restaurant?.length > 0
@@ -48,8 +51,8 @@ export function useOrdersReport() {
   const { searchQuery, filterValues, page, selectedOrder } = state;
 
   const resolvedDateRange = {
-    start_date: filterValues.date_range?.start || initialRange.start_date,
-    end_date: filterValues.date_range?.end || initialRange.end_date,
+    start_date: filterValues.date_range?.start ?? "",
+    end_date: filterValues.date_range?.end ?? "",
   };
 
   const summaryParams = {
@@ -62,7 +65,6 @@ export function useOrdersReport() {
   const {
     data: summaryData,
     isLoading: isSummaryLoading,
-    refetch: refetchSummary,
     isRefetching: isRefetchingSummary,
   } = useOrderSummaryQuery(summaryParams);
 
@@ -75,21 +77,38 @@ export function useOrdersReport() {
     filterValues,
   );
 
-  // Query: Paginated Orders List
+  // Query: Infinite Paginated Orders List
   const {
-    data: ordersResponse,
+    data: ordersResponsePages,
     isLoading: isOrdersLoading,
-    refetch: refetchOrders,
+    isError: isOrdersError,
     isRefetching: isRefetchingOrders,
-  } = useOrdersReportListQuery(ordersListParams);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useOrdersReportListInfiniteQuery(ordersListParams);
 
-  const orders = ordersResponse?.data || [];
-  const totalOrdersCount = ordersResponse?.meta?.total ?? orders.length;
+  const orders = useMemo(
+    () => ordersResponsePages?.pages.flatMap((pg) => pg?.data ?? []) ?? [],
+    [ordersResponsePages],
+  );
 
-  const isRefreshing = isRefetchingSummary || isRefetchingOrders;
+  const lastPageMeta =
+    ordersResponsePages?.pages[ordersResponsePages.pages.length - 1]?.meta;
+  const totalOrdersCount = lastPageMeta?.total ?? orders.length;
+
+  const isRefreshing =
+    isRefetchingSummary || (isRefetchingOrders && !isFetchingNextPage);
 
   const handleRefresh = async () => {
-    await Promise.allSettled([refetchSummary(), refetchOrders()]);
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: REPORT_KEYS.orderSummaries(),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: REPORT_KEYS.ordersReports(),
+      }),
+    ]);
   };
 
   const setSearchQuery = (query: string) => {
@@ -114,10 +133,14 @@ export function useOrdersReport() {
     totalOrdersCount,
     isSummaryLoading,
     isOrdersLoading,
+    isOrdersError,
     isRefreshing,
     handleRefresh,
     setSearchQuery,
     setFilterValues,
     setSelectedOrder,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 }

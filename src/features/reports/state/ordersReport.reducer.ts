@@ -1,22 +1,17 @@
 import { IOrderFilterValues } from "@/features/order";
-import { getDateRange } from "@/utils";
 import { IOrder } from "../types";
 
-export type IOrderReportFilterValues = IOrderFilterValues & {
-  period?: string;
-  dateRange?: { start_date: string; end_date: string };
-};
-
-const initialRange = getDateRange("This Month");
+export type IOrderReportFilterValues = IOrderFilterValues;
 
 export const INITIAL_FILTER_VALUES: IOrderReportFilterValues = {
+  period: "All Time",
   status: ["all"],
   payment_status: "all",
   order_type: ["all"],
   customer_name: "",
   customer_phone: "",
   table_number: "",
-  date_range: { start: initialRange.start_date, end: initialRange.end_date },
+  date_range: { start: "", end: "" },
   amount_range: { min: "", max: "" },
 };
 

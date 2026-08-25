@@ -1,4 +1,5 @@
 export interface IOrderFilterValues {
+  period?: string;
   status: string[];
   payment_status: string;
   order_type: string[];

@@ -8,7 +8,8 @@ import FilterDrawer, {
 } from "@/components/reuseable/FilterDrawer";
 import SearchBar from "@/components/reuseable/SearchBar";
 
-// 6. Types
+// 7. Constants/utils
+import { getDateRange } from "@/utils";
 import { IOrderFilterValues } from "../types/orderFilter.types";
 
 // ==================== TYPES ====================
@@ -120,7 +121,28 @@ export function OrderFilterPanel({
           { id: "unpaid", label: "Unpaid" },
         ],
       },
-      { id: "date_range", label: "Date Range", type: "date-range" },
+      {
+        id: "period",
+        label: "Filter by Date",
+        type: "chips",
+        options: [
+          { id: "Today", label: "Today" },
+          { id: "Yesterday", label: "Yesterday" },
+          { id: "This Week", label: "This Week" },
+          { id: "This Month", label: "This Month" },
+          { id: "All Time", label: "All Time" },
+        ],
+        onFieldChange: (selectedPeriod: unknown) => {
+          const range = getDateRange(String(selectedPeriod));
+          return {
+            date_range: {
+              start: range.start_date,
+              end: range.end_date,
+            },
+          };
+        },
+      },
+      { id: "date_range", label: "Custom Date Range", type: "date-range" },
       { id: "amount_range", label: "Price Range", type: "number-range" },
       {
         id: "customer_name",
@@ -163,18 +185,22 @@ export function OrderFilterPanel({
           onApply={(values) =>
             setFilterValues(values as unknown as IOrderFilterValues)
           }
-          onClear={() =>
+          onClear={() => {
             setFilterValues({
+              period: "All Time",
               status: ["all"],
               payment_status: "all",
               order_type: ["all"],
               customer_name: "",
               customer_phone: "",
               table_number: "",
-              date_range: { start: "", end: "" },
+              date_range: {
+                start: "",
+                end: "",
+              },
               amount_range: { min: "", max: "" },
-            } as IOrderFilterValues)
-          }
+            });
+          }}
         />
       </View>
     </View>
