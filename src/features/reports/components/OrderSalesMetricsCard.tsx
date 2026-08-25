@@ -1,18 +1,75 @@
+// 1. React / React Native
+import React, { useMemo } from "react";
+import { View } from "react-native";
+
+// 4. Shared components
 import {
   ActionCard,
   BarChart,
+  EmptyState,
+  ErrorState,
   type IBarChartDataItem,
 } from "@/components/reuseable";
-import { formatAmount, getResponsiveFontSize, WP } from "@/utils";
-import React, { useMemo } from "react";
-import { Text, View } from "react-native";
-import { IOrderSummaryData } from "../types";
+
+// 5. Feature components/hooks
 import OrderSalesMetricsSkeleton from "./skeletons/OrderSalesMetricsSkeleton";
+
+// 6. Types
+import { IOrderSummaryData } from "../types";
+
+// 7. Constants/utils
+import { WP } from "@/utils";
+
+function renderCardContent(
+  isError: boolean,
+  hasSalesData: boolean,
+  onRetry: (() => void) | undefined,
+  barData: IBarChartDataItem[],
+  currencySymbol: string,
+) {
+  if (isError) {
+    return (
+      <ErrorState
+        title="Failed to Load Sales Overview"
+        message="Unable to retrieve sales metrics. Please try again."
+        onRetry={onRetry}
+        pyClassName="py-4"
+      />
+    );
+  }
+
+  if (!hasSalesData) {
+    return (
+      <EmptyState
+        icon="analytics"
+        title="No Sales Data"
+        description="No sales metrics available for the selected period."
+        pyClassName="py-4"
+      />
+    );
+  }
+
+  return (
+    <View className="items-center w-full">
+      <BarChart
+        data={barData}
+        currencySymbol={currencySymbol}
+        chartHeight={190}
+        isAmount={true}
+        showGradient={true}
+        showValuesAsTopLabel={true}
+        noOfSections={4}
+      />
+    </View>
+  );
+}
 
 export interface IOrderSalesMetricsCardProps {
   summaryData: IOrderSummaryData | null | undefined;
   currencySymbol: string;
   isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   containerClassName?: string;
 }
 
@@ -20,6 +77,8 @@ export default function OrderSalesMetricsCard({
   summaryData,
   currencySymbol,
   isLoading = false,
+  isError = false,
+  onRetry,
   containerClassName = "",
 }: Readonly<IOrderSalesMetricsCardProps>) {
   const grossSales = summaryData?.sales?.completed_gross_sales ?? 0;
@@ -62,72 +121,12 @@ export default function OrderSalesMetricsCard({
       bodyStyle={{ padding: WP("3.5%") }}
     >
       <View className="py-2">
-        {!hasSalesData ? (
-          <Text
-            style={{ fontSize: getResponsiveFontSize("xs") }}
-            className="text-accent italic text-center py-4"
-          >
-            No sales metrics available for this period.
-          </Text>
-        ) : (
-          <View className="items-center w-full">
-            <BarChart
-              data={barData}
-              currencySymbol={currencySymbol}
-              chartHeight={180}
-              isAmount={true}
-              showGradient={true}
-              noOfSections={4}
-            />
-
-            {/* Metrics Breakdown Legend */}
-            <View className="flex-row justify-around w-full mt-4 pt-3 border-t border-base-200">
-              <View className="items-center">
-                <Text
-                  style={{ fontSize: 10 }}
-                  className="text-accent font-medium uppercase"
-                >
-                  Gross Sales
-                </Text>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-bold text-[#6366F1]"
-                >
-                  {formatAmount(grossSales, currencySymbol)}
-                </Text>
-              </View>
-
-              <View className="items-center">
-                <Text
-                  style={{ fontSize: 10 }}
-                  className="text-accent font-medium uppercase"
-                >
-                  Net Sales
-                </Text>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-bold text-[#3B82F6]"
-                >
-                  {formatAmount(netSales, currencySymbol)}
-                </Text>
-              </View>
-
-              <View className="items-center">
-                <Text
-                  style={{ fontSize: 10 }}
-                  className="text-accent font-medium uppercase"
-                >
-                  Discounts
-                </Text>
-                <Text
-                  style={{ fontSize: getResponsiveFontSize("xs") }}
-                  className="font-bold text-[#F97316]"
-                >
-                  {formatAmount(discounts, currencySymbol)}
-                </Text>
-              </View>
-            </View>
-          </View>
+        {renderCardContent(
+          isError,
+          hasSalesData,
+          onRetry,
+          barData,
+          currencySymbol,
         )}
       </View>
     </ActionCard>

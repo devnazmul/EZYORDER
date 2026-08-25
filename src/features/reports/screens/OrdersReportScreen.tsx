@@ -82,6 +82,7 @@ export default function OrdersReportScreen() {
         summaryData={summaryData}
         currencySymbol={currencySymbol}
         isLoading={isSummaryLoading || isRefreshing}
+        onRetry={handleRefresh}
       />
 
       {/* Section Divider & Heading for Order List */}
@@ -107,6 +108,55 @@ export default function OrdersReportScreen() {
     }
   };
 
+  const renderFooter = () => {
+    if (isOrdersLoading && !isFetchingNextPage && !isRefreshing) {
+      return (
+        <View key="initial-loading-skeletons">
+          <OrderCardSkeleton />
+          <OrderCardSkeleton />
+          <OrderCardSkeleton />
+        </View>
+      );
+    }
+    if (isFetchingNextPage) {
+      return (
+        <View key="next-page-loading-skeleton" className="py-2">
+          <OrderCardSkeleton />
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const renderEmptyState = () => {
+    if (isOrdersError) {
+      return (
+        <View key="error-state" className="py-6">
+          <ErrorState
+            title="Failed to Load Orders"
+            message="We couldn't retrieve the orders list. Please check your connection and try again."
+            onRetry={handleRefresh}
+            retryLabel="Retry"
+            pyClassName="py-4"
+          />
+        </View>
+      );
+    }
+    if (!isOrdersLoading && !isRefreshing && !isFetchingNextPage) {
+      return (
+        <View key="empty" className="py-8">
+          <EmptyState
+            icon="receipt-long"
+            title="No Orders Found"
+            description="No orders match the specified search keywords, filters, or date range."
+            pyClassName="py-6"
+          />
+        </View>
+      );
+    }
+    return null;
+  };
+
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
       <View className="flex-1 px-4 pt-4">
@@ -129,41 +179,8 @@ export default function OrdersReportScreen() {
               onViewDetails={() => setSelectedOrder(item)}
             />
           )}
-          ListFooterComponent={
-            isOrdersLoading && !isFetchingNextPage && !isRefreshing ? (
-              <View key="initial-loading-skeletons">
-                <OrderCardSkeleton />
-                <OrderCardSkeleton />
-                <OrderCardSkeleton />
-              </View>
-            ) : isFetchingNextPage ? (
-              <View key="next-page-loading-skeleton" className="py-2">
-                <OrderCardSkeleton />
-              </View>
-            ) : null
-          }
-          ListEmptyComponent={
-            isOrdersError ? (
-              <View key="error-state" className="py-6">
-                <ErrorState
-                  title="Failed to Load Orders"
-                  message="We couldn't retrieve the orders list. Please check your connection and try again."
-                  onRetry={handleRefresh}
-                  retryLabel="Retry"
-                  pyClassName="py-4"
-                />
-              </View>
-            ) : !isOrdersLoading && !isRefreshing && !isFetchingNextPage ? (
-              <View key="empty" className="py-8">
-                <EmptyState
-                  icon="receipt-long"
-                  title="No Orders Found"
-                  description="No orders match the specified search keywords, filters, or date range."
-                  pyClassName="py-6"
-                />
-              </View>
-            ) : null
-          }
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={renderEmptyState}
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}

@@ -1,4 +1,4 @@
-import { formatAmount } from "@/utils";
+// 1. React / React Native
 import React, { useEffect, useMemo, useState } from "react";
 import {
   DimensionValue,
@@ -7,7 +7,12 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+
+// 3. External libraries
 import { BarChart as GiftedBarChart } from "react-native-gifted-charts";
+
+// 7. Constants/utils
+import { formatAmount } from "@/utils";
 
 export interface IBarChartDataItem {
   name: string;
@@ -31,6 +36,7 @@ export interface IBarChartProps {
   xAxisColor?: string;
   yAxisTextColor?: string;
   showGradient?: boolean;
+  showValuesAsTopLabel?: boolean;
   barBorderRadius?: number;
   noOfSections?: number;
 }
@@ -49,6 +55,7 @@ export default function BarChart({
   xAxisColor = "#E5E7EB",
   yAxisTextColor = "#6E6E6E",
   showGradient = true,
+  showValuesAsTopLabel = false,
   barBorderRadius = 4,
   noOfSections = 4,
 }: Readonly<IBarChartProps>) {
@@ -201,6 +208,37 @@ export default function BarChart({
         );
       }
 
+      if (showValuesAsTopLabel) {
+        const formattedVal = isAmount
+          ? formatAmount(val, currencySymbol)
+          : String(val);
+        const topLabelWidth = Math.max(52, barWidth + 0);
+        const topMarginLeft = (barWidth - topLabelWidth) / 2;
+
+        item.topLabelComponent = () => (
+          <View
+            style={{
+              width: topLabelWidth,
+              marginLeft: topMarginLeft,
+              alignItems: "center",
+              marginBottom: 4,
+            }}
+          >
+            <Text
+              numberOfLines={1}
+              style={{
+                fontSize: 10,
+                color: "#475569",
+                fontWeight: "700",
+                textAlign: "center",
+              }}
+            >
+              {formattedVal}
+            </Text>
+          </View>
+        );
+      }
+
       return item;
     });
   }, [
@@ -208,6 +246,9 @@ export default function BarChart({
     frontColor,
     gradientColor,
     showGradient,
+    showValuesAsTopLabel,
+    isAmount,
+    currencySymbol,
     barBorderRadius,
     isDenseFilter,
     barWidth,
@@ -319,8 +360,9 @@ export default function BarChart({
         initialSpacing={initialSpacing}
         labelWidth={isDenseFilter ? 28 : 34}
         disableScroll={true}
-        focusedBarIndex={focusedBarIndex}
+        focusedBarIndex={showValuesAsTopLabel ? undefined : focusedBarIndex}
         onPress={(_item: unknown, index: number) => {
+          if (showValuesAsTopLabel) return;
           setFocusedBarIndex((prev) => (prev === index ? undefined : index));
         }}
         noOfSections={noOfSections}
@@ -356,7 +398,7 @@ export default function BarChart({
       />
 
       {/* Popover Tooltip */}
-      {focusedItem && tooltipPos && (
+      {!showValuesAsTopLabel && focusedItem && tooltipPos && (
         <View
           pointerEvents="none"
           style={{
