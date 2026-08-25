@@ -23,3 +23,4 @@ export { handleSendEmail } from "./handleSendEmail";
 export { logApiResponse } from "./logApiResponse";
 export * from "./orderTypeColors";
 export { default as parseDate } from "./parseDate";
+export { toggleMultiSelectValue } from "./toggleMultiSelectValue";

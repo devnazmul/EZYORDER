@@ -12,9 +12,13 @@ import {
 // 2. Expo / Navigation
 import { MaterialIcons } from "@expo/vector-icons";
 
+// 4. Shared components
+import Badge from "./Badge";
+
 // 7. Constants / utils
 import { COLORS } from "@/constants/colors";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { toggleMultiSelectValue } from "@/utils/toggleMultiSelectValue";
 
 // ==================== TYPES ====================
 
@@ -25,8 +29,9 @@ export interface IDropdownOption {
 
 export interface IDropdownProps {
   options: IDropdownOption[];
-  selectedValue?: string;
-  onSelect?: (value: string) => void;
+  selectedValue?: string | string[];
+  onSelect?: (value: string | string[]) => void;
+  isMultiSelect?: boolean;
   placeholder?: string;
   triggerClassName?: string;
   triggerTextClassName?: string;
@@ -44,6 +49,7 @@ export default function Dropdown({
   options,
   selectedValue,
   onSelect,
+  isMultiSelect = false,
   placeholder = "Select",
   triggerClassName = "",
   triggerTextClassName = "",
@@ -53,11 +59,48 @@ export default function Dropdown({
 
   const triggerRef = useRef<View>(null);
   const { width: windowWidth } = useWindowDimensions();
+  const fontSize = getResponsiveFontSize("xs");
 
-  const activeVal = selectedValue || options[0]?.value;
-  const selectedOption = options.find((opt) => opt.value === selectedValue);
-  const displayLabel =
-    selectedOption?.label || options[0]?.label || placeholder;
+  // Normalize selected values into array if multi-select, or single string
+  let selectedArray: string[] = [];
+  if (Array.isArray(selectedValue)) {
+    selectedArray = selectedValue;
+  } else if (typeof selectedValue === "string" && selectedValue) {
+    selectedArray = [selectedValue];
+  }
+
+  const activeSingleValue = isMultiSelect
+    ? ""
+    : (selectedValue as string) || options[0]?.value;
+
+  const isOptionSelected = (val: string): boolean => {
+    if (isMultiSelect) {
+      if (val === "all") {
+        return selectedArray.length === 0 || selectedArray.includes("all");
+      }
+      return selectedArray.includes(val);
+    }
+    return val === activeSingleValue;
+  };
+
+  const isAllSelected = isOptionSelected("all");
+
+  const selectedOptions = isMultiSelect
+    ? options.filter(
+        (opt) => opt.value !== "all" && selectedArray.includes(opt.value),
+      )
+    : [];
+
+  let displayLabel: string | null = null;
+  if (!isMultiSelect) {
+    const selectedOption = options.find(
+      (opt) => opt.value === activeSingleValue,
+    );
+    displayLabel = selectedOption?.label || options[0]?.label || placeholder;
+  } else if (isAllSelected || selectedOptions.length === 0) {
+    displayLabel =
+      options.find((opt) => opt.value === "all")?.label || placeholder;
+  }
 
   const handleOpen = () => {
     if (triggerRef.current) {
@@ -76,25 +119,58 @@ export default function Dropdown({
     }
   };
 
-  const handleSelect = (val: string) => {
-    onSelect?.(val);
-    setIsOpen(false);
+  const handleSelectOption = (val: string) => {
+    if (!isMultiSelect) {
+      onSelect?.(val);
+      setIsOpen(false);
+      return;
+    }
+
+    const next = toggleMultiSelectValue(selectedArray, val);
+    onSelect?.(next);
   };
 
   return (
     <>
       <TouchableOpacity
-        ref={triggerRef as any}
+        ref={triggerRef}
         onPress={handleOpen}
         activeOpacity={0.75}
-        className={`flex-row items-center bg-base-200 border border-base-200 px-3 py-1.5 rounded-lg ${triggerClassName}`}
+        className={`flex-row items-center border border-base-200 px-3 py-2 rounded-lg ${
+          triggerClassName.includes("bg-")
+            ? triggerClassName
+            : `bg-base-200 ${triggerClassName}`
+        }`}
       >
-        <Text
-          style={{ fontSize: getResponsiveFontSize("xs") }}
-          className={`font-semibold text-neutral mr-1 capitalize ${triggerTextClassName}`}
-        >
-          {displayLabel}
-        </Text>
+        {isMultiSelect && !isAllSelected && selectedOptions.length > 0 ? (
+          <View className="flex-row flex-wrap items-center gap-1.5 flex-1 mr-2 py-0.5">
+            {selectedOptions.map((opt) => (
+              <Badge
+                key={opt.value}
+                text={opt.label}
+                containerClassName="bg-primary rounded-lg border border-primary/20 px-2.5 py-1"
+                textClassName="text-white font-bold"
+                iconPosition="right"
+                icon={
+                  <TouchableOpacity
+                    onPress={() => handleSelectOption(opt.value)}
+                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                  >
+                    <MaterialIcons name="close" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                }
+              />
+            ))}
+          </View>
+        ) : (
+          <Text
+            style={{ fontSize }}
+            className={`font-semibold text-neutral mr-1 capitalize ${triggerTextClassName}`}
+          >
+            {displayLabel}
+          </Text>
+        )}
+
         <MaterialIcons
           name={isOpen ? "keyboard-arrow-up" : "keyboard-arrow-down"}
           size={WP("4%")}
@@ -121,17 +197,18 @@ export default function Dropdown({
                 className="bg-base-300 rounded-xl border border-base-200 shadow-xl py-1 z-50 overflow-hidden"
               >
                 {options.map((option) => {
-                  const isSelected = option.value === activeVal;
+                  const isSelected = isOptionSelected(option.value);
+
                   return (
                     <TouchableOpacity
                       key={option.value}
-                      onPress={() => handleSelect(option.value)}
+                      onPress={() => handleSelectOption(option.value)}
                       className={`flex-row items-center justify-between px-3.5 py-2.5 ${
                         isSelected ? "bg-primary/10" : "bg-transparent"
                       }`}
                     >
                       <Text
-                        style={{ fontSize: getResponsiveFontSize("xs") }}
+                        style={{ fontSize }}
                         className={`font-semibold capitalize mr-3 ${
                           isSelected ? "text-primary font-bold" : "text-neutral"
                         }`}

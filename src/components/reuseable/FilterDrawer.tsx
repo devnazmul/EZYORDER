@@ -15,9 +15,10 @@ import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
 
 // 4. Shared components
-import BottomSheet from "@/components/reuseable/BottomSheet";
-import Button from "@/components/reuseable/Button";
+import BottomSheet from "./BottomSheet";
+import Button from "./Button";
 import DatePickerModal from "./DatePickerModal";
+import Dropdown, { IDropdownOption } from "./Dropdown";
 import FilterChips from "./FilterChips";
 import DateField from "./inputs/DateField";
 import DateRangeField from "./inputs/DateRangeField";
@@ -27,12 +28,24 @@ import TextField from "./inputs/TextField";
 // 7. Constants / utils
 import { COLORS } from "@/constants/colors";
 import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
+import { toggleMultiSelectValue } from "@/utils/toggleMultiSelectValue";
+
+export type IFilterFieldType =
+  "chips" | "date-range" | "number-range" | "text" | "date" | "dropdown";
+
+export type IDatePickerType = "start" | "end" | "single";
+
+export interface IActiveDatePickerState {
+  fieldId: string;
+  type: IDatePickerType;
+}
 
 export interface IFilterField {
   id: string;
   label: string;
-  type: "chips" | "date-range" | "number-range" | "text" | "date";
-  options?: { id: string; label: string }[]; // For chips type
+  type: IFilterFieldType;
+  options?: { id: string; label: string }[]; // For chips or dropdown type
+  dropdownOptions?: IDropdownOption[]; // For dropdown type option mapping
   keyboardType?: KeyboardTypeOptions;
   isMultiSelect?: boolean;
   onFieldChange?: (
@@ -49,6 +62,244 @@ export interface IFilterDrawerProps {
   triggerClassName?: string;
 }
 
+// ==================== HELPER RENDERERS & UTILS ====================
+
+function FieldLabel({ label }: Readonly<{ label: string }>) {
+  return (
+    <Text
+      style={{ fontSize: getResponsiveFontSize("sm") }}
+      className="font-semibold text-accent capitalize mb-3"
+    >
+      {label}
+    </Text>
+  );
+}
+
+function applyFieldChange(
+  field: IFilterField,
+  updated: Record<string, unknown>,
+): Record<string, unknown> {
+  let result = updated;
+  if (field.onFieldChange) {
+    const sideEffects = field.onFieldChange(result[field.id], result);
+    if (sideEffects) {
+      result = { ...result, ...sideEffects };
+    }
+  }
+  return result;
+}
+
+function renderChipsField(
+  field: IFilterField,
+  localValues: Record<string, unknown>,
+  handleChipSelect: (field: IFilterField, optionId: string) => void,
+) {
+  if (!field.options) return null;
+  const selectedId = (localValues[field.id] as string | string[]) || "all";
+  return (
+    <View key={field.id}>
+      <FieldLabel label={field.label} />
+      <FilterChips
+        chips={field.options}
+        selectedId={selectedId}
+        onSelect={(optionId) => handleChipSelect(field, optionId)}
+        isBottomSheet={true}
+      />
+    </View>
+  );
+}
+
+function renderDateRangeField(
+  field: IFilterField,
+  localValues: Record<string, unknown>,
+  setActiveDatePicker: (val: IActiveDatePickerState | null) => void,
+  formatDateLabel: (dateStr?: string) => string,
+) {
+  const range = (localValues[field.id] as { start?: string; end?: string }) || {
+    start: "",
+    end: "",
+  };
+  return (
+    <DateRangeField
+      key={field.id}
+      label={field.label}
+      startDateValue={range.start}
+      endDateValue={range.end}
+      onSelectStartDate={() =>
+        setActiveDatePicker({ fieldId: field.id, type: "start" })
+      }
+      onSelectEndDate={() =>
+        setActiveDatePicker({ fieldId: field.id, type: "end" })
+      }
+      formatDateLabel={formatDateLabel}
+    />
+  );
+}
+
+function renderNumberRangeField(
+  field: IFilterField,
+  localValues: Record<string, unknown>,
+  setLocalValues: React.Dispatch<React.SetStateAction<Record<string, unknown>>>,
+) {
+  const range = (localValues[field.id] as { min?: string; max?: string }) || {
+    min: "",
+    max: "",
+  };
+
+  const updateRange = (key: "min" | "max", val: string) => {
+    setLocalValues((prev) => ({
+      ...prev,
+      [field.id]: {
+        ...((prev[field.id] as { min?: string; max?: string }) || {
+          min: "",
+          max: "",
+        }),
+        [key]: val,
+      },
+    }));
+  };
+
+  return (
+    <NumberRangeField
+      key={field.id}
+      label={field.label}
+      minValue={range.min}
+      maxValue={range.max}
+      onChangeMinText={(text) => updateRange("min", text)}
+      onChangeMaxText={(text) => updateRange("max", text)}
+    />
+  );
+}
+
+function renderTextField(
+  field: IFilterField,
+  localValues: Record<string, unknown>,
+  setLocalValues: React.Dispatch<React.SetStateAction<Record<string, unknown>>>,
+) {
+  const textVal = (localValues[field.id] as string) || "";
+  return (
+    <TextField
+      key={field.id}
+      label={field.label}
+      value={textVal}
+      keyboardType={field.keyboardType || "default"}
+      onChangeText={(text) => {
+        setLocalValues((prev) => ({
+          ...prev,
+          [field.id]: text,
+        }));
+      }}
+    />
+  );
+}
+
+function renderDropdownField(
+  field: IFilterField,
+  localValues: Record<string, unknown>,
+  setLocalValues: React.Dispatch<React.SetStateAction<Record<string, unknown>>>,
+) {
+  const selectedVal =
+    (localValues[field.id] as string | string[]) ||
+    (field.isMultiSelect ? ["all"] : "all");
+
+  const dropdownOptions: IDropdownOption[] =
+    field.dropdownOptions ||
+    field.options?.map((opt) => ({
+      label: opt.label,
+      value: opt.id,
+    })) ||
+    [];
+
+  return (
+    <View key={field.id}>
+      <FieldLabel label={field.label} />
+      <Dropdown
+        options={dropdownOptions}
+        selectedValue={selectedVal}
+        isMultiSelect={field.isMultiSelect}
+        onSelect={(val) => {
+          setLocalValues((prev) => {
+            const updated: Record<string, unknown> = {
+              ...prev,
+              [field.id]: val,
+            };
+            return applyFieldChange(field, updated);
+          });
+        }}
+        placeholder={`Select ${field.label}`}
+        triggerClassName="justify-between bg-base-100 border border-base-200 rounded-xl px-[3%] py-[3%]"
+      />
+    </View>
+  );
+}
+
+function renderDateField(
+  field: IFilterField,
+  localValues: Record<string, unknown>,
+  setActiveDatePicker: (val: IActiveDatePickerState | null) => void,
+  formatDateLabel: (dateStr?: string) => string,
+) {
+  const dateVal = (localValues[field.id] as string) || "";
+  return (
+    <DateField
+      key={field.id}
+      label={field.label}
+      value={dateVal}
+      onPress={() => setActiveDatePicker({ fieldId: field.id, type: "single" })}
+      formatDateLabel={formatDateLabel}
+    />
+  );
+}
+
+// ==================== SUB-COMPONENTS ====================
+
+interface IFilterDrawerFieldProps {
+  field: IFilterField;
+  localValues: Record<string, unknown>;
+  setLocalValues: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
+  handleChipSelect: (field: IFilterField, optionId: string) => void;
+  setActiveDatePicker: (val: IActiveDatePickerState | null) => void;
+  formatDateLabel: (dateStr?: string) => string;
+}
+
+function FilterDrawerField({
+  field,
+  localValues,
+  setLocalValues,
+  handleChipSelect,
+  setActiveDatePicker,
+  formatDateLabel,
+}: Readonly<IFilterDrawerFieldProps>) {
+  switch (field.type) {
+    case "chips":
+      return renderChipsField(field, localValues, handleChipSelect);
+    case "date-range":
+      return renderDateRangeField(
+        field,
+        localValues,
+        setActiveDatePicker,
+        formatDateLabel,
+      );
+    case "number-range":
+      return renderNumberRangeField(field, localValues, setLocalValues);
+    case "text":
+      return renderTextField(field, localValues, setLocalValues);
+    case "dropdown":
+      return renderDropdownField(field, localValues, setLocalValues);
+    case "date":
+      return renderDateField(
+        field,
+        localValues,
+        setActiveDatePicker,
+        formatDateLabel,
+      );
+    default:
+      return null;
+  }
+}
+
+// ==================== MAIN COMPONENT ====================
+
 export default function FilterDrawer({
   fields,
   values,
@@ -61,10 +312,8 @@ export default function FilterDrawer({
   // Local scratch state to modify before applying
   const [localValues, setLocalValues] =
     useState<Record<string, unknown>>(values);
-  const [activeDatePicker, setActiveDatePicker] = useState<{
-    fieldId: string;
-    type: "start" | "end" | "single";
-  } | null>(null);
+  const [activeDatePicker, setActiveDatePicker] =
+    useState<IActiveDatePickerState | null>(null);
 
   // Sync local values when drawer opens
   useEffect(() => {
@@ -92,58 +341,22 @@ export default function FilterDrawer({
   }, [values]);
 
   const handleChipSelect = (field: IFilterField, optionId: string) => {
-    if (!field.isMultiSelect) {
-      setLocalValues((prev) => {
-        let updated: Record<string, unknown> = {
-          ...prev,
-          [field.id]: optionId,
-        };
-        if (field.onFieldChange) {
-          const sideEffects = field.onFieldChange(optionId, updated);
-          if (sideEffects) {
-            updated = { ...updated, ...sideEffects };
-          }
-        }
-        return updated;
-      });
-      return;
-    }
-
     setLocalValues((prev) => {
-      const prevFieldVal = prev[field.id];
-      const current = Array.isArray(prevFieldVal)
-        ? (prevFieldVal as string[])
-        : [typeof prevFieldVal === "string" ? prevFieldVal : "all"];
+      let updated: Record<string, unknown>;
 
-      if (optionId === "all") {
-        return {
-          ...prev,
-          [field.id]: ["all"],
-        };
-      }
-
-      let next = current.filter((x: string) => x !== "all");
-      if (next.includes(optionId)) {
-        next = next.filter((x: string) => x !== optionId);
+      if (!field.isMultiSelect) {
+        updated = { ...prev, [field.id]: optionId };
       } else {
-        next.push(optionId);
+        const prevVal = prev[field.id];
+        const current = Array.isArray(prevVal)
+          ? (prevVal as string[])
+          : [typeof prevVal === "string" ? prevVal : "all"];
+
+        const next = toggleMultiSelectValue(current, optionId);
+        updated = { ...prev, [field.id]: next };
       }
 
-      if (next.length === 0) {
-        next = ["all"];
-      }
-
-      let updated: Record<string, unknown> = {
-        ...prev,
-        [field.id]: next,
-      };
-      if (field.onFieldChange) {
-        const sideEffects = field.onFieldChange(next, updated);
-        if (sideEffects) {
-          updated = { ...updated, ...sideEffects };
-        }
-      }
-      return updated;
+      return applyFieldChange(field, updated);
     });
   };
 
@@ -177,7 +390,7 @@ export default function FilterDrawer({
   const handleClear = () => {
     const cleared: Record<string, unknown> = {};
     fields.forEach((f) => {
-      if (f.type === "chips") {
+      if (f.type === "chips" || f.type === "dropdown") {
         cleared[f.id] = f.isMultiSelect ? ["all"] : "all";
       } else if (f.type === "date-range") {
         cleared[f.id] = { start: "", end: "" };
@@ -201,6 +414,13 @@ export default function FilterDrawer({
     const parsed = dayjs(dateStr);
     return parsed.isValid() ? parsed.format("MMM D, YYYY") : dateStr;
   };
+
+  const activeDateValue = useMemo(() => {
+    if (!activeDatePicker) return undefined;
+    const val = localValues[activeDatePicker.fieldId];
+    if (activeDatePicker.type === "single") return val as string;
+    return (val as { start?: string; end?: string })?.[activeDatePicker.type];
+  }, [activeDatePicker, localValues]);
 
   return (
     <>
@@ -251,130 +471,17 @@ export default function FilterDrawer({
           contentContainerStyle={{ paddingBottom: HP("6%") }}
         >
           <View className="gap-y-6">
-            {fields.map((field) => {
-              if (field.type === "chips" && field.options) {
-                const selectedId =
-                  (localValues[field.id] as string | string[]) || "all";
-                return (
-                  <View key={field.id}>
-                    <Text
-                      style={{ fontSize: getResponsiveFontSize("sm") }}
-                      className="font-semibold text-accent capitalize  mb-3"
-                    >
-                      {field.label}
-                    </Text>
-                    <FilterChips
-                      chips={field.options}
-                      selectedId={selectedId}
-                      onSelect={(optionId) => handleChipSelect(field, optionId)}
-                      isBottomSheet={true}
-                    />
-                  </View>
-                );
-              }
-
-              if (field.type === "date-range") {
-                const range = (localValues[field.id] as {
-                  start?: string;
-                  end?: string;
-                }) || { start: "", end: "" };
-                return (
-                  <DateRangeField
-                    key={field.id}
-                    label={field.label}
-                    startDateValue={range.start}
-                    endDateValue={range.end}
-                    onSelectStartDate={() =>
-                      setActiveDatePicker({ fieldId: field.id, type: "start" })
-                    }
-                    onSelectEndDate={() =>
-                      setActiveDatePicker({ fieldId: field.id, type: "end" })
-                    }
-                    formatDateLabel={formatDateLabel}
-                  />
-                );
-              }
-
-              if (field.type === "number-range") {
-                const range = (localValues[field.id] as {
-                  min?: string;
-                  max?: string;
-                }) || { min: "", max: "" };
-                return (
-                  <NumberRangeField
-                    key={field.id}
-                    label={field.label}
-                    minValue={range.min}
-                    maxValue={range.max}
-                    onChangeMinText={(text) => {
-                      setLocalValues((prev) => ({
-                        ...prev,
-                        [field.id]: {
-                          ...((prev[field.id] as {
-                            min?: string;
-                            max?: string;
-                          }) || { min: "", max: "" }),
-                          min: text,
-                        },
-                      }));
-                    }}
-                    onChangeMaxText={(text) => {
-                      setLocalValues((prev) => ({
-                        ...prev,
-                        [field.id]: {
-                          ...((prev[field.id] as {
-                            min?: string;
-                            max?: string;
-                          }) || { min: "", max: "" }),
-                          max: text,
-                        },
-                      }));
-                    }}
-                  />
-                );
-              }
-
-              if (field.type === "text") {
-                const textVal =
-                  typeof localValues[field.id] === "string"
-                    ? (localValues[field.id] as string)
-                    : "";
-                return (
-                  <TextField
-                    key={field.id}
-                    label={field.label}
-                    value={textVal}
-                    keyboardType={field.keyboardType || "default"}
-                    onChangeText={(text) => {
-                      setLocalValues((prev) => ({
-                        ...prev,
-                        [field.id]: text,
-                      }));
-                    }}
-                  />
-                );
-              }
-
-              if (field.type === "date") {
-                const dateVal =
-                  typeof localValues[field.id] === "string"
-                    ? (localValues[field.id] as string)
-                    : "";
-                return (
-                  <DateField
-                    key={field.id}
-                    label={field.label}
-                    value={dateVal}
-                    onPress={() =>
-                      setActiveDatePicker({ fieldId: field.id, type: "single" })
-                    }
-                    formatDateLabel={formatDateLabel}
-                  />
-                );
-              }
-
-              return null;
-            })}
+            {fields.map((field) => (
+              <FilterDrawerField
+                key={field.id}
+                field={field}
+                localValues={localValues}
+                setLocalValues={setLocalValues}
+                handleChipSelect={handleChipSelect}
+                setActiveDatePicker={setActiveDatePicker}
+                formatDateLabel={formatDateLabel}
+              />
+            ))}
           </View>
         </BottomSheetScrollView>
 
@@ -403,17 +510,7 @@ export default function FilterDrawer({
         <DatePickerModal
           visible={true}
           onClose={() => setActiveDatePicker(null)}
-          title={`Select Date`}
-          selectedDate={
-            activeDatePicker.type === "single"
-              ? (localValues[activeDatePicker.fieldId] as string)
-              : (
-                  localValues[activeDatePicker.fieldId] as Record<
-                    string,
-                    string
-                  >
-                )?.[activeDatePicker.type]
-          }
+          selectedDate={activeDateValue}
           onSelectDate={handleDateSelect}
         />
       )}

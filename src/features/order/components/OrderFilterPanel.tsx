@@ -1,10 +1,14 @@
+// 1. React / React Native
 import React, { useMemo } from "react";
 import { View } from "react-native";
+
+// 4. Shared components
 import FilterDrawer, {
   IFilterField,
 } from "@/components/reuseable/FilterDrawer";
 import SearchBar from "@/components/reuseable/SearchBar";
 
+// 6. Types
 import { IOrderFilterValues } from "../types/orderFilter.types";
 
 // ==================== TYPES ====================
@@ -30,10 +34,10 @@ export function OrderFilterPanel({
       {
         id: "status",
         label: "Order Status",
-        type: "chips",
+        type: "dropdown",
         isMultiSelect: true,
         options: [
-          { id: "all", label: "All" },
+          { id: "all", label: "All Statuses" },
           { id: "pending", label: "Pending" },
           { id: "kitchen", label: "Kitchen" },
           { id: "completed", label: "Completed" },
@@ -42,11 +46,12 @@ export function OrderFilterPanel({
       {
         id: "payment_status",
         label: "Payment Status",
-        type: "chips",
+        type: "dropdown",
         isMultiSelect: false,
         options: [
-          { id: "all", label: "All" },
+          { id: "all", label: "All Payment Statuses" },
           { id: "paid", label: "Paid" },
+          { id: "partial_paid", label: "Partial Paid" },
           { id: "unpaid", label: "Unpaid" },
         ],
       },
