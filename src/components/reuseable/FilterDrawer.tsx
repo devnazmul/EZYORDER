@@ -15,8 +15,9 @@ import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
 
 // 4. Shared components
-import BottomSheet from "@/components/reuseable/BottomSheet";
-import Button from "@/components/reuseable/Button";
+import BottomSheet from "./BottomSheet";
+import Button from "./Button";
+import Dropdown, { IDropdownOption } from "./Dropdown";
 import DatePickerModal from "./DatePickerModal";
 import FilterChips from "./FilterChips";
 import DateField from "./inputs/DateField";
@@ -31,8 +32,9 @@ import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 export interface IFilterField {
   id: string;
   label: string;
-  type: "chips" | "date-range" | "number-range" | "text" | "date";
-  options?: { id: string; label: string }[]; // For chips type
+  type: "chips" | "date-range" | "number-range" | "text" | "date" | "dropdown";
+  options?: { id: string; label: string }[]; // For chips or dropdown type
+  dropdownOptions?: IDropdownOption[]; // For dropdown type option mapping
   keyboardType?: KeyboardTypeOptions;
   isMultiSelect?: boolean;
   onFieldChange?: (
@@ -352,6 +354,56 @@ export default function FilterDrawer({
                       }));
                     }}
                   />
+                );
+              }
+
+              if (field.type === "dropdown") {
+                const rawVal = localValues[field.id];
+                const selectedVal = Array.isArray(rawVal)
+                  ? rawVal[0]
+                  : (rawVal as string) || "all";
+
+                const dropdownOptions: IDropdownOption[] =
+                  field.dropdownOptions ||
+                  field.options?.map((opt) => ({
+                    label: opt.label,
+                    value: opt.id,
+                  })) ||
+                  [];
+
+                return (
+                  <View key={field.id}>
+                    <Text
+                      style={{ fontSize: getResponsiveFontSize("sm") }}
+                      className="font-semibold text-accent capitalize mb-3"
+                    >
+                      {field.label}
+                    </Text>
+                    <Dropdown
+                      options={dropdownOptions}
+                      selectedValue={selectedVal}
+                      onSelect={(val) => {
+                        setLocalValues((prev) => {
+                          let updated: Record<string, unknown> = {
+                            ...prev,
+                            [field.id]: field.isMultiSelect ? [val] : val,
+                          };
+                          if (field.onFieldChange) {
+                            const sideEffects = field.onFieldChange(
+                              val,
+                              updated,
+                            );
+                            if (sideEffects) {
+                              updated = { ...updated, ...sideEffects };
+                            }
+                          }
+                          return updated;
+                        });
+                      }}
+                      placeholder={`Select ${field.label}`}
+                      triggerClassName="justify-between bg-base-100 border border-base-200 rounded-xl px-[3%] py-[3%]"
+                    />
+                  </View>
                 );
               }
 

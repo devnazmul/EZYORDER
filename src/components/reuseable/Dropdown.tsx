@@ -87,7 +87,11 @@ export default function Dropdown({
         ref={triggerRef as any}
         onPress={handleOpen}
         activeOpacity={0.75}
-        className={`flex-row items-center bg-base-200 border border-base-200 px-3 py-1.5 rounded-lg ${triggerClassName}`}
+        className={`flex-row items-center border border-base-200 px-3 py-1.5 rounded-lg ${
+          triggerClassName.includes("bg-")
+            ? triggerClassName
+            : `bg-base-200 ${triggerClassName}`
+        }`}
       >
         <Text
           style={{ fontSize: getResponsiveFontSize("xs") }}
