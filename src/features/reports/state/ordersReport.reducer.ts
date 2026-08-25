@@ -12,6 +12,7 @@ export const INITIAL_FILTER_VALUES: IOrderReportFilterValues = {
   customer_phone: "",
   table_number: "",
   date_range: { start: "", end: "" },
+  time_range: { start: "", end: "" },
   amount_range: { min: "", max: "" },
 };
 

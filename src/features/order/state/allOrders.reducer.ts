@@ -1,4 +1,4 @@
-import { IOrder } from "@/src/features/reports/types/order.types";
+import { IOrder } from "@/features/reports";
 import { IOrderFilterValues } from "../types/orderFilter.types";
 
 export interface IAllOrdersState {
@@ -27,6 +27,7 @@ export const defaultFilterValues: IOrderFilterValues = {
   customer_phone: "",
   table_number: "",
   date_range: { start: "", end: "" },
+  time_range: { start: "", end: "" },
   amount_range: { min: "", max: "" },
 };
 

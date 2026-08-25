@@ -52,6 +52,12 @@ export class ReportsService {
     if (filterValues.table_number) {
       p.table_number = filterValues.table_number;
     }
+    if (filterValues.time_range?.start) {
+      p.start_time = filterValues.time_range.start;
+    }
+    if (filterValues.time_range?.end) {
+      p.end_time = filterValues.time_range.end;
+    }
 
     return p;
   }

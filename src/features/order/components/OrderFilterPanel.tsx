@@ -142,7 +142,8 @@ export function OrderFilterPanel({
           };
         },
       },
-      { id: "date_range", label: "Custom Date Range", type: "date-range" },
+      { id: "date_range", label: "Date Range", type: "date-range" },
+      { id: "time_range", label: "Time Range", type: "time-range" },
       { id: "amount_range", label: "Price Range", type: "number-range" },
       {
         id: "customer_name",
@@ -195,6 +196,10 @@ export function OrderFilterPanel({
               customer_phone: "",
               table_number: "",
               date_range: {
+                start: "",
+                end: "",
+              },
+              time_range: {
                 start: "",
                 end: "",
               },

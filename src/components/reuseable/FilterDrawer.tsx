@@ -24,6 +24,8 @@ import DateField from "./inputs/DateField";
 import DateRangeField from "./inputs/DateRangeField";
 import NumberRangeField from "./inputs/NumberRangeField";
 import TextField from "./inputs/TextField";
+import TimePickerModal from "./TimePickerModal";
+import TimeRangeField from "./inputs/TimeRangeField";
 
 // 7. Constants / utils
 import { COLORS } from "@/constants/colors";
@@ -31,13 +33,24 @@ import { getResponsiveFontSize, HP, WP } from "@/utils/getResponsiveSizes";
 import { toggleMultiSelectValue } from "@/utils/toggleMultiSelectValue";
 
 export type IFilterFieldType =
-  "chips" | "date-range" | "number-range" | "text" | "date" | "dropdown";
+  | "chips"
+  | "date-range"
+  | "time-range"
+  | "number-range"
+  | "text"
+  | "date"
+  | "dropdown";
 
 export type IDatePickerType = "start" | "end" | "single";
 
 export interface IActiveDatePickerState {
   fieldId: string;
   type: IDatePickerType;
+}
+
+export interface IActiveTimePickerState {
+  fieldId: string;
+  type: "start" | "end";
 }
 
 export interface IFilterField {
@@ -132,6 +145,33 @@ function renderDateRangeField(
         setActiveDatePicker({ fieldId: field.id, type: "end" })
       }
       formatDateLabel={formatDateLabel}
+    />
+  );
+}
+
+function renderTimeRangeField(
+  field: IFilterField,
+  localValues: Record<string, unknown>,
+  setActiveTimePicker: (val: IActiveTimePickerState | null) => void,
+  formatTimeLabel: (timeStr?: string) => string,
+) {
+  const range = (localValues[field.id] as { start?: string; end?: string }) || {
+    start: "",
+    end: "",
+  };
+  return (
+    <TimeRangeField
+      key={field.id}
+      label={field.label}
+      startTimeValue={range.start}
+      endTimeValue={range.end}
+      onSelectStartTime={() =>
+        setActiveTimePicker({ fieldId: field.id, type: "start" })
+      }
+      onSelectEndTime={() =>
+        setActiveTimePicker({ fieldId: field.id, type: "end" })
+      }
+      formatTimeLabel={formatTimeLabel}
     />
   );
 }
@@ -259,7 +299,9 @@ interface IFilterDrawerFieldProps {
   setLocalValues: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
   handleChipSelect: (field: IFilterField, optionId: string) => void;
   setActiveDatePicker: (val: IActiveDatePickerState | null) => void;
+  setActiveTimePicker: (val: IActiveTimePickerState | null) => void;
   formatDateLabel: (dateStr?: string) => string;
+  formatTimeLabel: (timeStr?: string) => string;
 }
 
 function FilterDrawerField({
@@ -268,7 +310,9 @@ function FilterDrawerField({
   setLocalValues,
   handleChipSelect,
   setActiveDatePicker,
+  setActiveTimePicker,
   formatDateLabel,
+  formatTimeLabel,
 }: Readonly<IFilterDrawerFieldProps>) {
   switch (field.type) {
     case "chips":
@@ -279,6 +323,13 @@ function FilterDrawerField({
         localValues,
         setActiveDatePicker,
         formatDateLabel,
+      );
+    case "time-range":
+      return renderTimeRangeField(
+        field,
+        localValues,
+        setActiveTimePicker,
+        formatTimeLabel,
       );
     case "number-range":
       return renderNumberRangeField(field, localValues, setLocalValues);
@@ -314,6 +365,8 @@ export default function FilterDrawer({
     useState<Record<string, unknown>>(values);
   const [activeDatePicker, setActiveDatePicker] =
     useState<IActiveDatePickerState | null>(null);
+  const [activeTimePicker, setActiveTimePicker] =
+    useState<IActiveTimePickerState | null>(null);
 
   // Sync local values when drawer opens
   useEffect(() => {
@@ -387,12 +440,32 @@ export default function FilterDrawer({
     setActiveDatePicker(null);
   };
 
+  const handleTimeSelect = (timeStr: string) => {
+    if (!activeTimePicker) return;
+    const { fieldId, type } = activeTimePicker;
+
+    setLocalValues((prev) => {
+      const currentRange = (prev[fieldId] as {
+        start?: string;
+        end?: string;
+      }) || { start: "", end: "" };
+      return {
+        ...prev,
+        [fieldId]: {
+          ...currentRange,
+          [type]: timeStr,
+        },
+      };
+    });
+    setActiveTimePicker(null);
+  };
+
   const handleClear = () => {
     const cleared: Record<string, unknown> = {};
     fields.forEach((f) => {
       if (f.type === "chips" || f.type === "dropdown") {
         cleared[f.id] = f.isMultiSelect ? ["all"] : "all";
-      } else if (f.type === "date-range") {
+      } else if (f.type === "date-range" || f.type === "time-range") {
         cleared[f.id] = { start: "", end: "" };
       } else if (f.type === "number-range") {
         cleared[f.id] = { min: "", max: "" };
@@ -415,12 +488,23 @@ export default function FilterDrawer({
     return parsed.isValid() ? parsed.format("MMM D, YYYY") : dateStr;
   };
 
+  const formatTimeLabel = (timeStr?: string) => {
+    if (!timeStr) return "Select Time";
+    return timeStr;
+  };
+
   const activeDateValue = useMemo(() => {
     if (!activeDatePicker) return undefined;
     const val = localValues[activeDatePicker.fieldId];
     if (activeDatePicker.type === "single") return val as string;
     return (val as { start?: string; end?: string })?.[activeDatePicker.type];
   }, [activeDatePicker, localValues]);
+
+  const activeTimeValue = useMemo(() => {
+    if (!activeTimePicker) return undefined;
+    const val = localValues[activeTimePicker.fieldId];
+    return (val as { start?: string; end?: string })?.[activeTimePicker.type];
+  }, [activeTimePicker, localValues]);
 
   return (
     <>
@@ -479,7 +563,9 @@ export default function FilterDrawer({
                 setLocalValues={setLocalValues}
                 handleChipSelect={handleChipSelect}
                 setActiveDatePicker={setActiveDatePicker}
+                setActiveTimePicker={setActiveTimePicker}
                 formatDateLabel={formatDateLabel}
+                formatTimeLabel={formatTimeLabel}
               />
             ))}
           </View>
@@ -512,6 +598,16 @@ export default function FilterDrawer({
           onClose={() => setActiveDatePicker(null)}
           selectedDate={activeDateValue}
           onSelectDate={handleDateSelect}
+        />
+      )}
+
+      {/* Embedded Time Picker Modal */}
+      {activeTimePicker && (
+        <TimePickerModal
+          visible={true}
+          onClose={() => setActiveTimePicker(null)}
+          selectedTime={activeTimeValue}
+          onSelectTime={handleTimeSelect}
         />
       )}
     </>
