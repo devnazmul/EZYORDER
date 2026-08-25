@@ -30,7 +30,7 @@ export interface IDropdownOption {
 export interface IDropdownProps {
   options: IDropdownOption[];
   selectedValue?: string | string[];
-  onSelect?: (value: any) => void;
+  onSelect?: (value: string | string[]) => void;
   isMultiSelect?: boolean;
   placeholder?: string;
   triggerClassName?: string;
