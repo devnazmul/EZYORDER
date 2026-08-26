@@ -1,6 +1,6 @@
 import { REPORT_KEYS } from "@/constants";
 import { useAuth } from "@/hooks";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   getAllOrdersForReports,
   getCustomers,
@@ -91,14 +91,29 @@ export const useOrderTypeReportQuery = (params: IOrderTypeReportParams) => {
   });
 };
 
-export const useOrdersReportListQuery = (
+export const useOrdersReportListInfiniteQuery = (
   params: IOrdersReportParams,
   options?: { enabled?: boolean },
 ) => {
   const { token } = useAuth();
-  return useQuery({
-    queryKey: REPORT_KEYS.ordersReportList({ token, ...params }),
-    queryFn: () => getAllOrdersForReports(params),
+  // Omit page parameter from query key so all pages share the same query cache
+  const { page, ...paramsWithoutPage } = params;
+
+  return useInfiniteQuery({
+    queryKey: REPORT_KEYS.ordersReportList({ token, ...paramsWithoutPage }),
+    queryFn: ({ pageParam = 1 }) =>
+      getAllOrdersForReports({
+        ...paramsWithoutPage,
+        page: Number(pageParam),
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || !lastPage.meta) return undefined;
+      const { current_page, total_pages } = lastPage.meta;
+      const currentPageNum = Number(current_page);
+      const totalPagesNum = Number(total_pages);
+      return currentPageNum < totalPagesNum ? currentPageNum + 1 : undefined;
+    },
     enabled: !!token && (options?.enabled ?? true),
   });
 };
