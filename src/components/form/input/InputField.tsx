@@ -1,16 +1,25 @@
-import COLORS from "@/constants/colors";
-import { getResponsiveFontSize, HP } from "@/utils/getResponsiveSizes";
-import { MaterialIcons } from "@expo/vector-icons";
+// 1. React / React Native
 import React, { useState } from "react";
-import { Controller, useFormContext } from "react-hook-form";
 import {
   TextInput,
   TextInputProps,
   TouchableOpacity,
   View,
 } from "react-native";
+
+// 2. Expo / Navigation
+import { MaterialIcons } from "@expo/vector-icons";
+
+// 3. External libraries
+import { Controller, useFormContext } from "react-hook-form";
+
+// 4. Shared components
 import InputError from "./InputError";
 import InputLabel from "./InputLabel";
+
+// 7. Constants / utils
+import { COLORS } from "@/constants/colors";
+import { getResponsiveFontSize, HP } from "@/utils/getResponsiveSizes";
 
 export interface IInputFieldProps extends TextInputProps {
   readonly name: string;
@@ -91,10 +100,10 @@ export default function InputField({
                   secureTextEntry={isPassword && !isVisible}
                   placeholderTextColor={COLORS.accent}
                   className="flex-1 text-neutral h-full outline-none"
-                  style={{
-                    fontSize: getResponsiveFontSize("sm"),
-                    ...((textInputProps.style as any) || {}),
-                  }}
+                  style={[
+                    { fontSize: getResponsiveFontSize("sm") },
+                    textInputProps.style,
+                  ]}
                   autoCapitalize={textInputProps.autoCapitalize || "none"}
                   autoCorrect={textInputProps.autoCorrect ?? false}
                 />
@@ -102,6 +111,10 @@ export default function InputField({
                 {isPassword && (
                   <TouchableOpacity
                     onPress={() => setIsVisible(!isVisible)}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      isVisible ? "Hide password" : "Show password"
+                    }
                     className="p-2"
                   >
                     <MaterialIcons

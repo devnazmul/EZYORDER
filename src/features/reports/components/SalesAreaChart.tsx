@@ -3,9 +3,11 @@ import React, { useMemo } from "react";
 import { Text, useWindowDimensions, View } from "react-native";
 
 // 3. External libraries
+import dayjs from "dayjs";
 import { LineChart } from "react-native-gifted-charts";
 
 // 4. Shared components
+import { DropdownField } from "@/components/form/input";
 import {
   EmptyState,
   ErrorState,
@@ -53,28 +55,11 @@ const formatLabel = (label: string, groupBy: string = "day") => {
     }
   }
 
-  // Format YYYY-MM-DD to short date
-  let match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(label);
-  if (match) {
-    const [, year, month, day] = match;
-    const d = new Date(
-      Number.parseInt(year, 10),
-      Number.parseInt(month, 10) - 1,
-      Number.parseInt(day, 10),
-    );
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const d = dayjs(label);
+  if (d.isValid()) {
+    return d.format("MMM D");
   }
-  // Format DD-MM-YYYY to short date
-  match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(label);
-  if (match) {
-    const [, day, month, year] = match;
-    const d = new Date(
-      Number.parseInt(year, 10),
-      Number.parseInt(month, 10) - 1,
-      Number.parseInt(day, 10),
-    );
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  }
+
   return label;
 };
 
@@ -94,7 +79,7 @@ function PointerLabel({ items, currencySymbol }: IPointerLabelProps) {
   return (
     <View
       style={{
-        backgroundColor: "#1F2937",
+        backgroundColor: COLORS.accent,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
@@ -102,7 +87,7 @@ function PointerLabel({ items, currencySymbol }: IPointerLabelProps) {
         justifyContent: "center",
         minWidth: 80,
         marginBottom: 6,
-        shadowColor: "#000",
+        shadowColor: COLORS.neutral,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1.5,
@@ -251,9 +236,21 @@ export default function SalesAreaChart({
           </Text>
         </View>
       }
-      dropdownOptions={onGroupByChange ? GROUP_BY_OPTIONS : undefined}
-      selectedDropdownValue={groupBy}
-      onDropdownSelect={(val) => onGroupByChange?.(val as IGroupBy)}
+      headerRight={
+        onGroupByChange ? (
+          <DropdownField
+            dropdownOptions={GROUP_BY_OPTIONS}
+            selectedValue={groupBy}
+            onSelect={(val) =>
+              onGroupByChange?.(
+                (Array.isArray(val) ? val[0] || "" : val) as IGroupBy,
+              )
+            }
+            className="max-w-[200px]"
+            triggerClassName="justify-between bg-base-200 border border-base-200 px-3 py-1.5 rounded-lg"
+          />
+        ) : undefined
+      }
       isLoading={isLoading}
       skeleton={<SalesAreaChartSkeleton />}
       containerClassName={containerClassName}
