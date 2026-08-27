@@ -8,9 +8,6 @@ import {
   ViewStyle,
 } from "react-native";
 
-// 4. Shared components
-import Dropdown, { IDropdownOption } from "../Dropdown";
-
 // 7. Constants / utils
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 
@@ -19,10 +16,6 @@ import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 export interface IActionCardProps {
   title?: string | React.ReactNode;
   headerRight?: React.ReactNode;
-  dropdownOptions?: IDropdownOption[];
-  selectedDropdownValue?: string;
-  onDropdownSelect?: (value: string) => void;
-  dropdownPlaceholder?: string;
   children?: React.ReactNode;
   actionLabel?: string;
   onActionPress?: () => void;
@@ -42,10 +35,6 @@ export interface IActionCardProps {
 export default function ActionCard({
   title,
   headerRight,
-  dropdownOptions,
-  selectedDropdownValue,
-  onDropdownSelect,
-  dropdownPlaceholder,
   children,
   actionLabel,
   onActionPress,
@@ -78,17 +67,6 @@ export default function ActionCard({
     );
   }
 
-  const rightContent =
-    headerRight ??
-    (dropdownOptions && dropdownOptions.length > 0 ? (
-      <Dropdown
-        options={dropdownOptions}
-        selectedValue={selectedDropdownValue}
-        onSelect={onDropdownSelect}
-        placeholder={dropdownPlaceholder}
-      />
-    ) : null);
-
   let renderedFooter: React.ReactNode = null;
   if (actionElement) {
     renderedFooter = actionElement;
@@ -97,6 +75,8 @@ export default function ActionCard({
       <TouchableOpacity
         onPress={onActionPress}
         activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityLabel={actionLabel}
         className={`w-full items-center justify-center border-t border-base-200 bg-primary py-4 ${actionClassName}`}
       >
         <Text
@@ -114,7 +94,7 @@ export default function ActionCard({
       className={`bg-base-300 rounded-xl overflow-hidden border border-base-200 shadow-sm ${containerClassName}`}
     >
       {/* Title Header */}
-      {title || rightContent ? (
+      {title || headerRight ? (
         <View
           style={{ paddingHorizontal: WP("4%") }}
           className={`border-b border-base-200 flex-row justify-between items-center py-4 ${headerClassName}`}
@@ -129,7 +109,7 @@ export default function ActionCard({
           ) : (
             title
           )}
-          {rightContent}
+          {headerRight}
         </View>
       ) : null}
 
