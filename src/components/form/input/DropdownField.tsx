@@ -18,12 +18,13 @@ import { Controller, useFormContext } from "react-hook-form";
 // 4. Shared components
 import Badge from "@/components/reuseable/Badge";
 import InputError from "./InputError";
+import InputLabel from "./InputLabel";
 
 // 7. Constants / utils
-import { handleFieldSideEffects } from "./handleFieldSideEffects";
 import { COLORS } from "@/constants/colors";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { toggleMultiSelectValue } from "@/utils/toggleMultiSelectValue";
+import { handleFieldSideEffects } from "./handleFieldSideEffects";
 
 // ==================== TYPES ====================
 
@@ -155,14 +156,7 @@ function DropdownView({
 
   return (
     <View className={className || "w-full"}>
-      {Boolean(label) && (
-        <Text
-          style={{ fontSize: getResponsiveFontSize("sm") }}
-          className="font-semibold text-accent capitalize mb-3"
-        >
-          {label}
-        </Text>
-      )}
+      <InputLabel label={label} className="capitalize mb-3" />
 
       <TouchableOpacity
         ref={triggerRef}

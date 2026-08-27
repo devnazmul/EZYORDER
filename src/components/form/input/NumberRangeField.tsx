@@ -7,11 +7,12 @@ import { Controller, useFormContext } from "react-hook-form";
 
 // 4. Shared components
 import InputError from "./InputError";
+import InputLabel from "./InputLabel";
 
 // 7. Constants / utils
-import { handleFieldSideEffects } from "./handleFieldSideEffects";
 import { COLORS } from "@/constants/colors";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { handleFieldSideEffects } from "./handleFieldSideEffects";
 
 export interface INumberRangeFieldProps {
   readonly name: string;
@@ -105,14 +106,7 @@ export default function NumberRangeField({
 
         return (
           <View className={`w-full ${className}`}>
-            {Boolean(label) && (
-              <Text
-                style={{ fontSize: getResponsiveFontSize("sm") }}
-                className="font-semibold text-accent capitalize mb-3"
-              >
-                {label}
-              </Text>
-            )}
+            <InputLabel label={label} className="capitalize mb-3" />
             <View className="flex-row items-center gap-3">
               <NumberItemInput
                 label={minLabel}

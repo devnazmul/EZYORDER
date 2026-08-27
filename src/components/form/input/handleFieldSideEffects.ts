@@ -1,5 +1,6 @@
 import {
   FieldValues,
+  Path,
   UseFormGetValues,
   UseFormSetValue,
 } from "react-hook-form";
@@ -16,21 +17,15 @@ export function handleFieldSideEffects<
 ): void {
   if (!onFieldChange) return;
 
-  const currentFormValues = getValues();
   const updatedFormValues = {
-    ...currentFormValues,
+    ...getValues(),
     [name]: val,
-  } as unknown as TForm;
+  } as TForm;
 
   const sideEffects = onFieldChange(val, updatedFormValues);
-  if (sideEffects) {
-    Object.keys(sideEffects).forEach((key) => {
-      setValue(
-        key as Parameters<typeof setValue>[0],
-        sideEffects[key as keyof typeof sideEffects] as Parameters<
-          typeof setValue
-        >[1],
-      );
-    });
-  }
+  if (!sideEffects) return;
+
+  Object.entries(sideEffects).forEach(([key, value]) => {
+    setValue(key as Path<TForm>, value as TForm[Path<TForm>]);
+  });
 }

@@ -1,6 +1,6 @@
 // 1. React / React Native
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 // 3. External libraries
 import { Controller, useFormContext } from "react-hook-form";
@@ -8,11 +8,11 @@ import { Controller, useFormContext } from "react-hook-form";
 // 4. Shared components
 import FilterChips from "@/components/reuseable/FilterChips";
 import InputError from "./InputError";
+import InputLabel from "./InputLabel";
 
 // 7. Constants / utils
-import { handleFieldSideEffects } from "./handleFieldSideEffects";
-import { getResponsiveFontSize } from "@/utils/getResponsiveSizes";
 import { toggleMultiSelectValue } from "@/utils/toggleMultiSelectValue";
+import { handleFieldSideEffects } from "./handleFieldSideEffects";
 
 export interface IChipsFieldProps {
   readonly name: string;
@@ -79,14 +79,7 @@ export default function ChipsField({
 
         return (
           <View className={`w-full ${className}`}>
-            {Boolean(label) && (
-              <Text
-                style={{ fontSize: getResponsiveFontSize("sm") }}
-                className="font-semibold text-accent capitalize mb-3"
-              >
-                {label}
-              </Text>
-            )}
+            <InputLabel label={label} className="capitalize mb-3" />
             <FilterChips
               chips={options}
               selectedId={selectedId}
