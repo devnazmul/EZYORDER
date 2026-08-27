@@ -180,12 +180,10 @@ export function OrderFilterPanel({
           keyboardType="numeric"
           containerClassName="flex-1 rounded-xl py-2"
         />
-        <FilterDrawer
+        <FilterDrawer<IOrderFilterValues>
           fields={filterFields}
-          values={filterValues as unknown as Record<string, unknown>}
-          onApply={(values) =>
-            setFilterValues(values as unknown as IOrderFilterValues)
-          }
+          values={filterValues}
+          onApply={setFilterValues}
           onClear={() => {
             setFilterValues({
               period: "All Time",
