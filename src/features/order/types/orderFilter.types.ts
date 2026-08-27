@@ -7,6 +7,7 @@ export interface IOrderFilterValues {
   customer_phone: string;
   table_number: string;
   date_range: { start: string; end: string };
+  time_range?: { start: string; end: string };
   amount_range: { min: string; max: string };
   exclude_status?: string;
   date_filter?: string;

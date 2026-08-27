@@ -74,6 +74,12 @@ export class OrderService {
       if (dateRange.end) params.to_date = dateRange.end;
     }
 
+    const timeRange = filterValues.time_range;
+    if (timeRange) {
+      if (timeRange.start) params.start_time = timeRange.start;
+      if (timeRange.end) params.end_time = timeRange.end;
+    }
+
     const amtRange = filterValues.amount_range;
     if (amtRange) {
       if (amtRange.min) params.min_amount = amtRange.min;

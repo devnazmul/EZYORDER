@@ -18,7 +18,7 @@ import {
   useTodayOrdersQuery,
 } from "../hooks/queries/useOrderQueries";
 import { OrderService } from "../services/orderService";
-import { IOrder } from "@/src/features/reports/types/order.types";
+import { IOrder } from "@/features/reports";
 import {
   allOrdersReducer,
   defaultFilterValues,

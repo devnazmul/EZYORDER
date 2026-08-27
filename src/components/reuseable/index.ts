@@ -9,6 +9,15 @@ export { default as BrandAlertModal } from "./BrandAlertModal";
 export { default as BrandPopupModal } from "./BrandPopupModal";
 export { default as Button } from "./Button";
 export { default as DatePickerModal } from "./DatePickerModal";
+export { default as TimePickerModal } from "./TimePickerModal";
+
+// ...
+// Inputs
+export { default as DateField } from "./inputs/DateField";
+export { default as DateRangeField } from "./inputs/DateRangeField";
+export { default as NumberRangeField } from "./inputs/NumberRangeField";
+export { default as TextField } from "./inputs/TextField";
+export { default as TimeRangeField } from "./inputs/TimeRangeField";
 export {
   default as DoughnutChart,
   type IDoughnutChartItem,
@@ -47,12 +56,6 @@ export {
 // Dashboard
 export { default as KpiCard } from "./dashboard/KpiCard";
 export { default as LiveOrderBoard } from "./dashboard/LiveOrderBoard";
-
-// Inputs
-export { default as DateField } from "./inputs/DateField";
-export { default as DateRangeField } from "./inputs/DateRangeField";
-export { default as NumberRangeField } from "./inputs/NumberRangeField";
-export { default as TextField } from "./inputs/TextField";
 
 // Skeletons
 export { default as DealCardSkeleton } from "../../features/menu/components/skeletons/DealCardSkeleton";

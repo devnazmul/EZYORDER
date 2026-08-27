@@ -142,7 +142,8 @@ export function OrderFilterPanel({
           };
         },
       },
-      { id: "date_range", label: "Custom Date Range", type: "date-range" },
+      { id: "date_range", label: "Date Range", type: "date-range" },
+      { id: "time_range", label: "Time Range", type: "time-range" },
       { id: "amount_range", label: "Price Range", type: "number-range" },
       {
         id: "customer_name",
@@ -179,12 +180,10 @@ export function OrderFilterPanel({
           keyboardType="numeric"
           containerClassName="flex-1 rounded-xl py-2"
         />
-        <FilterDrawer
+        <FilterDrawer<IOrderFilterValues>
           fields={filterFields}
-          values={filterValues as unknown as Record<string, unknown>}
-          onApply={(values) =>
-            setFilterValues(values as unknown as IOrderFilterValues)
-          }
+          values={filterValues}
+          onApply={setFilterValues}
           onClear={() => {
             setFilterValues({
               period: "All Time",
@@ -195,6 +194,10 @@ export function OrderFilterPanel({
               customer_phone: "",
               table_number: "",
               date_range: {
+                start: "",
+                end: "",
+              },
+              time_range: {
                 start: "",
                 end: "",
               },
