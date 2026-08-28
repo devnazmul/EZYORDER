@@ -26,7 +26,7 @@ export { default as FilterDrawer, type IFilterField } from "./FilterDrawer";
 export { default as LabelValueRow } from "./LabelValueRow";
 export { default as LoadingScreen } from "./LoadingScreen";
 export { default as MenuCard } from "./MenuCard";
-export { default as PageTitle } from "./PageTitle";
+export { default as PageTitle, type IPageTitleProps } from "./PageTitle";
 export { default as RefreshableScrollView } from "./RefreshableScrollView";
 export {
   default as ScreenContainer,

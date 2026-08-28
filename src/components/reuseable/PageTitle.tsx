@@ -1,23 +1,37 @@
-import COLORS from "@/constants/colors";
-import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
-import { MaterialIcons } from "@expo/vector-icons";
+// 1. React / React Native
 import React from "react";
 import { Text, View } from "react-native";
 
-interface PageTitleProps {
+// 2. Expo / Navigation
+import { MaterialIcons } from "@expo/vector-icons";
+
+// 7. Constants/utils
+import { COLORS } from "@/constants/colors";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+
+export interface IPageTitleProps {
   title: string;
   icon: keyof typeof MaterialIcons.glyphMap;
   badgeCount?: number;
   description?: string;
 }
 
-export default function PageTitle({ title, icon, badgeCount, description }: PageTitleProps) {
+export default function PageTitle({
+  title,
+  icon,
+  badgeCount,
+  description,
+}: Readonly<IPageTitleProps>) {
   return (
     <View className="flex-row items-start gap-3 mb-4">
       <View className="bg-primary/10 p-3 rounded-lg">
-        <MaterialIcons name={icon} size={description ? WP("6%") : WP("5%")} color={COLORS.primary} />
+        <MaterialIcons
+          name={icon}
+          size={description ? WP("6%") : WP("5%")}
+          color={COLORS.primary}
+        />
       </View>
-      <View className="">
+      <View className="flex-1">
         <View className="flex-row items-center gap-2">
           <Text
             style={{ fontSize: getResponsiveFontSize("lg") }}
@@ -27,14 +41,21 @@ export default function PageTitle({ title, icon, badgeCount, description }: Page
           </Text>
           {badgeCount !== undefined && badgeCount > 0 && (
             <View className="bg-primary px-2.5 py-0.5 rounded-lg items-center justify-center">
-              <Text style={{ fontSize: getResponsiveFontSize("xs") }} className="text-white font-bold">
+              <Text
+                style={{ fontSize: getResponsiveFontSize("xs") }}
+                className="text-white font-bold"
+              >
                 {badgeCount}
               </Text>
             </View>
           )}
         </View>
-        {description !== undefined && description && (
-          <Text numberOfLines={2} style={{ fontSize: getResponsiveFontSize("sm") }} className="text-accent">
+        {description !== undefined && !!description && (
+          <Text
+            numberOfLines={2}
+            style={{ fontSize: getResponsiveFontSize("sm") }}
+            className="text-accent"
+          >
             {description}
           </Text>
         )}
