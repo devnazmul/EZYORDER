@@ -1,7 +1,93 @@
-import { IOrdersReportParams } from "../types";
+import { type IDoughnutChartItem } from "@/components/reuseable";
+import {
+  formatLabel,
+  getOrderTypeColor,
+  getPaymentMethodsConfig,
+} from "@/utils";
 import { IOrderReportFilterValues } from "../state/ordersReport.reducer";
+import {
+  IOrdersReportParams,
+  IPaymentSummaryData,
+  ISalesByOrderTypeItem,
+} from "../types";
 
 export class ReportsService {
+  /**
+   * Processes payment summary data into formatted doughnut chart items & total
+   */
+  static getPaymentChartData(
+    paymentSummary?: IPaymentSummaryData | null,
+    paymentConfigs = getPaymentMethodsConfig(),
+  ): { total: number; chartItems: IDoughnutChartItem[] } {
+    const cash = Number(paymentSummary?.cash ?? 0);
+    const card = Number(paymentSummary?.card ?? 0);
+    const online = Number(paymentSummary?.online ?? 0);
+
+    const total = Number(paymentSummary?.total ?? cash + card + online);
+
+    const chartItems: IDoughnutChartItem[] = paymentConfigs.map((config) => {
+      const rawValue =
+        paymentSummary?.[config.key as keyof IPaymentSummaryData];
+      const value = Number(rawValue ?? 0);
+      const percent =
+        total > 0 ? Math.min(Math.round((value / total) * 100), 100) : 0;
+
+      return {
+        label: config.label,
+        value,
+        color: config.color,
+        legendValue: `${percent}%`,
+      };
+    });
+
+    return { total, chartItems };
+  }
+
+  /**
+   * Processes sales by order type data into formatted doughnut chart items & total amount
+   */
+  static getRevenueByOrderTypeChartData(
+    orderTypeData?: ISalesByOrderTypeItem[] | Record<string, unknown> | null,
+    netSales = 0,
+  ): {
+    totalAmount: number;
+    chartItems: IDoughnutChartItem[];
+    isEmpty: boolean;
+  } {
+    const list: ISalesByOrderTypeItem[] = Array.isArray(orderTypeData)
+      ? orderTypeData
+      : [];
+
+    const totalAmount = list.reduce(
+      (acc: number, item: ISalesByOrderTypeItem) =>
+        acc + Number(item.total_sales || item.amount || item.value || 0),
+      0,
+    );
+
+    const chartItems: IDoughnutChartItem[] = list.map(
+      (item: ISalesByOrderTypeItem) => {
+        const val = Number(item.total_sales || item.amount || item.value || 0);
+        const label = formatLabel(item.order_type || "");
+        const typeColor = getOrderTypeColor(item.order_type || "");
+        const percent =
+          netSales > 0 ? Math.min(Math.round((val / netSales) * 100), 100) : 0;
+
+        return {
+          label,
+          value: val,
+          color: typeColor,
+          legendValue: `${percent}%`,
+        };
+      },
+    );
+
+    return {
+      totalAmount,
+      chartItems,
+      isEmpty: list.length === 0,
+    };
+  }
+
   /**
    * Build query parameters for orders report list API
    */
