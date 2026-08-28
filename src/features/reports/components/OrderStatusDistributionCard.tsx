@@ -1,10 +1,20 @@
-import { DoughnutChart, type IDoughnutChartItem } from "@/components/reuseable";
+// 1. React / React Native
+import React from "react";
+import { View } from "react-native";
+
+// 4. Shared components
+import { DoughnutChart, EmptyState } from "@/components/reuseable";
 import ActionCard from "@/components/reuseable/cards/ActionCard";
-import { getResponsiveFontSize, WP } from "@/utils";
-import React, { useMemo } from "react";
-import { Text, View } from "react-native";
-import { IOrderSummaryData } from "../types";
+
+// 5. Feature components/services
+import { OrderReportsService } from "../services/orderReportsService";
 import OrderStatusDistributionSkeleton from "./skeletons/OrderStatusDistributionSkeleton";
+
+// 6. Types
+import { IOrderSummaryData } from "../types";
+
+// 7. Constants/utils
+import { WP } from "@/utils";
 
 export interface IOrderStatusDistributionCardProps {
   summaryData: IOrderSummaryData | null | undefined;
@@ -17,45 +27,8 @@ export default function OrderStatusDistributionCard({
   isLoading = false,
   containerClassName = "",
 }: Readonly<IOrderStatusDistributionCardProps>) {
-  const totalOrders = summaryData?.total_orders ?? 0;
-  const completedOrders = summaryData?.completed_orders ?? 0;
-  const pendingOrders =
-    summaryData?.pending?.total ?? summaryData?.pending?.pending ?? 0;
-  const cancelledOrders = summaryData?.cancelled?.total ?? 0;
-
-  const chartItems: IDoughnutChartItem[] = useMemo(() => {
-    const list: IDoughnutChartItem[] = [
-      {
-        value: completedOrders,
-        color: "#10B981", // Emerald
-        label: "Completed",
-        legendValue:
-          totalOrders > 0
-            ? `${Math.round((completedOrders / totalOrders) * 100)}%`
-            : "0%",
-      },
-      {
-        value: pendingOrders,
-        color: "#3B82F6", // Blue
-        label: "Pending",
-        legendValue:
-          totalOrders > 0
-            ? `${Math.round((pendingOrders / totalOrders) * 100)}%`
-            : "0%",
-      },
-      {
-        value: cancelledOrders,
-        color: "#EF4444", // Red
-        label: "Cancelled",
-        legendValue:
-          totalOrders > 0
-            ? `${Math.round((cancelledOrders / totalOrders) * 100)}%`
-            : "0%",
-      },
-    ].filter((item) => item.value > 0);
-
-    return list;
-  }, [completedOrders, pendingOrders, cancelledOrders, totalOrders]);
+  const { totalOrders, chartItems, isEmpty } =
+    OrderReportsService.getOrderStatusDistributionChartData(summaryData);
 
   return (
     <ActionCard
@@ -70,13 +43,12 @@ export default function OrderStatusDistributionCard({
       bodyStyle={{ padding: WP("3.5%") }}
     >
       <View className="items-center justify-center py-2">
-        {totalOrders === 0 || chartItems.length === 0 ? (
-          <Text
-            style={{ fontSize: getResponsiveFontSize("xs") }}
-            className="text-accent italic text-center py-4"
-          >
-            No order status data for this period.
-          </Text>
+        {isEmpty ? (
+          <EmptyState
+            icon="pie-chart"
+            description="No order status data for this period."
+            pyClassName="py-4"
+          />
         ) : (
           <View className="items-center w-full py-2">
             <DoughnutChart

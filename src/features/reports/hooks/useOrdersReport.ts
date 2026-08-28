@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks";
 
 // 5. Feature hooks / services / state
 import { useRestaurantQuery } from "@/features/restaurants";
-import { ReportsService } from "../services/reportsService";
+import { OrderReportsService } from "../services/orderReportsService";
 import {
   initialOrdersReportState,
   IOrderReportFilterValues,
@@ -68,8 +68,8 @@ export function useOrdersReport() {
     isRefetching: isRefetchingSummary,
   } = useOrderSummaryQuery(summaryParams);
 
-  // API Params for Paginated Orders List via ReportsService
-  const ordersListParams = ReportsService.buildOrdersListParams(
+  // API Params for Paginated Orders List via OrderReportsService
+  const ordersListParams = OrderReportsService.buildOrdersListParams(
     restaurantId,
     page,
     resolvedDateRange,

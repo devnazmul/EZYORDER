@@ -7,7 +7,7 @@ import { DoughnutChart, EmptyState, ErrorState } from "@/components/reuseable";
 import ActionCard from "@/components/reuseable/cards/ActionCard";
 
 // 5. Feature components/services
-import { ReportsService } from "../services/reportsService";
+import { SalesReportsService } from "../services/salesReportsService";
 import SalesByPaymentSkeleton from "./skeletons/SalesByPaymentSkeleton";
 
 // 6. Types
@@ -35,7 +35,7 @@ export default function SalesByPaymentCard({
   containerClassName = "",
 }: Readonly<ISalesByPaymentCardProps>) {
   const { total, chartItems } =
-    ReportsService.getPaymentChartData(paymentSummary);
+    SalesReportsService.getPaymentChartData(paymentSummary);
 
   const renderContent = () => {
     if (isError) {

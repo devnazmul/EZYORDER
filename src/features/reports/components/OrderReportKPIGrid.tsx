@@ -5,10 +5,14 @@ import { View } from "react-native";
 // 4. Shared components
 import { KpiCard } from "@/components/reuseable";
 
+// 5. Feature components/services
+import { OrderReportsService } from "../services/orderReportsService";
+
 // 6. Types
 import { IOrderSummaryData } from "../types";
 
 // 7. Constants/utils
+import { COLORS } from "@/constants/colors";
 import { formatAmount } from "@/utils";
 
 export interface IOrderReportKPIGridProps {
@@ -22,14 +26,15 @@ export default function OrderReportKPIGrid({
   currencySymbol,
   isLoading,
 }: Readonly<IOrderReportKPIGridProps>) {
-  const grossSales = summaryData?.sales?.completed_gross_sales ?? 0;
-  const netSales = summaryData?.sales?.completed_net_sales ?? 0;
-  const totalOrders = summaryData?.total_orders ?? 0;
-  const completedOrders = summaryData?.completed_orders ?? 0;
-  const pendingOrders =
-    summaryData?.pending?.total ?? summaryData?.pending?.pending ?? 0;
-  const cancelledOrders = summaryData?.cancelled?.total ?? 0;
-  const avgOrderValue = summaryData?.sales?.average_order_value ?? 0;
+  const {
+    grossSales,
+    netSales,
+    totalOrders,
+    completedOrders,
+    pendingOrders,
+    cancelledOrders,
+    avgOrderValue,
+  } = OrderReportsService.getKPIMetrics(summaryData);
 
   return (
     <View className="flex-col gap-y-3">
@@ -44,7 +49,7 @@ export default function OrderReportKPIGrid({
           gradientColors={["#111827", "#0F172A"]}
           icon="currency-pound"
           iconColor="#FFFFFF"
-          iconBgColor="#10B981"
+          iconBgColor={COLORS.amount.total}
           subtitle="Gross sales for selected period"
         />
       </View>
@@ -57,9 +62,9 @@ export default function OrderReportKPIGrid({
           title="Total Orders"
           value={Number(totalOrders).toLocaleString()}
           icon="shopping-bag"
-          iconColor="#059669"
-          iconBgColor="#ECFDF5"
-          textColor="#059669"
+          iconColor={COLORS.amount.total}
+          iconBgColor={`${COLORS.amount.total}15`}
+          textColor={COLORS.amount.total}
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
         />
@@ -69,9 +74,9 @@ export default function OrderReportKPIGrid({
           title="Completed"
           value={Number(completedOrders).toLocaleString()}
           icon="check-circle"
-          iconColor="#3B82F6"
-          iconBgColor="#EFF6FF"
-          textColor="#3B82F6"
+          iconColor={COLORS.orderStatus.completed}
+          iconBgColor={`${COLORS.orderStatus.completed}15`}
+          textColor={COLORS.orderStatus.completed}
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
         />
@@ -85,9 +90,9 @@ export default function OrderReportKPIGrid({
           title="Pending Orders"
           value={Number(pendingOrders).toLocaleString()}
           icon="pending-actions"
-          iconColor="#F59E0B"
-          iconBgColor="#FFFBEB"
-          textColor="#F59E0B"
+          iconColor={COLORS.orderStatus.pending}
+          iconBgColor={`${COLORS.orderStatus.pending}15`}
+          textColor={COLORS.orderStatus.pending}
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
         />
@@ -97,9 +102,9 @@ export default function OrderReportKPIGrid({
           title="Cancelled Orders"
           value={Number(cancelledOrders).toLocaleString()}
           icon="cancel"
-          iconColor="#EF4444"
-          iconBgColor="#FEF2F2"
-          textColor="#EF4444"
+          iconColor={COLORS.orderStatus.cancelled}
+          iconBgColor={`${COLORS.orderStatus.cancelled}15`}
+          textColor={COLORS.orderStatus.cancelled}
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
         />
@@ -113,9 +118,9 @@ export default function OrderReportKPIGrid({
           title="Net Sales"
           value={formatAmount(netSales, currencySymbol)}
           icon="account-balance-wallet"
-          iconColor="#0D9488"
-          iconBgColor="#CCFBF1"
-          textColor="#0D9488"
+          iconColor={COLORS.amount.net}
+          iconBgColor={`${COLORS.amount.net}15`}
+          textColor={COLORS.amount.net}
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
         />
@@ -125,9 +130,9 @@ export default function OrderReportKPIGrid({
           title="Avg Order Value"
           value={formatAmount(avgOrderValue, currencySymbol)}
           icon="analytics"
-          iconColor="#8B5CF6"
-          iconBgColor="#F5F3FF"
-          textColor="#8B5CF6"
+          iconColor={COLORS.amount.average}
+          iconBgColor={`${COLORS.amount.average}15`}
+          textColor={COLORS.amount.average}
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
         />

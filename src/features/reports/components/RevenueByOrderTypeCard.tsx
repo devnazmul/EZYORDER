@@ -7,7 +7,7 @@ import { DoughnutChart, EmptyState, ErrorState } from "@/components/reuseable";
 import ActionCard from "@/components/reuseable/cards/ActionCard";
 
 // 5. Feature components/services
-import { ReportsService } from "../services/reportsService";
+import { SalesReportsService } from "../services/salesReportsService";
 import RevenueByOrderTypeSkeleton from "./skeletons/RevenueByOrderTypeSkeleton";
 
 // 6. Types
@@ -37,7 +37,7 @@ export default function RevenueByOrderTypeCard({
   containerClassName = "",
 }: Readonly<IRevenueByOrderTypeCardProps>) {
   const { totalAmount, chartItems, isEmpty } =
-    ReportsService.getRevenueByOrderTypeChartData(orderTypeData, netSales);
+    SalesReportsService.getRevenueByOrderTypeChartData(orderTypeData, netSales);
 
   const totalDisplay = formatAmount(totalAmount || netSales, currencySymbol);
 
