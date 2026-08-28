@@ -3,13 +3,11 @@ import React from "react";
 import { View } from "react-native";
 
 // 4. Shared components
-import { EmptyState, ErrorState } from "@/components/reuseable";
+import { DoughnutChart, EmptyState, ErrorState } from "@/components/reuseable";
 import ActionCard from "@/components/reuseable/cards/ActionCard";
-import DoughnutChart, {
-  IDoughnutChartItem,
-} from "@/components/reuseable/DoughnutChart";
 
-// 5. Feature components/hooks
+// 5. Feature components/services
+import { SalesReportsService } from "../services/salesReportsService";
 import RevenueByOrderTypeSkeleton from "./skeletons/RevenueByOrderTypeSkeleton";
 
 // 6. Types
@@ -18,7 +16,6 @@ import type { ISalesByOrderTypeItem } from "../types";
 // 7. Constants/utils
 import { formatAmount } from "@/utils/formatters";
 import { WP } from "@/utils/getResponsiveSizes";
-import { getOrderTypeColor } from "@/utils/orderTypeColors";
 
 export interface IRevenueByOrderTypeCardProps {
   orderTypeData?: ISalesByOrderTypeItem[] | Record<string, unknown> | null;
@@ -30,10 +27,6 @@ export interface IRevenueByOrderTypeCardProps {
   containerClassName?: string;
 }
 
-const formatLabel = (type: string) => {
-  return type.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-};
-
 export default function RevenueByOrderTypeCard({
   orderTypeData,
   netSales = 0,
@@ -43,33 +36,10 @@ export default function RevenueByOrderTypeCard({
   onRetry,
   containerClassName = "",
 }: Readonly<IRevenueByOrderTypeCardProps>) {
-  const list: ISalesByOrderTypeItem[] = Array.isArray(orderTypeData)
-    ? orderTypeData
-    : [];
+  const { totalAmount, chartItems, isEmpty } =
+    SalesReportsService.getRevenueByOrderTypeChartData(orderTypeData, netSales);
 
-  const totalAmount = list.reduce(
-    (acc: number, item: ISalesByOrderTypeItem) =>
-      acc + Number(item.total_sales || item.amount || item.value || 0),
-    0,
-  );
   const totalDisplay = formatAmount(totalAmount || netSales, currencySymbol);
-
-  const chartItems: IDoughnutChartItem[] = list.map(
-    (item: ISalesByOrderTypeItem) => {
-      const val = Number(item.total_sales || item.amount || item.value || 0);
-      const label = formatLabel(item.order_type || "");
-      const typeColor = getOrderTypeColor(item.order_type || "");
-      const percent =
-        netSales > 0 ? Math.min(Math.round((val / netSales) * 100), 100) : 0;
-
-      return {
-        label,
-        value: val,
-        color: typeColor,
-        legendValue: `${percent}%`,
-      };
-    },
-  );
 
   const renderContent = () => {
     if (isError) {
@@ -82,7 +52,7 @@ export default function RevenueByOrderTypeCard({
       );
     }
 
-    if (list.length === 0) {
+    if (isEmpty) {
       return (
         <EmptyState
           icon="pie-chart"
