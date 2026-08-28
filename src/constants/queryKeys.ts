@@ -1,4 +1,9 @@
 import type {
+  IExpenseListParams,
+  IExpenseMatrixParams,
+  IExpenseTypesParams,
+} from "@/features/expenses/types";
+import type {
   ICustomerParams,
   IOrderTypeReportParams,
   IOrdersReportParams,
@@ -49,6 +54,7 @@ export const QUERY_KEYS = {
   // Expense keys
   EXPENSES: "expenses",
   EXPENSE_TYPES: "expense_types",
+  EXPENSE_MATRIX: "expense_matrix",
 
   // Partner keys
   PARTNERS: "partners",
@@ -155,4 +161,26 @@ export const MENU_KEYS = {
   catalogs: () => [...MENU_KEYS.all, "catalog"] as const,
   catalog: (params?: IMenuQueryParams) =>
     [...MENU_KEYS.catalogs(), params] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Expenses.
+ */
+export const EXPENSE_KEYS = {
+  all: ["expenses"] as const,
+
+  // Expenses List
+  lists: () => [...EXPENSE_KEYS.all, "list"] as const,
+  list: (params?: IExpenseListParams) =>
+    [...EXPENSE_KEYS.lists(), params] as const,
+
+  // Expense Types List
+  types: () => [...EXPENSE_KEYS.all, "types"] as const,
+  typeList: (params?: IExpenseTypesParams) =>
+    [...EXPENSE_KEYS.types(), params] as const,
+
+  // Expense Matrix (KPI Summary)
+  matrices: () => [...EXPENSE_KEYS.all, "matrix"] as const,
+  matrix: (params?: IExpenseMatrixParams) =>
+    [...EXPENSE_KEYS.matrices(), params] as const,
 } as const;

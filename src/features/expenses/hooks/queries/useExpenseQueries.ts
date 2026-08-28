@@ -1,20 +1,35 @@
-import { QUERY_KEYS } from "@/constants/queryKeys";
+// 3. External libraries
+import { useQuery } from "@tanstack/react-query";
+
+// 4. Shared context
+import { useAuth } from "@/src/context/AuthContext";
+
+// 5. Feature apis
 import {
+  getExpenseMatrix,
   getExpenses,
   getExpenseTypes,
 } from "@/features/expenses/apis/expenses";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/src/context/AuthContext";
+
+// 6. Types
+import type {
+  IExpenseListParams,
+  IExpenseMatrixParams,
+  IExpenseTypesParams,
+} from "@/features/expenses/types";
+
+// 7. Constants/utils
+import { EXPENSE_KEYS } from "@/constants/queryKeys";
 
 export const useExpensesQuery = (
   restaurantId: number | string,
   perPage: number = 200,
-  params: Record<string, any> = {},
+  params: Partial<IExpenseListParams> = {},
 ) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.EXPENSES, restaurantId, perPage, params],
-    queryFn: () => getExpenses(token!, restaurantId, perPage, params),
+    queryKey: EXPENSE_KEYS.list({ restaurantId, perPage, ...params }),
+    queryFn: () => getExpenses(restaurantId, perPage, params),
     enabled: !!token && !!restaurantId,
   });
 };
@@ -22,12 +37,24 @@ export const useExpensesQuery = (
 export const useExpenseTypesQuery = (
   restaurantId: number | string,
   perPage: number = 1000,
-  params: Record<string, any> = {},
+  params: Partial<IExpenseTypesParams> = {},
 ) => {
   const { token } = useAuth();
   return useQuery({
-    queryKey: [QUERY_KEYS.EXPENSE_TYPES, restaurantId, perPage, params],
-    queryFn: () => getExpenseTypes(token!, restaurantId, perPage, params),
+    queryKey: EXPENSE_KEYS.typeList({ restaurantId, perPage, ...params }),
+    queryFn: () => getExpenseTypes(restaurantId, perPage, params),
     enabled: !!token && !!restaurantId,
+  });
+};
+
+export const useExpenseMatrixQuery = (
+  params: IExpenseMatrixParams = {},
+  enabled: boolean = true,
+) => {
+  const { token } = useAuth();
+  return useQuery({
+    queryKey: EXPENSE_KEYS.matrix(params),
+    queryFn: () => getExpenseMatrix(params),
+    enabled: !!token && enabled,
   });
 };
