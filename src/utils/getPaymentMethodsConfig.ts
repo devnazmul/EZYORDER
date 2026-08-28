@@ -8,26 +8,38 @@ export interface IPaymentMethodConfig {
   color: string;
 }
 
-export const PAYMENT_METHODS_CONFIG: IPaymentMethodConfig[] = [
+const PAYMENT_METHODS_CONFIG: Record<IPaymentMethodKey, IPaymentMethodConfig> =
   {
-    key: "cash",
-    label: "Cash",
-    color: COLORS.payment.cash,
-  },
-  {
-    key: "card",
-    label: "Card Payment",
-    color: COLORS.payment.card,
-  },
-  {
-    key: "online",
-    label: "Online",
-    color: COLORS.payment.online,
-  },
-];
+    cash: {
+      key: "cash",
+      label: "Cash",
+      color: COLORS.payment.cash,
+    },
+    card: {
+      key: "card",
+      label: "Card Payment",
+      color: COLORS.payment.card,
+    },
+    online: {
+      key: "online",
+      label: "Online",
+      color: COLORS.payment.online,
+    },
+  };
 
-export function getPaymentMethodsConfig(): IPaymentMethodConfig[] {
-  return PAYMENT_METHODS_CONFIG;
+export const DEFAULT_PAYMENT_METHOD_CONFIG = {
+  key: "unknown",
+  label: "Unknown",
+  color: COLORS.accent,
+};
+
+export function getPaymentMethodsConfig(key: string): IPaymentMethodConfig {
+  const normalizedKey = (key || "")
+    .toLowerCase()
+    .trim()
+    .replaceAll(" ", "_") as IPaymentMethodKey;
+
+  return PAYMENT_METHODS_CONFIG[normalizedKey] || DEFAULT_PAYMENT_METHOD_CONFIG;
 }
 
 export default getPaymentMethodsConfig;

@@ -9,15 +9,16 @@ export { formatLabel } from "./formatLabel";
 export * from "./formatters";
 export { default as formatUtcToLocalTime } from "./formatUtcToLocalTime";
 export { getCurrencySymbol } from "./getCurrencySymbol";
-export { default as getDateRange, type IDateRangeResult } from "./getDateRange";
-export * from "./getPaymentMethodsConfig";
-export * from "./getResponsiveSizes";
-export * from "./getStatusBadgeConfig";
 export {
   default as getCustomerFullAddress,
   type ICustomerAddressable,
   type IGetCustomerFullAddressOptions,
 } from "./getCustomerFullAddress";
+export { default as getDateRange, type IDateRangeResult } from "./getDateRange";
+export * from "./getOrderTypeConfig";
+export * from "./getPaymentMethodsConfig";
+export * from "./getResponsiveSizes";
+export * from "./getStatusBadgeConfig";
 export { handleCallPhone } from "./handleCallPhone";
 export { handleOpenMaps } from "./handleOpenMaps";
 export { handleSendEmail } from "./handleSendEmail";
