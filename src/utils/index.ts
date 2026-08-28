@@ -7,6 +7,7 @@ export {
 export { default as formatDate } from "./formatDate";
 export { formatLabel } from "./formatLabel";
 export * from "./formatters";
+export { formatDoughnutChartItems } from "./formatDoughnutChartItems";
 export { default as formatUtcToLocalTime } from "./formatUtcToLocalTime";
 export { getCurrencySymbol } from "./getCurrencySymbol";
 export {
@@ -15,6 +16,7 @@ export {
   type IGetCustomerFullAddressOptions,
 } from "./getCustomerFullAddress";
 export { default as getDateRange, type IDateRangeResult } from "./getDateRange";
+export * from "./getOrderStatusConfig";
 export * from "./getOrderTypeConfig";
 export * from "./getPaymentMethodsConfig";
 export * from "./getResponsiveSizes";

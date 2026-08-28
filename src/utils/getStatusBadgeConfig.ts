@@ -1,8 +1,25 @@
-import COLORS from "@/constants/colors";
+import { COLORS } from "@/constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
+import {
+  getOrderStatusConfig,
+  type IOrderStatusKey,
+} from "./getOrderStatusConfig";
 
-export interface StatusBadgeConfig {
+export type IStatusBadgeKey =
+  | IOrderStatusKey
+  | "complete"
+  | "preparing"
+  | "active"
+  | "expired"
+  | "inactive"
+  | "accepted"
+  | "delivered"
+  | "paid"
+  | "unpaid";
+
+export interface IStatusBadgeConfig {
+  key: IStatusBadgeKey;
   iconName: React.ComponentProps<typeof MaterialIcons>["name"];
   iconColor: string;
   containerClass: string;
@@ -12,120 +29,206 @@ export interface StatusBadgeConfig {
   textColor: string;
 }
 
-export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {
-  const s = (status || "").toLowerCase().trim();
-  switch (s) {
-    case "pending":
-      return {
-        iconName: "schedule",
-        iconColor: COLORS.accent,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.warning}15`,
-        borderColor: `${COLORS.warning}`,
-        textColor: COLORS.accent,
-      };
-    case "completed":
-    case "complete":
-      return {
-        iconName: "check-circle",
-        iconColor: COLORS.success,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.success}15`,
-        borderColor: `${COLORS.success}66`,
-        textColor: COLORS.success,
-      };
-    case "kitchen":
-    case "preparing":
-      return {
-        iconName: "restaurant",
-        iconColor: COLORS.secondary,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.secondary}15`,
-        borderColor: `${COLORS.secondary}66`,
-        textColor: COLORS.secondary,
-      };
-    case "active":
-      return {
-        iconName: "check-circle",
-        iconColor: COLORS.success,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.success}15`,
-        borderColor: `${COLORS.success}66`,
-        textColor: COLORS.success,
-      };
-    case "expired":
-      return {
-        iconName: "error-outline",
-        iconColor: COLORS.error,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.error}15`,
-        borderColor: `${COLORS.error}66`,
-        textColor: COLORS.error,
-      };
-    case "inactive":
-      return {
-        iconName: "pause-circle-outline",
-        iconColor: COLORS.accent,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.accent}15`,
-        borderColor: `${COLORS.accent}66`,
-        textColor: COLORS.accent,
-      };
-    case "accepted":
-      return {
-        iconName: "thumb-up",
-        iconColor: COLORS.info,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.info}15`,
-        borderColor: `${COLORS.info}66`,
-        textColor: COLORS.info,
-      };
-    case "delivered":
-      return {
-        iconName: "local-shipping",
-        iconColor: COLORS.info,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.info}15`,
-        borderColor: `${COLORS.info}66`,
-        textColor: COLORS.info,
-      };
-    case "paid":
-      return {
-        iconName: "check-circle",
-        iconColor: COLORS.success,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.success}15`,
-        borderColor: `${COLORS.success}66`,
-        textColor: COLORS.success,
-      };
-    case "unpaid":
-      return {
-        iconName: "payment",
-        iconColor: COLORS.primary,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.primary}15`,
-        borderColor: `${COLORS.primary}66`,
-        textColor: COLORS.primary,
-      };
-    default:
-      return {
-        iconName: "help-outline",
-        iconColor: COLORS.accent,
-        containerClass: "",
-        textClass: "",
-        backgroundColor: `${COLORS.accent}15`,
-        borderColor: `${COLORS.accent}66`,
-        textColor: COLORS.accent,
-      };
-  }
+const pendingOrderConfig = getOrderStatusConfig("pending");
+const kitchenOrderConfig = getOrderStatusConfig("kitchen");
+const readyOrderConfig = getOrderStatusConfig("ready");
+const pickedUpOrderConfig = getOrderStatusConfig("picked_up");
+const enRouteOrderConfig = getOrderStatusConfig("en_route");
+const arrivedOrderConfig = getOrderStatusConfig("arrived");
+const completedOrderConfig = getOrderStatusConfig("completed");
+const cancelledOrderConfig = getOrderStatusConfig("cancelled");
+
+const STATUS_BADGE_CONFIG: Record<string, IStatusBadgeConfig> = {
+  pending: {
+    key: "pending",
+    iconName: pendingOrderConfig.iconName,
+    iconColor: pendingOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${pendingOrderConfig.color}15`,
+    borderColor: `${pendingOrderConfig.color}`,
+    textColor: pendingOrderConfig.textColor,
+  },
+  kitchen: {
+    key: "kitchen",
+    iconName: kitchenOrderConfig.iconName,
+    iconColor: kitchenOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${kitchenOrderConfig.color}15`,
+    borderColor: `${kitchenOrderConfig.color}66`,
+    textColor: kitchenOrderConfig.textColor,
+  },
+  preparing: {
+    key: "preparing",
+    iconName: kitchenOrderConfig.iconName,
+    iconColor: kitchenOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${kitchenOrderConfig.color}15`,
+    borderColor: `${kitchenOrderConfig.color}66`,
+    textColor: kitchenOrderConfig.textColor,
+  },
+  ready: {
+    key: "ready",
+    iconName: readyOrderConfig.iconName,
+    iconColor: readyOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${readyOrderConfig.color}15`,
+    borderColor: `${readyOrderConfig.color}66`,
+    textColor: readyOrderConfig.textColor,
+  },
+  picked_up: {
+    key: "picked_up",
+    iconName: pickedUpOrderConfig.iconName,
+    iconColor: pickedUpOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${pickedUpOrderConfig.color}15`,
+    borderColor: `${pickedUpOrderConfig.color}66`,
+    textColor: pickedUpOrderConfig.textColor,
+  },
+  en_route: {
+    key: "en_route",
+    iconName: enRouteOrderConfig.iconName,
+    iconColor: enRouteOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${enRouteOrderConfig.color}15`,
+    borderColor: `${enRouteOrderConfig.color}66`,
+    textColor: enRouteOrderConfig.textColor,
+  },
+  arrived: {
+    key: "arrived",
+    iconName: arrivedOrderConfig.iconName,
+    iconColor: arrivedOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${arrivedOrderConfig.color}15`,
+    borderColor: `${arrivedOrderConfig.color}66`,
+    textColor: arrivedOrderConfig.textColor,
+  },
+  completed: {
+    key: "completed",
+    iconName: completedOrderConfig.iconName,
+    iconColor: completedOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${completedOrderConfig.color}15`,
+    borderColor: `${completedOrderConfig.color}66`,
+    textColor: completedOrderConfig.textColor,
+  },
+  complete: {
+    key: "complete",
+    iconName: completedOrderConfig.iconName,
+    iconColor: completedOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${completedOrderConfig.color}15`,
+    borderColor: `${completedOrderConfig.color}66`,
+    textColor: completedOrderConfig.textColor,
+  },
+  cancelled: {
+    key: "cancelled",
+    iconName: cancelledOrderConfig.iconName,
+    iconColor: cancelledOrderConfig.iconColor,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${cancelledOrderConfig.color}15`,
+    borderColor: `${cancelledOrderConfig.color}66`,
+    textColor: cancelledOrderConfig.textColor,
+  },
+  active: {
+    key: "active",
+    iconName: "check-circle",
+    iconColor: COLORS.success,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${COLORS.success}15`,
+    borderColor: `${COLORS.success}66`,
+    textColor: COLORS.success,
+  },
+  expired: {
+    key: "expired",
+    iconName: "error-outline",
+    iconColor: COLORS.error,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${COLORS.error}15`,
+    borderColor: `${COLORS.error}66`,
+    textColor: COLORS.error,
+  },
+  inactive: {
+    key: "inactive",
+    iconName: "pause-circle-outline",
+    iconColor: COLORS.accent,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${COLORS.accent}15`,
+    borderColor: `${COLORS.accent}66`,
+    textColor: COLORS.accent,
+  },
+  accepted: {
+    key: "accepted",
+    iconName: "thumb-up",
+    iconColor: COLORS.info,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${COLORS.info}15`,
+    borderColor: `${COLORS.info}66`,
+    textColor: COLORS.info,
+  },
+  delivered: {
+    key: "delivered",
+    iconName: "local-shipping",
+    iconColor: COLORS.info,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${COLORS.info}15`,
+    borderColor: `${COLORS.info}66`,
+    textColor: COLORS.info,
+  },
+  paid: {
+    key: "paid",
+    iconName: "check-circle",
+    iconColor: COLORS.success,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${COLORS.success}15`,
+    borderColor: `${COLORS.success}66`,
+    textColor: COLORS.success,
+  },
+  unpaid: {
+    key: "unpaid",
+    iconName: "payment",
+    iconColor: COLORS.primary,
+    containerClass: "",
+    textClass: "",
+    backgroundColor: `${COLORS.primary}15`,
+    borderColor: `${COLORS.primary}66`,
+    textColor: COLORS.primary,
+  },
 };
+
+const DEFAULT_STATUS_BADGE_CONFIG = {
+  key: "unknown",
+  iconName: "help-outline",
+  iconColor: COLORS.accent,
+  containerClass: "",
+  textClass: "",
+  backgroundColor: `${COLORS.accent}15`,
+  borderColor: `${COLORS.accent}66`,
+  textColor: COLORS.accent,
+};
+
+export function getStatusBadgeConfig(status: string): IStatusBadgeConfig {
+  const normalizedKey = (status || "")
+    .toLowerCase()
+    .trim()
+    .replaceAll(" ", "_");
+
+  return STATUS_BADGE_CONFIG[normalizedKey] || DEFAULT_STATUS_BADGE_CONFIG;
+}
+
+export default getStatusBadgeConfig;
