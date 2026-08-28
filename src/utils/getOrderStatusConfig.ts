@@ -4,11 +4,13 @@ import React from "react";
 
 export type IOrderStatusKey =
   | "pending"
+  | "accepted"
   | "kitchen"
   | "ready"
   | "picked_up"
   | "en_route"
   | "arrived"
+  | "delivered"
   | "completed"
   | "cancelled";
 
@@ -29,6 +31,14 @@ const ORDER_STATUS_CONFIG: Record<string, IOrderStatusConfig> = {
     textColor: COLORS.orderStatus.pending,
     iconName: "schedule",
     iconColor: COLORS.orderStatus.pending,
+  },
+  accepted: {
+    key: "accepted",
+    label: "Accepted",
+    color: COLORS.orderStatus.accepted,
+    textColor: COLORS.orderStatus.accepted,
+    iconName: "thumb-up",
+    iconColor: COLORS.orderStatus.accepted,
   },
   kitchen: {
     key: "kitchen",
@@ -69,6 +79,14 @@ const ORDER_STATUS_CONFIG: Record<string, IOrderStatusConfig> = {
     textColor: COLORS.orderStatus.arrived,
     iconName: "place",
     iconColor: COLORS.orderStatus.arrived,
+  },
+  delivered: {
+    key: "delivered",
+    label: "Delivered",
+    color: COLORS.orderStatus.delivered,
+    textColor: COLORS.orderStatus.delivered,
+    iconName: "local-shipping",
+    iconColor: COLORS.orderStatus.delivered,
   },
   completed: {
     key: "completed",

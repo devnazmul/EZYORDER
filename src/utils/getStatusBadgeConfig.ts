@@ -30,11 +30,13 @@ export interface IStatusBadgeConfig {
 }
 
 const pendingOrderConfig = getOrderStatusConfig("pending");
+const acceptedOrderConfig = getOrderStatusConfig("accepted");
 const kitchenOrderConfig = getOrderStatusConfig("kitchen");
 const readyOrderConfig = getOrderStatusConfig("ready");
 const pickedUpOrderConfig = getOrderStatusConfig("picked_up");
 const enRouteOrderConfig = getOrderStatusConfig("en_route");
 const arrivedOrderConfig = getOrderStatusConfig("arrived");
+const deliveredOrderConfig = getOrderStatusConfig("delivered");
 const completedOrderConfig = getOrderStatusConfig("completed");
 const cancelledOrderConfig = getOrderStatusConfig("cancelled");
 
@@ -171,43 +173,43 @@ const STATUS_BADGE_CONFIG: Record<string, IStatusBadgeConfig> = {
   },
   accepted: {
     key: "accepted",
-    iconName: "thumb-up",
-    iconColor: COLORS.info,
+    iconName: acceptedOrderConfig.iconName,
+    iconColor: acceptedOrderConfig.iconColor,
     containerClass: "",
     textClass: "",
-    backgroundColor: `${COLORS.info}15`,
-    borderColor: `${COLORS.info}66`,
-    textColor: COLORS.info,
+    backgroundColor: `${acceptedOrderConfig.color}15`,
+    borderColor: `${acceptedOrderConfig.color}66`,
+    textColor: acceptedOrderConfig.textColor,
   },
   delivered: {
     key: "delivered",
-    iconName: "local-shipping",
-    iconColor: COLORS.info,
+    iconName: deliveredOrderConfig.iconName,
+    iconColor: deliveredOrderConfig.iconColor,
     containerClass: "",
     textClass: "",
-    backgroundColor: `${COLORS.info}15`,
-    borderColor: `${COLORS.info}66`,
-    textColor: COLORS.info,
+    backgroundColor: `${deliveredOrderConfig.color}15`,
+    borderColor: `${deliveredOrderConfig.color}66`,
+    textColor: deliveredOrderConfig.textColor,
   },
   paid: {
     key: "paid",
     iconName: "check-circle",
-    iconColor: COLORS.success,
+    iconColor: COLORS.amount.paid,
     containerClass: "",
     textClass: "",
-    backgroundColor: `${COLORS.success}15`,
-    borderColor: `${COLORS.success}66`,
-    textColor: COLORS.success,
+    backgroundColor: `${COLORS.amount.paid}15`,
+    borderColor: `${COLORS.amount.paid}66`,
+    textColor: COLORS.amount.paid,
   },
   unpaid: {
     key: "unpaid",
     iconName: "payment",
-    iconColor: COLORS.primary,
+    iconColor: COLORS.amount.unpaid,
     containerClass: "",
     textClass: "",
-    backgroundColor: `${COLORS.primary}15`,
-    borderColor: `${COLORS.primary}66`,
-    textColor: COLORS.primary,
+    backgroundColor: `${COLORS.amount.unpaid}15`,
+    borderColor: `${COLORS.amount.unpaid}66`,
+    textColor: COLORS.amount.unpaid,
   },
 };
 
