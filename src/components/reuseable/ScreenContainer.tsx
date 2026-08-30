@@ -89,7 +89,7 @@ export const ScreenContainer: React.FC<IScreenContainerProps> = ({
     >
       <View
         style={contentStyle}
-        className={`flex-col gap-y-5 ${contentClassName}`.trim()}
+        className={`flex-col gap-y-3 ${contentClassName}`.trim()}
       >
         {children}
       </View>

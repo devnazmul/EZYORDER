@@ -1,5 +1,5 @@
 // 1. React / React Native
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DimensionValue,
   Pressable,
@@ -68,193 +68,187 @@ export default function BarChart({
     setFocusedBarIndex(undefined);
   }, [rawData]);
 
-  const safeData = useMemo(() => rawData || [], [rawData]);
-  const isDenseFilter = safeData.length > 7;
+  const safeData = rawData || [];
+  const totalCount = safeData.length;
+
+  if (totalCount === 0) {
+    return (
+      <View
+        style={{ height: chartHeight as DimensionValue }}
+        className="w-full items-center justify-center py-6"
+      >
+        <Text className="text-xs text-accent italic text-center">
+          {emptyText}
+        </Text>
+      </View>
+    );
+  }
+
+  const isDenseFilter = totalCount > 7;
   const chartWidth = screenWidth - horizontalPadding;
-  const availableChartArea = Math.max(100, chartWidth - 50);
+  const availableChartArea = Math.max(100, chartWidth - 65);
 
   // Dynamically compute bar width & spacing so bars are justified across available area
-  const { barWidth, barSpacing, initialSpacing } = useMemo(() => {
-    const count = safeData.length || 1;
-    if (isDenseFilter) {
-      const initSpace = 4;
-      const spaceBetween = count > 20 ? 2 : 4;
-      const availableForBars = availableChartArea - initSpace * 2;
-      const computedWidth =
-        (availableForBars - spaceBetween * (count - 1)) / count;
-      const finalBarWidth = Math.max(
-        3,
-        Math.min(20, Math.floor(computedWidth)),
-      );
-      const finalSpacing = Math.max(
-        1,
-        Math.floor(
-          (availableForBars - finalBarWidth * count) / Math.max(1, count - 1),
-        ),
-      );
-      return {
-        barWidth: finalBarWidth,
-        barSpacing: finalSpacing,
-        initialSpacing: initSpace,
-      };
-    }
+  const count = totalCount || 1;
+  let barWidth: number;
+  let barSpacing: number;
+  let initialSpacing: number;
 
-    const initSpace = count <= 3 ? 20 : 12;
-    const availableForBars = availableChartArea - initSpace * 2;
+  if (isDenseFilter) {
+    initialSpacing = 4;
+    const spaceBetween = count > 20 ? 2 : 4;
+    const availableForBars = availableChartArea - initialSpacing * 2;
+    const computedWidth =
+      (availableForBars - spaceBetween * (count - 1)) / count;
+    barWidth = Math.max(3, Math.min(20, Math.floor(computedWidth)));
+    barSpacing = Math.max(
+      1,
+      Math.floor(
+        (availableForBars - barWidth * count) / Math.max(1, count - 1),
+      ),
+    );
+  } else {
+    initialSpacing = count <= 3 ? 20 : 12;
+    const availableForBars = availableChartArea - initialSpacing * 2;
     const targetSpacing = count <= 3 ? 32 : 20;
     const computedWidth =
       (availableForBars - targetSpacing * (count - 1)) / count;
     const maxBarW = count <= 3 ? 48 : 28;
-    const finalBarWidth = Math.max(
-      12,
-      Math.min(maxBarW, Math.floor(computedWidth)),
-    );
-    const finalSpacing = Math.max(
+    barWidth = Math.max(12, Math.min(maxBarW, Math.floor(computedWidth)));
+    barSpacing = Math.max(
       8,
       Math.floor(
-        (availableForBars - finalBarWidth * count) / Math.max(1, count - 1),
+        (availableForBars - barWidth * count) / Math.max(1, count - 1),
       ),
     );
-    return {
-      barWidth: finalBarWidth,
-      barSpacing: finalSpacing,
-      initialSpacing: initSpace,
-    };
-  }, [safeData.length, isDenseFilter, availableChartArea]);
+  }
+
+  let visibleIndices: Set<number>;
+  if (totalCount <= 5) {
+    visibleIndices = new Set(Array.from({ length: totalCount }, (_, i) => i));
+  } else {
+    const maxIndex = totalCount - 1;
+    visibleIndices = new Set([
+      0,
+      Math.round(maxIndex * 0.25),
+      Math.round(maxIndex * 0.5),
+      Math.round(maxIndex * 0.75),
+      maxIndex,
+    ]);
+  }
 
   // Map data to GiftedCharts BarChart structure
-  const chartData = useMemo(() => {
-    return safeData.map((d, index) => {
-      const val =
-        typeof d.value === "number"
-          ? d.value
-          : Number.parseFloat(String(d.value)) || 0;
-      const itemFrontColor = d.frontColor || frontColor;
-      const itemGradientColor = d.gradientColor || gradientColor;
+  const chartData = safeData.map((d, index) => {
+    const val =
+      typeof d.value === "number"
+        ? d.value
+        : Number.parseFloat(String(d.value)) || 0;
+    const itemFrontColor = d.frontColor || frontColor;
+    const itemGradientColor = d.gradientColor || gradientColor;
 
-      const item: Record<string, unknown> = {
-        value: val,
-        frontColor: itemFrontColor,
-        gradientColor: itemGradientColor,
-        showGradient,
-        barBorderTopLeftRadius: barBorderRadius,
-        barBorderTopRightRadius: barBorderRadius,
-        barBorderRadius,
-        barStyle: {
-          borderTopLeftRadius: barBorderRadius,
-          borderTopRightRadius: barBorderRadius,
-          borderRadius: barBorderRadius,
-        },
-        name: d.name,
-      };
+    const item: Record<string, unknown> = {
+      value: val,
+      frontColor: itemFrontColor,
+      gradientColor: itemGradientColor,
+      showGradient,
+      barBorderTopLeftRadius: barBorderRadius,
+      barBorderTopRightRadius: barBorderRadius,
+      barBorderRadius,
+      barStyle: {
+        borderTopLeftRadius: barBorderRadius,
+        borderTopRightRadius: barBorderRadius,
+        borderRadius: barBorderRadius,
+      },
+      name: d.name,
+    };
 
-      if (isDenseFilter) {
-        const parsedDay = Number.parseInt(
-          String(d.name || "").replace(/\D/g, ""),
-          10,
-        );
-        const dayNum =
-          !Number.isNaN(parsedDay) && parsedDay > 0 ? parsedDay : index + 1;
-        const showLabel = dayNum === 1 || dayNum % 5 === 0;
-        const targetLabelWidth = 28;
-        const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
+    const showLabel = visibleIndices.has(index);
 
-        item.labelComponent = () => (
-          <View
+    if (isDenseFilter) {
+      const targetLabelWidth = 40;
+      const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
+
+      item.labelComponent = () => (
+        <View
+          style={{
+            width: targetLabelWidth,
+            marginLeft,
+            alignItems: "center",
+            marginTop: 8,
+          }}
+        >
+          <Text
             style={{
-              width: targetLabelWidth,
-              marginLeft,
-              alignItems: "center",
-              marginTop: 8,
+              fontSize: 8,
+              color: yAxisTextColor,
+              fontWeight: "600",
+              textAlign: "center",
             }}
           >
-            <Text
-              style={{
-                fontSize: 8,
-                color: yAxisTextColor,
-                fontWeight: "600",
-                textAlign: "center",
-              }}
-            >
-              {showLabel ? String(dayNum) : ""}
-            </Text>
-          </View>
-        );
-      } else {
-        const targetLabelWidth = Math.max(28, barWidth + 8);
-        const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
+            {showLabel ? d.name : ""}
+          </Text>
+        </View>
+      );
+    } else {
+      const targetLabelWidth = Math.max(48, barWidth + 8);
+      const marginLeft = (barWidth - targetLabelWidth + barSpacing) / 2;
 
-        item.labelComponent = () => (
-          <View
+      item.labelComponent = () => (
+        <View
+          style={{
+            width: targetLabelWidth,
+            marginLeft,
+            alignItems: "center",
+            marginTop: 8,
+          }}
+        >
+          <Text
             style={{
-              width: targetLabelWidth,
-              marginLeft,
-              alignItems: "center",
-              marginTop: 8,
+              fontSize: 9,
+              color: yAxisTextColor,
+              fontWeight: "600",
+              textAlign: "center",
             }}
           >
-            <Text
-              numberOfLines={1}
-              style={{
-                fontSize: 9,
-                color: yAxisTextColor,
-                fontWeight: "600",
-                textAlign: "center",
-              }}
-            >
-              {d.name}
-            </Text>
-          </View>
-        );
-      }
+            {showLabel ? d.name : ""}
+          </Text>
+        </View>
+      );
+    }
 
-      if (showValuesAsTopLabel) {
-        const formattedVal = isAmount
-          ? formatAmount(val, currencySymbol)
-          : String(val);
-        const topLabelWidth = Math.max(52, barWidth + 0);
-        const topMarginLeft = (barWidth - topLabelWidth) / 2;
+    if (showValuesAsTopLabel) {
+      const formattedVal = isAmount
+        ? formatAmount(val, currencySymbol)
+        : String(val);
+      const topLabelWidth = Math.max(52, barWidth + 0);
+      const topMarginLeft = (barWidth - topLabelWidth) / 2;
 
-        item.topLabelComponent = () => (
-          <View
+      item.topLabelComponent = () => (
+        <View
+          style={{
+            width: topLabelWidth,
+            marginLeft: topMarginLeft,
+            alignItems: "center",
+            marginBottom: 4,
+          }}
+        >
+          <Text
+            numberOfLines={1}
             style={{
-              width: topLabelWidth,
-              marginLeft: topMarginLeft,
-              alignItems: "center",
-              marginBottom: 4,
+              fontSize: 10,
+              color: "#475569",
+              fontWeight: "700",
+              textAlign: "center",
             }}
           >
-            <Text
-              numberOfLines={1}
-              style={{
-                fontSize: 10,
-                color: "#475569",
-                fontWeight: "700",
-                textAlign: "center",
-              }}
-            >
-              {formattedVal}
-            </Text>
-          </View>
-        );
-      }
+            {formattedVal}
+          </Text>
+        </View>
+      );
+    }
 
-      return item;
-    });
-  }, [
-    safeData,
-    frontColor,
-    gradientColor,
-    showGradient,
-    showValuesAsTopLabel,
-    isAmount,
-    currencySymbol,
-    barBorderRadius,
-    isDenseFilter,
-    barWidth,
-    barSpacing,
-    yAxisTextColor,
-  ]);
+    return item;
+  });
 
   const maxDataValue =
     chartData.length > 0
@@ -273,9 +267,10 @@ export default function BarChart({
       : undefined;
 
   // Tooltip coordinates
-  const tooltipPos = useMemo(() => {
-    if (focusedBarIndex === undefined || !focusedItem) return undefined;
+  let tooltipPos:
+    { left: number; top: number; line1: string; line2: string } | undefined;
 
+  if (focusedBarIndex !== undefined && focusedItem) {
     const line1 = `${focusedItem.name}:`;
     const line2 = isAmount
       ? formatAmount(focusedItem.value, currencySymbol)
@@ -303,36 +298,12 @@ export default function BarChart({
     const idealTop = barTopY - 40;
     const clampedTop = Math.max(0, idealTop);
 
-    return {
+    tooltipPos = {
       left: clampedLeft,
       top: clampedTop,
       line1,
       line2,
     };
-  }, [
-    focusedBarIndex,
-    focusedItem,
-    isAmount,
-    currencySymbol,
-    initialSpacing,
-    barWidth,
-    barSpacing,
-    availableChartArea,
-    chartHeight,
-    maxDataValue,
-  ]);
-
-  if (safeData.length === 0) {
-    return (
-      <View
-        style={{ height: chartHeight as DimensionValue }}
-        className="w-full items-center justify-center py-6"
-      >
-        <Text className="text-xs text-accent italic text-center">
-          {emptyText}
-        </Text>
-      </View>
-    );
   }
 
   return (
@@ -352,13 +323,13 @@ export default function BarChart({
         width={availableChartArea}
         rulesLength={availableChartArea}
         xAxisLength={availableChartArea}
-        endSpacing={0}
+        endSpacing={initialSpacing}
         height={chartHeight - 85}
         maxValue={maxDataValue > 0 ? maxDataValue * 1.2 : undefined}
         barWidth={barWidth}
         spacing={barSpacing}
         initialSpacing={initialSpacing}
-        labelWidth={isDenseFilter ? 28 : 34}
+        labelWidth={48}
         disableScroll={true}
         focusedBarIndex={showValuesAsTopLabel ? undefined : focusedBarIndex}
         onPress={(_item: unknown, index: number) => {

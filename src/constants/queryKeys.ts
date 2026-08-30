@@ -2,6 +2,7 @@ import type {
   IExpenseListParams,
   IExpenseMatrixParams,
   IExpenseTypesParams,
+  IExpenseTrendParams,
   IPaymentMethodBreakdownParams,
 } from "@/features/expenses/types";
 import type {
@@ -190,4 +191,9 @@ export const EXPENSE_KEYS = {
     [...EXPENSE_KEYS.all, "paymentMethodBreakdown"] as const,
   paymentMethodBreakdown: (params?: IPaymentMethodBreakdownParams) =>
     [...EXPENSE_KEYS.paymentMethodBreakdowns(), params] as const,
+
+  // Expense Trend
+  trends: () => [...EXPENSE_KEYS.all, "trend"] as const,
+  trend: (params?: IExpenseTrendParams) =>
+    [...EXPENSE_KEYS.trends(), params] as const,
 } as const;
