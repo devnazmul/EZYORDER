@@ -1,73 +1,48 @@
-import { formatAmount, formatDateTime } from "@/utils/formatters";
-import { getCurrencySymbol } from "@/utils/getCurrencySymbol";
-import { useData } from "@/src/context/context/DataContext";
-import { MaterialIcons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+// 1. React / React Native
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-interface ExpenseCardProps {
-  expense: {
-    id: number | string;
-    amount: number | string;
-    payment_date: string;
-    payment_method: string;
-    paid_by?: string;
-    note?: string;
-    description?: string;
-    expense_type: string | number;
-  };
-  expenseTypes: any[];
+// 3. External libraries
+import { MaterialIcons } from "@expo/vector-icons";
+
+// 4. Shared utils
+import { formatAmount, formatDateTime } from "@/utils/formatters";
+
+// 5. Feature services
+import { ExpenseService } from "../services/expense.service";
+
+// 6. Types
+import type { IExpense, IExpenseType } from "../types";
+
+export interface IExpenseCardProps {
+  expense: IExpense;
+  expenseTypes: IExpenseType[];
+  currencySymbol?: string;
   onPress: () => void;
 }
 
-export default function ExpenseCard({ expense, expenseTypes, onPress }: ExpenseCardProps) {
-  const { settings } = useData();
+export default function ExpenseCard({
+  expense,
+  expenseTypes,
+  currencySymbol = "£",
+  onPress,
+}: Readonly<IExpenseCardProps>) {
+  const categoryName = ExpenseService.getExpenseCategoryName(
+    expense.expense_type,
+    expenseTypes,
+  );
 
-  // Resolve currency symbol
-  const currencySymbol = useMemo(() => {
-    return getCurrencySymbol(settings?.currency);
-  }, [settings?.currency]);
+  const rawDate = expense.payment_date
+    ? expense.payment_date.split(" ")[0]
+    : "";
+  const formattedDate = formatDateTime(rawDate) || "N/A";
 
-  // Map category type details
-  const categoryDetails = useMemo(() => {
-    const typeId = String(expense.expense_type);
-    const matchedType = expenseTypes.find((opt) => String(opt?.id) === typeId);
-    const typeName =
-      matchedType?.name || (typeof expense.expense_type === "string" ? expense.expense_type : "Other");
+  const detailsDisplay = ExpenseService.formatExpenseDetailsDisplay(
+    expense.paid_by,
+    formattedDate,
+  );
 
-    return {
-      name: typeName,
-      icon: "receipt" as const,
-      bgColor: "bg-neutral/10",
-      color: "#464747",
-    };
-  }, [expense.expense_type, expenseTypes]);
-
-  // Format date
-  const formattedDate = useMemo(() => {
-    if (!expense.payment_date) return "N/A";
-    const rawDate = expense.payment_date.split(" ")[0];
-    return formatDateTime(rawDate);
-  }, [expense.payment_date]);
-
-  // Format amount using the formatAmount utility with dynamic symbol
-  const formattedAmount = useMemo(() => {
-    return formatAmount(expense.amount, currencySymbol);
-  }, [expense.amount, currencySymbol]);
-
-
-  // Heading displays the expense type (category) name
-  const titleDisplay = categoryDetails.name;
-
-  // Sub-details displaying vendor name (paid_by) and payment date
-  const detailsDisplay = useMemo(() => {
-    const parts = [];
-    if (expense.paid_by && expense.paid_by.trim() !== "") {
-      parts.push(expense.paid_by.trim());
-    }
-    parts.push(formattedDate);
-    return parts.join(" • ");
-  }, [expense.paid_by, formattedDate]);
+  const formattedAmount = formatAmount(expense.amount, currencySymbol);
 
   return (
     <TouchableOpacity
@@ -77,21 +52,30 @@ export default function ExpenseCard({ expense, expenseTypes, onPress }: ExpenseC
     >
       <View className="flex-row items-center flex-1 mr-3">
         {/* Category Icon */}
-        <View className={`w-12 h-12 rounded-lg items-center justify-center ${categoryDetails.bgColor} mr-4`}>
-          <MaterialIcons name={categoryDetails.icon} size={24} color={categoryDetails.color} />
+        <View className="w-12 h-12 rounded-lg items-center justify-center bg-neutral/10 mr-4">
+          <MaterialIcons name="receipt" size={24} color="#464747" />
         </View>
 
         {/* Expense Info */}
         <View className="flex-1 min-w-0">
-          <Text className="text-sm font-bold text-neutral truncate" numberOfLines={1}>
-            {titleDisplay}
+          <Text
+            className="text-sm font-bold text-neutral truncate"
+            numberOfLines={1}
+          >
+            {categoryName}
           </Text>
           {expense.description && expense.description.trim() !== "" ? (
-            <Text className="text-xs text-neutral/80 mt-0.5 truncate" numberOfLines={1}>
+            <Text
+              className="text-xs text-neutral/80 mt-0.5 truncate"
+              numberOfLines={1}
+            >
               {expense.description.trim()}
             </Text>
           ) : null}
-          <Text className="text-[11px] text-accent font-semibold leading-4 mt-0.5" numberOfLines={1}>
+          <Text
+            className="text-[11px] text-accent font-semibold leading-4 mt-0.5"
+            numberOfLines={1}
+          >
             {detailsDisplay}
           </Text>
         </View>
@@ -99,7 +83,9 @@ export default function ExpenseCard({ expense, expenseTypes, onPress }: ExpenseC
 
       {/* Amount Display */}
       <View className="text-right">
-        <Text className="text-sm font-black text-primary">{formattedAmount}</Text>
+        <Text className="text-sm font-black text-primary">
+          {formattedAmount}
+        </Text>
       </View>
     </TouchableOpacity>
   );
