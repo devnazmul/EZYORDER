@@ -111,3 +111,20 @@ export interface IExpenseMatrixResponse {
   message: string;
   data: IExpenseMatrixData;
 }
+export interface IPaymentMethodBreakdownParams {
+  start_date?: string;
+  end_date?: string;
+}
+
+export interface IPaymentMethodBreakdownItem {
+  payment_method: string;
+  count: number;
+  total: string;
+  percentage: number;
+}
+
+export interface IPaymentMethodBreakdownResponse {
+  success: boolean;
+  message: string;
+  data: IPaymentMethodBreakdownItem[];
+}
