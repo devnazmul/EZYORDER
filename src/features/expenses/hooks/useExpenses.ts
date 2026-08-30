@@ -4,6 +4,7 @@ import { useMemo, useReducer } from "react";
 // 3. External libraries / Shared hooks / Shared context
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuth } from "@/src/context/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 // 5. Feature components/hooks/services/state
 import { useRestaurantQuery } from "@/features/restaurants/hooks/queries/useRestaurantQueries";
@@ -14,6 +15,7 @@ import {
   type IExpensesState,
 } from "../state/expenses.reducer";
 import {
+  useExpensePaymentMethodBreakdownQuery,
   useExpensesQuery,
   useExpenseTypesQuery,
 } from "./queries/useExpenseQueries";
@@ -23,6 +25,7 @@ import type { IExpenseFilterValues } from "../schema";
 import type { IExpense } from "../types";
 
 // 7. Constants/utils
+import { EXPENSE_KEYS } from "@/constants/queryKeys";
 import { getCurrencySymbol } from "@/utils";
 
 const INITIAL_STATE: IExpensesState = {
@@ -34,6 +37,7 @@ const INITIAL_STATE: IExpensesState = {
 
 export function useExpenses() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const restaurantId = user?.restaurant?.[0]?.id;
 
   const [state, dispatch] = useReducer(expensesReducer, INITIAL_STATE);
@@ -52,21 +56,37 @@ export function useExpenses() {
     [debouncedSearchQuery, state.filterValues],
   );
 
-  const {
-    data: expensesResponse,
-    isLoading: isExpensesLoading,
-    refetch: refetchExpenses,
-  } = useExpensesQuery(restaurantId || "", 200, apiParams);
+  const { data: expensesResponse, isLoading: isExpensesLoading } =
+    useExpensesQuery(restaurantId || "", 200, apiParams);
 
   const { data: typesResponse, isLoading: isTypesLoading } =
     useExpenseTypesQuery(restaurantId || "", 1000);
 
+  const paymentMethodBreakdownParams = {
+    ...(state.filterValues.date_range?.start
+      ? { start_date: state.filterValues.date_range.start }
+      : {}),
+    ...(state.filterValues.date_range?.end
+      ? { end_date: state.filterValues.date_range.end }
+      : {}),
+  };
+
+  const {
+    data: paymentBreakdownResponse,
+    isLoading: isPaymentBreakdownLoading,
+    isError: isPaymentBreakdownError,
+    refetch: refetchPaymentBreakdown,
+  } = useExpensePaymentMethodBreakdownQuery(paymentMethodBreakdownParams);
+
   const expenses = expensesResponse?.data ?? [];
   const expenseTypes = typesResponse?.data ?? [];
+  const paymentMethodBreakdownChartData = paymentBreakdownResponse?.data ?? [];
 
   const handleRefresh = async () => {
     dispatch({ type: "SET_IS_REFRESHING", payload: true });
-    await refetchExpenses();
+    await queryClient.invalidateQueries({
+      queryKey: EXPENSE_KEYS.all,
+    });
     dispatch({ type: "SET_IS_REFRESHING", payload: false });
   };
 
@@ -92,6 +112,10 @@ export function useExpenses() {
     isRefreshing: state.isRefreshing,
     expenses,
     expenseTypes,
+    paymentMethodBreakdownChartData,
+    isPaymentBreakdownLoading,
+    isPaymentBreakdownError,
+    refetchPaymentBreakdown,
     currencySymbol,
     isLoading: isExpensesLoading || isTypesLoading,
     handleRefresh,

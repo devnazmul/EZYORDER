@@ -12,6 +12,7 @@ import {
   ExpenseDetailModal,
   ExpenseFilterPanel,
   ExpenseKPICards,
+  ExpensePaymentBreakdownCard,
 } from "../components";
 import { useExpenses } from "../hooks/useExpenses";
 
@@ -26,6 +27,10 @@ export default function ExpensesScreen() {
     isRefreshing,
     expenses,
     expenseTypes,
+    paymentMethodBreakdownChartData,
+    isPaymentBreakdownLoading,
+    isPaymentBreakdownError,
+    refetchPaymentBreakdown,
     currencySymbol,
     isLoading,
     handleRefresh,
@@ -91,6 +96,17 @@ export default function ExpensesScreen() {
         endDate={filterValues.date_range?.end}
         currencySymbol={currencySymbol}
       />
+
+      {/* Expense Payment Method Breakdown */}
+      <View className="my-2">
+        <ExpensePaymentBreakdownCard
+          data={paymentMethodBreakdownChartData}
+          currencySymbol={currencySymbol}
+          isLoading={isPaymentBreakdownLoading}
+          isError={isPaymentBreakdownError}
+          onRetry={refetchPaymentBreakdown}
+        />
+      </View>
 
       {/* Expenses List */}
       <View className="mt-1">{renderListContent()}</View>
