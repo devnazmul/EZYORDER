@@ -128,3 +128,19 @@ export interface IPaymentMethodBreakdownResponse {
   message: string;
   data: IPaymentMethodBreakdownItem[];
 }
+
+export interface IExpenseTrendParams {
+  start_date?: string;
+  end_date?: string;
+}
+
+export interface IExpenseTrendItem {
+  date: string;
+  total_spent: string;
+}
+
+export interface IExpenseTrendResponse {
+  success: boolean;
+  message: string;
+  data: IExpenseTrendItem[];
+}

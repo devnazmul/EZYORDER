@@ -7,6 +7,8 @@ import type {
   IExpenseListResponse,
   IExpenseMatrixParams,
   IExpenseMatrixResponse,
+  IExpenseTrendParams,
+  IExpenseTrendResponse,
   IExpenseTypesParams,
   IExpenseTypesResponse,
   IPaymentMethodBreakdownParams,
@@ -77,6 +79,20 @@ export const getExpensePaymentMethodBreakdown = async (
 ): Promise<IPaymentMethodBreakdownResponse | null> => {
   const response = await axiosClient.get<IPaymentMethodBreakdownResponse>(
     "/v1.0/expenses/payment-method-breakdown",
+    {
+      params,
+      validateStatus: () => true,
+    },
+  );
+  return response.status === 200 && response.data ? response.data : null;
+};
+
+// GET EXPENSE TREND
+export const getExpenseTrend = async (
+  params: IExpenseTrendParams = {},
+): Promise<IExpenseTrendResponse | null> => {
+  const response = await axiosClient.get<IExpenseTrendResponse>(
+    "/v1.0/expenses/trend",
     {
       params,
       validateStatus: () => true,

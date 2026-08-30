@@ -1,5 +1,5 @@
 // 1. React / React Native
-import { useMemo, useReducer } from "react";
+import { useReducer } from "react";
 
 // 3. External libraries / Shared hooks / Shared context
 import { useDebounce } from "@/hooks/useDebounce";
@@ -17,6 +17,7 @@ import {
 import {
   useExpensePaymentMethodBreakdownQuery,
   useExpensesQuery,
+  useExpenseTrendQuery,
   useExpenseTypesQuery,
 } from "./queries/useExpenseQueries";
 
@@ -50,10 +51,9 @@ export function useExpenses() {
     restaurantResponse?.restaurant?.currency,
   );
 
-  const apiParams = useMemo(
-    () =>
-      ExpenseService.buildApiParams(debouncedSearchQuery, state.filterValues),
-    [debouncedSearchQuery, state.filterValues],
+  const apiParams = ExpenseService.buildApiParams(
+    debouncedSearchQuery,
+    state.filterValues,
   );
 
   const { data: expensesResponse, isLoading: isExpensesLoading } =
@@ -62,13 +62,9 @@ export function useExpenses() {
   const { data: typesResponse, isLoading: isTypesLoading } =
     useExpenseTypesQuery(restaurantId || "", 1000);
 
-  const paymentMethodBreakdownParams = {
-    ...(state.filterValues.date_range?.start
-      ? { start_date: state.filterValues.date_range.start }
-      : {}),
-    ...(state.filterValues.date_range?.end
-      ? { end_date: state.filterValues.date_range.end }
-      : {}),
+  const dateRangeParams = {
+    ...(apiParams.start_date ? { start_date: apiParams.start_date } : {}),
+    ...(apiParams.end_date ? { end_date: apiParams.end_date } : {}),
   };
 
   const {
@@ -76,11 +72,19 @@ export function useExpenses() {
     isLoading: isPaymentBreakdownLoading,
     isError: isPaymentBreakdownError,
     refetch: refetchPaymentBreakdown,
-  } = useExpensePaymentMethodBreakdownQuery(paymentMethodBreakdownParams);
+  } = useExpensePaymentMethodBreakdownQuery(dateRangeParams);
+
+  const {
+    data: expenseTrendResponse,
+    isLoading: isExpenseTrendLoading,
+    isError: isExpenseTrendError,
+    refetch: refetchExpenseTrend,
+  } = useExpenseTrendQuery(dateRangeParams);
 
   const expenses = expensesResponse?.data ?? [];
   const expenseTypes = typesResponse?.data ?? [];
   const paymentMethodBreakdownChartData = paymentBreakdownResponse?.data ?? [];
+  const expenseTrendData = expenseTrendResponse?.data ?? [];
 
   const handleRefresh = async () => {
     dispatch({ type: "SET_IS_REFRESHING", payload: true });
@@ -116,6 +120,10 @@ export function useExpenses() {
     isPaymentBreakdownLoading,
     isPaymentBreakdownError,
     refetchPaymentBreakdown,
+    expenseTrendData,
+    isExpenseTrendLoading,
+    isExpenseTrendError,
+    refetchExpenseTrend,
     currencySymbol,
     isLoading: isExpensesLoading || isTypesLoading,
     handleRefresh,

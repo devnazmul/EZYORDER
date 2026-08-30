@@ -9,6 +9,7 @@ import {
   getExpenseMatrix,
   getExpensePaymentMethodBreakdown,
   getExpenses,
+  getExpenseTrend,
   getExpenseTypes,
 } from "@/features/expenses/apis/expenses";
 
@@ -16,6 +17,7 @@ import {
 import type {
   IExpenseListParams,
   IExpenseMatrixParams,
+  IExpenseTrendParams,
   IExpenseTypesParams,
   IPaymentMethodBreakdownParams,
 } from "@/features/expenses/types";
@@ -69,6 +71,18 @@ export const useExpensePaymentMethodBreakdownQuery = (
   return useQuery({
     queryKey: EXPENSE_KEYS.paymentMethodBreakdown(params),
     queryFn: () => getExpensePaymentMethodBreakdown(params),
+    enabled: !!token && enabled,
+  });
+};
+
+export const useExpenseTrendQuery = (
+  params: IExpenseTrendParams = {},
+  enabled: boolean = true,
+) => {
+  const { token } = useAuth();
+  return useQuery({
+    queryKey: EXPENSE_KEYS.trend(params),
+    queryFn: () => getExpenseTrend(params),
     enabled: !!token && enabled,
   });
 };

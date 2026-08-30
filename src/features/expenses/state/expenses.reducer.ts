@@ -3,9 +3,13 @@ import type { IExpenseFilterValues } from "../schema";
 import type { IExpense } from "../types";
 
 export const DEFAULT_EXPENSE_FILTERS: IExpenseFilterValues = {
+  period: "All Time",
   date_range: { start: "", end: "" },
   amount_range: { min: "", max: "" },
+  expense_type: ["all"],
   payment_method: "all",
+  status: "all",
+  paid_by: "",
   order_by: "",
 };
 
