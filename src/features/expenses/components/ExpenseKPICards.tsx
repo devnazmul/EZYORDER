@@ -4,6 +4,7 @@ import { View } from "react-native";
 
 // 4. Shared components / context / utils
 import { KpiCard } from "@/components/reuseable";
+import { COLORS } from "@/constants/colors";
 import { formatAmount } from "@/utils";
 
 // 5. Feature hooks, services & apis
@@ -17,36 +18,41 @@ export interface IExpenseKPICardsProps {
   startDate?: string;
   endDate?: string;
   currencySymbol?: string;
+  isLoading?: boolean;
 }
 
 export default function ExpenseKPICards({
   startDate,
   endDate,
   currencySymbol = "£",
+  isLoading = false,
 }: Readonly<IExpenseKPICardsProps>) {
   const queryParams: IExpenseMatrixParams = {
     ...(startDate ? { start_date: startDate } : {}),
     ...(endDate ? { end_date: endDate } : {}),
   };
 
-  const { data: matrixRes, isLoading } = useExpenseMatrixQuery(queryParams);
+  const { data: matrixRes, isLoading: isMatrixLoading } =
+    useExpenseMatrixQuery(queryParams);
+
+  const showLoading = isLoading || isMatrixLoading;
 
   const { totalExpenses, topExpenseTypeName, topExpenseSpent, averageAmount } =
     ExpenseService.processMatrixData(matrixRes?.data);
 
   return (
-    <View className="flex-col gap-3 my-2">
+    <View className="flex-col gap-3">
       {/* Card 1: Total Expenses (Full Width) */}
       <View className="flex-1">
         <KpiCard
           variant="light"
-          loading={isLoading}
+          loading={showLoading}
           title="Total Expenses"
           value={formatAmount(totalExpenses, currencySymbol)}
           subtitle="Based on filtered range"
           icon="account-balance-wallet"
-          iconColor="#9333EA"
-          iconBgColor="#F3E8FF"
+          iconColor={COLORS.amount.total}
+          iconBgColor={`${COLORS.amount.total}20`}
           textColor="#111827"
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
@@ -58,13 +64,13 @@ export default function ExpenseKPICards({
         {/* Top Expense Type */}
         <KpiCard
           variant="light"
-          loading={isLoading}
+          loading={showLoading}
           title="Top Expense Type"
           value={topExpenseTypeName}
           subtitle={`${formatAmount(topExpenseSpent, currencySymbol)} total spent`}
           icon="local-offer"
-          iconColor="#16A34A"
-          iconBgColor="#DCFCE7"
+          iconColor={COLORS.amount.gross}
+          iconBgColor={`${COLORS.amount.gross}20`}
           textColor="#111827"
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
@@ -73,13 +79,13 @@ export default function ExpenseKPICards({
         {/* Avg Expense Amount */}
         <KpiCard
           variant="light"
-          loading={isLoading}
+          loading={showLoading}
           title="Avg Expense Amount"
           value={formatAmount(averageAmount, currencySymbol)}
           subtitle="Per transaction average"
           icon="trending-up"
-          iconColor="#EA580C"
-          iconBgColor="#FFEDD5"
+          iconColor={COLORS.amount.average}
+          iconBgColor={`${COLORS.amount.average}20`}
           textColor="#111827"
           gradientColors={["#FFFFFF", "#FFFFFF"]}
           containerClassName="flex-1"
