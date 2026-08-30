@@ -35,7 +35,7 @@ export default function ExpensePaymentBreakdownCard({
   containerClassName = "",
 }: Readonly<IExpensePaymentBreakdownCardProps>) {
   const { total, chartItems } =
-    ExpenseService.getPaymentMethodBreakdownChartData(data);
+    ExpenseService.getPaymentMethodBreakdownChartData(data, currencySymbol);
 
   const renderContent = () => {
     if (isError) {

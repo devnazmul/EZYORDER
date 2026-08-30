@@ -2,7 +2,7 @@
 import type { IDoughnutChartItem } from "@/components/reuseable";
 import type { IBarChartDataItem } from "@/components/reuseable/BarChart";
 import { COLORS } from "@/constants/colors";
-import { getPaymentMethodsConfig } from "@/utils";
+import { formatAmount, getPaymentMethodsConfig } from "@/utils";
 
 // 6. Types
 import type { IExpenseFilterValues } from "../schema";
@@ -188,6 +188,7 @@ export class ExpenseService {
    */
   static getPaymentMethodBreakdownChartData(
     data?: IPaymentMethodBreakdownItem[] | null,
+    currencySymbol = "£",
   ): {
     total: number;
     chartItems: IDoughnutChartItem[];
@@ -208,6 +209,7 @@ export class ExpenseService {
       return {
         label: config.label,
         value: val,
+        formattedValue: formatAmount(val, currencySymbol),
         color: config.color,
         legendValue: `${Number(item.percentage || 0).toFixed(1)}%`,
       };
