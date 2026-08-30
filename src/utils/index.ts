@@ -24,6 +24,7 @@ export * from "./getStatusBadgeConfig";
 export { handleCallPhone } from "./handleCallPhone";
 export { handleOpenMaps } from "./handleOpenMaps";
 export { handleSendEmail } from "./handleSendEmail";
+export { handleShareLink, type IShareLinkOptions } from "./handleShareLink";
 export { logApiResponse } from "./logApiResponse";
 export * from "./orderTypeColors";
 export { default as parseDate } from "./parseDate";

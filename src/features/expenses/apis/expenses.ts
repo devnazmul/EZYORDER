@@ -1,9 +1,14 @@
+// 3. External libraries / config
 import axiosClient from "@/config/axiosClient";
+
+// 6. Types
 import type {
   IExpenseListParams,
+  IExpenseListResponse,
   IExpenseMatrixParams,
   IExpenseMatrixResponse,
   IExpenseTypesParams,
+  IExpenseTypesResponse,
 } from "../types/expenses.types";
 
 // GET ALL EXPENSES FOR A RESTAURANT
@@ -11,7 +16,7 @@ export const getExpenses = async (
   restaurantId: number | string,
   perPage: number = 200,
   params: Partial<IExpenseListParams> = {},
-) => {
+): Promise<IExpenseListResponse | null> => {
   const mergedParams = {
     order_by: "asc",
     start_date: "",
@@ -24,7 +29,7 @@ export const getExpenses = async (
     is_active: "",
     ...params,
   };
-  const response = await axiosClient.get(
+  const response = await axiosClient.get<IExpenseListResponse>(
     `/v1.0/expenses/${restaurantId}/${perPage}`,
     {
       params: mergedParams,
@@ -39,8 +44,8 @@ export const getExpenseTypes = async (
   restaurantId: number | string,
   perPage: number = 1000,
   params: Partial<IExpenseTypesParams> = {},
-) => {
-  const response = await axiosClient.get(
+): Promise<IExpenseTypesResponse | null> => {
+  const response = await axiosClient.get<IExpenseTypesResponse>(
     `/v1.0/expense-types/${restaurantId}/${perPage}`,
     {
       params,
