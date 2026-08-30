@@ -1,5 +1,6 @@
-// 4. Shared utils
+// 4. Shared utils & components
 import { getPaymentMethodsConfig } from "@/utils";
+import type { IDoughnutChartItem } from "@/components/reuseable";
 
 // 6. Types
 import type { IExpenseFilterValues } from "../schema";
@@ -8,6 +9,7 @@ import type {
   IExpenseMatrixData,
   IExpenseReceipt,
   IExpenseType,
+  IPaymentMethodBreakdownItem,
 } from "../types";
 
 export class ExpenseService {
@@ -145,5 +147,38 @@ export class ExpenseService {
     }
 
     return params;
+  }
+
+  /**
+   * Processes payment method breakdown data into doughnut chart items and total value.
+   */
+  static getPaymentMethodBreakdownChartData(
+    data?: IPaymentMethodBreakdownItem[] | null,
+  ): {
+    total: number;
+    chartItems: IDoughnutChartItem[];
+  } {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return { total: 0, chartItems: [] };
+    }
+
+    const total = data.reduce(
+      (acc, item) => acc + (Number(item.total) || 0),
+      0,
+    );
+
+    const chartItems: IDoughnutChartItem[] = data.map((item) => {
+      const config = getPaymentMethodsConfig(item.payment_method);
+      const val = Number(item.total) || 0;
+
+      return {
+        label: config.label,
+        value: val,
+        color: config.color,
+        legendValue: `${Number(item.percentage || 0).toFixed(1)}%`,
+      };
+    });
+
+    return { total, chartItems };
   }
 }
