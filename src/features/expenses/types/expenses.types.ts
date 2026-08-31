@@ -144,3 +144,34 @@ export interface IExpenseTrendResponse {
   message: string;
   data: IExpenseTrendItem[];
 }
+
+export interface ICreateExpensePayload {
+  amount: number;
+  payment_method: string;
+  payment_date: string;
+  expense_type: string;
+  reciepts: string[];
+  restaurant_id: number;
+  note?: string;
+  paid_by?: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+export interface IUpdateExpensePayload extends ICreateExpensePayload {
+  id: number;
+}
+
+export interface IUploadReceiptResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    full_location: string;
+  };
+}
+
+export interface IExpenseMutationResponse {
+  success: boolean;
+  message: string;
+  data: IExpense;
+}

@@ -5,14 +5,16 @@ import { COLORS } from "@/constants/colors";
 import { formatAmount, getPaymentMethodsConfig } from "@/utils";
 
 // 6. Types
-import type { IExpenseFilterValues } from "../schema";
+import type { IExpenseFilterValues, IExpenseFormData } from "../schema";
 import type {
+  ICreateExpensePayload,
   IExpenseListParams,
   IExpenseMatrixData,
   IExpenseReceipt,
   IExpenseTrendItem,
   IExpenseType,
   IPaymentMethodBreakdownItem,
+  IUpdateExpensePayload,
 } from "../types";
 
 export class ExpenseService {
@@ -345,6 +347,43 @@ export class ExpenseService {
       chartData,
       totalSpent,
       isEmpty: chartData.length === 0 || totalSpent === 0,
+    };
+  }
+
+  /**
+   * Transforms validated form data and receipt image URLs into a Create Expense payload.
+   */
+  static toCreatePayload(
+    formData: IExpenseFormData,
+    uploadedReceiptUrls: string[],
+  ): ICreateExpensePayload {
+    return {
+      amount: Number(formData.amount),
+      payment_method: formData.payment_method,
+      payment_date: formData.payment_date,
+      expense_type: String(formData.expense_type),
+      reciepts: uploadedReceiptUrls,
+      restaurant_id: formData.restaurant_id,
+      note: formData.note || "",
+      paid_by: formData.paid_by,
+      description: formData.description || "",
+      is_active: formData.is_active ?? true,
+    };
+  }
+
+  /**
+   * Transforms validated form data and receipt image URLs into an Update Expense payload.
+   */
+  static toUpdatePayload(
+    formData: IExpenseFormData,
+    uploadedReceiptUrls: string[],
+  ): IUpdateExpensePayload {
+    if (!formData.id) {
+      throw new Error("Expense ID is required for update operation");
+    }
+    return {
+      ...this.toCreatePayload(formData, uploadedReceiptUrls),
+      id: formData.id,
     };
   }
 }

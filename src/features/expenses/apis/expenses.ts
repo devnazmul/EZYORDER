@@ -3,16 +3,20 @@ import axiosClient from "@/config/axiosClient";
 
 // 6. Types
 import type {
+  ICreateExpensePayload,
   IExpenseListParams,
   IExpenseListResponse,
   IExpenseMatrixParams,
   IExpenseMatrixResponse,
+  IExpenseMutationResponse,
   IExpenseTrendParams,
   IExpenseTrendResponse,
   IExpenseTypesParams,
   IExpenseTypesResponse,
   IPaymentMethodBreakdownParams,
   IPaymentMethodBreakdownResponse,
+  IUpdateExpensePayload,
+  IUploadReceiptResponse,
 } from "../types/expenses.types";
 
 // GET ALL EXPENSES FOR A RESTAURANT
@@ -101,4 +105,63 @@ export const getExpenseTrend = async (
     },
   );
   return response.status === 200 && response.data ? response.data : null;
+};
+
+// CREATE EXPENSE
+export const createExpense = async (
+  payload: ICreateExpensePayload,
+): Promise<IExpenseMutationResponse | null> => {
+  const response = await axiosClient.post<IExpenseMutationResponse>(
+    "/v1.0/expenses",
+    payload,
+    { validateStatus: () => true },
+  );
+  return response.status === 200 || response.status === 201
+    ? response.data
+    : null;
+};
+
+// UPDATE EXPENSE
+export const updateExpense = async (
+  payload: IUpdateExpensePayload,
+): Promise<IExpenseMutationResponse | null> => {
+  const response = await axiosClient.put<IExpenseMutationResponse>(
+    "/v1.0/expenses",
+    payload,
+    { validateStatus: () => true },
+  );
+  return response.status === 200 ? response.data : null;
+};
+
+// UPLOAD RECEIPT FILE
+export const uploadReceiptFile = async (
+  fileUri: string,
+  fileName?: string,
+  mimeType?: string,
+): Promise<string | null> => {
+  const formData = new FormData();
+  const name = fileName || fileUri.split("/").pop() || "receipt.jpg";
+  const type = mimeType || "image/jpeg";
+
+  formData.append("file", {
+    uri: fileUri,
+    name,
+    type,
+  } as unknown as Blob);
+
+  const response = await axiosClient.post<IUploadReceiptResponse>(
+    "/v1.0/payments-invoice-file",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      validateStatus: () => true,
+    },
+  );
+
+  if (response.status === 200 && response.data?.data?.full_location) {
+    return response.data.data.full_location;
+  }
+  return null;
 };
