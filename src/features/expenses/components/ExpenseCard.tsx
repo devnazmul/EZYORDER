@@ -1,12 +1,15 @@
 // 1. React / React Native
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 // 3. External libraries
 import { MaterialIcons } from "@expo/vector-icons";
 
-// 4. Shared utils
+// 4. Shared components & utils
+import { Badge, CustomText } from "@/components/reuseable";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
+import getGeneralStatusConfig from "@/utils/getGeneralStatusConfig";
+import getPaymentMethodsConfig from "@/utils/getPaymentMethodsConfig";
 
 // 5. Feature services
 import { ExpenseService } from "../services/expense.service";
@@ -37,55 +40,143 @@ function ExpenseCardComponent({
     : "";
   const formattedDate = formatDateTime(rawDate) || "N/A";
 
-  const detailsDisplay = ExpenseService.formatExpenseDetailsDisplay(
-    expense.paid_by,
-    formattedDate,
-  );
-
+  const paymentMethodConfig = getPaymentMethodsConfig(expense.payment_method);
+  const paidBy = expense.paid_by?.trim() || "N/A";
   const formattedAmount = formatAmount(expense.amount, currencySymbol);
+
+  const receiptsCount = expense.reciepts?.length ?? 0;
+  const isExpenseActive = expense.is_active !== 0;
+  const statusConfig = getGeneralStatusConfig(
+    isExpenseActive ? "active" : "inactive",
+  );
 
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className="bg-base-300 border border-base-200 rounded-2xl p-4 mb-3 flex-row items-center justify-between shadow-sm"
+      className="bg-base-300 border border-base-200 rounded-2xl p-4 mb-3 shadow-sm gap-y-3"
     >
-      <View className="flex-row items-center flex-1 mr-3">
-        {/* Category Icon */}
-        <View className="w-12 h-12 rounded-lg items-center justify-center bg-neutral/10 mr-4">
-          <MaterialIcons name="receipt" size={24} color="#464747" />
-        </View>
-
-        {/* Expense Info */}
-        <View className="flex-1 min-w-0">
-          <Text
-            className="text-sm font-bold text-neutral truncate"
-            numberOfLines={1}
-          >
-            {categoryName}
-          </Text>
-          {expense.description && expense.description.trim() !== "" ? (
-            <Text
-              className="text-xs text-neutral/80 mt-0.5 truncate"
-              numberOfLines={1}
-            >
-              {expense.description.trim()}
-            </Text>
-          ) : null}
-          <Text
-            className="text-[11px] text-accent font-semibold leading-4 mt-0.5"
-            numberOfLines={1}
-          >
-            {detailsDisplay}
-          </Text>
-        </View>
+      {/* Top Row: Category Name & Amount */}
+      <View className="flex-row items-start justify-between">
+        <CustomText
+          variant="primary"
+          weight="bold"
+          size="md"
+          className="flex-1 mr-3"
+        >
+          {categoryName}
+        </CustomText>
+        <CustomText
+          variant="currency"
+          weight="bold"
+          size="md"
+          className="shrink-0"
+        >
+          {formattedAmount}
+        </CustomText>
       </View>
 
-      {/* Amount Display */}
-      <View className="text-right">
-        <Text className="text-sm font-bold text-primary">
-          {formattedAmount}
-        </Text>
+      {/* Description below Category Name & Amount */}
+      {expense.description && expense.description.trim() !== "" ? (
+        <CustomText variant="secondary" size="xs" className="-mt-1">
+          {expense.description.trim()}
+        </CustomText>
+      ) : (
+        <CustomText variant="secondary" size="xs" className="-mt-1">
+          No description provided
+        </CustomText>
+      )}
+
+      {/* Row of Badges: Payment Method & Status */}
+      <View className="flex-row items-center justify-end gap-2 flex-wrap">
+        <Badge
+          text={paymentMethodConfig.label}
+          icon={
+            <MaterialIcons
+              name="payment"
+              size={12}
+              color={paymentMethodConfig.color}
+              style={{ marginRight: 2 }}
+            />
+          }
+          containerStyle={{
+            backgroundColor: `${paymentMethodConfig.color}15`,
+            borderColor: `${paymentMethodConfig.color}66`,
+            borderWidth: 1,
+          }}
+          textStyle={{
+            color: paymentMethodConfig.color,
+          }}
+        />
+        <Badge
+          text={statusConfig.label}
+          icon={
+            <MaterialIcons
+              name={statusConfig.iconName}
+              size={12}
+              color={statusConfig.iconColor}
+              style={{ marginRight: 2 }}
+            />
+          }
+          containerStyle={{
+            backgroundColor: statusConfig.backgroundColor,
+            borderColor: statusConfig.borderColor,
+            borderWidth: 1,
+          }}
+          textStyle={{
+            color: statusConfig.textColor,
+          }}
+        />
+      </View>
+
+      {/* Divider */}
+      <View className="h-[1px] bg-base-200 w-full" />
+
+      {/* Bottom Metadata Details Row: Paid By, Payment Date, Receipts */}
+      <View className="flex-row items-center justify-between flex-wrap gap-y-1.5 pt-0.5">
+        {/* Paid By */}
+        <View className="flex-row items-center gap-x-1 mr-2">
+          <MaterialIcons name="person-outline" size={14} color="#6B7280" />
+          <CustomText
+            variant="secondary"
+            weight="medium"
+            size="xs"
+            numberOfLines={1}
+          >
+            {paidBy}
+          </CustomText>
+        </View>
+
+        {/* Payment Date */}
+        <View className="flex-row items-center gap-x-1 mr-2">
+          <MaterialIcons name="event" size={14} color="#6B7280" />
+          <CustomText
+            variant="secondary"
+            weight="medium"
+            size="xs"
+            numberOfLines={1}
+          >
+            {formattedDate}
+          </CustomText>
+        </View>
+
+        {/* Number of Receipts */}
+        <View className="flex-row items-center gap-x-1">
+          <MaterialIcons
+            name="attach-file"
+            size={14}
+            color={receiptsCount > 0 ? "#10B981" : "#9CA3AF"}
+          />
+          <CustomText
+            variant={receiptsCount > 0 ? "primary" : "tertiary"}
+            weight="semibold"
+            size="xs"
+            className={receiptsCount > 0 ? "text-success" : ""}
+            numberOfLines={1}
+          >
+            {receiptsCount} {receiptsCount === 1 ? "Receipt" : "Receipts"}
+          </CustomText>
+        </View>
       </View>
     </TouchableOpacity>
   );
