@@ -7,8 +7,12 @@ import type {
   IExpenseListResponse,
   IExpenseMatrixParams,
   IExpenseMatrixResponse,
+  IExpenseTrendParams,
+  IExpenseTrendResponse,
   IExpenseTypesParams,
   IExpenseTypesResponse,
+  IPaymentMethodBreakdownParams,
+  IPaymentMethodBreakdownResponse,
 } from "../types/expenses.types";
 
 // GET ALL EXPENSES FOR A RESTAURANT
@@ -61,6 +65,34 @@ export const getExpenseMatrix = async (
 ): Promise<IExpenseMatrixResponse | null> => {
   const response = await axiosClient.get<IExpenseMatrixResponse>(
     "/v1.0/expenses/matrix",
+    {
+      params,
+      validateStatus: () => true,
+    },
+  );
+  return response.status === 200 && response.data ? response.data : null;
+};
+
+// GET EXPENSE PAYMENT METHOD BREAKDOWN
+export const getExpensePaymentMethodBreakdown = async (
+  params: IPaymentMethodBreakdownParams = {},
+): Promise<IPaymentMethodBreakdownResponse | null> => {
+  const response = await axiosClient.get<IPaymentMethodBreakdownResponse>(
+    "/v1.0/expenses/payment-method-breakdown",
+    {
+      params,
+      validateStatus: () => true,
+    },
+  );
+  return response.status === 200 && response.data ? response.data : null;
+};
+
+// GET EXPENSE TREND
+export const getExpenseTrend = async (
+  params: IExpenseTrendParams = {},
+): Promise<IExpenseTrendResponse | null> => {
+  const response = await axiosClient.get<IExpenseTrendResponse>(
+    "/v1.0/expenses/trend",
     {
       params,
       validateStatus: () => true,

@@ -19,7 +19,7 @@ export default function ExpenseCardSkeleton({
       {cards.map((key) => (
         <View
           key={key}
-          className="bg-card rounded-2xl p-4 my-1.5 border border-border/40 shadow-sm flex-row items-center justify-between"
+          className="bg-base-300 border border-base-200 rounded-2xl p-4 flex-row items-center justify-between shadow-sm"
         >
           {/* Left Column: Icon Pill & Info */}
           <View className="flex-row items-center gap-3.5 flex-1 pr-3">

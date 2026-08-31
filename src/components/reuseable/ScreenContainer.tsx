@@ -26,6 +26,7 @@ export interface IScreenContainerProps extends ScrollViewProps {
   withSafeArea?: boolean;
   safeAreaEdges?: Edge[];
   safeAreaClassName?: string;
+  scrollable?: boolean;
 }
 
 export const ScreenContainer: React.FC<IScreenContainerProps> = ({
@@ -44,8 +45,41 @@ export const ScreenContainer: React.FC<IScreenContainerProps> = ({
   style,
   keyboardShouldPersistTaps = "handled",
   className = "",
+  scrollable = true,
   ...scrollViewProps
 }) => {
+  if (!scrollable) {
+    const nonScrollableContent = (
+      <View
+        style={[
+          {
+            paddingHorizontal: WP("4%"),
+            paddingTop: 16,
+          },
+          style,
+        ]}
+        className={`flex-1 bg-base-100 ${className}`.trim()}
+      >
+        <View
+          style={contentStyle}
+          className={`flex-1 flex-col gap-y-3 ${contentClassName}`.trim()}
+        >
+          {children}
+        </View>
+      </View>
+    );
+
+    if (withSafeArea) {
+      return (
+        <SafeAreaView edges={safeAreaEdges} className={safeAreaClassName}>
+          {nonScrollableContent}
+        </SafeAreaView>
+      );
+    }
+
+    return nonScrollableContent;
+  }
+
   const ContainerComponent = withKeyboardAvoiding
     ? KeyboardAwareScrollView
     : ScrollView;
@@ -89,7 +123,7 @@ export const ScreenContainer: React.FC<IScreenContainerProps> = ({
     >
       <View
         style={contentStyle}
-        className={`flex-col gap-y-5 ${contentClassName}`.trim()}
+        className={`flex-col gap-y-3 ${contentClassName}`.trim()}
       >
         {children}
       </View>

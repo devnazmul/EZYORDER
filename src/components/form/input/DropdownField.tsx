@@ -2,6 +2,7 @@
 import React, { useRef, useState } from "react";
 import {
   Modal,
+  ScrollView,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -45,6 +46,7 @@ export interface IDropdownFieldProps {
   readonly triggerClassName?: string;
   readonly triggerTextClassName?: string;
   readonly className?: string;
+  readonly maxHeight?: number;
   readonly onFieldChange?: (
     val: unknown,
     formValues: Record<string, unknown>,
@@ -68,6 +70,7 @@ function DropdownView({
   triggerClassName,
   triggerTextClassName,
   className,
+  maxHeight = 240,
   errorMessage,
   onSelectOption,
 }: Readonly<{
@@ -79,6 +82,7 @@ function DropdownView({
   triggerClassName: string;
   triggerTextClassName: string;
   className: string;
+  maxHeight?: number;
   errorMessage?: string;
   onSelectOption: (val: string) => void;
 }>) {
@@ -227,41 +231,50 @@ function DropdownView({
                   top: coords?.top,
                   right: coords?.right,
                   minWidth: coords?.minWidth,
+                  maxHeight,
                 }}
                 className="bg-base-300 rounded-xl border border-base-200 shadow-xl py-1 z-50 overflow-hidden"
               >
-                {formattedOptions.map((option) => {
-                  const isSelected = isOptionSelected(option.value);
+                <ScrollView
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator
+                  style={{ maxHeight }}
+                >
+                  {formattedOptions.map((option) => {
+                    const isSelected = isOptionSelected(option.value);
 
-                  return (
-                    <TouchableOpacity
-                      key={option.value}
-                      onPress={() => handleSelect(option.value)}
-                      accessibilityRole="button"
-                      accessibilityLabel={option.label}
-                      accessibilityState={{ selected: isSelected }}
-                      className={`flex-row items-center justify-between px-3.5 py-2.5 ${
-                        isSelected ? "bg-primary/10" : "bg-transparent"
-                      }`}
-                    >
-                      <Text
-                        style={{ fontSize }}
-                        className={`font-semibold capitalize mr-3 ${
-                          isSelected ? "text-primary font-bold" : "text-neutral"
+                    return (
+                      <TouchableOpacity
+                        key={option.value}
+                        onPress={() => handleSelect(option.value)}
+                        accessibilityRole="button"
+                        accessibilityLabel={option.label}
+                        accessibilityState={{ selected: isSelected }}
+                        className={`flex-row items-center justify-between px-3.5 py-2.5 ${
+                          isSelected ? "bg-primary/10" : "bg-transparent"
                         }`}
                       >
-                        {option.label}
-                      </Text>
-                      {isSelected && (
-                        <MaterialIcons
-                          name="check"
-                          size={WP("3.5%")}
-                          color={COLORS.primary}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
+                        <Text
+                          style={{ fontSize }}
+                          className={`font-semibold capitalize mr-3 ${
+                            isSelected
+                              ? "text-primary font-bold"
+                              : "text-neutral"
+                          }`}
+                        >
+                          {option.label}
+                        </Text>
+                        {isSelected && (
+                          <MaterialIcons
+                            name="check"
+                            size={WP("3.5%")}
+                            color={COLORS.primary}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
               </View>
             )}
           </View>
@@ -282,6 +295,7 @@ interface IRhfDropdownFieldProps {
   triggerClassName: string;
   triggerTextClassName: string;
   className: string;
+  maxHeight?: number;
   onFieldChange?: (
     val: unknown,
     formValues: Record<string, unknown>,
@@ -297,6 +311,7 @@ function RhfDropdownField({
   triggerClassName,
   triggerTextClassName,
   className,
+  maxHeight,
   onFieldChange,
 }: Readonly<IRhfDropdownFieldProps>) {
   const { control, getValues, setValue } = useFormContext();
@@ -340,6 +355,7 @@ function RhfDropdownField({
             triggerClassName={triggerClassName}
             triggerTextClassName={triggerTextClassName}
             className={className}
+            maxHeight={maxHeight}
             errorMessage={error?.message}
             onSelectOption={handleSelectOption}
           />
@@ -363,6 +379,7 @@ export default function DropdownField({
   triggerClassName = "justify-between bg-base-100 border border-base-200 rounded-xl px-[3%] py-[3%]",
   triggerTextClassName = "",
   className = "",
+  maxHeight,
   onFieldChange,
 }: Readonly<IDropdownFieldProps>) {
   const formattedOptions: IDropdownOption[] =
@@ -384,6 +401,7 @@ export default function DropdownField({
         triggerClassName={triggerClassName}
         triggerTextClassName={triggerTextClassName}
         className={className}
+        maxHeight={maxHeight}
         onFieldChange={onFieldChange}
       />
     );
@@ -414,6 +432,7 @@ export default function DropdownField({
       triggerClassName={triggerClassName}
       triggerTextClassName={triggerTextClassName}
       className={className}
+      maxHeight={maxHeight}
       onSelectOption={handleSelectOption}
     />
   );

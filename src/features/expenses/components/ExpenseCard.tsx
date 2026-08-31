@@ -48,7 +48,7 @@ export default function ExpenseCard({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className="bg-base-300 border border-base-200 rounded-lg p-4 mb-3 flex-row items-center justify-between shadow-sm"
+      className="bg-base-300 border border-base-200 rounded-2xl p-4 mb-3 flex-row items-center justify-between shadow-sm"
     >
       <View className="flex-row items-center flex-1 mr-3">
         {/* Category Icon */}
@@ -83,7 +83,7 @@ export default function ExpenseCard({
 
       {/* Amount Display */}
       <View className="text-right">
-        <Text className="text-sm font-black text-primary">
+        <Text className="text-sm font-bold text-primary">
           {formattedAmount}
         </Text>
       </View>

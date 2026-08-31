@@ -19,6 +19,11 @@ export {
   type IDoughnutChartItem,
   type IDoughnutChartProps,
 } from "./DoughnutChart";
+export {
+  default as LineChart,
+  type ILineChartDataItem,
+  type ILineChartProps,
+} from "./LineChart";
 export { default as EmptyState } from "./EmptyState";
 export { default as ErrorState, type IErrorStateProps } from "./ErrorState";
 export { default as FilterChips } from "./FilterChips";

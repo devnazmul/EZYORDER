@@ -55,7 +55,7 @@ export default function ActionCard({
     return (
       <View
         style={{ padding: WP("4%") }}
-        className={`bg-base-300 rounded-xl border border-base-200 shadow-sm justify-center items-center min-h-[120px] ${containerClassName}`}
+        className={`bg-base-300 rounded-2xl border border-base-200 shadow-sm justify-center items-center min-h-[120px] ${containerClassName}`}
       >
         <Text
           style={{ fontSize: getResponsiveFontSize("xs") }}
@@ -91,7 +91,7 @@ export default function ActionCard({
 
   return (
     <View
-      className={`bg-base-300 rounded-xl overflow-hidden border border-base-200 shadow-sm ${containerClassName}`}
+      className={`bg-base-300 rounded-2xl overflow-hidden border border-base-200 shadow-sm ${containerClassName}`}
     >
       {/* Title Header */}
       {title || headerRight ? (

@@ -7,7 +7,9 @@ import { useAuth } from "@/src/context/AuthContext";
 // 5. Feature apis
 import {
   getExpenseMatrix,
+  getExpensePaymentMethodBreakdown,
   getExpenses,
+  getExpenseTrend,
   getExpenseTypes,
 } from "@/features/expenses/apis/expenses";
 
@@ -15,7 +17,9 @@ import {
 import type {
   IExpenseListParams,
   IExpenseMatrixParams,
+  IExpenseTrendParams,
   IExpenseTypesParams,
+  IPaymentMethodBreakdownParams,
 } from "@/features/expenses/types";
 
 // 7. Constants/utils
@@ -55,6 +59,30 @@ export const useExpenseMatrixQuery = (
   return useQuery({
     queryKey: EXPENSE_KEYS.matrix(params),
     queryFn: () => getExpenseMatrix(params),
+    enabled: !!token && enabled,
+  });
+};
+
+export const useExpensePaymentMethodBreakdownQuery = (
+  params: IPaymentMethodBreakdownParams = {},
+  enabled: boolean = true,
+) => {
+  const { token } = useAuth();
+  return useQuery({
+    queryKey: EXPENSE_KEYS.paymentMethodBreakdown(params),
+    queryFn: () => getExpensePaymentMethodBreakdown(params),
+    enabled: !!token && enabled,
+  });
+};
+
+export const useExpenseTrendQuery = (
+  params: IExpenseTrendParams = {},
+  enabled: boolean = true,
+) => {
+  const { token } = useAuth();
+  return useQuery({
+    queryKey: EXPENSE_KEYS.trend(params),
+    queryFn: () => getExpenseTrend(params),
     enabled: !!token && enabled,
   });
 };

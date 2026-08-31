@@ -1,5 +1,8 @@
-// 4. Shared utils
-import { getPaymentMethodsConfig } from "@/utils";
+// 4. Shared utils & components
+import type { IDoughnutChartItem } from "@/components/reuseable";
+import type { IBarChartDataItem } from "@/components/reuseable/BarChart";
+import { COLORS } from "@/constants/colors";
+import { formatAmount, getPaymentMethodsConfig } from "@/utils";
 
 // 6. Types
 import type { IExpenseFilterValues } from "../schema";
@@ -7,7 +10,9 @@ import type {
   IExpenseListParams,
   IExpenseMatrixData,
   IExpenseReceipt,
+  IExpenseTrendItem,
   IExpenseType,
+  IPaymentMethodBreakdownItem,
 } from "../types";
 
 export class ExpenseService {
@@ -105,6 +110,23 @@ export class ExpenseService {
   }
 
   /**
+   * Helper to resolve expense_type query parameter.
+   */
+  private static resolveExpenseTypeParam(
+    expenseType?: IExpenseFilterValues["expense_type"],
+  ): IExpenseListParams["expense_type"] | undefined {
+    if (!expenseType) return undefined;
+    if (Array.isArray(expenseType)) {
+      const filtered = expenseType.filter((t) => String(t) !== "all");
+      if (filtered.length > 0) {
+        return filtered.length === 1 ? filtered[0] : filtered;
+      }
+      return undefined;
+    }
+    return expenseType !== "all" ? expenseType : undefined;
+  }
+
+  /**
    * Builds API query parameters from search key and filter values.
    */
   static buildApiParams(
@@ -117,33 +139,212 @@ export class ExpenseService {
       params.search_key = searchKey.trim();
     }
 
-    if (filterValues?.date_range?.start) {
-      params.start_date = filterValues.date_range.start;
+    const {
+      date_range,
+      amount_range,
+      expense_type,
+      payment_method,
+      status,
+      paid_by,
+      order_by,
+    } = filterValues || {};
+
+    if (date_range?.start) params.start_date = date_range.start;
+    if (date_range?.end) params.end_date = date_range.end;
+    if (amount_range?.min) params.min_amount = amount_range.min;
+    if (amount_range?.max) params.max_amount = amount_range.max;
+
+    const resolvedType = ExpenseService.resolveExpenseTypeParam(expense_type);
+    if (resolvedType) params.expense_type = resolvedType;
+
+    if (payment_method && payment_method !== "all") {
+      params.payment_method = payment_method;
     }
 
-    if (filterValues?.date_range?.end) {
-      params.end_date = filterValues.date_range.end;
+    if (status && status !== "all") {
+      if (status === "active") {
+        params.is_active = 1;
+      } else if (status === "inactive") {
+        params.is_active = 0;
+      }
     }
 
-    if (filterValues?.amount_range?.min) {
-      params.min_amount = filterValues.amount_range.min;
+    if (paid_by && paid_by.trim() !== "") {
+      params.paid_by = paid_by.trim();
     }
 
-    if (filterValues?.amount_range?.max) {
-      params.max_amount = filterValues.amount_range.max;
-    }
-
-    if (filterValues?.payment_method && filterValues.payment_method !== "all") {
-      params.payment_method = filterValues.payment_method;
-    }
-
-    if (filterValues?.order_by) {
-      const upper = filterValues.order_by.toUpperCase();
+    if (order_by) {
+      const upper = order_by.toUpperCase();
       if (upper === "ASC" || upper === "DESC") {
         params.order_by = upper;
       }
     }
 
     return params;
+  }
+
+  /**
+   * Processes payment method breakdown data into doughnut chart items and total value.
+   */
+  static getPaymentMethodBreakdownChartData(
+    data?: IPaymentMethodBreakdownItem[] | null,
+    currencySymbol = "£",
+  ): {
+    total: number;
+    chartItems: IDoughnutChartItem[];
+  } {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return { total: 0, chartItems: [] };
+    }
+
+    const total = data.reduce(
+      (acc, item) => acc + (Number(item.total) || 0),
+      0,
+    );
+
+    const chartItems: IDoughnutChartItem[] = data.map((item) => {
+      const config = getPaymentMethodsConfig(item.payment_method);
+      const val = Number(item.total) || 0;
+
+      return {
+        label: config.label,
+        value: val,
+        formattedValue: formatAmount(val, currencySymbol),
+        color: config.color,
+        legendValue: `${Number(item.percentage || 0).toFixed(1)}%`,
+      };
+    });
+
+    return { total, chartItems };
+  }
+
+  /**
+   * Processes expense trend data into primary gradient bar chart items.
+   * Aggregates into weekly buckets (starting Monday) when trend data has > 14 items.
+   */
+  static getExpenseTrendChartData(trendData?: IExpenseTrendItem[] | null): {
+    chartData: IBarChartDataItem[];
+    totalSpent: number;
+    isEmpty: boolean;
+  } {
+    if (!trendData || !Array.isArray(trendData) || trendData.length === 0) {
+      return { chartData: [], totalSpent: 0, isEmpty: true };
+    }
+
+    let totalSpent = 0;
+    trendData.forEach((item) => {
+      totalSpent += Number(item.total_spent) || 0;
+    });
+
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    if (trendData.length <= 14) {
+      const chartData: IBarChartDataItem[] = trendData.map((item) => {
+        const val = Number(item.total_spent) || 0;
+
+        let name = item.date;
+        if (item.date) {
+          const parts = item.date.split("-");
+          if (parts.length === 3) {
+            const day = parts[0];
+            const monthNum = Number.parseInt(parts[1], 10);
+            const month = monthNames[monthNum - 1] || parts[1];
+            name = `${day} ${month}`;
+          }
+        }
+
+        return {
+          name,
+          value: val,
+          frontColor: COLORS.primary,
+          gradientColor: "#FF9E93",
+        };
+      });
+
+      return {
+        chartData,
+        totalSpent,
+        isEmpty: chartData.length === 0 || totalSpent === 0,
+      };
+    }
+
+    // Aggregate into weekly buckets (starting Monday) when > 14 items
+    const weeklyBuckets = new Map<
+      string,
+      { total: number; mondayDate: Date | null }
+    >();
+
+    trendData.forEach((item) => {
+      const val = Number(item.total_spent) || 0;
+      let key = item.date;
+      let mondayDate: Date | null = null;
+
+      if (item.date) {
+        const parts = item.date.split("-");
+        if (parts.length === 3) {
+          const dd = Number.parseInt(parts[0], 10);
+          const mm = Number.parseInt(parts[1], 10);
+          const yyyy = Number.parseInt(parts[2], 10);
+
+          if (!Number.isNaN(dd) && !Number.isNaN(mm) && !Number.isNaN(yyyy)) {
+            const dateObj = new Date(yyyy, mm - 1, dd);
+            const day = dateObj.getDay();
+            const offset = day === 0 ? -6 : 1 - day;
+            mondayDate = new Date(yyyy, mm - 1, dd + offset);
+
+            const mYear = mondayDate.getFullYear();
+            const mMonth = String(mondayDate.getMonth() + 1).padStart(2, "0");
+            const mDay = String(mondayDate.getDate()).padStart(2, "0");
+            key = `${mYear}-${mMonth}-${mDay}`;
+          }
+        }
+      }
+
+      if (!weeklyBuckets.has(key)) {
+        weeklyBuckets.set(key, { total: 0, mondayDate });
+      }
+      const bucket = weeklyBuckets.get(key)!;
+      bucket.total += val;
+    });
+
+    const sortedKeys = Array.from(weeklyBuckets.keys()).sort((a, b) =>
+      a.localeCompare(b),
+    );
+    const chartData: IBarChartDataItem[] = sortedKeys.map((key) => {
+      const bucket = weeklyBuckets.get(key)!;
+      let name = key;
+
+      if (bucket.mondayDate) {
+        const dayNum = bucket.mondayDate.getDate();
+        const monthStr = monthNames[bucket.mondayDate.getMonth()];
+        name = `${dayNum} ${monthStr}`;
+      }
+
+      return {
+        name,
+        value: Number(bucket.total.toFixed(2)),
+        frontColor: COLORS.primary,
+        gradientColor: "#FF9E93",
+      };
+    });
+
+    return {
+      chartData,
+      totalSpent,
+      isEmpty: chartData.length === 0 || totalSpent === 0,
+    };
   }
 }

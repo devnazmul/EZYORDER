@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 export const expenseFilterSchema = z.object({
+  period: z.string().optional(),
   date_range: z
     .object({
       start: z.string().optional(),
@@ -14,7 +15,12 @@ export const expenseFilterSchema = z.object({
       max: z.string().optional(),
     })
     .optional(),
+  expense_type: z
+    .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()]))])
+    .optional(),
   payment_method: z.string().optional(),
+  status: z.string().optional(),
+  paid_by: z.string().optional(),
   order_by: z.string().optional(),
 });
 

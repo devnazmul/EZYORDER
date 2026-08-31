@@ -18,6 +18,7 @@ import { getResponsiveFontSize, WP } from "@/utils";
 export type IDoughnutChartItem = {
   label: string;
   value: number;
+  formattedValue?: string | number;
   color?: string | string[];
   colors?: string[];
   legendValue?: string | number;
@@ -383,7 +384,7 @@ export default function DoughnutChart({
                     style={{ fontSize: getResponsiveFontSize("xs") }}
                     className="text-neutral font-semibold"
                   >
-                    {item.value}
+                    {item.formattedValue ?? item.value}
                   </Text>
                 </View>
               </View>
