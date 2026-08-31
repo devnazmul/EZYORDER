@@ -13,6 +13,10 @@ export { default as InputError, type IInputErrorProps } from "./InputError";
 export { default as InputField, type IInputFieldProps } from "./InputField";
 export { default as InputLabel, type IInputLabelProps } from "./InputLabel";
 export {
+  default as FileUploadField,
+  type IFileUploadFieldProps,
+} from "./FileUploadField";
+export {
   default as NumberRangeField,
   type INumberRangeFieldProps,
 } from "./NumberRangeField";
