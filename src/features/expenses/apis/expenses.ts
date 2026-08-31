@@ -26,7 +26,7 @@ export const getExpenses = async (
   params: Partial<IExpenseListParams> = {},
 ): Promise<IExpenseListResponse | null> => {
   const mergedParams: Record<string, unknown> = {
-    order_by: "asc",
+    order_by: "desc",
     page: 1,
     ...params,
   };
