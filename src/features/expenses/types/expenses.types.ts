@@ -163,10 +163,11 @@ export interface IUpdateExpensePayload extends ICreateExpensePayload {
 }
 
 export interface IUploadReceiptResponse {
-  success: boolean;
+  success?: boolean;
   message?: string;
+  full_location?: string;
   data?: {
-    full_location: string;
+    full_location?: string;
   };
 }
 

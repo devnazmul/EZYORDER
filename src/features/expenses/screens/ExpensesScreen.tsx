@@ -1,6 +1,9 @@
 // 1. React / React Native
-import React from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import React, { useState } from "react";
+import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
+
+// 2. Expo / Navigation
+import { MaterialIcons } from "@expo/vector-icons";
 
 // 4. Shared components
 import { EmptyState, PageTitle, ScreenContainer } from "@/components/reuseable";
@@ -11,6 +14,7 @@ import {
   ExpenseCardSkeleton,
   ExpenseDetailModal,
   ExpenseFilterPanel,
+  ExpenseFormBottomSheet,
   ExpenseKPICards,
   ExpensePaymentBreakdownCard,
   ExpenseTrendCard,
@@ -19,10 +23,13 @@ import { useExpenses } from "../hooks/useExpenses";
 
 // 7. Constants/utils
 import { COLORS } from "@/constants/colors";
-import { HP } from "@/utils/getResponsiveSizes";
+import { HP, WP } from "@/utils/getResponsiveSizes";
 import { IExpense } from "../types";
 
 export default function ExpensesScreen() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<IExpense | null>(null);
+
   const {
     searchQuery,
     setSearchQuery,
@@ -50,111 +57,94 @@ export default function ExpensesScreen() {
     defaultFilters,
   } = useExpenses();
 
-  const handleSelectExpense = React.useCallback(
-    (item: IExpense) => {
-      setSelectedExpense(item);
-    },
-    [setSelectedExpense],
-  );
+  const handleSelectExpense = (item: IExpense) => {
+    setSelectedExpense(item);
+  };
 
-  const handleEndReached = React.useCallback(() => {
+  const handleEditExpense = (item: IExpense) => {
+    setEditingExpense(item);
+    setIsFormOpen(true);
+  };
+
+  const handleCreateExpense = () => {
+    setEditingExpense(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEndReached = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  };
 
-  const renderFooter = React.useCallback(() => {
+  const renderFooter = () => {
     if (!isFetchingNextPage) return null;
     return (
       <View className="mt-3">
         <ExpenseCardSkeleton count={3} />
       </View>
     );
-  }, [isFetchingNextPage]);
+  };
 
-  const renderHeader = React.useCallback(
-    () => (
-      <View className="gap-y-3 pb-3">
-        {/* Page Title */}
-        <PageTitle
-          title="Expenses"
-          icon="receipt-long"
-          badgeCount={expenses.length}
-          description="Track and manage your restaurant expenses and categories"
-        />
-
-        {/* Search & Filter Panel */}
-        <ExpenseFilterPanel
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filterValues={filterValues}
-          setFilterValues={setFilterValues}
-          defaultFilters={defaultFilters}
-          expenseTypes={expenseTypes}
-        />
-
-        {/* Expense KPI Cards */}
-        <ExpenseKPICards
-          startDate={filterValues.date_range?.start}
-          endDate={filterValues.date_range?.end}
-          currencySymbol={currencySymbol}
-          isLoading={isRefreshing || isLoading}
-        />
-
-        {/* Expense Payment Method Breakdown */}
-        <ExpensePaymentBreakdownCard
-          data={paymentMethodBreakdownChartData}
-          currencySymbol={currencySymbol}
-          isLoading={isPaymentBreakdownLoading || isRefreshing}
-          isError={isPaymentBreakdownError}
-          onRetry={refetchPaymentBreakdown}
-        />
-
-        {/* Expense Trend */}
-        <ExpenseTrendCard
-          data={expenseTrendData}
-          currencySymbol={currencySymbol}
-          isLoading={isExpenseTrendLoading || isRefreshing}
-          isError={isExpenseTrendError}
-          onRetry={refetchExpenseTrend}
-        />
-      </View>
-    ),
-    [
-      expenses.length,
-      searchQuery,
-      setSearchQuery,
-      filterValues,
-      setFilterValues,
-      defaultFilters,
-      expenseTypes,
-      currencySymbol,
-      isRefreshing,
-      isLoading,
-      paymentMethodBreakdownChartData,
-      isPaymentBreakdownLoading,
-      isPaymentBreakdownError,
-      refetchPaymentBreakdown,
-      expenseTrendData,
-      isExpenseTrendLoading,
-      isExpenseTrendError,
-      refetchExpenseTrend,
-    ],
-  );
-
-  const renderItem = React.useCallback(
-    ({ item }: { item: IExpense }) => (
-      <ExpenseCard
-        expense={item}
-        expenseTypes={expenseTypes}
-        currencySymbol={currencySymbol}
-        onPress={() => handleSelectExpense(item)}
+  const renderHeader = () => (
+    <View className="gap-y-3 pb-3">
+      {/* Page Title */}
+      <PageTitle
+        title="Expenses"
+        icon="receipt-long"
+        badgeCount={expenses.length}
+        description="Track and manage your restaurant expenses and categories"
       />
-    ),
-    [expenseTypes, currencySymbol, handleSelectExpense],
+
+      {/* Search & Filter Panel */}
+      <ExpenseFilterPanel
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filterValues={filterValues}
+        setFilterValues={setFilterValues}
+        defaultFilters={defaultFilters}
+        expenseTypes={expenseTypes}
+      />
+
+      {/* Expense KPI Cards */}
+      <ExpenseKPICards
+        startDate={filterValues.date_range?.start}
+        endDate={filterValues.date_range?.end}
+        currencySymbol={currencySymbol}
+        isLoading={isRefreshing || isLoading}
+      />
+
+      {/* Expense Payment Method Breakdown */}
+      <ExpensePaymentBreakdownCard
+        data={paymentMethodBreakdownChartData}
+        currencySymbol={currencySymbol}
+        isLoading={isPaymentBreakdownLoading || isRefreshing}
+        isError={isPaymentBreakdownError}
+        onRetry={refetchPaymentBreakdown}
+      />
+
+      {/* Expense Trend */}
+      <ExpenseTrendCard
+        data={expenseTrendData}
+        currencySymbol={currencySymbol}
+        isLoading={isExpenseTrendLoading || isRefreshing}
+        isError={isExpenseTrendError}
+        onRetry={refetchExpenseTrend}
+      />
+    </View>
   );
 
-  const renderEmptyState = React.useCallback(() => {
+  const renderItem = ({ item }: { item: IExpense }) => (
+    <ExpenseCard
+      expense={item}
+      expenseTypes={expenseTypes}
+      currencySymbol={currencySymbol}
+      onPress={() => handleSelectExpense(item)}
+      onEdit={handleEditExpense}
+    />
+  );
+
+  const renderEmptyState = () => {
     if (isLoading && !isRefreshing) {
       return <ExpenseCardSkeleton count={5} />;
     }
@@ -170,13 +160,13 @@ export default function ExpensesScreen() {
         description={emptyDescription}
       />
     );
-  }, [isLoading, isRefreshing, searchQuery]);
+  };
 
   return (
     <ScreenContainer
       scrollable={false}
       safeAreaEdges={["left"]}
-      contentClassName="flex-1"
+      contentClassName="flex-1 relative"
     >
       <FlatList
         className="flex-1"
@@ -184,7 +174,7 @@ export default function ExpensesScreen() {
         keyExtractor={(item) => String(item.id)}
         ListHeaderComponent={renderHeader}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: HP("6%") }}
+        contentContainerStyle={{ paddingBottom: HP("10%") }}
         renderItem={renderItem}
         ListEmptyComponent={renderEmptyState}
         ListFooterComponent={renderFooter}
@@ -204,6 +194,30 @@ export default function ExpensesScreen() {
         }
       />
 
+      {/* Floating Action Button (FAB) for Adding Expense */}
+      <TouchableOpacity
+        onPress={handleCreateExpense}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Add New Expense"
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 5,
+          width: WP("12%"),
+          height: WP("12%"),
+          borderRadius: WP("6%"),
+          elevation: 6,
+          shadowColor: COLORS.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.35,
+          shadowRadius: 6,
+        }}
+        className="z-50 bg-primary items-center justify-center shadow-lg"
+      >
+        <MaterialIcons name="add" size={WP("7%")} color={COLORS.base300} />
+      </TouchableOpacity>
+
       {/* Expense Detail Bottom Drawer Sheet */}
       <ExpenseDetailModal
         visible={selectedExpense !== null}
@@ -211,6 +225,16 @@ export default function ExpensesScreen() {
         expense={selectedExpense}
         expenseTypes={expenseTypes}
         currencySymbol={currencySymbol}
+      />
+
+      {/* Expense Create / Edit Form BottomSheet */}
+      <ExpenseFormBottomSheet
+        visible={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingExpense(null);
+        }}
+        initialExpense={editingExpense}
       />
     </ScreenContainer>
   );

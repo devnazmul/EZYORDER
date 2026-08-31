@@ -10,11 +10,13 @@ import { Badge, CustomText } from "@/components/reuseable";
 import { formatAmount, formatDateTime } from "@/utils/formatters";
 import getGeneralStatusConfig from "@/utils/getGeneralStatusConfig";
 import getPaymentMethodsConfig from "@/utils/getPaymentMethodsConfig";
+import { WP } from "@/utils/getResponsiveSizes";
 
 // 5. Feature services
 import { ExpenseService } from "../services/expense.service";
 
 // 6. Types
+import { COLORS } from "@/constants";
 import type { IExpense, IExpenseType } from "../types";
 
 export interface IExpenseCardProps {
@@ -22,6 +24,7 @@ export interface IExpenseCardProps {
   expenseTypes: IExpenseType[];
   currencySymbol?: string;
   onPress: () => void;
+  onEdit?: (expense: IExpense) => void;
 }
 
 function ExpenseCardComponent({
@@ -29,6 +32,7 @@ function ExpenseCardComponent({
   expenseTypes,
   currencySymbol = "£",
   onPress,
+  onEdit,
 }: Readonly<IExpenseCardProps>) {
   const categoryName = ExpenseService.getExpenseCategoryName(
     expense.expense_type,
@@ -127,6 +131,23 @@ function ExpenseCardComponent({
             color: statusConfig.textColor,
           }}
         />
+
+        {Boolean(onEdit) && (
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              onEdit?.(expense);
+            }}
+            activeOpacity={0.7}
+            className="p-1.5 rounded-lg bg-base-100 border border-base-200"
+          >
+            <MaterialIcons
+              name="edit"
+              size={WP("3.5%")}
+              color={COLORS.accent}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Divider */}

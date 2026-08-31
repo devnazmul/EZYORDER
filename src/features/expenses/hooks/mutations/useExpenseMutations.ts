@@ -21,13 +21,7 @@ export const useCreateExpenseMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: ICreateExpensePayload) => {
-      const result = await createExpense(payload);
-      if (!result) {
-        throw new Error("Failed to create expense");
-      }
-      return result;
-    },
+    mutationFn: (payload: ICreateExpensePayload) => createExpense(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EXPENSE_KEYS.all });
     },
@@ -38,13 +32,7 @@ export const useUpdateExpenseMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: IUpdateExpensePayload) => {
-      const result = await updateExpense(payload);
-      if (!result) {
-        throw new Error("Failed to update expense");
-      }
-      return result;
-    },
+    mutationFn: (payload: IUpdateExpensePayload) => updateExpense(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EXPENSE_KEYS.all });
     },

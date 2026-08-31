@@ -110,27 +110,25 @@ export const getExpenseTrend = async (
 // CREATE EXPENSE
 export const createExpense = async (
   payload: ICreateExpensePayload,
-): Promise<IExpenseMutationResponse | null> => {
+): Promise<IExpenseMutationResponse> => {
   const response = await axiosClient.post<IExpenseMutationResponse>(
     "/v1.0/expenses",
     payload,
-    { validateStatus: () => true },
+    { validateStatus: (status) => status < 400 },
   );
-  return response.status === 200 || response.status === 201
-    ? response.data
-    : null;
+  return response.data;
 };
 
 // UPDATE EXPENSE
 export const updateExpense = async (
   payload: IUpdateExpensePayload,
-): Promise<IExpenseMutationResponse | null> => {
+): Promise<IExpenseMutationResponse> => {
   const response = await axiosClient.put<IExpenseMutationResponse>(
     "/v1.0/expenses",
     payload,
-    { validateStatus: () => true },
+    { validateStatus: (status) => status < 400 },
   );
-  return response.status === 200 ? response.data : null;
+  return response.data;
 };
 
 // UPLOAD RECEIPT FILE
@@ -141,7 +139,15 @@ export const uploadReceiptFile = async (
 ): Promise<string | null> => {
   const formData = new FormData();
   const name = fileName || fileUri.split("/").pop() || "receipt.jpg";
-  const type = mimeType || "image/jpeg";
+
+  let type = mimeType;
+  if (!type) {
+    const lowerName = name.toLowerCase();
+    if (lowerName.endsWith(".png")) type = "image/png";
+    else if (lowerName.endsWith(".pdf")) type = "application/pdf";
+    else if (lowerName.endsWith(".webp")) type = "image/webp";
+    else type = "image/jpeg";
+  }
 
   formData.append("file", {
     uri: fileUri,
@@ -160,8 +166,11 @@ export const uploadReceiptFile = async (
     },
   );
 
-  if (response.status === 200 && response.data?.data?.full_location) {
-    return response.data.data.full_location;
+  const location =
+    response.data?.data?.full_location || response.data?.full_location;
+
+  if ((response.status === 200 || response.status === 201) && location) {
+    return location;
   }
   return null;
 };
