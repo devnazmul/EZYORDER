@@ -56,8 +56,13 @@ export function useExpenses() {
     state.filterValues,
   );
 
-  const { data: expensesResponse, isLoading: isExpensesLoading } =
-    useExpensesQuery(restaurantId || "", 200, apiParams);
+  const {
+    data: expensesResponse,
+    isLoading: isExpensesLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useExpensesQuery(restaurantId || "", 20, apiParams);
 
   const { data: typesResponse, isLoading: isTypesLoading } =
     useExpenseTypesQuery(restaurantId || "", 1000);
@@ -81,7 +86,10 @@ export function useExpenses() {
     refetch: refetchExpenseTrend,
   } = useExpenseTrendQuery(dateRangeParams);
 
-  const expenses = expensesResponse?.data ?? [];
+  const expenses =
+    expensesResponse?.pages.flatMap(
+      (page) => page?.data ?? (Array.isArray(page) ? page : []),
+    ) ?? [];
   const expenseTypes = typesResponse?.data ?? [];
   const paymentMethodBreakdownChartData = paymentBreakdownResponse?.data ?? [];
   const expenseTrendData = expenseTrendResponse?.data ?? [];
@@ -115,6 +123,9 @@ export function useExpenses() {
     setSelectedExpense,
     isRefreshing: state.isRefreshing,
     expenses,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     expenseTypes,
     paymentMethodBreakdownChartData,
     isPaymentBreakdownLoading,

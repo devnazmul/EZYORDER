@@ -18,21 +18,23 @@ import type {
 // GET ALL EXPENSES FOR A RESTAURANT
 export const getExpenses = async (
   restaurantId: number | string,
-  perPage: number = 200,
+  perPage: number = 20,
   params: Partial<IExpenseListParams> = {},
 ): Promise<IExpenseListResponse | null> => {
-  const mergedParams = {
+  const mergedParams: Record<string, unknown> = {
     order_by: "asc",
-    start_date: "",
-    end_date: "",
-    search_key: "",
-    min_amount: "",
-    max_amount: "",
-    payment_method: "",
-    supplier_id: "",
-    is_active: "",
+    page: 1,
     ...params,
   };
+
+  // Remove empty string / null / undefined values so query filters work cleanly
+  Object.keys(mergedParams).forEach((key) => {
+    const val = mergedParams[key];
+    if (val === "" || val === null || val === undefined) {
+      delete mergedParams[key];
+    }
+  });
+
   const response = await axiosClient.get<IExpenseListResponse>(
     `/v1.0/expenses/${restaurantId}/${perPage}`,
     {

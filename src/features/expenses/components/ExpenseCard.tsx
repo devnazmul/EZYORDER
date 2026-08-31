@@ -21,7 +21,7 @@ export interface IExpenseCardProps {
   onPress: () => void;
 }
 
-export default function ExpenseCard({
+function ExpenseCardComponent({
   expense,
   expenseTypes,
   currencySymbol = "£",
@@ -90,3 +90,5 @@ export default function ExpenseCard({
     </TouchableOpacity>
   );
 }
+
+export default React.memo(ExpenseCardComponent);
