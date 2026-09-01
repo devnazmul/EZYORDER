@@ -43,10 +43,10 @@ interface IExpenseFormBottomSheetProps {
 
 // Static payment method options (defined outside to avoid re-creation or memoization on render)
 const PAYMENT_METHOD_OPTIONS: IDropdownOption[] = [
-  "cash",
   "card",
+  "cash",
   "bank_transfer",
-  "online",
+  "cheque",
 ].map((method) => {
   const config = getPaymentMethodsConfig(method);
   return {
