@@ -4,6 +4,8 @@ import {
   DefaultValues,
   FieldValues,
   FormProvider,
+  Path,
+  Resolver,
   SubmitHandler,
   useForm,
 } from "react-hook-form";
@@ -35,12 +37,17 @@ export function CustomForm<T extends FieldValues>({
   showFormActionButton = true,
   submitButtonLabel,
   style,
-}: ICustomFormProps<T>) {
-  const formConfig: any = {};
-  if (schema) formConfig.resolver = zodResolver(schema as any);
-  if (defaultValues) formConfig.values = defaultValues;
+}: Readonly<ICustomFormProps<T>>) {
+  const resolver = schema
+    ? (zodResolver(
+        schema as Parameters<typeof zodResolver>[0],
+      ) as unknown as Resolver<T>)
+    : undefined;
 
-  const methods = useForm<T>(formConfig);
+  const methods = useForm<T>({
+    resolver,
+    defaultValues,
+  });
 
   const {
     handleSubmit,
@@ -52,27 +59,40 @@ export function CustomForm<T extends FieldValues>({
     try {
       await Promise.resolve(submitHandler(data));
       methods.reset();
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Keep values on error so the user doesn't lose their input
       methods.reset(undefined, { keepValues: true });
 
-      const errorStatus = err?.response?.status || err?.status;
+      const axiosErr = err as {
+        response?: {
+          status?: number;
+          data?: { errors?: Record<string, unknown> };
+        };
+        status?: number;
+        data?: { errors?: Record<string, unknown> };
+      };
+
+      const errorStatus = axiosErr?.response?.status || axiosErr?.status;
       if (errorStatus === 422) {
         // Parse Laravel/standard backend validation errors
-        const errors = err?.response?.data?.errors || err?.data?.errors;
+        const errors =
+          axiosErr?.response?.data?.errors || axiosErr?.data?.errors;
 
         if (errors && typeof errors === "object") {
           Object.keys(errors).forEach((field) => {
             const fieldErrors = errors[field];
             if (Array.isArray(fieldErrors)) {
               fieldErrors.forEach((errorMessage: string) => {
-                setError(field as any, {
+                setError(field as Path<T>, {
                   type: "server",
                   message: errorMessage,
                 });
               });
             } else if (typeof fieldErrors === "string") {
-              setError(field as any, { type: "server", message: fieldErrors });
+              setError(field as Path<T>, {
+                type: "server",
+                message: fieldErrors,
+              });
             }
           });
         }
@@ -100,3 +120,5 @@ export function CustomForm<T extends FieldValues>({
     </FormProvider>
   );
 }
+
+export default CustomForm;

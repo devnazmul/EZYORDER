@@ -1,5 +1,5 @@
 // 3. External libraries
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 // 4. Shared context
 import { useAuth } from "@/src/context/AuthContext";
@@ -27,13 +27,48 @@ import { EXPENSE_KEYS } from "@/constants/queryKeys";
 
 export const useExpensesQuery = (
   restaurantId: number | string,
-  perPage: number = 200,
+  perPage: number = 20,
   params: Partial<IExpenseListParams> = {},
 ) => {
   const { token } = useAuth();
-  return useQuery({
-    queryKey: EXPENSE_KEYS.list({ restaurantId, perPage, ...params }),
-    queryFn: () => getExpenses(restaurantId, perPage, params),
+  const { page, ...paramsWithoutPage } = params;
+
+  return useInfiniteQuery({
+    queryKey: EXPENSE_KEYS.list({
+      restaurantId,
+      perPage,
+      ...paramsWithoutPage,
+    }),
+    queryFn: ({ pageParam = 1 }) =>
+      getExpenses(restaurantId, perPage, {
+        ...paramsWithoutPage,
+        page: Number(pageParam),
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: any) => {
+      if (!lastPage) return undefined;
+
+      const currentPage = Number(
+        lastPage?.meta?.current_page ??
+          lastPage?.current_page ??
+          lastPage?.meta?.page ??
+          1,
+      );
+
+      const totalPages = Number(
+        lastPage?.meta?.total_pages ??
+          lastPage?.meta?.last_page ??
+          lastPage?.last_page ??
+          lastPage?.total_pages ??
+          0,
+      );
+
+      if (currentPage > 0 && totalPages > 0 && currentPage < totalPages) {
+        return currentPage + 1;
+      }
+
+      return undefined;
+    },
     enabled: !!token && !!restaurantId,
   });
 };

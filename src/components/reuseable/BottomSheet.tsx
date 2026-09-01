@@ -1,12 +1,14 @@
-import React, { useCallback, useEffect, useRef } from "react";
 import {
-  BottomSheetModal,
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
+  BottomSheetModal,
   BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
+import React, { useEffect, useRef } from "react";
 
-interface BottomSheetProps extends Omit<BottomSheetModalProps, "children"> {
+import { usePlatform } from "@/hooks";
+
+interface IBottomSheetProps extends Omit<BottomSheetModalProps, "children"> {
   visible: boolean;
   onClose: () => void;
   snapPoints?: string[];
@@ -28,9 +30,10 @@ export default function BottomSheet({
   snapPoints = ["50%"],
   children,
   ...props
-}: BottomSheetProps) {
+}: Readonly<IBottomSheetProps>) {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const isOpenRef = useRef(false);
+  const { bottomSheetKeyboardBehavior } = usePlatform();
 
   useEffect(() => {
     if (visible && !isOpenRef.current) {
@@ -43,10 +46,10 @@ export default function BottomSheet({
     }
   }, [visible]);
 
-  const handleDismiss = useCallback(() => {
+  const handleDismiss = () => {
     isOpenRef.current = false;
     onClose();
-  }, [onClose]);
+  };
 
   return (
     <BottomSheetModal
@@ -58,10 +61,12 @@ export default function BottomSheet({
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
       handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
+      keyboardBehavior={bottomSheetKeyboardBehavior}
+      keyboardBlurBehavior="restore"
+      android_keyboardInputMode="adjustPan"
       {...props}
     >
       {children}
     </BottomSheetModal>
   );
 }
-

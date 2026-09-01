@@ -14,6 +14,7 @@ export default {
       googleServicesFile: process.env.GOOGLE_SERVICE_INFO_PLIST,
     },
     android: {
+      softwareKeyboardLayoutMode: "pan",
       package: "com.essencecon.ezyorder",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       adaptiveIcon: {

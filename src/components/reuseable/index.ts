@@ -8,6 +8,12 @@ export { default as BottomSheet } from "./BottomSheet";
 export { default as BrandAlertModal } from "./BrandAlertModal";
 export { default as BrandPopupModal } from "./BrandPopupModal";
 export { default as Button } from "./Button";
+export {
+  default as CustomText,
+  type ICustomTextProps,
+  type TextVariant,
+  type FontWeight,
+} from "./CustomText";
 export { default as DatePickerModal } from "./DatePickerModal";
 export { default as TimePickerModal } from "./TimePickerModal";
 

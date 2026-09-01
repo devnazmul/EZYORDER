@@ -19,24 +19,31 @@ export default function ExpenseCardSkeleton({
       {cards.map((key) => (
         <View
           key={key}
-          className="bg-base-300 border border-base-200 rounded-2xl p-4 flex-row items-center justify-between shadow-sm"
+          className="bg-base-300 border border-base-200 rounded-2xl p-4 shadow-sm gap-y-3"
         >
-          {/* Left Column: Icon Pill & Info */}
-          <View className="flex-row items-center gap-3.5 flex-1 pr-3">
-            <Bone width={48} height={48} borderRadius={12} />
-            <View className="flex-1 gap-y-2">
-              <Bone width="60%" height={16} borderRadius={4} />
-              <View className="flex-row items-center gap-2">
-                <Bone width={60} height={12} borderRadius={4} />
-                <Bone width={50} height={16} borderRadius={9999} />
-              </View>
-            </View>
+          {/* Row 1: Category Name & Amount */}
+          <View className="flex-row items-start justify-between">
+            <Bone width="45%" height={18} borderRadius={4} />
+            <Bone width={70} height={18} borderRadius={4} />
           </View>
 
-          {/* Right Column: Amount */}
-          <View className="items-end gap-2">
-            <Bone width={70} height={18} borderRadius={4} />
-            <Bone width={16} height={16} borderRadius={4} />
+          {/* Row 2: Description */}
+          <Bone width="65%" height={14} borderRadius={4} />
+
+          {/* Row 3: Badges Row */}
+          <View className="flex-row items-center justify-end gap-2">
+            <Bone width={80} height={22} borderRadius={9999} />
+            <Bone width={60} height={22} borderRadius={9999} />
+          </View>
+
+          {/* Divider */}
+          <View className="h-[1px] bg-base-200 w-full" />
+
+          {/* Bottom Metadata Details Row */}
+          <View className="flex-row items-center justify-between pt-0.5">
+            <Bone width={65} height={14} borderRadius={4} />
+            <Bone width={75} height={14} borderRadius={4} />
+            <Bone width={60} height={14} borderRadius={4} />
           </View>
         </View>
       ))}

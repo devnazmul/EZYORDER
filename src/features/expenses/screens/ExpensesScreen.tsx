@@ -1,6 +1,9 @@
 // 1. React / React Native
-import React from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import React, { useState } from "react";
+import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
+
+// 2. Expo / Navigation
+import { MaterialIcons } from "@expo/vector-icons";
 
 // 4. Shared components
 import { EmptyState, PageTitle, ScreenContainer } from "@/components/reuseable";
@@ -11,6 +14,7 @@ import {
   ExpenseCardSkeleton,
   ExpenseDetailModal,
   ExpenseFilterPanel,
+  ExpenseFormBottomSheet,
   ExpenseKPICards,
   ExpensePaymentBreakdownCard,
   ExpenseTrendCard,
@@ -19,9 +23,13 @@ import { useExpenses } from "../hooks/useExpenses";
 
 // 7. Constants/utils
 import { COLORS } from "@/constants/colors";
-import { HP } from "@/utils/getResponsiveSizes";
+import { HP, WP } from "@/utils/getResponsiveSizes";
+import { IExpense } from "../types";
 
 export default function ExpensesScreen() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<IExpense | null>(null);
+
   const {
     searchQuery,
     setSearchQuery,
@@ -31,6 +39,9 @@ export default function ExpensesScreen() {
     setSelectedExpense,
     isRefreshing,
     expenses,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     expenseTypes,
     paymentMethodBreakdownChartData,
     isPaymentBreakdownLoading,
@@ -45,6 +56,35 @@ export default function ExpensesScreen() {
     handleRefresh,
     defaultFilters,
   } = useExpenses();
+
+  const handleSelectExpense = (item: IExpense) => {
+    setSelectedExpense(item);
+  };
+
+  const handleEditExpense = (item: IExpense) => {
+    setEditingExpense(item);
+    setIsFormOpen(true);
+  };
+
+  const handleCreateExpense = () => {
+    setEditingExpense(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEndReached = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const renderFooter = () => {
+    if (!isFetchingNextPage) return null;
+    return (
+      <View className="mt-3">
+        <ExpenseCardSkeleton count={3} />
+      </View>
+    );
+  };
 
   const renderHeader = () => (
     <View className="gap-y-3 pb-3">
@@ -94,6 +134,16 @@ export default function ExpensesScreen() {
     </View>
   );
 
+  const renderItem = ({ item }: { item: IExpense }) => (
+    <ExpenseCard
+      expense={item}
+      expenseTypes={expenseTypes}
+      currencySymbol={currencySymbol}
+      onPress={() => handleSelectExpense(item)}
+      onEdit={handleEditExpense}
+    />
+  );
+
   const renderEmptyState = () => {
     if (isLoading && !isRefreshing) {
       return <ExpenseCardSkeleton count={5} />;
@@ -113,22 +163,27 @@ export default function ExpensesScreen() {
   };
 
   return (
-    <ScreenContainer scrollable={false} safeAreaEdges={["left"]}>
+    <ScreenContainer
+      scrollable={false}
+      safeAreaEdges={["left"]}
+      contentClassName="flex-1 relative"
+    >
       <FlatList
+        className="flex-1"
         data={isLoading && !isRefreshing ? [] : expenses}
         keyExtractor={(item) => String(item.id)}
         ListHeaderComponent={renderHeader}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: HP("6%") }}
-        renderItem={({ item }) => (
-          <ExpenseCard
-            expense={item}
-            expenseTypes={expenseTypes}
-            currencySymbol={currencySymbol}
-            onPress={() => setSelectedExpense(item)}
-          />
-        )}
+        contentContainerStyle={{ paddingBottom: HP("10%") }}
+        renderItem={renderItem}
         ListEmptyComponent={renderEmptyState}
+        ListFooterComponent={renderFooter}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.5}
+        initialNumToRender={8}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -139,6 +194,30 @@ export default function ExpensesScreen() {
         }
       />
 
+      {/* Floating Action Button (FAB) for Adding Expense */}
+      <TouchableOpacity
+        onPress={handleCreateExpense}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Add New Expense"
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 5,
+          width: WP("12%"),
+          height: WP("12%"),
+          borderRadius: WP("6%"),
+          elevation: 6,
+          shadowColor: COLORS.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.35,
+          shadowRadius: 6,
+        }}
+        className="z-50 bg-primary items-center justify-center shadow-lg"
+      >
+        <MaterialIcons name="add" size={WP("7%")} color={COLORS.base300} />
+      </TouchableOpacity>
+
       {/* Expense Detail Bottom Drawer Sheet */}
       <ExpenseDetailModal
         visible={selectedExpense !== null}
@@ -146,6 +225,16 @@ export default function ExpensesScreen() {
         expense={selectedExpense}
         expenseTypes={expenseTypes}
         currencySymbol={currencySymbol}
+      />
+
+      {/* Expense Create / Edit Form BottomSheet */}
+      <ExpenseFormBottomSheet
+        visible={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingExpense(null);
+        }}
+        initialExpense={editingExpense}
       />
     </ScreenContainer>
   );
