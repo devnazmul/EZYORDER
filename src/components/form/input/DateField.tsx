@@ -6,7 +6,6 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 // 3. External libraries
-import dayjs from "dayjs";
 import { Controller, useFormContext } from "react-hook-form";
 
 // 4. Shared components
@@ -16,6 +15,7 @@ import InputLabel from "./InputLabel";
 
 // 7. Constants / utils
 import { COLORS } from "@/constants/colors";
+import { formatDate } from "@/utils";
 import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
 import { handleFieldSideEffects } from "./handleFieldSideEffects";
 
@@ -37,9 +37,7 @@ export default function DateField({
   selectedLabel = "Selected Date",
   className = "",
   formatDateLabel = (dateStr) =>
-    dateStr && dayjs(dateStr).isValid()
-      ? dayjs(dateStr).format("MMM D, YYYY")
-      : dateStr || "Select Date",
+    dateStr ? formatDate(dateStr, "MMM D, YYYY") || dateStr : "Select Date",
   onFieldChange,
 }: Readonly<IDateFieldProps>) {
   const [isPickerVisible, setIsPickerVisible] = useState(false);
