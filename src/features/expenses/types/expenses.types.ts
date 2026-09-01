@@ -84,14 +84,19 @@ export interface IExpenseListResponse {
     per_page: number;
     current_page: number;
     total_pages: number;
+    skip?: number;
   };
   data: IExpense[];
 }
 
 export interface IExpenseTypesResponse {
   current_page?: number;
-  data: IExpenseType[];
+  last_page?: number;
+  per_page?: number;
   total?: number;
+  from?: number;
+  to?: number;
+  data: IExpenseType[];
 }
 
 export interface ITopExpenseTypeData {
@@ -175,4 +180,25 @@ export interface IExpenseMutationResponse {
   success: boolean;
   message: string;
   data: IExpense;
+}
+
+export interface ICreateExpenseTypePayload {
+  name: string;
+  description?: string;
+  restaurant_id: number;
+  is_active?: boolean;
+}
+
+export interface IUpdateExpenseTypePayload {
+  id: number;
+  name: string;
+  description?: string;
+  restaurant_id: number;
+  is_active?: boolean;
+}
+
+export interface IExpenseTypeMutationResponse {
+  success?: boolean;
+  message?: string;
+  data?: IExpenseType;
 }

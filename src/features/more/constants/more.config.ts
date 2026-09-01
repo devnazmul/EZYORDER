@@ -51,6 +51,14 @@ export const SETTING_SECTIONS: ISettingSection[] = [
         bgClassName: "bg-secondary/10",
       },
       {
+        id: "expense-types",
+        title: "Expense Types",
+        route: "/more/expense-types",
+        icon: "receipt-long",
+        color: COLORS.secondary,
+        bgClassName: "bg-secondary/10",
+      },
+      {
         id: "partners",
         title: "Partners",
         route: "/more/partners",

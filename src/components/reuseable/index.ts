@@ -47,6 +47,11 @@ export { default as SearchBar } from "./SearchBar";
 export { default as ServiceCard } from "./ServiceCard";
 export { default as StatusBadge } from "./StatusBadge";
 export { default as ToggleBar } from "./ToggleBar";
+export {
+  default as FloatingButton,
+  type IFloatingButtonProps,
+  type FloatingButtonPosition,
+} from "./FloatingButton";
 
 // Cards
 export {

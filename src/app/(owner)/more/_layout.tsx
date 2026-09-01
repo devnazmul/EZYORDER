@@ -7,6 +7,7 @@ export default function MoreLayout() {
       <Stack.Screen name="business-settings" />
       <Stack.Screen name="discounts-and-campaigns" />
       <Stack.Screen name="dishes" />
+      <Stack.Screen name="expense-types" />
       <Stack.Screen name="expenses" />
       <Stack.Screen name="menu" />
       <Stack.Screen name="partners" />

@@ -1,26 +1,30 @@
+// 1. React / React Native
+import React, { useState } from "react";
+import { View } from "react-native";
+
+// 4. Shared components & context
 import {
   EmptyState,
   LoadingScreen,
   PageTitle,
-  RefreshableScrollView,
+  ScreenContainer,
   ToggleBar,
 } from "@/components/reuseable";
+import { useAuth } from "@/context/AuthContext";
 
-import { useAuth } from "@/src/context/AuthContext";
-import { useExpenseTypesQuery } from "@/features/expenses/hooks/queries/useExpenseQueries";
+// 5. Feature components & services (via Barrel exports)
 import {
+  RestaurantService,
   useBusinessTimingQuery,
   useRestaurantQuery,
-} from "@/features/restaurants/hooks/queries/useRestaurantQueries";
-import React, { useMemo, useState } from "react";
-import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { BusinessInfoCard,BusinessScheduleCard,ExpenseTypeCard } from "../components";
+} from "@/features/restaurants";
+import { BusinessInfoCard, BusinessScheduleCard } from "../components";
+
+// 6. Types
 
 const TABS = [
   { id: "info", label: "Business Info" },
   { id: "schedule", label: "Schedule" },
-  { id: "expense_types", label: "Expense Types" },
 ];
 
 export default function BusinessSettingsScreen() {
@@ -42,38 +46,8 @@ export default function BusinessSettingsScreen() {
     refetch: refetchTiming,
   } = useBusinessTimingQuery(restaurantId || "");
 
-  const {
-    data: expenseTypesData,
-    isLoading: isExpenseTypesLoading,
-    refetch: refetchExpenseTypes,
-  } = useExpenseTypesQuery(restaurantId || "", 1000);
-
-  // Extract raw timings list and sort from Monday (1) to Sunday (0)
-  const timingList = useMemo(() => {
-    let list: any[] = [];
-    if (Array.isArray(timingData)) {
-      list = [...timingData];
-    } else if (timingData && Array.isArray((timingData as any).data)) {
-      list = [...(timingData as any).data];
-    }
-
-    // Sort Monday (1) -> Tuesday (2) -> ... -> Saturday (6) -> Sunday (0)
-    return list.sort((a, b) => {
-      const dayA = a.day === 0 ? 7 : a.day;
-      const dayB = b.day === 0 ? 7 : b.day;
-      return dayA - dayB;
-    });
-  }, [timingData]);
-
-  // Extract raw expense types list
-  const expenseTypesList = useMemo(() => {
-    if (!expenseTypesData) return [];
-    if (Array.isArray(expenseTypesData)) return expenseTypesData;
-    if (Array.isArray(expenseTypesData.data)) return expenseTypesData.data;
-    if (expenseTypesData.data && Array.isArray(expenseTypesData.data.data))
-      return expenseTypesData.data.data;
-    return [];
-  }, [expenseTypesData]);
+  // Extract raw timings list and sort from Monday (1) to Sunday (0) via RestaurantService
+  const timingList = RestaurantService.sortBusinessTimings(timingData);
 
   // Handle Refreshing for current active tab
   const handleRefresh = async () => {
@@ -81,16 +55,13 @@ export default function BusinessSettingsScreen() {
       await refetchRestaurant();
     } else if (activeTab === "schedule") {
       await refetchTiming();
-    } else if (activeTab === "expense_types") {
-      await refetchExpenseTypes();
     }
   };
 
   // Determine current load state
   const isCurrentTabLoading =
     (activeTab === "info" && isRestaurantLoading) ||
-    (activeTab === "schedule" && isTimingLoading) ||
-    (activeTab === "expense_types" && isExpenseTypesLoading);
+    (activeTab === "schedule" && isTimingLoading);
 
   // Render content depending on activeTab
   const renderTabContent = () => {
@@ -146,7 +117,7 @@ export default function BusinessSettingsScreen() {
       }
       return (
         <View key="schedule-content" className="flex-1">
-          {timingList.map((dayTiming: any, index: number) => (
+          {timingList.map((dayTiming, index) => (
             <BusinessScheduleCard
               key={dayTiming.day ?? index}
               timing={dayTiming}
@@ -156,50 +127,19 @@ export default function BusinessSettingsScreen() {
       );
     }
 
-    if (activeTab === "expense_types") {
-      if (expenseTypesList.length === 0) {
-        return (
-          <View
-            key="empty-expenses"
-            className="flex-1 justify-center items-center py-10 bg-base-100"
-          >
-            <EmptyState
-              icon="receipt"
-              title="No Expense Types"
-              description="There are no expense types registered for this restaurant."
-            />
-          </View>
-        );
-      }
-      return (
-        <View key="expense-types-content" className="flex-1">
-          {expenseTypesList.map((type: any) => (
-            <ExpenseTypeCard key={type.id} expenseType={type} />
-          ))}
-        </View>
-      );
-    }
-
     return null;
   };
 
   return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <RefreshableScrollView
-        onRefresh={handleRefresh}
-        className="flex-1 px-4 py-4"
-        contentContainerStyle={{ paddingBottom: 40 }}
-      >
-        <PageTitle title="Business Settings" icon="settings" />
+    <ScreenContainer
+      safeAreaEdges={["left", "right"]}
+      onRefresh={handleRefresh}
+    >
+      <PageTitle title="Business Settings" icon="settings" />
 
-        <ToggleBar
-          options={TABS}
-          activeId={activeTab}
-          onSelect={setActiveTab}
-        />
+      <ToggleBar options={TABS} activeId={activeTab} onSelect={setActiveTab} />
 
-        <View className="mt-2">{renderTabContent()}</View>
-      </RefreshableScrollView>
-    </SafeAreaView>
+      <View className="mt-2">{renderTabContent()}</View>
+    </ScreenContainer>
   );
 }
