@@ -27,3 +27,4 @@ export type IUpdateExpenseTypeFormData = z.infer<
   typeof updateExpenseTypeSchema
 >;
 export type IExpenseTypeFormData = z.infer<typeof expenseTypeFormSchema>;
+export type IExpenseTypeFormInput = z.input<typeof expenseTypeFormSchema>;
