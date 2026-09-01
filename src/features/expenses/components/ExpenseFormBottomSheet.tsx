@@ -1,5 +1,5 @@
 // 1. React / React Native
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { View } from "react-native";
 
 // 2. Expo / Navigation
@@ -22,14 +22,8 @@ import CustomText from "@/components/reuseable/CustomText";
 
 // 5. Feature components/hooks/services
 import { useAuth } from "@/hooks";
-import { uploadReceiptFile } from "../apis/expenses";
-import {
-  useCreateExpenseMutation,
-  useUpdateExpenseMutation,
-} from "../hooks/mutations/useExpenseMutations";
-import { useExpenseTypesQuery } from "../hooks/queries/useExpenseQueries";
+import { useExpenseTypesQuery, useSubmitExpense } from "../hooks";
 import { expenseFormSchema } from "../schema";
-import { ExpenseService } from "../services";
 
 // 6. Types
 import type { IDropdownOption } from "@/components/form/input";
@@ -68,11 +62,11 @@ export default function ExpenseFormBottomSheet({
 }: Readonly<IExpenseFormBottomSheetProps>) {
   const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id || "";
-  const [isUploading, setIsUploading] = useState(false);
 
-  // Mutations
-  const createMutation = useCreateExpenseMutation();
-  const updateMutation = useUpdateExpenseMutation();
+  // Submission Hook
+  const { submitExpense, isSubmitting, isUploading } = useSubmitExpense({
+    onSuccess: onClose,
+  });
 
   // Queries
   const { data: expenseTypesData } = useExpenseTypesQuery(restaurantId, 1000);
@@ -126,55 +120,6 @@ export default function ExpenseFormBottomSheet({
     };
   }, [initialExpense, restaurantId, user?.name]);
 
-  const handleSubmit = async (formData: IExpenseFormData) => {
-    try {
-      setIsUploading(true);
-      const rawReceipts = formData.reciepts || [];
-      const processedReceipts: string[] = [];
-
-      for (const receipt of rawReceipts) {
-        if (
-          typeof receipt === "string" &&
-          (receipt.startsWith("file://") ||
-            receipt.startsWith("content://") ||
-            receipt.startsWith("ph://") ||
-            receipt.startsWith("blob:"))
-        ) {
-          const uploadedPath = await uploadReceiptFile(receipt);
-          if (uploadedPath) {
-            processedReceipts.push(uploadedPath);
-          } else {
-            throw new Error("Failed to upload receipt file");
-          }
-        } else if (typeof receipt === "string" && receipt.trim().length > 0) {
-          processedReceipts.push(receipt);
-        }
-      }
-
-      if (formData.id) {
-        const payload = ExpenseService.toUpdatePayload(
-          formData,
-          processedReceipts,
-        );
-        await updateMutation.mutateAsync(payload);
-      } else {
-        const payload = ExpenseService.toCreatePayload(
-          formData,
-          processedReceipts,
-        );
-        await createMutation.mutateAsync(payload);
-      }
-      onClose();
-    } catch (err) {
-      console.error("Failed to submit expense:", err);
-      throw err;
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const isSubmitting =
-    createMutation.isPending || updateMutation.isPending || isUploading;
   let submitButtonLabel = initialExpense ? "Update Expense" : "Create Expense";
   if (isUploading) {
     submitButtonLabel = "Uploading Receipts...";
@@ -216,7 +161,7 @@ export default function ExpenseFormBottomSheet({
         <CustomForm<IExpenseFormData>
           schema={expenseFormSchema}
           defaultValues={defaultValues}
-          submitHandler={handleSubmit}
+          submitHandler={submitExpense}
           submitButtonLabel={submitButtonLabel}
           cancelHandler={onClose}
           actionButtonClassName="mt-6"
