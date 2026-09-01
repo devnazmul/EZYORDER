@@ -2,7 +2,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 // 4. Shared context
-import { useAuth } from "@/src/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 // 5. Feature apis
 import {
@@ -16,9 +16,11 @@ import {
 // 6. Types
 import type {
   IExpenseListParams,
+  IExpenseListResponse,
   IExpenseMatrixParams,
   IExpenseTrendParams,
   IExpenseTypesParams,
+  IExpenseTypesResponse,
   IPaymentMethodBreakdownParams,
 } from "@/features/expenses/types";
 
@@ -45,23 +47,11 @@ export const useExpensesQuery = (
         page: Number(pageParam),
       }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage: any) => {
+    getNextPageParam: (lastPage: IExpenseListResponse) => {
       if (!lastPage) return undefined;
 
-      const currentPage = Number(
-        lastPage?.meta?.current_page ??
-          lastPage?.current_page ??
-          lastPage?.meta?.page ??
-          1,
-      );
-
-      const totalPages = Number(
-        lastPage?.meta?.total_pages ??
-          lastPage?.meta?.last_page ??
-          lastPage?.last_page ??
-          lastPage?.total_pages ??
-          0,
-      );
+      const currentPage = Number(lastPage.meta?.current_page ?? 1);
+      const totalPages = Number(lastPage.meta?.total_pages ?? 0);
 
       if (currentPage > 0 && totalPages > 0 && currentPage < totalPages) {
         return currentPage + 1;
@@ -82,6 +72,42 @@ export const useExpenseTypesQuery = (
   return useQuery({
     queryKey: EXPENSE_KEYS.typeList({ restaurantId, perPage, ...params }),
     queryFn: () => getExpenseTypes(restaurantId, perPage, params),
+    enabled: !!token && !!restaurantId,
+  });
+};
+
+export const useExpenseTypesInfiniteQuery = (
+  restaurantId: number | string,
+  perPage: number = 20,
+  params: Partial<IExpenseTypesParams> = {},
+) => {
+  const { token } = useAuth();
+  const { page, ...paramsWithoutPage } = params;
+
+  return useInfiniteQuery({
+    queryKey: EXPENSE_KEYS.typeList({
+      restaurantId,
+      perPage,
+      ...paramsWithoutPage,
+    }),
+    queryFn: ({ pageParam = 1 }) =>
+      getExpenseTypes(restaurantId, perPage, {
+        ...paramsWithoutPage,
+        page: Number(pageParam),
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: IExpenseTypesResponse) => {
+      if (!lastPage) return undefined;
+
+      const currentPage = Number(lastPage.current_page ?? 1);
+      const totalPages = Number(lastPage.last_page ?? 0);
+
+      if (currentPage > 0 && totalPages > 0 && currentPage < totalPages) {
+        return currentPage + 1;
+      }
+
+      return undefined;
+    },
     enabled: !!token && !!restaurantId,
   });
 };

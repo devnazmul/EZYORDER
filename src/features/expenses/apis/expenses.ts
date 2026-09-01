@@ -4,6 +4,7 @@ import axiosClient from "@/config/axiosClient";
 // 6. Types
 import type {
   ICreateExpensePayload,
+  ICreateExpenseTypePayload,
   IExpenseListParams,
   IExpenseListResponse,
   IExpenseMatrixParams,
@@ -11,11 +12,13 @@ import type {
   IExpenseMutationResponse,
   IExpenseTrendParams,
   IExpenseTrendResponse,
+  IExpenseTypeMutationResponse,
   IExpenseTypesParams,
   IExpenseTypesResponse,
   IPaymentMethodBreakdownParams,
   IPaymentMethodBreakdownResponse,
   IUpdateExpensePayload,
+  IUpdateExpenseTypePayload,
   IUploadReceiptResponse,
 } from "../types/expenses.types";
 
@@ -24,7 +27,7 @@ export const getExpenses = async (
   restaurantId: number | string,
   perPage: number = 20,
   params: Partial<IExpenseListParams> = {},
-): Promise<IExpenseListResponse | null> => {
+): Promise<IExpenseListResponse> => {
   const mergedParams: Record<string, unknown> = {
     order_by: "desc",
     page: 1,
@@ -43,10 +46,10 @@ export const getExpenses = async (
     `/v1.0/expenses/${restaurantId}/${perPage}`,
     {
       params: mergedParams,
-      validateStatus: () => true,
+      validateStatus: (status) => status < 400,
     },
   );
-  return response.status === 200 && response.data ? response.data : null;
+  return response.data;
 };
 
 // GET ALL EXPENSE TYPES FOR A RESTAURANT
@@ -54,57 +57,57 @@ export const getExpenseTypes = async (
   restaurantId: number | string,
   perPage: number = 1000,
   params: Partial<IExpenseTypesParams> = {},
-): Promise<IExpenseTypesResponse | null> => {
+): Promise<IExpenseTypesResponse> => {
   const response = await axiosClient.get<IExpenseTypesResponse>(
     `/v1.0/expense-types/${restaurantId}/${perPage}`,
     {
       params,
-      validateStatus: () => true,
+      validateStatus: (status) => status < 400,
     },
   );
-  return response.status === 200 && response.data ? response.data : null;
+  return response.data;
 };
 
 // GET ALL EXPENSE MATRIX (KPI SUMMARY)
 export const getExpenseMatrix = async (
   params: IExpenseMatrixParams = {},
-): Promise<IExpenseMatrixResponse | null> => {
+): Promise<IExpenseMatrixResponse> => {
   const response = await axiosClient.get<IExpenseMatrixResponse>(
     "/v1.0/expenses/matrix",
     {
       params,
-      validateStatus: () => true,
+      validateStatus: (status) => status < 400,
     },
   );
-  return response.status === 200 && response.data ? response.data : null;
+  return response.data;
 };
 
 // GET EXPENSE PAYMENT METHOD BREAKDOWN
 export const getExpensePaymentMethodBreakdown = async (
   params: IPaymentMethodBreakdownParams = {},
-): Promise<IPaymentMethodBreakdownResponse | null> => {
+): Promise<IPaymentMethodBreakdownResponse> => {
   const response = await axiosClient.get<IPaymentMethodBreakdownResponse>(
     "/v1.0/expenses/payment-method-breakdown",
     {
       params,
-      validateStatus: () => true,
+      validateStatus: (status) => status < 400,
     },
   );
-  return response.status === 200 && response.data ? response.data : null;
+  return response.data;
 };
 
 // GET EXPENSE TREND
 export const getExpenseTrend = async (
   params: IExpenseTrendParams = {},
-): Promise<IExpenseTrendResponse | null> => {
+): Promise<IExpenseTrendResponse> => {
   const response = await axiosClient.get<IExpenseTrendResponse>(
     "/v1.0/expenses/trend",
     {
       params,
-      validateStatus: () => true,
+      validateStatus: (status) => status < 400,
     },
   );
-  return response.status === 200 && response.data ? response.data : null;
+  return response.data;
 };
 
 // CREATE EXPENSE
@@ -136,7 +139,7 @@ export const uploadReceiptFile = async (
   fileUri: string,
   fileName?: string,
   mimeType?: string,
-): Promise<string | null> => {
+): Promise<string> => {
   const formData = new FormData();
   const name = fileName || fileUri.split("/").pop() || "receipt.jpg";
 
@@ -162,15 +165,50 @@ export const uploadReceiptFile = async (
       headers: {
         "Content-Type": "multipart/form-data",
       },
-      validateStatus: () => true,
+      validateStatus: (status) => status < 400,
     },
   );
 
   const location =
     response.data?.data?.full_location || response.data?.full_location;
 
-  if ((response.status === 200 || response.status === 201) && location) {
+  if (location) {
     return location;
   }
-  return null;
+  throw new Error("Failed to retrieve uploaded receipt file location.");
+};
+
+// CREATE EXPENSE TYPE
+export const createExpenseType = async (
+  payload: ICreateExpenseTypePayload,
+): Promise<IExpenseTypeMutationResponse> => {
+  const response = await axiosClient.post<IExpenseTypeMutationResponse>(
+    "/v1.0/expense-types",
+    payload,
+    { validateStatus: (status) => status < 400 },
+  );
+  return response.data;
+};
+
+// UPDATE EXPENSE TYPE
+export const updateExpenseType = async (
+  payload: IUpdateExpenseTypePayload,
+): Promise<IExpenseTypeMutationResponse> => {
+  const response = await axiosClient.put<IExpenseTypeMutationResponse>(
+    "/v1.0/expense-types",
+    payload,
+    { validateStatus: (status) => status < 400 },
+  );
+  return response.data;
+};
+
+// DELETE EXPENSE TYPE
+export const deleteExpenseType = async (
+  id: number | string,
+): Promise<IExpenseTypeMutationResponse> => {
+  const response = await axiosClient.delete<IExpenseTypeMutationResponse>(
+    `/v1.0/expense-types/${id}`,
+    { validateStatus: (status) => status < 400 },
+  );
+  return response.data;
 };
