@@ -7,12 +7,13 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 // 7. Constants / utils
 import { COLORS } from "@/constants/colors";
+import { formatDate } from "@/utils";
 
 // ==================== TYPES ====================
 export interface IDatePickerModalProps {
   visible: boolean;
   onClose: () => void;
-  selectedDate?: string; // YYYY-MM-DD format
+  selectedDate?: string; // YYYY-MM-DD or DD-MM-YYYY format
   onSelectDate: (date: string) => void;
 }
 
@@ -23,10 +24,10 @@ export default function DatePickerModal({
   selectedDate,
   onSelectDate,
 }: Readonly<IDatePickerModalProps>) {
-  const parsedDate =
-    selectedDate && dayjs(selectedDate).isValid()
-      ? dayjs(selectedDate).toDate()
-      : new Date();
+  const formattedIso = selectedDate
+    ? formatDate(selectedDate, "YYYY-MM-DD")
+    : "";
+  const parsedDate = formattedIso ? dayjs(formattedIso).toDate() : new Date();
 
   return (
     <DateTimePickerModal
@@ -34,7 +35,7 @@ export default function DatePickerModal({
       mode="date"
       date={parsedDate}
       onConfirm={(date) => {
-        onSelectDate(dayjs(date).format("YYYY-MM-DD"));
+        onSelectDate(formatDate(date, "YYYY-MM-DD"));
         onClose();
       }}
       onCancel={onClose}

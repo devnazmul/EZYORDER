@@ -33,6 +33,7 @@ module.exports = {
           cash: "#6366F1",
           card: "#3B82F6",
           online: "#10B981",
+          cheque: "#8B5CF6",
         },
         orderType: {
           delivery: "#DC2D2A",

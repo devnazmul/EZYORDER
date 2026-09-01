@@ -86,7 +86,9 @@ export default function InputField({
 
                 <TextInput
                   {...textInputProps}
-                  value={value}
+                  value={
+                    value !== undefined && value !== null ? String(value) : ""
+                  }
                   onChangeText={onChange}
                   onFocus={(e) => {
                     setIsFocused(true);

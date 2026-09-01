@@ -1,7 +1,7 @@
 import { COLORS } from "@/constants/colors";
 
 export type IPaymentMethodKey =
-  "cash" | "card" | "online" | "bank" | "bank_transfer";
+  "cash" | "card" | "online" | "bank" | "bank_transfer" | "cheque";
 
 export interface IPaymentMethodConfig {
   key: IPaymentMethodKey;
@@ -35,6 +35,11 @@ const PAYMENT_METHODS_CONFIG: Record<IPaymentMethodKey, IPaymentMethodConfig> =
       key: "bank_transfer",
       label: "Bank Transfer",
       color: COLORS.payment.online,
+    },
+    cheque: {
+      key: "cheque",
+      label: "Cheque",
+      color: COLORS.payment.cheque,
     },
   };
 

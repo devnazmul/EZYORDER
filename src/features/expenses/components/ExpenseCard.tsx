@@ -82,11 +82,23 @@ function ExpenseCardComponent({
 
       {/* Description below Category Name & Amount */}
       {expense.description && expense.description.trim() !== "" ? (
-        <CustomText variant="secondary" size="xs" className="-mt-1">
+        <CustomText
+          variant="secondary"
+          size="xs"
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          className="-mt-1"
+        >
           {expense.description.trim()}
         </CustomText>
       ) : (
-        <CustomText variant="secondary" size="xs" className="-mt-1">
+        <CustomText
+          variant="secondary"
+          size="xs"
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          className="-mt-1"
+        >
           No description provided
         </CustomText>
       )}

@@ -32,7 +32,7 @@ import type { IExpense } from "../types";
 
 // 7. Constants/utils
 import { COLORS } from "@/constants/colors";
-import { getPaymentMethodsConfig } from "@/utils";
+import { formatDate, getPaymentMethodsConfig } from "@/utils";
 import { HP, WP } from "@/utils/getResponsiveSizes";
 
 interface IExpenseFormBottomSheetProps {
@@ -43,10 +43,10 @@ interface IExpenseFormBottomSheetProps {
 
 // Static payment method options (defined outside to avoid re-creation or memoization on render)
 const PAYMENT_METHOD_OPTIONS: IDropdownOption[] = [
-  "cash",
   "card",
+  "cash",
   "bank_transfer",
-  "online",
+  "cheque",
 ].map((method) => {
   const config = getPaymentMethodsConfig(method);
   return {
@@ -89,13 +89,19 @@ export default function ExpenseFormBottomSheet({
           ? String(initialExpense.expense_type.id)
           : String(initialExpense.expense_type || "");
 
+      const formattedPaymentDate =
+        formatDate(initialExpense.payment_date, "YYYY-MM-DD") ||
+        dayjs().format("YYYY-MM-DD");
+
       return {
         id: initialExpense.id,
-        amount: Number(initialExpense.amount) || 0,
+        amount:
+          initialExpense.amount !== undefined && initialExpense.amount !== null
+            ? (String(initialExpense.amount) as unknown as number)
+            : ("" as unknown as number),
         expense_type: typeValue,
         payment_method: initialExpense.payment_method || "cash",
-        payment_date:
-          initialExpense.payment_date || dayjs().format("YYYY-MM-DD"),
+        payment_date: formattedPaymentDate,
         paid_by: initialExpense.paid_by || user?.name || "",
         note: initialExpense.note || "",
         description: initialExpense.description || "",
@@ -107,7 +113,7 @@ export default function ExpenseFormBottomSheet({
     }
 
     return {
-      amount: 0,
+      amount: "" as unknown as number,
       expense_type: "",
       payment_method: "cash",
       payment_date: dayjs().format("YYYY-MM-DD"),

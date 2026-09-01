@@ -12,7 +12,7 @@ import { EmptyState, PageTitle, ScreenContainer } from "@/components/reuseable";
 import {
   ExpenseCard,
   ExpenseCardSkeleton,
-  ExpenseDetailModal,
+  ExpenseDetailBottomSheet,
   ExpenseFilterPanel,
   ExpenseFormBottomSheet,
   ExpenseKPICards,
@@ -219,7 +219,7 @@ export default function ExpensesScreen() {
       </TouchableOpacity>
 
       {/* Expense Detail Bottom Drawer Sheet */}
-      <ExpenseDetailModal
+      <ExpenseDetailBottomSheet
         visible={selectedExpense !== null}
         onClose={() => setSelectedExpense(null)}
         expense={selectedExpense}

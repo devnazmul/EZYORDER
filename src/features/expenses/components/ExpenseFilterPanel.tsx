@@ -97,6 +97,7 @@ export default function ExpenseFilterPanel({
         { id: "card", label: "Credit/Debit Card" },
         { id: "cash", label: "Cash" },
         { id: "bank_transfer", label: "Bank Transfer" },
+        { id: "cheque", label: "Cheque" },
       ],
     },
     {
