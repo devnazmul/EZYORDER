@@ -2,25 +2,22 @@ import {
   EmptyState,
   LoadingScreen,
   PageTitle,
-  RefreshableScrollView,
+  ScreenContainer,
   ToggleBar,
 } from "@/components/reuseable";
 
-import { useAuth } from "@/src/context/AuthContext";
-import { useExpenseTypesQuery } from "@/features/expenses/hooks/queries/useExpenseQueries";
 import {
   useBusinessTimingQuery,
   useRestaurantQuery,
 } from "@/features/restaurants/hooks/queries/useRestaurantQueries";
+import { useAuth } from "@/src/context/AuthContext";
 import React, { useMemo, useState } from "react";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { BusinessInfoCard,BusinessScheduleCard,ExpenseTypeCard } from "../components";
+import { BusinessInfoCard, BusinessScheduleCard } from "../components";
 
 const TABS = [
   { id: "info", label: "Business Info" },
   { id: "schedule", label: "Schedule" },
-  { id: "expense_types", label: "Expense Types" },
 ];
 
 export default function BusinessSettingsScreen() {
@@ -42,12 +39,6 @@ export default function BusinessSettingsScreen() {
     refetch: refetchTiming,
   } = useBusinessTimingQuery(restaurantId || "");
 
-  const {
-    data: expenseTypesData,
-    isLoading: isExpenseTypesLoading,
-    refetch: refetchExpenseTypes,
-  } = useExpenseTypesQuery(restaurantId || "", 1000);
-
   // Extract raw timings list and sort from Monday (1) to Sunday (0)
   const timingList = useMemo(() => {
     let list: any[] = [];
@@ -65,32 +56,19 @@ export default function BusinessSettingsScreen() {
     });
   }, [timingData]);
 
-  // Extract raw expense types list
-  const expenseTypesList = useMemo(() => {
-    if (!expenseTypesData) return [];
-    if (Array.isArray(expenseTypesData)) return expenseTypesData;
-    if (Array.isArray(expenseTypesData.data)) return expenseTypesData.data;
-    if (expenseTypesData.data && Array.isArray(expenseTypesData.data.data))
-      return expenseTypesData.data.data;
-    return [];
-  }, [expenseTypesData]);
-
   // Handle Refreshing for current active tab
   const handleRefresh = async () => {
     if (activeTab === "info") {
       await refetchRestaurant();
     } else if (activeTab === "schedule") {
       await refetchTiming();
-    } else if (activeTab === "expense_types") {
-      await refetchExpenseTypes();
     }
   };
 
   // Determine current load state
   const isCurrentTabLoading =
     (activeTab === "info" && isRestaurantLoading) ||
-    (activeTab === "schedule" && isTimingLoading) ||
-    (activeTab === "expense_types" && isExpenseTypesLoading);
+    (activeTab === "schedule" && isTimingLoading);
 
   // Render content depending on activeTab
   const renderTabContent = () => {
@@ -156,50 +134,19 @@ export default function BusinessSettingsScreen() {
       );
     }
 
-    if (activeTab === "expense_types") {
-      if (expenseTypesList.length === 0) {
-        return (
-          <View
-            key="empty-expenses"
-            className="flex-1 justify-center items-center py-10 bg-base-100"
-          >
-            <EmptyState
-              icon="receipt"
-              title="No Expense Types"
-              description="There are no expense types registered for this restaurant."
-            />
-          </View>
-        );
-      }
-      return (
-        <View key="expense-types-content" className="flex-1">
-          {expenseTypesList.map((type: any) => (
-            <ExpenseTypeCard key={type.id} expenseType={type} />
-          ))}
-        </View>
-      );
-    }
-
     return null;
   };
 
   return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <RefreshableScrollView
-        onRefresh={handleRefresh}
-        className="flex-1 px-4 py-4"
-        contentContainerStyle={{ paddingBottom: 40 }}
-      >
-        <PageTitle title="Business Settings" icon="settings" />
+    <ScreenContainer
+      safeAreaEdges={["left", "right"]}
+      onRefresh={handleRefresh}
+    >
+      <PageTitle title="Business Settings" icon="settings" />
 
-        <ToggleBar
-          options={TABS}
-          activeId={activeTab}
-          onSelect={setActiveTab}
-        />
+      <ToggleBar options={TABS} activeId={activeTab} onSelect={setActiveTab} />
 
-        <View className="mt-2">{renderTabContent()}</View>
-      </RefreshableScrollView>
-    </SafeAreaView>
+      <View className="mt-2">{renderTabContent()}</View>
+    </ScreenContainer>
   );
 }
