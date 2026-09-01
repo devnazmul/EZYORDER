@@ -1,3 +1,8 @@
+// 1. React / React Native
+import React, { useState } from "react";
+import { View } from "react-native";
+
+// 4. Shared components & context
 import {
   EmptyState,
   LoadingScreen,
@@ -5,15 +10,17 @@ import {
   ScreenContainer,
   ToggleBar,
 } from "@/components/reuseable";
+import { useAuth } from "@/context/AuthContext";
 
+// 5. Feature components & services (via Barrel exports)
 import {
+  RestaurantService,
   useBusinessTimingQuery,
   useRestaurantQuery,
-} from "@/features/restaurants/hooks/queries/useRestaurantQueries";
-import { useAuth } from "@/src/context/AuthContext";
-import React, { useMemo, useState } from "react";
-import { View } from "react-native";
+} from "@/features/restaurants";
 import { BusinessInfoCard, BusinessScheduleCard } from "../components";
+
+// 6. Types
 
 const TABS = [
   { id: "info", label: "Business Info" },
@@ -39,22 +46,8 @@ export default function BusinessSettingsScreen() {
     refetch: refetchTiming,
   } = useBusinessTimingQuery(restaurantId || "");
 
-  // Extract raw timings list and sort from Monday (1) to Sunday (0)
-  const timingList = useMemo(() => {
-    let list: any[] = [];
-    if (Array.isArray(timingData)) {
-      list = [...timingData];
-    } else if (timingData && Array.isArray((timingData as any).data)) {
-      list = [...(timingData as any).data];
-    }
-
-    // Sort Monday (1) -> Tuesday (2) -> ... -> Saturday (6) -> Sunday (0)
-    return list.sort((a, b) => {
-      const dayA = a.day === 0 ? 7 : a.day;
-      const dayB = b.day === 0 ? 7 : b.day;
-      return dayA - dayB;
-    });
-  }, [timingData]);
+  // Extract raw timings list and sort from Monday (1) to Sunday (0) via RestaurantService
+  const timingList = RestaurantService.sortBusinessTimings(timingData);
 
   // Handle Refreshing for current active tab
   const handleRefresh = async () => {
@@ -124,7 +117,7 @@ export default function BusinessSettingsScreen() {
       }
       return (
         <View key="schedule-content" className="flex-1">
-          {timingList.map((dayTiming: any, index: number) => (
+          {timingList.map((dayTiming, index) => (
             <BusinessScheduleCard
               key={dayTiming.day ?? index}
               timing={dayTiming}
