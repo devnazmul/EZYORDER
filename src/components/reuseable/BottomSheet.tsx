@@ -5,7 +5,8 @@ import {
   BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
 import React, { useEffect, useRef } from "react";
-import { Platform } from "react-native";
+
+import { usePlatform } from "@/hooks";
 
 interface IBottomSheetProps extends Omit<BottomSheetModalProps, "children"> {
   visible: boolean;
@@ -32,6 +33,7 @@ export default function BottomSheet({
 }: Readonly<IBottomSheetProps>) {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const isOpenRef = useRef(false);
+  const { bottomSheetKeyboardBehavior } = usePlatform();
 
   useEffect(() => {
     if (visible && !isOpenRef.current) {
@@ -59,7 +61,7 @@ export default function BottomSheet({
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: "#FFFFFF", borderRadius: 24 }}
       handleIndicatorStyle={{ backgroundColor: "#E2E8F0", width: 48 }}
-      keyboardBehavior={Platform.OS === "ios" ? "extend" : "interactive"}
+      keyboardBehavior={bottomSheetKeyboardBehavior}
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustPan"
       {...props}
