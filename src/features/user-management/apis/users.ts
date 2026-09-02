@@ -1,30 +1,39 @@
-import ENV from "@/config/env";
-import axios from "axios";
+// 3. External libraries / config
+import axiosClient from "@/config/axiosClient";
 
-const API_BASE_URL = ENV.API_BASE_URL;
+// 6. Types
+import type {
+  IGetUsersQueryParams,
+  IGetUsersResponse,
+  IOwnerProfileResponse,
+} from "../types";
 
-const getHeaders = (token: string) => ({
-  Authorization: `Bearer ${token}`,
-  Accept: "application/json",
-});
-
-// GET ALL USERS
-export const getUsers = async (token: string, params: Record<string, any> = {}) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/users`, {
-    headers: getHeaders(token),
+/**
+ * Fetch all users with optional query parameters/filters
+ */
+export const getUsers = async (
+  params: IGetUsersQueryParams = {},
+): Promise<IGetUsersResponse> => {
+  const response = await axiosClient.get<IGetUsersResponse>("/v1.0/users", {
     params,
-    validateStatus: () => true,
+    validateStatus: (status) => status < 400,
   });
-  console.log("Users data", response.data);
-  return response.status === 200 && response.data?.success ? response.data : [];
+
+  return response.data;
 };
 
-// GET SINGLE OWNER PROFILE
-export const getOwnerProfile = async (token: string, id: string | number) => {
-  const response = await axios.get(`${API_BASE_URL}/owner/${id}`, {
-    headers: getHeaders(token),
-    validateStatus: () => true,
-  });
-  console.log("Owner profile data", response.data);
-  return response.status === 200 && response.data ? response.data : null;
+/**
+ * Fetch single owner profile by ID
+ */
+export const getOwnerProfile = async (
+  id: string | number,
+): Promise<IOwnerProfileResponse> => {
+  const response = await axiosClient.get<IOwnerProfileResponse>(
+    `/owner/${id}`,
+    {
+      validateStatus: (status) => status < 400,
+    },
+  );
+
+  return response.data;
 };
