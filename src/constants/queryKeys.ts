@@ -11,6 +11,7 @@ import type {
   IOrdersReportParams,
   ISalesParams,
 } from "@/features/reports/types";
+import type { IGetUsersQueryParams } from "@/features/user-management/types";
 import type {
   IBusinessTimingQueryParams,
   IMenuQueryParams,
@@ -196,4 +197,18 @@ export const EXPENSE_KEYS = {
   trends: () => [...EXPENSE_KEYS.all, "trend"] as const,
   trend: (params?: IExpenseTrendParams) =>
     [...EXPENSE_KEYS.trends(), params] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Users & Profiles.
+ */
+export const USER_KEYS = {
+  all: ["users"] as const,
+  lists: () => [...USER_KEYS.all, "list"] as const,
+  list: (params?: IGetUsersQueryParams) =>
+    [...USER_KEYS.lists(), params] as const,
+  owners: () => [...USER_KEYS.all, "owner"] as const,
+  owner: (id: string | number | null) => [...USER_KEYS.owners(), id] as const,
+  details: () => [...USER_KEYS.all, "detail"] as const,
+  detail: (id: string | number | null) => [...USER_KEYS.details(), id] as const,
 } as const;

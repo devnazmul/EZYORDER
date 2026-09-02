@@ -9,6 +9,7 @@ export { formatLabel } from "./formatLabel";
 export * from "./formatters";
 export { formatDoughnutChartItems } from "./formatDoughnutChartItems";
 export { default as formatUtcToLocalTime } from "./formatUtcToLocalTime";
+export { getAnimatedCounterText } from "./getAnimatedCounterText";
 export { getCurrencySymbol } from "./getCurrencySymbol";
 export {
   default as getCustomerFullAddress,

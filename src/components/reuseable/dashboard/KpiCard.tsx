@@ -1,9 +1,21 @@
-import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+// 1. React / React Native
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, Easing, TouchableOpacity, View } from "react-native";
+
+// 2. Expo / Navigation
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+
+// 4. Shared components
+import CustomText from "../CustomText";
 import KpiCardSkeleton from "../skeletons/KpiCardSkeleton";
+
+// 5. Shared hooks
+import { useInView } from "@/hooks";
+
+// 7. Constants / utils
+import { COLORS } from "@/constants";
+import { getAnimatedCounterText, WP } from "@/utils";
 
 export type ITrendType = "up" | "neutral" | "down";
 
@@ -28,6 +40,8 @@ export interface IKpiCardProps {
   rightElement?: React.ReactNode;
   onPress?: () => void;
   disableBackgroundIcon?: boolean;
+  isAnimated?: boolean;
+  animationDuration?: number;
 }
 
 interface ITrendBadgeProps {
@@ -39,20 +53,17 @@ const TREND_CONFIG = {
   up: {
     bg: "bg-success/20",
     icon: "trending-up" as const,
-    color: "#36d399",
-    text: "text-success",
+    color: COLORS.success,
   },
   down: {
     bg: "bg-error/20",
     icon: "trending-down" as const,
-    color: "#ff8369",
-    text: "text-error",
+    color: COLORS.error,
   },
   neutral: {
     bg: "bg-white/10",
     icon: "trending-flat" as const,
     color: "rgba(255, 255, 255, 0.7)",
-    text: "text-white/70",
   },
 };
 
@@ -68,13 +79,15 @@ function TrendBadge({ trend, trendText }: Readonly<ITrendBadgeProps>) {
         size={WP("3.75%")}
         color={config.color}
       />
-      <Text
-        style={{ fontSize: getResponsiveFontSize("xs") - 1 }}
-        className={`font-medium capitalize truncate ${config.text}`}
+      <CustomText
+        size="xs"
+        weight="medium"
+        style={{ color: config.color }}
+        className="capitalize truncate"
         numberOfLines={2}
       >
         {trendText}
-      </Text>
+      </CustomText>
     </View>
   );
 }
@@ -96,15 +109,6 @@ function getGradientColors(
     return gradientColors as [string, string, ...string[]];
   }
   return isDark ? DEFAULT_DARK_GRADIENT : DEFAULT_LIGHT_GRADIENT;
-}
-
-function getValueTextColorClass(
-  isDark: boolean,
-  hasCustomTextColor: boolean,
-): string {
-  if (isDark) return "text-base-100";
-  if (hasCustomTextColor) return "";
-  return "text-neutral";
 }
 
 interface IBackgroundIconWatermarkProps {
@@ -164,14 +168,14 @@ function CardHeader({
       >
         <MaterialIcons name={icon} size={WP("4%")} color={iconColor} />
       </View>
-      <Text
-        style={{ fontSize: getResponsiveFontSize("sm") }}
-        className={`flex-1 flex-wrap font-semibold capitalize ${
-          isDark ? "text-base-100" : "text-neutral/60"
-        }`}
+      <CustomText
+        size="sm"
+        weight="semibold"
+        style={{ color: isDark ? COLORS.base100 : COLORS.neutral }}
+        className="flex-1 flex-wrap capitalize"
       >
         {title}
-      </Text>
+      </CustomText>
     </View>
   );
 }
@@ -180,7 +184,6 @@ interface ICardValueBodyProps {
   value: string;
   textColor?: string;
   valueClassName: string;
-  valueTextColorClass: string;
   subtitle?: string;
   isDark: boolean;
   trend?: ITrendType;
@@ -192,33 +195,38 @@ function CardValueBody({
   value,
   textColor,
   valueClassName,
-  valueTextColorClass,
   subtitle,
   isDark,
   trend,
   trendText,
   rightElement,
 }: Readonly<ICardValueBodyProps>) {
+  const resolvedValueColor =
+    textColor || (isDark ? COLORS.base100 : COLORS.neutral);
+
   return (
     <View className="flex-row items-end justify-between">
       <View className={`flex-1 ${rightElement ? "mr-2 max-w-[45%]" : ""}`}>
-        <Text
-          style={{
-            fontSize: getResponsiveFontSize("xl"),
-            ...(textColor ? { color: textColor } : {}),
-          }}
-          className={`font-bold mt-1 ${valueTextColorClass} ${valueClassName}`}
+        <CustomText
+          size="xl"
+          weight="bold"
+          style={{ color: resolvedValueColor }}
+          className={`mt-1 ${valueClassName}`}
         >
           {value}
-        </Text>
+        </CustomText>
 
         {subtitle ? (
-          <Text
-            style={{ fontSize: getResponsiveFontSize("xs") }}
-            className={`font-medium mt-0.5 ${isDark ? "text-white/70" : "text-accent"}`}
+          <CustomText
+            size="xs"
+            weight="medium"
+            style={{
+              color: isDark ? COLORS.base100 : COLORS.accent,
+            }}
+            className="mt-0.5"
           >
             {subtitle}
-          </Text>
+          </CustomText>
         ) : null}
 
         {trend ? <TrendBadge trend={trend} trendText={trendText} /> : null}
@@ -252,7 +260,55 @@ export default function KpiCard({
   rightElement,
   onPress,
   disableBackgroundIcon = false,
+  isAnimated = true,
+  animationDuration = 1000,
 }: Readonly<IKpiCardProps>) {
+  const [animProgress, setAnimProgress] = useState<number>(isAnimated ? 0 : 1);
+  const animVal = useRef(new Animated.Value(isAnimated ? 0 : 1)).current;
+
+  const cardMinHeight = minHeight ?? 110;
+  const { containerRef, isInView, checkVisibility } = useInView<View>(
+    cardMinHeight,
+    {
+      threshold: 0.8,
+      enabled: isAnimated,
+    },
+  );
+
+  useEffect(() => {
+    if (!isAnimated) {
+      setAnimProgress(1);
+      return;
+    }
+
+    if (!isInView) {
+      animVal.setValue(0);
+      setAnimProgress(0);
+      return;
+    }
+
+    animVal.setValue(0);
+    setAnimProgress(0);
+
+    const listenerId = animVal.addListener(({ value: v }) => {
+      setAnimProgress(v);
+    });
+
+    const animation = Animated.timing(animVal, {
+      toValue: 1,
+      duration: animationDuration,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    });
+
+    animation.start();
+
+    return () => {
+      animVal.removeListener(listenerId);
+      animation.stop();
+    };
+  }, [isInView, isAnimated, animationDuration, value]);
+
   // SKELETON LOADER STATE
   if (loading) {
     return <KpiCardSkeleton trend={trend} />;
@@ -266,12 +322,10 @@ export default function KpiCard({
   const isHexOrRgbBg =
     resolvedIconBg.startsWith("#") || resolvedIconBg.startsWith("rgb");
 
-  const valueTextColorClass = getValueTextColorClass(
-    isDark,
-    Boolean(textColor),
-  );
   const showBackgroundIcon =
     !disableBackgroundIcon && !rightElement && Boolean(icon);
+
+  const displayedValue = getAnimatedCounterText(value, animProgress);
 
   const cardContent = (
     <LinearGradient
@@ -286,7 +340,7 @@ export default function KpiCard({
           ? "rgba(255, 255, 255, 0.1)"
           : "rgba(0, 0, 0, 0.05)",
         padding: WP("3.5%"),
-        minHeight: minHeight ?? 110,
+        minHeight: cardMinHeight,
         overflow: "hidden",
       }}
       className={`flex-1 shadow-sm ${containerClassName}`}
@@ -312,10 +366,9 @@ export default function KpiCard({
           isDark={isDark}
         />
         <CardValueBody
-          value={value}
+          value={displayedValue}
           textColor={textColor}
           valueClassName={valueClassName}
-          valueTextColorClass={valueTextColorClass}
           subtitle={subtitle}
           isDark={isDark}
           trend={trend}
@@ -329,6 +382,8 @@ export default function KpiCard({
   if (onPress) {
     return (
       <TouchableOpacity
+        ref={containerRef}
+        onLayout={checkVisibility}
         activeOpacity={0.85}
         onPress={onPress}
         className="flex-1 flex-col"
@@ -338,5 +393,13 @@ export default function KpiCard({
     );
   }
 
-  return cardContent;
+  return (
+    <View
+      ref={containerRef}
+      onLayout={checkVisibility}
+      className="flex-1 flex-col"
+    >
+      {cardContent}
+    </View>
+  );
 }
