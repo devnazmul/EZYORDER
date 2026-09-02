@@ -11,7 +11,7 @@ import { DefaultValues, useFormContext } from "react-hook-form";
 
 // 4. Shared components
 import { CustomForm } from "@/components/form/CustomForm";
-import { DropdownField, InputField } from "@/components/form/input";
+import { InputField, SwitchField } from "@/components/form/input";
 import BottomSheet from "@/components/reuseable/BottomSheet";
 import Button from "@/components/reuseable/Button";
 import CustomText from "@/components/reuseable/CustomText";
@@ -26,7 +26,6 @@ import { expenseTypeFormSchema } from "../schema";
 import { ExpenseService } from "../services";
 
 // 6. Types
-import type { IDropdownOption } from "@/components/form/input";
 import type { IExpenseTypeFormData } from "../schema";
 import type { IExpenseType } from "../types";
 
@@ -39,11 +38,6 @@ interface IExpenseTypeFormBottomSheetProps {
   readonly onClose: () => void;
   readonly initialExpenseType?: IExpenseType | null;
 }
-
-const STATUS_OPTIONS: IDropdownOption[] = [
-  { label: "Active", value: "1" },
-  { label: "Inactive", value: "0" },
-];
 
 function FormBottomActions({
   onClose,
@@ -172,6 +166,16 @@ export default function ExpenseTypeFormBottomSheet({
               {initialExpenseType ? "Edit Expense Type" : "Add Expense Type"}
             </CustomText>
           </View>
+
+          {/* Header Right Status Switch */}
+          <SwitchField
+            name="is_active"
+            label={(isActive) => (isActive ? "Active" : "Inactive")}
+            labelProps={(isActive) => ({
+              style: { color: isActive ? COLORS.primary : COLORS.accent },
+            })}
+            confirmPrompt
+          />
         </View>
 
         {/* Scrollable Fields */}
@@ -198,14 +202,6 @@ export default function ExpenseTypeFormBottomSheet({
               placeholder="Additional details about this type..."
               multiline
               numberOfLines={5}
-            />
-
-            {/* Status Dropdown Field */}
-            <DropdownField
-              name="is_active"
-              label="Status"
-              placeholder="Select status"
-              dropdownOptions={STATUS_OPTIONS}
             />
           </View>
         </BottomSheetScrollView>
