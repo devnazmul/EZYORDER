@@ -134,7 +134,7 @@ export default function ExpenseTypeFormBottomSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      snapPoints={["75%"]}
+      snapPoints={["60%"]}
       keyboardBehavior="interactive"
       android_keyboardInputMode="adjustResize"
     >
