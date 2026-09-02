@@ -1,91 +1,77 @@
-import {
-  EmptyState,
-  LoadingScreen,
-  PageTitle,
-  RefreshableScrollView,
-} from "@/components/reuseable";
+// 1. React / React Native
+import React from "react";
+import { Image, View } from "react-native";
 
-import { useAuth } from "@/src/context/AuthContext";
-import { useOwnerProfileQuery } from "@/features/user-management/hooks/queries/useUserQueries";
+// 2. Expo / Navigation
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
-import { Image, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+
+// 3. External libraries
+import { useQueryClient } from "@tanstack/react-query";
+
+// 4. Shared components & context
+import {
+  ActionCard,
+  Badge,
+  CustomText,
+  EmptyState,
+  ScreenContainer,
+} from "@/components/reuseable";
+import { useAuth } from "@/context/AuthContext";
+
+// 5. Feature components/hooks
+import { useOwnerProfileQuery } from "@/features/user-management/hooks/queries/useUserQueries";
+import { ProfileScreenSkeleton } from "../components";
+
+// 7. Constants/utils
+import { COLORS } from "@/constants/colors";
+import { USER_KEYS } from "@/constants/queryKeys";
+import { formatLabel, getInitials } from "@/utils";
 
 export default function ProfileScreen() {
-  const { user: authUser } = useAuth();
-  const userId = authUser?.id;
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id;
 
-  const { data, isLoading, refetch } = useOwnerProfileQuery(userId || null);
+  const { data, isLoading, isFetching } = useOwnerProfileQuery(userId || null);
 
-  const profileUser = useMemo(() => {
-    if (!data) return null;
-    return data.user || data.data?.user || null;
-  }, [data]);
+  const profileUser = data?.user || null;
 
-  const initials = useMemo(() => {
-    if (!profileUser) return "U";
-    const first = profileUser.first_Name
-      ? profileUser.first_Name.charAt(0)
-      : "";
-    const last = profileUser.last_Name ? profileUser.last_Name.charAt(0) : "";
-    return (first + last).toUpperCase() || "U";
-  }, [profileUser]);
-
-  const fullName = useMemo(() => {
-    if (!profileUser) return "User Name";
-    const first = profileUser.first_Name || "";
-    const last = profileUser.last_Name || "";
-    return `${first} ${last}`.trim() || "User Name";
-  }, [profileUser]);
-
-  const formattedRole = useMemo(() => {
-    if (!profileUser?.type) return "Staff";
-    return profileUser.type
-      .replace(/[-_]/g, " ")
-      .split(" ")
-      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }, [profileUser]);
-
-  // Formatter for status properties
-  const formatStatus = (status?: string) => {
-    if (!status) return "N/A";
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  };
+  const first = profileUser?.first_Name || "";
+  const last = profileUser?.last_Name || "";
+  const fullName = `${first} ${last}`.trim() || "---";
+  const initials = first || last ? getInitials(`${first} ${last}`) : "--";
+  const formattedRole = formatLabel(profileUser?.type) || "Staff";
 
   const renderDetailItem = (
     icon: keyof typeof MaterialIcons.glyphMap,
     label: string,
     value: string | number | undefined | null,
+    isLast = false,
   ) => {
     if (value === undefined || value === null || String(value).trim() === "")
       return null;
     return (
-      <View className="flex-row items-start gap-3 py-3.5 border-b border-base-200/50">
+      <View
+        className={`flex-row items-start gap-3 py-3.5 ${!isLast ? "border-b border-base-200/50" : ""}`}
+      >
         <View className="bg-primary/10 p-2 rounded-lg mt-0.5">
-          <MaterialIcons name={icon} size={18} color="#DC2D2A" />
+          <MaterialIcons name={icon} size={18} color={COLORS.primary} />
         </View>
         <View className="flex-1">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">
+          <CustomText size="xs" weight="bold" variant="tertiary">
             {label}
-          </Text>
-          <Text className="text-sm font-bold text-neutral mt-0.5">{value}</Text>
+          </CustomText>
+          <CustomText size="sm" weight="bold" className="mt-0.5">
+            {value}
+          </CustomText>
         </View>
       </View>
     );
   };
 
   const renderContent = () => {
-    if (isLoading) {
-      return (
-        <View
-          key="loading"
-          className="flex-1 justify-center items-center py-20"
-        >
-          <LoadingScreen message="Loading profile..." useSafeArea={false} />
-        </View>
-      );
+    if (isLoading || isFetching) {
+      return <ProfileScreenSkeleton key="skeleton" />;
     }
 
     if (!profileUser) {
@@ -121,84 +107,70 @@ export default function ProfileScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <Text className="text-3xl font-black text-primary">
+              <CustomText size="3xl" weight="extrabold" variant="currency">
                 {initials}
-              </Text>
+              </CustomText>
             )}
           </View>
           <View className="items-center">
-            <Text className="text-lg font-black text-neutral text-center">
+            <CustomText size="lg" weight="bold" className="text-center">
               {fullName}
-            </Text>
-            <View className="bg-primary/10 px-3 py-0.5 rounded-full mt-1.5 self-center">
-              <Text className="text-[10px] font-bold text-primary uppercase tracking-wider">
-                {formattedRole}
-              </Text>
+            </CustomText>
+            <View className="mt-1.5">
+              <Badge
+                text={formattedRole}
+                containerClassName="bg-primary/10"
+                textClassName="text-primary"
+              />
             </View>
           </View>
         </View>
 
         {/* 2. Personal Information */}
-        <View className="bg-base-300 border border-base-200 rounded-xl px-4 py-1 shadow-sm">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest pt-3.5 pb-1">
-            Personal Information
-          </Text>
+        <ActionCard title="Personal Information" bodyClassName="px-4 py-1">
           {renderDetailItem("email", "Email Address", profileUser.email)}
-          {renderDetailItem("phone", "Phone Number", profileUser.phone)}
-        </View>
+          {renderDetailItem("phone", "Phone Number", profileUser.phone, true)}
+        </ActionCard>
 
         {/* 3. Workplace & Role Status */}
-        <View className="bg-base-300 border border-base-200 rounded-xl px-4 py-1 shadow-sm">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest pt-3.5 pb-1">
-            Role & Workplace Details
-          </Text>
-          {renderDetailItem("business", "Business ID", profileUser.business_id)}
-          {renderDetailItem(
-            "restaurant",
-            "Waiter Status",
-            formatStatus(profileUser.waiter_status),
-          )}
-          {renderDetailItem(
-            "local-shipping",
-            "Driver Status",
-            formatStatus(profileUser.driver_status),
-          )}
-          {renderDetailItem(
-            "credit-card",
-            "Stripe Account ID",
-            profileUser.stripe_id || "Not Configured",
-          )}
-          {renderDetailItem("event", "Trial Expiry", profileUser.trial_ends_at)}
-        </View>
+        {!!profileUser.trial_ends_at && (
+          <ActionCard
+            title="Role & Workplace Details"
+            bodyClassName="px-4 py-1"
+          >
+            {renderDetailItem(
+              "event",
+              "Trial Expiry",
+              profileUser.trial_ends_at,
+              true,
+            )}
+          </ActionCard>
+        )}
 
         {/* 4. Address Details */}
         {hasAddressGroup && (
-          <View className="bg-base-300 border border-base-200 rounded-xl px-4 py-1 shadow-sm">
-            <Text className="text-[10px] font-bold text-accent uppercase tracking-widest pt-3.5 pb-1">
-              Address Information
-            </Text>
+          <ActionCard title="Address Information" bodyClassName="px-4 py-1">
             {renderDetailItem("tag", "Door / Unit Number", profileUser.door_no)}
             {renderDetailItem("place", "Street Address", profileUser.Address)}
-            {renderDetailItem("map", "Postcode", profileUser.post_code)}
-          </View>
+            {renderDetailItem("map", "Postcode", profileUser.post_code, true)}
+          </ActionCard>
         )}
       </View>
     );
   };
 
-  return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <RefreshableScrollView
-        onRefresh={async () => {
-          await refetch();
-        }}
-        className="flex-1 px-4 py-4"
-        contentContainerStyle={{ paddingBottom: 40 }}
-      >
-        <PageTitle title="My Profile" icon="person" />
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: USER_KEYS.owner(userId || null),
+    });
+  };
 
-        <View className="mt-2">{renderContent()}</View>
-      </RefreshableScrollView>
-    </SafeAreaView>
+  return (
+    <ScreenContainer
+      onRefresh={handleRefresh}
+      safeAreaEdges={["left", "right"]}
+    >
+      <View>{renderContent()}</View>
+    </ScreenContainer>
   );
 }
