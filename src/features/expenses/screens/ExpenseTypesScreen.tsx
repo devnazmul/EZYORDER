@@ -97,7 +97,8 @@ export default function ExpenseTypesScreen() {
       contentClassName="flex-1 relative"
     >
       <FlatList
-        data={isLoading || isError ? [] : expenseTypesList}
+        className="flex-1"
+        data={isLoading && !isRefreshing ? [] : expenseTypesList}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ paddingBottom: HP("10%") }}
         contentContainerClassName="gap-y-3"
@@ -114,6 +115,10 @@ export default function ExpenseTypesScreen() {
         )}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
         onRefresh={handleRefresh}
         refreshing={isRefreshing}
         showsVerticalScrollIndicator={false}

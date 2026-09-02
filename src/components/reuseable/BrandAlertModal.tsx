@@ -1,87 +1,121 @@
-import { MaterialIcons } from "@expo/vector-icons";
+// 1. React / React Native
 import React from "react";
-import { Modal, Text, View } from "react-native";
+import { Modal, View } from "react-native";
+
+// 2. Expo / Navigation
+import { MaterialIcons } from "@expo/vector-icons";
+
+// 4. Shared components
 import Button from "./Button";
+import CustomText from "./CustomText";
 
-export interface BrandAlertConfig {
-  visible: boolean;
-  type: "info" | "success" | "error" | "confirm";
-  title: string;
-  description: string;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm?: () => void;
+// 7. Constants/utils
+import { COLORS } from "@/constants/colors";
+
+export type IBrandAlertType = "info" | "success" | "error" | "confirm";
+
+export interface IBrandAlertConfig {
+  readonly visible: boolean;
+  readonly type: IBrandAlertType;
+  readonly title: string;
+  readonly description: string;
+  readonly confirmText?: string;
+  readonly cancelText?: string;
+  readonly onConfirm?: () => void;
 }
 
-interface BrandAlertModalProps extends Omit<BrandAlertConfig, "onConfirm"> {
-  onConfirm: () => void;
-  onCancel?: () => void;
+export interface IBrandAlertModalProps extends Omit<
+  IBrandAlertConfig,
+  "onConfirm"
+> {
+  readonly onConfirm: () => void;
+  readonly onCancel?: () => void;
 }
+
+interface IAlertVisualConfig {
+  readonly icon: keyof typeof MaterialIcons.glyphMap;
+  readonly iconColor: string;
+  readonly bgColor: string;
+  readonly borderColor: string;
+}
+
+const BRAND_ALERT_TYPE_CONFIG: Record<IBrandAlertType, IAlertVisualConfig> = {
+  success: {
+    icon: "check-circle",
+    iconColor: COLORS.success,
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-100",
+  },
+  error: {
+    icon: "error-outline",
+    iconColor: COLORS.error,
+    bgColor: "bg-rose-50",
+    borderColor: "border-rose-100",
+  },
+  confirm: {
+    icon: "help-outline",
+    iconColor: COLORS.primary,
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-100",
+  },
+  info: {
+    icon: "info-outline",
+    iconColor: COLORS.info,
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-100",
+  },
+};
 
 export default function BrandAlertModal({
   visible,
-  type,
+  type = "info",
   title,
   description,
   confirmText,
   cancelText,
   onConfirm,
   onCancel,
-}: BrandAlertModalProps) {
-  const getIconAndColors = () => {
-    switch (type) {
-      case "success":
-        return {
-          icon: "check-circle" as const,
-          iconColor: "#10b981",
-          bgColor: "bg-emerald-50",
-          borderColor: "border-emerald-100",
-        };
-      case "error":
-        return {
-          icon: "error-outline" as const,
-          iconColor: "#ef4444",
-          bgColor: "bg-rose-50",
-          borderColor: "border-rose-100",
-        };
-      case "confirm":
-        return {
-          icon: "help-outline" as const,
-          iconColor: "#f59e0b",
-          bgColor: "bg-amber-50",
-          borderColor: "border-amber-100",
-        };
-      case "info":
-      default:
-        return {
-          icon: "info-outline" as const,
-          iconColor: "#3b82f6",
-          bgColor: "bg-blue-50",
-          borderColor: "border-blue-100",
-        };
-    }
-  };
-
-  const { icon, iconColor, bgColor, borderColor } = getIconAndColors();
+}: Readonly<IBrandAlertModalProps>) {
+  const { icon, iconColor, bgColor, borderColor } =
+    BRAND_ALERT_TYPE_CONFIG[type] || BRAND_ALERT_TYPE_CONFIG.info;
 
   return (
-    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onCancel}>
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onCancel}
+    >
       <View className="flex-1 bg-slate-900/60 justify-center items-center px-6">
         <View className="bg-base-300 w-full max-w-[320px] rounded-lg p-6 border border-slate-100/10 shadow-2xl items-center">
           {/* Circular Icon Header */}
-          <View className={`w-14 h-14 rounded-full items-center justify-center mb-4 ${bgColor} border ${borderColor}`}>
+          <View
+            className={`w-14 h-14 rounded-full items-center justify-center mb-4 ${bgColor} border ${borderColor}`}
+          >
             <MaterialIcons name={icon} size={28} color={iconColor} />
           </View>
 
           {/* Title */}
-          <Text className="text-sm font-black text-slate-900 text-center capitalize mb-2 tracking-wide">
+          <CustomText
+            variant="primary"
+            size="sm"
+            weight="semibold"
+            className="text-center capitalize mb-2 tracking-wide"
+          >
             {title}
-          </Text>
+          </CustomText>
 
           {/* Description */}
-          <Text className="text-xs font-bold text-slate-500 text-center leading-4 mb-6 px-1">
-            {description}
-          </Text>
+          {Boolean(description) && (
+            <CustomText
+              variant="tertiary"
+              size="xs"
+              weight="medium"
+              className="text-center leading-4 mb-6 px-1"
+            >
+              {description}
+            </CustomText>
+          )}
 
           {/* Action Buttons */}
           {type === "confirm" ? (

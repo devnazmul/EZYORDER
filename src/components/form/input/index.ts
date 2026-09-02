@@ -20,6 +20,7 @@ export {
   default as NumberRangeField,
   type INumberRangeFieldProps,
 } from "./NumberRangeField";
+export { default as SwitchField, type ISwitchFieldProps } from "./SwitchField";
 export {
   default as TimeRangeField,
   type ITimeRangeFieldProps,
