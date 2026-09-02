@@ -100,13 +100,9 @@ export const useExpenseTypesInfiniteQuery = (
       if (!lastPage) return undefined;
 
       const currentPage = Number(lastPage.current_page ?? 1);
-      const totalPages = Number(lastPage.last_page ?? 0);
+      const lastPageNum = Number(lastPage.last_page ?? 1);
 
-      if (currentPage > 0 && totalPages > 0 && currentPage < totalPages) {
-        return currentPage + 1;
-      }
-
-      return undefined;
+      return currentPage < lastPageNum ? currentPage + 1 : undefined;
     },
     enabled: !!token && !!restaurantId,
   });

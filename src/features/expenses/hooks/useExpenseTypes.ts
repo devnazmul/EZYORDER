@@ -37,10 +37,14 @@ export function useExpenseTypes() {
     hasNextPage,
     fetchNextPage,
     isError,
-  } = useExpenseTypesInfiniteQuery(restaurantId || "", 5);
+  } = useExpenseTypesInfiniteQuery(restaurantId || "", 10);
 
-  const expenseTypesList = useMemo<IExpenseType[]>(
-    () => data?.pages.flatMap((page) => page?.data ?? []) ?? [],
+  const expenseTypesList = useMemo(
+    () =>
+      data?.pages.flatMap((page) => {
+        if (Array.isArray(page?.data)) return page.data;
+        return [];
+      }) ?? [],
     [data],
   );
 
