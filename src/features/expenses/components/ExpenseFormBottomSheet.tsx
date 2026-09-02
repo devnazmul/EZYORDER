@@ -8,6 +8,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 // 3. External libraries
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
+import { useFormContext } from "react-hook-form";
 
 // 4. Shared components
 import { CustomForm } from "@/components/form/CustomForm";
@@ -18,6 +19,7 @@ import {
   InputField,
 } from "@/components/form/input";
 import BottomSheet from "@/components/reuseable/BottomSheet";
+import Button from "@/components/reuseable/Button";
 import CustomText from "@/components/reuseable/CustomText";
 
 // 5. Feature components/hooks/services
@@ -54,6 +56,43 @@ const PAYMENT_METHOD_OPTIONS: IDropdownOption[] = [
     value: method,
   };
 });
+
+function FormBottomActions({
+  onClose,
+  submitButtonLabel,
+  isSubmitting,
+  onSubmit,
+}: {
+  readonly onClose: () => void;
+  readonly submitButtonLabel: string;
+  readonly isSubmitting: boolean;
+  readonly onSubmit: (data: IExpenseFormData) => Promise<void>;
+}) {
+  const { handleSubmit } = useFormContext<IExpenseFormData>();
+
+  return (
+    <View
+      style={{ padding: WP("4%"), paddingBottom: HP("6%") }}
+      className="flex-row items-center gap-3 border-t border-base-200 bg-base-200"
+    >
+      <Button
+        label="Cancel"
+        onPress={onClose}
+        variant="outline"
+        containerClassName="flex-1 !shadow-none"
+        disabled={isSubmitting}
+      />
+      <Button
+        label={submitButtonLabel}
+        onPress={handleSubmit(onSubmit)}
+        variant="primary"
+        containerClassName="flex-1"
+        isLoading={isSubmitting}
+        disabled={isSubmitting}
+      />
+    </View>
+  );
+}
 
 export default function ExpenseFormBottomSheet({
   visible,
@@ -133,19 +172,29 @@ export default function ExpenseFormBottomSheet({
     submitButtonLabel = "Saving...";
   }
 
+  const isFormSubmitting = isSubmitting || isUploading;
+
   return (
-    <BottomSheet visible={visible} onClose={onClose} snapPoints={["85%"]}>
-      <BottomSheetScrollView
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="none"
-        contentContainerStyle={{
-          paddingHorizontal: WP("5%"),
-          paddingBottom: HP("5%"),
-        }}
-        showsVerticalScrollIndicator={false}
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={["85%"]}
+      keyboardBehavior="interactive"
+      android_keyboardInputMode="adjustResize"
+    >
+      <CustomForm<IExpenseFormData>
+        schema={expenseFormSchema}
+        defaultValues={defaultValues}
+        submitHandler={submitExpense}
+        showFormActionButton={false}
+        className="flex-1"
+        style={{ flex: 1, flexDirection: "column" }}
       >
         {/* Header */}
-        <View className="flex-row items-center justify-between py-3 mb-2 border-b border-base-200">
+        <View
+          style={{ paddingHorizontal: WP("5%") }}
+          className="flex-row items-center justify-between py-3 mb-2 border-b border-base-200"
+        >
           <View className="flex-row items-center gap-2">
             <View
               style={{ width: WP("9%"), height: WP("9%") }}
@@ -163,14 +212,14 @@ export default function ExpenseFormBottomSheet({
           </View>
         </View>
 
-        {/* CustomForm */}
-        <CustomForm<IExpenseFormData>
-          schema={expenseFormSchema}
-          defaultValues={defaultValues}
-          submitHandler={submitExpense}
-          submitButtonLabel={submitButtonLabel}
-          cancelHandler={onClose}
-          actionButtonClassName="mt-6"
+        {/* Scrollable Fields */}
+        <BottomSheetScrollView
+          style={{ flexShrink: 1, paddingHorizontal: WP("5%") }}
+          className="py-4"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: HP("6%") }}
         >
           <View className="gap-y-4">
             {/* Amount Field */}
@@ -212,6 +261,8 @@ export default function ExpenseFormBottomSheet({
               name="note"
               label="Note"
               placeholder="Short note or title"
+              multiline
+              numberOfLines={4}
             />
 
             {/* Description Field */}
@@ -220,7 +271,7 @@ export default function ExpenseFormBottomSheet({
               label="Description"
               placeholder="Additional details about this expense..."
               multiline
-              numberOfLines={3}
+              numberOfLines={4}
             />
 
             {/* Receipt Attachments Field */}
@@ -230,8 +281,16 @@ export default function ExpenseFormBottomSheet({
               buttonText="Attach Receipt Image or PDF"
             />
           </View>
-        </CustomForm>
-      </BottomSheetScrollView>
+        </BottomSheetScrollView>
+
+        {/* Fixed Bottom Action Buttons */}
+        <FormBottomActions
+          onClose={onClose}
+          submitButtonLabel={submitButtonLabel}
+          isSubmitting={isFormSubmitting}
+          onSubmit={submitExpense}
+        />
+      </CustomForm>
     </BottomSheet>
   );
 }

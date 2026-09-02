@@ -69,18 +69,29 @@ export default function InputField({
 
           const iconSize = getResponsiveFontSize("sm") + 6;
 
+          const isMultiline = Boolean(textInputProps.multiline);
+          const multilineMinHeight = textInputProps.numberOfLines
+            ? Math.max(72, textInputProps.numberOfLines * 24 + 20)
+            : Math.max(88, HP("10%"));
+
           return (
             <View>
               <View
-                className={`flex-row items-center justify-between bg-base-100 w-full px-3 rounded-lg border ${borderClass}`}
-                style={{ height: Math.max(44, HP("5%")) }}
+                className={`flex-row ${
+                  isMultiline ? "items-start " : "items-center"
+                } justify-between bg-base-100 w-full  px-3 rounded-lg border ${borderClass} ${isMultiline ? "pt-2" : ""}`}
+                style={
+                  isMultiline
+                    ? { minHeight: multilineMinHeight }
+                    : { height: Math.max(44, HP("5%")) }
+                }
               >
                 {iconName && (
                   <MaterialIcons
                     name={iconName}
                     size={iconSize}
                     color={iconColor}
-                    className="mr-1"
+                    className={isMultiline ? "mr-1 mt-0.5" : "mr-1"}
                   />
                 )}
 
@@ -101,9 +112,11 @@ export default function InputField({
                   }}
                   secureTextEntry={isPassword && !isVisible}
                   placeholderTextColor={COLORS.accent}
-                  className="flex-1 text-neutral h-full outline-none"
+                  textAlignVertical={isMultiline ? "top" : "center"}
+                  className={`flex-1 text-neutral h-full outline-none`}
                   style={[
                     { fontSize: getResponsiveFontSize("sm") },
+                    isMultiline && { paddingTop: 0 },
                     textInputProps.style,
                   ]}
                   autoCapitalize={textInputProps.autoCapitalize || "none"}

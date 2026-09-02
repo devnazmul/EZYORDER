@@ -197,7 +197,7 @@ export default function ExpenseTypeFormBottomSheet({
               label="Description"
               placeholder="Additional details about this type..."
               multiline
-              numberOfLines={3}
+              numberOfLines={5}
             />
 
             {/* Status Dropdown Field */}
