@@ -1,0 +1,136 @@
+import COLORS from "@/constants/colors";
+import { getResponsiveFontSize, WP } from "@/utils/getResponsiveSizes";
+import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import LiveOrderBoardSkeleton from "../skeletons/LiveOrderBoardSkeleton";
+
+export interface LiveOrderBoardData {
+  new_order: number;
+  preparing: number;
+  complete: number;
+  unpaid: number;
+}
+
+export interface LiveOrderBoardProps {
+  liveOrderBoard?: LiveOrderBoardData;
+  isLoading?: boolean;
+  role?: "manager" | "driver";
+}
+
+interface OrderStatusCardProps {
+  title: string;
+  count: number;
+  type: "new" | "preparing" | "completed" | "unpaid";
+  role?: "manager" | "driver";
+}
+
+function OrderStatusCard({ title, count, type, role = "manager" }: OrderStatusCardProps) {
+  let containerClass = "";
+  let textClass = "";
+  let iconName: keyof typeof MaterialIcons.glyphMap = "notifications-none";
+  let iconColor: string = COLORS.info;
+
+  if (type === "new") {
+    containerClass =
+      "bg-[#2563eb12] border-b-4 border-[#2563eb] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#1d4ed8] tracking-wider capitalize";
+    iconName = "notifications-none";
+    iconColor = "#2563eb";
+  } else if (type === "preparing") {
+    containerClass =
+      "bg-[#d9770612] border-b-4 border-[#d97706] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#b45309] tracking-wider capitalize";
+    iconName = "schedule";
+    iconColor = "#d97706";
+  } else if (type === "completed") {
+    containerClass =
+      "bg-[#47556912] border-b-4 border-[#475569] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#334155] tracking-wider capitalize";
+    iconName = "history";
+    iconColor = "#475569";
+  } else if (type === "unpaid") {
+    containerClass =
+      "bg-[#db277712] border-b-4 border-[#db2777] flex-row justify-between items-center rounded-xl";
+    textClass = "font-semibold text-[#be185d] tracking-wider capitalize";
+    iconName = "history";
+    iconColor = "#db2777";
+  }
+
+  const handlePress = () => {
+    if (role === "driver") {
+      router.push({ pathname: "/(driver)/my-orders" });
+      return;
+    }
+
+    // Default: manager route
+    const params: Record<string, string> = {
+      tab: "eat_in,delivery,take_away,walk_in",
+    };
+
+    if (type === "new") {
+      params.status = "pending";
+      params.payment_status = "";
+    } else if (type === "preparing") {
+      params.status = "kitchen";
+      params.payment_status = "";
+    } else if (type === "completed") {
+      params.status = "completed";
+      params.payment_status = "";
+    } else if (type === "unpaid") {
+      params.status = "";
+      params.payment_status = "unpaid";
+    }
+
+    router.push({
+      pathname: "/orders/todays-orders",
+      params,
+    });
+  };
+
+  const isFlippedIcon = type === "completed" || type === "unpaid";
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={handlePress}
+      style={{ paddingHorizontal: WP("4%") }}
+      className={`${containerClass} py-3.5`}
+    >
+      <Text style={{ fontSize: getResponsiveFontSize("sm") }} className={textClass}>
+        {`${title} (${count})`}
+      </Text>
+      <MaterialIcons
+        name={iconName}
+        size={WP("5.5%")}
+        color={iconColor}
+        style={isFlippedIcon ? { transform: [{ scaleX: -1 }] } : undefined}
+      />
+    </TouchableOpacity>
+  );
+}
+
+export default function LiveOrderBoard({
+  liveOrderBoard,
+  isLoading = false,
+  role = "manager",
+}: LiveOrderBoardProps) {
+  if (isLoading) {
+    return <LiveOrderBoardSkeleton />;
+  }
+
+  const newOrdersCount = liveOrderBoard?.new_order ?? 0;
+  const preparingCount = liveOrderBoard?.preparing ?? 0;
+  const completedCount = liveOrderBoard?.complete ?? 0;
+  const unpaidCount = liveOrderBoard?.unpaid ?? 0;
+
+  return (
+    <View key="loaded" className="gap-y-2.5">
+      <OrderStatusCard title="New Orders" count={newOrdersCount} type="new" role={role} />
+      <OrderStatusCard title="Preparing" count={preparingCount} type="preparing" role={role} />
+      <OrderStatusCard title="Completed" count={completedCount} type="completed" role={role} />
+      <OrderStatusCard title="Unpaid" count={unpaidCount} type="unpaid" role={role} />
+    </View>
+  );
+}
