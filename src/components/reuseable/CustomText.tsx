@@ -59,6 +59,14 @@ const WEIGHT_STYLES: Record<IFontWeight, TextStyle> = {
   extrabold: { fontWeight: "800" },
 };
 
+const DEFAULT_ROBOTO_FONT_MAP: Record<IFontWeight, string> = {
+  normal: "Roboto_400Regular",
+  medium: "Roboto_500Medium",
+  semibold: "Roboto_500Medium",
+  bold: "Roboto_700Bold",
+  extrabold: "Roboto_900Black",
+};
+
 export default function CustomText({
   variant = "primary",
   currencySymbol,
@@ -84,11 +92,16 @@ export default function CustomText({
     return {};
   }, [size]);
 
+  const resolvedFontFamily =
+    fontFamily ||
+    DEFAULT_ROBOTO_FONT_MAP[weight] ||
+    DEFAULT_ROBOTO_FONT_MAP.normal;
+
   const fontStyle: TextStyle = {
     ...VARIANT_STYLES[variant],
     ...WEIGHT_STYLES[weight],
     ...fontSizeStyle,
-    ...(fontFamily ? { fontFamily } : {}),
+    fontFamily: resolvedFontFamily,
   };
 
   const formattedContent = React.useMemo(() => {

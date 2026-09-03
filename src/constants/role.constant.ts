@@ -13,3 +13,5 @@ export const ROLES = [
   ROLE.DRIVER,
   ROLE.CUSTOMER,
 ];
+
+export const ALLOWED_ROLES = [ROLE.OWNER, ROLE.DRIVER];

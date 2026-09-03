@@ -1,3 +1,6 @@
+import { ROLE } from "@/constants";
+import { IRestaurant } from "@/types";
+
 export interface IRolePivot {
   model_type: string;
   model_id: number;
@@ -24,7 +27,7 @@ export interface IUser {
   last_Name: string | null;
   phone: string | null;
   image: string | null;
-  type: string;
+  type: ROLE;
   driver_status: string;
   waiter_status: string;
   post_code: string | null;
@@ -38,8 +41,10 @@ export interface IUser {
   trial_ends_at: string | null;
   door_no: string | null;
   business_id: number | null;
+  token?: string;
   role?: IUserRole;
   roles?: IUserRole[];
+  restaurant?: IRestaurant[];
   is_active?: boolean | number;
   last_login_at?: string | null;
   created_at?: string;
