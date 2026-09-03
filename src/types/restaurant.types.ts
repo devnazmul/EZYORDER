@@ -43,7 +43,7 @@ export interface IRestaurant {
   GoogleMapApi: string | null;
   Address: string | null;
   PostCode: string | null;
-  Logo: string | null;
+  Logo: string;
   OwnerID: number;
   Key_ID: string;
   expiry_date: string | null;

@@ -2,14 +2,17 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 
+// 3. External libraries
+import { useQueryClient } from "@tanstack/react-query";
+
 // 4. Shared components & context
 import {
   EmptyState,
-  LoadingScreen,
   PageTitle,
   ScreenContainer,
   ToggleBar,
 } from "@/components/reuseable";
+import { BUSINESS_TIMING_KEYS, RESTAURANT_KEYS } from "@/constants/queryKeys";
 import { useAuth } from "@/context/AuthContext";
 
 // 5. Feature components & services (via Barrel exports)
@@ -18,7 +21,12 @@ import {
   useBusinessTimingQuery,
   useRestaurantQuery,
 } from "@/features/restaurants";
-import { BusinessInfoCard, BusinessScheduleCard } from "../components";
+import {
+  BusinessInfoCard,
+  BusinessInfoCardSkeleton,
+  BusinessScheduleCard,
+  BusinessScheduleCardSkeleton,
+} from "../components";
 
 // 6. Types
 
@@ -28,6 +36,7 @@ const TABS = [
 ];
 
 export default function BusinessSettingsScreen() {
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
 
@@ -37,97 +46,144 @@ export default function BusinessSettingsScreen() {
   const {
     data: restaurantData,
     isLoading: isRestaurantLoading,
-    refetch: refetchRestaurant,
-  } = useRestaurantQuery(restaurantId || "");
+    isRefetching: isRestaurantRefetching,
+    isError: isRestaurantError,
+    error: restaurantError,
+  } = useRestaurantQuery({ restaurant_id: restaurantId });
 
   const {
     data: timingData,
     isLoading: isTimingLoading,
-    refetch: refetchTiming,
-  } = useBusinessTimingQuery(restaurantId || "");
+    isRefetching: isTimingRefetching,
+    isError: isTimingError,
+    error: timingError,
+  } = useBusinessTimingQuery({ restaurant_id: restaurantId });
 
   // Extract raw timings list and sort from Monday (1) to Sunday (0) via RestaurantService
   const timingList = RestaurantService.sortBusinessTimings(timingData);
 
-  // Handle Refreshing for current active tab
+  // Handle Refreshing for current active tab via Query Key Invalidation
   const handleRefresh = async () => {
     if (activeTab === "info") {
-      await refetchRestaurant();
+      await queryClient.invalidateQueries({
+        queryKey: RESTAURANT_KEYS.detail({ restaurant_id: restaurantId }),
+      });
     } else if (activeTab === "schedule") {
-      await refetchTiming();
+      await queryClient.invalidateQueries({
+        queryKey: BUSINESS_TIMING_KEYS.detail({ restaurant_id: restaurantId }),
+      });
     }
   };
 
-  // Determine current load state
-  const isCurrentTabLoading =
-    (activeTab === "info" && isRestaurantLoading) ||
-    (activeTab === "schedule" && isTimingLoading);
-
-  // Render content depending on activeTab
-  const renderTabContent = () => {
-    if (isCurrentTabLoading) {
+  // Render Info Tab Content
+  const renderInfoTab = () => {
+    if (isRestaurantLoading || isRestaurantRefetching) {
       return (
-        <View
-          key="loading"
-          className="flex-1 justify-center items-center py-20"
-        >
-          <LoadingScreen message="Loading settings..." useSafeArea={false} />
+        <View key="loading-info" className="flex-1">
+          <BusinessInfoCardSkeleton />
         </View>
       );
     }
 
-    if (activeTab === "info") {
-      if (!restaurantData) {
-        return (
-          <View
-            key="empty-info"
-            className="flex-1 justify-center items-center py-10 bg-base-100"
-          >
-            <EmptyState
-              icon="error-outline"
-              title="No Restaurant Info"
-              description="Unable to load restaurant information at this time."
-            />
-          </View>
-        );
-      }
+    if (isRestaurantError) {
       return (
-        <View key="info-content" className="flex-1">
-          <BusinessInfoCard
-            settings={restaurantData?.restaurant || restaurantData}
+        <View
+          key="error-info"
+          className="flex-1 justify-center items-center py-10"
+        >
+          <EmptyState
+            icon="error-outline"
+            title="Failed to Load Restaurant Info"
+            description={
+              restaurantError instanceof Error
+                ? restaurantError.message
+                : "An unexpected error occurred while loading business settings."
+            }
           />
         </View>
       );
     }
 
-    if (activeTab === "schedule") {
-      if (timingList.length === 0) {
-        return (
-          <View
-            key="empty-schedule"
-            className="flex-1 justify-center items-center py-10 bg-base-100"
-          >
-            <EmptyState
-              icon="schedule"
-              title="No Timings Available"
-              description="No business hours or schedule timings are configured."
-            />
-          </View>
-        );
-      }
+    if (!restaurantData) {
       return (
-        <View key="schedule-content" className="flex-1">
-          {timingList.map((dayTiming, index) => (
-            <BusinessScheduleCard
-              key={dayTiming.day ?? index}
-              timing={dayTiming}
-            />
+        <View
+          key="empty-info"
+          className="flex-1 justify-center items-center py-10"
+        >
+          <EmptyState
+            icon="info-outline"
+            title="No Restaurant Info Found"
+            description="No business settings or info details available for this restaurant."
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View key="info-content" className="flex-1">
+        <BusinessInfoCard
+          settings={restaurantData?.restaurant || restaurantData}
+        />
+      </View>
+    );
+  };
+
+  // Render Schedule Tab Content
+  const renderScheduleTab = () => {
+    if (isTimingLoading || isTimingRefetching) {
+      return (
+        <View key="loading-schedule" className="flex-1">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <BusinessScheduleCardSkeleton key={`schedule-skeleton-${index}`} />
           ))}
         </View>
       );
     }
 
-    return null;
+    if (isTimingError) {
+      return (
+        <View
+          key="error-schedule"
+          className="flex-1 justify-center items-center py-10"
+        >
+          <EmptyState
+            icon="error-outline"
+            title="Failed to Load Operating Hours"
+            description={
+              timingError instanceof Error
+                ? timingError.message
+                : "An unexpected error occurred while loading schedule timings."
+            }
+          />
+        </View>
+      );
+    }
+
+    if (timingList.length === 0) {
+      return (
+        <View
+          key="empty-schedule"
+          className="flex-1 justify-center items-center py-10"
+        >
+          <EmptyState
+            icon="schedule"
+            title="No Operating Hours Found"
+            description="No business hours or schedule timings are configured for this restaurant."
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View key="schedule-content" className="flex-1">
+        {timingList.map((dayTiming, index) => (
+          <BusinessScheduleCard
+            key={dayTiming.day ?? index}
+            timing={dayTiming}
+          />
+        ))}
+      </View>
+    );
   };
 
   return (
@@ -135,11 +191,17 @@ export default function BusinessSettingsScreen() {
       safeAreaEdges={["left", "right"]}
       onRefresh={handleRefresh}
     >
-      <PageTitle title="Business Settings" icon="settings" />
+      <PageTitle
+        title="Business Settings"
+        icon="settings"
+        description="Details about business and services"
+      />
 
       <ToggleBar options={TABS} activeId={activeTab} onSelect={setActiveTab} />
 
-      <View className="mt-2">{renderTabContent()}</View>
+      <View>
+        {activeTab === "info" ? renderInfoTab() : renderScheduleTab()}
+      </View>
     </ScreenContainer>
   );
 }

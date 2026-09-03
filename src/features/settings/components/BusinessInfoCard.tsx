@@ -1,118 +1,136 @@
+// 1. React / React Native
 import React from "react";
-import { Image, Text, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { ServiceCard } from "@/components/reuseable";
-import ENV from "@/config/env";
+import { View } from "react-native";
 
-interface BusinessInfoCardProps {
-  settings: any;
+// 4. Shared components & utils
+import {
+  ActionCard,
+  Avatar,
+  Badge,
+  CustomText,
+  DetailItem,
+  ServiceCard,
+  StatusBadge,
+} from "@/components/reuseable";
+import { formatAmount, getCurrencySymbol } from "@/utils";
+
+// 6. Types
+import { IRestaurant } from "@/types";
+
+export interface IBusinessInfoCardProps {
+  settings: IRestaurant;
 }
 
-// Helper to resolve absolute URLs for relative assets
-const resolveImageUrl = (path?: string) => {
-  if (!path) return undefined;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const mediaBase = ENV.API_BASE_URL.replace("/api", "");
-  return `${mediaBase}/${path}`;
-};
+interface IOrderStatusItemProps {
+  label: string;
+  isEnabled: boolean | number | undefined;
+}
 
-export default function BusinessInfoCard({ settings }: BusinessInfoCardProps) {
+function OrderStatusItem({
+  label,
+  isEnabled,
+}: Readonly<IOrderStatusItemProps>) {
+  const enabled = !!isEnabled;
+  return (
+    <View className="flex-row items-center justify-between py-2.5">
+      <CustomText variant="secondary" size="sm" weight="semibold">
+        {label}
+      </CustomText>
+      <StatusBadge status={enabled ? "active" : "inactive"} />
+    </View>
+  );
+}
+
+export default function BusinessInfoCard({
+  settings,
+}: Readonly<IBusinessInfoCardProps>) {
   if (!settings) return null;
 
-  // Render a single key-value info item
-  const renderDetailItem = (
-    icon: keyof typeof MaterialIcons.glyphMap,
-    label: string,
-    value: string | number | undefined | null,
-  ) => {
-    if (value === undefined || value === null || String(value).trim() === "") return null;
-    return (
-      <View className="flex-row items-start gap-3 py-3 border-b border-base-200/50">
-        <View className="bg-primary/10 p-2 rounded-lg mt-0.5">
-          <MaterialIcons name={icon} size={18} color="#DC2D2A" />
-        </View>
-        <View className="flex-1">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">{label}</Text>
-          <Text className="text-sm font-bold text-neutral mt-0.5">{value}</Text>
-        </View>
-      </View>
-    );
-  };
+  const addressString = [settings?.Address, settings?.PostCode]
+    .filter(Boolean)
+    .join(", ");
 
-  // Render a small enabled/disabled toggle block
-  const renderToggleStatus = (label: string, isEnabled: boolean | number) => {
-    const enabled = !!isEnabled;
-    return (
-      <View className="flex-row items-center justify-between py-2 border-b border-base-200/40">
-        <Text className="text-xs font-semibold text-neutral">{label}</Text>
-        <View
-          className={`flex-row items-center px-2 py-0.5 rounded-full ${enabled ? "bg-green-50 border border-green-200" : "bg-neutral/5 border border-neutral/10"}`}
-        >
-          <View className={`w-1.5 h-1.5 rounded-full mr-1.5 ${enabled ? "bg-success" : "bg-accent/40"}`} />
-          <Text className={`text-[10px] font-bold ${enabled ? "text-green-700" : "text-neutral/40"}`}>
-            {enabled ? "ENABLED" : "DISABLED"}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
-
-
-  const addressString = [settings?.Address, settings?.PostCode].filter(Boolean).join(", ");
-  const logoUri = resolveImageUrl(settings?.Logo);
+  const currencySymbol = getCurrencySymbol(settings?.currency);
 
   return (
-    <View className="gap-y-6">
-      {/* 1. Brand & Logo Header (Unified Row, No Cover Image) */}
-      <View className="flex-row items-center gap-4 bg-base-300 border border-base-200 rounded-xl p-4 shadow-sm">
-        <View className="w-20 h-20 rounded-full border-2 border-primary/20 bg-base-200 overflow-hidden items-center justify-center">
-          {logoUri ? (
-            <Image source={{ uri: logoUri }} className="w-full h-full" resizeMode="cover" />
-          ) : (
-            <Text className="text-2xl font-black text-primary">
-              {(settings?.Name || "R").charAt(0).toUpperCase()}
-            </Text>
+    <View className="gap-y-3">
+      {/* 1. Brand & Logo Header */}
+      <View className="flex-row items-center gap-3 bg-base-300 border border-base-200 rounded-2xl p-4 shadow-sm">
+        <Avatar imageUri={settings?.Logo} name={settings?.Name} />
+        <View className="flex-1 flex-col items-start gap-y-1">
+          {Boolean(settings?.Name) && (
+            <CustomText variant="primary" size="lg" weight="bold">
+              {settings.Name}
+            </CustomText>
           )}
-        </View>
-        <View className="flex-1">
-          <Text className="text-xl font-black text-neutral">{settings?.Name || "Restaurant Name"}</Text>
-          {settings?.business_type && (
-            <View className="bg-secondary/15 self-start px-2.5 py-0.5 rounded-full mt-1.5">
-              <Text className="text-[10px] font-bold text-secondary uppercase tracking-wider">
-                {settings.business_type}
-              </Text>
+          {Boolean(settings?.business_type) && (
+            <View className="self-start">
+              <Badge
+                text={settings.business_type.trim()}
+                containerClassName="bg-secondary/15"
+                textClassName="text-secondary capitalize"
+              />
             </View>
           )}
         </View>
       </View>
 
-      {/* 3. About Description */}
-      {settings?.About && (
-        <View className="bg-base-300 border border-base-200 rounded-xl p-4 shadow-sm">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1.5">
-            About The Restaurant
-          </Text>
-          <Text className="text-sm text-neutral/80 leading-relaxed font-semibold">{settings.About}</Text>
-        </View>
+      {/* 2. About Description */}
+      {Boolean(settings?.About) && (
+        <ActionCard title="About The Business" bodyClassName="p-4">
+          <CustomText
+            variant="secondary"
+            size="sm"
+            weight="semibold"
+            className="leading-relaxed"
+          >
+            {settings.About}
+          </CustomText>
+        </ActionCard>
       )}
 
-      {/* 4. Contact Details */}
-      <View className="bg-base-300 border border-base-200 rounded-xl px-4 py-1 shadow-sm">
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest pt-3 pb-1">
-          Contact Details
-        </Text>
-        {renderDetailItem("place", "Address", addressString)}
-        {renderDetailItem("phone", "Phone Number", settings?.PhoneNumber)}
-        {renderDetailItem("email", "Email Address", settings?.EmailAddress)}
-        {renderDetailItem("language", "Webpage", settings?.Webpage)}
-      </View>
+      {/* 3. Contact Details */}
+      <ActionCard title="Contact Details" bodyClassName="p-4">
+        {Boolean(addressString) && (
+          <DetailItem
+            icon="place"
+            label="Address"
+            value={addressString}
+            labelType="address"
+          />
+        )}
+        {Boolean(settings?.PhoneNumber) && (
+          <DetailItem
+            icon="phone"
+            label="Phone Number"
+            value={settings?.PhoneNumber}
+            labelType="phone"
+          />
+        )}
+        {Boolean(settings?.EmailAddress) && (
+          <DetailItem
+            icon="email"
+            label="Email Address"
+            value={settings?.EmailAddress}
+            labelType="email"
+          />
+        )}
+        {Boolean(settings?.Webpage) && (
+          <DetailItem
+            icon="language"
+            label="Webpage"
+            value={settings?.Webpage}
+            labelType="url"
+            isLast
+          />
+        )}
+      </ActionCard>
 
-      {/* 5. Services and Payment Methods */}
-      <View>
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-3 px-1">
-          Services & Payment Methods
-        </Text>
+      {/* 4. Services & Payment Methods */}
+      <ActionCard
+        title="Services & Payment Methods"
+        bodyClassName="p-4 gap-y-3"
+      >
         <ServiceCard
           icon="restaurant"
           title="Eat In / Dine-In"
@@ -131,58 +149,77 @@ export default function BusinessInfoCard({ settings }: BusinessInfoCardProps) {
           isEnabled={settings?.is_delivery}
           paymentMode={settings?.delivery_payment_mode}
         />
-      </View>
+      </ActionCard>
 
-      {/* 6. Ordering Controls */}
-      <View className="bg-base-300 border border-base-200 rounded-xl p-4 shadow-sm">
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest mb-2">
-          Ordering Options
-        </Text>
-        {renderToggleStatus("Customer Ordering Enabled", settings?.is_customer_order_enabled)}
-        {renderToggleStatus("Customer Ordering Payments Allowed", settings?.enable_customer_order_payment)}
-        {renderToggleStatus("Schedule Orders Allowed", settings?.is_customer_schedule_order)}
-        {renderToggleStatus("Review Slider Enabled", settings?.is_review_silder)}
-        {renderToggleStatus("Guest Checkout Allowed", settings?.Is_guest_user)}
-      </View>
+      {/* 5. Ordering Controls */}
+      <ActionCard title="Is taking orders in customer end" bodyClassName="p-4">
+        <OrderStatusItem label="Eat In" isEnabled={settings?.is_eat_in} />
+        <OrderStatusItem label="Takeaway" isEnabled={settings?.is_take_away} />
+        <OrderStatusItem label="Delivery" isEnabled={settings?.is_delivery} />
+      </ActionCard>
 
-      {/* 7. Restaurant Configuration */}
-      <View className="bg-base-300 border border-base-200 rounded-xl px-4 py-1 shadow-sm">
-        <Text className="text-[10px] font-bold text-accent uppercase tracking-widest pt-3 pb-1">
-          General Configurations
-        </Text>
-        {renderDetailItem("table-restaurant", "Total Tables", settings?.totalTables)}
-        {renderDetailItem(
-          "percent",
-          "Tax Percentage",
-          settings?.tax_percentage !== undefined ? `${settings.tax_percentage}%` : null,
+      {/* 6. General Configurations */}
+      <ActionCard title="General Configurations" bodyClassName="p-4">
+        {Boolean(settings?.totalTables) && (
+          <DetailItem
+            icon="table-restaurant"
+            label="Total Tables"
+            value={settings?.totalTables}
+          />
         )}
-        {renderDetailItem(
-          "schedule",
-          "Average Collection Time",
-          settings?.average_collection_time ? `${settings.average_collection_time} minutes` : null,
+        {Boolean(settings?.tax_percentage) && (
+          <DetailItem
+            icon="percent"
+            label="Tax Percentage"
+            value={`${settings.tax_percentage}%`}
+          />
         )}
-        {renderDetailItem(
-          "local-shipping",
-          "Average Delivery Time",
-          settings?.average_delivery_time ? `${settings.average_delivery_time} minutes` : null,
+        {Boolean(settings?.average_collection_time) && (
+          <DetailItem
+            icon="schedule"
+            label="Average Collection Time"
+            value={settings?.average_collection_time}
+          />
         )}
-        {renderDetailItem(
-          "map",
-          "Delivery Radius",
-          settings?.delivery_radius ? `${settings.delivery_radius} KM` : null,
+        {Boolean(settings?.average_delivery_time) && (
+          <DetailItem
+            icon="local-shipping"
+            label="Average Delivery Time"
+            value={settings?.average_delivery_time}
+          />
         )}
-        {renderDetailItem(
-          "attach-money",
-          "Minimum Delivery Amount",
-          settings?.minimum_delivery_amount
-            ? `${settings?.currency || ""} ${settings.minimum_delivery_amount}`
-            : null,
+        {Boolean(settings?.delivery_radius) && (
+          <DetailItem
+            icon="map"
+            label="Delivery Radius"
+            value={settings?.delivery_radius}
+          />
         )}
-        {renderDetailItem("currency-exchange", "Default Currency", settings?.currency)}
-        {renderDetailItem("event-busy", "License Expiry Date", settings?.expiry_date)}
-        {renderDetailItem("grid-view", "Layout View Mode", settings?.Layout)}
-      </View>
+        {Boolean(settings?.minimum_delivery_amount) && (
+          <DetailItem
+            icon="attach-money"
+            label="Minimum Delivery Amount"
+            value={formatAmount(
+              settings?.minimum_delivery_amount as string,
+              currencySymbol,
+            )}
+          />
+        )}
+        {Boolean(settings?.currency) && (
+          <DetailItem
+            icon="currency-exchange"
+            label="Default Currency"
+            value={settings?.currency}
+          />
+        )}
+        {Boolean(settings?.expiry_date) && (
+          <DetailItem
+            icon="event-busy"
+            label="License Expiry Date"
+            value={settings?.expiry_date}
+          />
+        )}
+      </ActionCard>
     </View>
   );
 }
-

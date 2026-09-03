@@ -1,6 +1,10 @@
+import { Badge, CustomText, StatusBadge } from "@/components/reuseable";
+import { COLORS } from "@/constants";
+import { getPaymentMethodsConfig } from "@/utils";
+import { WP } from "@/utils/getResponsiveSizes";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 export interface IServiceCardProps {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -9,64 +13,122 @@ export interface IServiceCardProps {
   paymentMode?: { cash: number; stripe: number };
 }
 
-export function ServiceCard({ icon, title, isEnabled, paymentMode }: Readonly<IServiceCardProps>) {
+interface IPaymentModeBadgeProps {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  isEnabled: boolean;
+  color: string;
+}
+
+function PaymentModeBadge({
+  icon,
+  label,
+  isEnabled,
+  color,
+}: Readonly<IPaymentModeBadgeProps>) {
+  const badgeIconSize = WP("3.5%");
+
+  return (
+    <View
+      className="flex-1"
+      accessibilityRole="text"
+      accessibilityLabel={`${label}: ${isEnabled ? "Enabled" : "Disabled"}`}
+    >
+      <Badge
+        text={label}
+        icon={
+          <MaterialIcons
+            name={icon}
+            size={badgeIconSize}
+            color={isEnabled ? color : COLORS.accent}
+          />
+        }
+        containerClassName={`justify-center py-2 px-3 rounded-lg border ${
+          isEnabled ? "" : "bg-base-200 border-transparent"
+        }`}
+        containerStyle={
+          isEnabled
+            ? {
+                backgroundColor: `${color}10`,
+                borderColor: `${color}40`,
+              }
+            : undefined
+        }
+        textClassName={isEnabled ? "" : "text-accent"}
+        textStyle={isEnabled ? { color } : undefined}
+      />
+    </View>
+  );
+}
+
+export function ServiceCard({
+  icon,
+  title,
+  isEnabled,
+  paymentMode,
+}: Readonly<IServiceCardProps>) {
   const enabled = !!isEnabled;
+  const cashConfig = getPaymentMethodsConfig("cash");
+  const cardConfig = getPaymentMethodsConfig("card");
+
+  const isCashEnabled = Boolean(paymentMode?.cash);
+  const isCardEnabled = Boolean(paymentMode?.stripe);
+  const headerIconSize = WP("4.5%");
+
   return (
     <View className="bg-base-300 border border-base-200 rounded-xl p-4 shadow-sm mb-4">
       <View className="flex-row items-center justify-between pb-3 border-b border-base-200/50 mb-3">
         <View className="flex-row items-center gap-2">
-          <View className={`p-1.5 rounded-lg ${enabled ? "bg-primary/10" : "bg-neutral/5"}`}>
-            <MaterialIcons name={icon} size={18} color={enabled ? "#DC2D2A" : "#6E6E6E"} />
+          <View
+            className={`p-1.5 rounded-lg ${enabled ? "bg-primary/10" : "bg-neutral/5"}`}
+          >
+            <MaterialIcons
+              name={icon}
+              size={headerIconSize}
+              color={enabled ? COLORS.primary : COLORS.accent}
+            />
           </View>
-          <Text className="text-md font-bold text-neutral">{title}</Text>
+          <CustomText variant="primary" size="sm" weight="bold">
+            {title}
+          </CustomText>
         </View>
-        <View
-          className={`px-2.5 py-0.5 rounded-full border ${enabled ? "bg-green-50 border-green-100" : "bg-neutral/5 border-neutral/10"}`}
-        >
-          <Text className={`text-[9px] font-bold ${enabled ? "text-green-700" : "text-neutral/40"}`}>
-            {enabled ? "ACTIVE" : "INACTIVE"}
-          </Text>
-        </View>
+        <StatusBadge status={enabled ? "active" : "inactive"} />
       </View>
 
       {enabled ? (
-        <View className="space-y-2">
-          <Text className="text-[10px] font-bold text-accent uppercase tracking-wider mb-1">
+        <View className="">
+          <CustomText
+            variant="secondary"
+            size="xs"
+            weight="semibold"
+            className="mb-2"
+          >
             Accepted Payment Modes
-          </Text>
-          <View className="flex-row gap-3">
-            <View
-              className={`flex-1 flex-row items-center justify-center py-2 px-3 rounded-lg border ${paymentMode?.cash ? "bg-primary/5 border-primary/20 text-primary" : "bg-base-200 border-transparent"}`}
-            >
-              <MaterialIcons
-                name="attach-money"
-                size={14}
-                color={paymentMode?.cash ? "#DC2D2A" : "#6E6E6E"}
-                style={{ marginRight: 4 }}
-              />
-              <Text className={`text-xs font-bold ${paymentMode?.cash ? "text-primary" : "text-accent"}`}>
-                Cash
-              </Text>
-            </View>
-            <View
-              className={`flex-1 flex-row items-center justify-center py-2 px-3 rounded-lg border ${paymentMode?.stripe ? "bg-primary/5 border-primary/20 text-primary" : "bg-base-200 border-transparent"}`}
-            >
-              <MaterialIcons
-                name="credit-card"
-                size={14}
-                color={paymentMode?.stripe ? "#DC2D2A" : "#6E6E6E"}
-                style={{ marginRight: 4 }}
-              />
-              <Text className={`text-xs font-bold ${paymentMode?.stripe ? "text-primary" : "text-accent"}`}>
-                Card/Online
-              </Text>
-            </View>
+          </CustomText>
+          <View className="flex-row gap-2">
+            <PaymentModeBadge
+              icon={cashConfig.icon}
+              label={cashConfig.label}
+              isEnabled={isCashEnabled}
+              color={cashConfig.color}
+            />
+            <PaymentModeBadge
+              icon={cardConfig.icon}
+              label="Card/Online"
+              isEnabled={isCardEnabled}
+              color={cardConfig.color}
+            />
           </View>
         </View>
       ) : (
-        <Text className="text-xs font-semibold text-accent/50 italic py-1 text-center">
+        <CustomText
+          variant="tertiary"
+          size="xs"
+          weight="semibold"
+          className="italic py-1 text-center"
+        >
           Service is disabled
-        </Text>
+        </CustomText>
       )}
     </View>
   );

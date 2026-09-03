@@ -1,5 +1,5 @@
-import { ROLE, ROLES } from "@/constants";
+import { ALLOWED_ROLES, ROLE } from "@/constants";
 
 export const verifUserRole = (role: ROLE) => {
-  return ROLES?.includes(role);
+  return ALLOWED_ROLES?.includes(role);
 };

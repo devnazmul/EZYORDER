@@ -1,16 +1,10 @@
+import { IUser } from "@/features/user-management/types";
 import * as SecureStore from "expo-secure-store";
 
 const TOKEN_KEY = "auth_token";
 const USER_KEY = "user_data";
 
-export interface IUserData {
-  id: number;
-  name: string;
-  email: string;
-  type: string;
-  business_id?: number | null;
-  [key: string]: any;
-}
+export type IUserData = IUser;
 
 export const authStore = {
   async saveSession(token: string, user: IUserData): Promise<void> {
