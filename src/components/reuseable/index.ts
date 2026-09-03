@@ -1,3 +1,4 @@
+export { default as Avatar, type IAvatarProps } from "./Avatar";
 export { default as Badge } from "./Badge";
 export {
   default as BarChart,
@@ -20,6 +21,7 @@ export {
   type ITextVariant,
 } from "./CustomText";
 export { default as DatePickerModal } from "./DatePickerModal";
+export { default as DetailItem, type IDetailItemProps } from "./DetailItem";
 export { default as TimePickerModal } from "./TimePickerModal";
 
 // ...
@@ -54,7 +56,7 @@ export {
   type IScreenContainerProps,
 } from "./ScreenContainer";
 export { default as SearchBar } from "./SearchBar";
-export { default as ServiceCard } from "./ServiceCard";
+export { default as ServiceCard, type IServiceCardProps } from "./ServiceCard";
 export { default as StatusBadge } from "./StatusBadge";
 export { default as ToggleBar } from "./ToggleBar";
 
