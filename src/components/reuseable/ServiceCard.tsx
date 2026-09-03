@@ -1,4 +1,4 @@
-import { Badge, CustomText, StatusBadge } from "@/components/reuseable";
+import { Badge, CustomText } from "@/components/reuseable";
 import { COLORS } from "@/constants";
 import { getPaymentMethodsConfig } from "@/utils";
 import { WP } from "@/utils/getResponsiveSizes";
@@ -92,7 +92,6 @@ export function ServiceCard({
             {title}
           </CustomText>
         </View>
-        <StatusBadge status={enabled ? "active" : "inactive"} />
       </View>
 
       {enabled ? (

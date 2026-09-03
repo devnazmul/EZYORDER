@@ -133,7 +133,7 @@ export default function BusinessInfoCard({
       >
         <ServiceCard
           icon="restaurant"
-          title="Eat In / Dine-In"
+          title="Eat In"
           isEnabled={settings?.is_eat_in}
           paymentMode={settings?.eat_in_payment_mode}
         />
