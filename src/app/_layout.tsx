@@ -1,6 +1,6 @@
 import LoadingScreen from "@/components/reuseable/LoadingScreen";
-import { AuthProvider, DataProvider, ResponsiveProvider } from "@/src/context";
 import { useAuth, usePushNotifications } from "@/hooks";
+import { AuthProvider, ResponsiveProvider } from "@/src/context";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as NavigationBar from "expo-navigation-bar";
@@ -49,12 +49,10 @@ export default function RootLayout() {
       <ResponsiveProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <DataProvider>
-              <BottomSheetModalProvider>
-                <StatusBar style="dark" />
-                <RootNavigation />
-              </BottomSheetModalProvider>
-            </DataProvider>
+            <BottomSheetModalProvider>
+              <StatusBar style="dark" />
+              <RootNavigation />
+            </BottomSheetModalProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ResponsiveProvider>
