@@ -26,6 +26,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@expo-google-fonts/roboto": "^0.4.3",
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5.2.14",
     "@hookform/resolvers": "^5.9.1",
