@@ -27,7 +27,7 @@ export interface IUser {
   last_Name: string | null;
   phone: string | null;
   image: string | null;
-  type: ROLE;
+  type: ROLE | string;
   driver_status: string;
   waiter_status: string;
   post_code: string | null;
@@ -49,32 +49,4 @@ export interface IUser {
   last_login_at?: string | null;
   created_at?: string;
   updated_at?: string;
-}
-
-export interface IUsersPaginationMeta {
-  total: number;
-  per_page: number | null;
-  current_page: number;
-  skip: number;
-  total_pages: number;
-}
-
-export interface IGetUsersQueryParams {
-  search_key?: string;
-  role?: string;
-  page?: number;
-  per_page?: number;
-  [key: string]: unknown;
-}
-
-export interface IGetUsersResponse {
-  success: boolean;
-  message: string;
-  meta: IUsersPaginationMeta;
-  data: IUser[];
-}
-
-export interface IOwnerProfileResponse {
-  user: IUser;
-  ok: boolean;
 }

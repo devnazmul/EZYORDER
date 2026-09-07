@@ -1,26 +1,33 @@
-import {
-  EmptyState,
-  FilterDrawer,
-  KpiCard,
-  SearchBar,
-} from "@/components/reuseable";
-import { UserCard, UserDetailModal } from "../components";
-import { useUsersQuery } from "@/features/user-management/hooks/queries/useUserQueries";
-import { useDebounce } from "@/hooks/useDebounce";
-import { MaterialIcons } from "@expo/vector-icons";
-import React, { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// 1. React / React Native
+import { useState } from "react";
+import { FlatList, View } from "react-native";
 
-const DEFAULT_FILTERS = {
+// 3. External libraries / Shared hooks
+import { USER_KEYS } from "@/constants/queryKeys";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useQueryClient } from "@tanstack/react-query";
+
+// 4. Shared components
+import { EmptyState, PageTitle, ScreenContainer } from "@/components/reuseable";
+
+// 5. Feature components / hooks / schema
+import {
+  UserCard,
+  UserCardSkeleton,
+  UserManagementFilterPanel,
+} from "../components";
+import { useUsersQuery } from "../hooks/queries/useUserQueries";
+import { type UserFilterValues } from "../schema";
+
+const DEFAULT_FILTERS: UserFilterValues = {
   role: "all",
 };
 
 export default function UserManagementScreen() {
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterValues, setFilterValues] =
-    useState<Record<string, any>>(DEFAULT_FILTERS);
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+    useState<UserFilterValues>(DEFAULT_FILTERS);
 
   // Debounce search query to prevent hitting the API on every keystroke
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -29,141 +36,77 @@ export default function UserManagementScreen() {
   const {
     data: usersResponse,
     isLoading,
-    refetch,
+    isFetching,
   } = useUsersQuery({
     search_key: debouncedSearchQuery.trim() || undefined,
-    role: filterValues.role !== "all" ? filterValues.role : undefined,
+    role:
+      filterValues.role !== "all" ? (filterValues.role as string) : undefined,
   });
 
-  // Safely extract users list from the API response envelope
-  const users = useMemo(() => {
-    if (!usersResponse) return [];
-    if (Array.isArray(usersResponse)) return usersResponse;
-    if (Array.isArray(usersResponse.data)) return usersResponse.data;
-    if (usersResponse.data && Array.isArray(usersResponse.data.data))
-      return usersResponse.data.data;
-    return [];
-  }, [usersResponse]);
-
-  // Define filter fields for the FilterDrawer
-  const filterFields = useMemo(
-    () => [
-      {
-        id: "role",
-        label: "Staff Role",
-        type: "chips" as const,
-        options: [
-          { id: "all", label: "All Roles" },
-          { id: "admin", label: "Admin" },
-          { id: "waiter", label: "Waiter" },
-          { id: "driver", label: "Driver" },
-        ],
-      },
-    ],
-    [],
-  );
-
-  const handleApplyFilters = (newValues: Record<string, any>) => {
-    setFilterValues(newValues);
-  };
+  // Extract users list from the typed API response envelope
+  const users = usersResponse?.data ?? [];
 
   const handleClearFilters = () => {
     setFilterValues(DEFAULT_FILTERS);
   };
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: USER_KEYS.lists() });
+  };
+
   // Since we are filtering on the server side, the users list is already filtered.
   const filteredUsers = users;
 
-  // Compute active filters count
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (filterValues.role !== "all") count++;
-    return count;
-  }, [filterValues]);
+  const isFiltered = Boolean(searchQuery || filterValues.role !== "all");
+  const showSkeleton = isLoading || isFetching;
 
   return (
-    <SafeAreaView
-      edges={["left", "right", "bottom"]}
-      className="flex-1 bg-base-100"
-    >
-      {/* App Header with Back Button */}
-
+    <ScreenContainer scrollable={false} contentClassName="flex-1">
       <FlatList
-        data={filteredUsers}
+        className="flex-1"
+        data={showSkeleton ? [] : filteredUsers}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 16,
           paddingBottom: 80,
         }}
-        onRefresh={refetch}
-        refreshing={isLoading}
+        showsVerticalScrollIndicator={false}
+        onRefresh={handleRefresh}
+        refreshing={false}
         ListHeaderComponent={
-          <View className="mb-6">
+          <View>
             {/* Page Title Row */}
-            <View className="flex-row items-center gap-2 mb-5">
-              <View className="bg-primary-container/10 p-1.5 rounded-lg">
-                <MaterialIcons name="people" size={18} color="#DC2D2A" />
-              </View>
-              <Text className="text-lg font-black text-neutral uppercase tracking-tight">
-                User Management
-              </Text>
-            </View>
+            <PageTitle
+              icon="people"
+              title="User Management"
+              description="Manage staff members and roles"
+            />
 
-            {/* KPI Total Staff Card */}
-            <View className="mb-5">
-              <KpiCard
-                title="Total Staff"
-                value={`Active Users: ${users.filter((u: any) => u.is_active !== 0).length}`}
-                icon="group"
-                variant="dark"
-                gradientColors={["#0d0d0d", "#1f0b1dff"]}
-              />
-            </View>
-
-            {/* Search & Filter Row */}
-            <View className="flex-row items-center gap-3">
-              <SearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search staff name or email..."
-                containerClassName="flex-1"
-              />
-              <FilterDrawer
-                fields={filterFields}
-                values={filterValues}
-                onApply={handleApplyFilters}
-                onClear={handleClearFilters}
-              />
-            </View>
-
-            {/* Active Filter Indicators */}
-            {(!!searchQuery || activeFilterCount > 0) && (
-              <View className="flex-row items-center justify-between mt-4 px-1">
-                <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">
-                  Matching {filteredUsers.length} Users
-                </Text>
-              </View>
-            )}
+            {/* Search & Filter Panel */}
+            <UserManagementFilterPanel
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              filterValues={filterValues}
+              onApplyFilters={setFilterValues}
+              onClearFilters={handleClearFilters}
+              matchingCount={showSkeleton ? 0 : filteredUsers.length}
+            />
           </View>
         }
-        renderItem={({ item }) => (
-          <UserCard user={item} onPress={() => setSelectedUser(item)} />
-        )}
+        renderItem={({ item }) => <UserCard user={item} />}
+        contentContainerClassName="gap-y-3"
         ListEmptyComponent={
-          isLoading ? (
-            <View className="py-20 items-center justify-center">
-              <ActivityIndicator size="large" color="#DC2D2A" />
-              <Text className="mt-3 text-xs font-semibold text-accent">
-                Loading staff members...
-              </Text>
+          showSkeleton ? (
+            <View className="gap-y-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <UserCardSkeleton key={`user-card-skeleton-${index}`} />
+              ))}
             </View>
           ) : (
             <EmptyState
               icon="person-search"
               title="No Users Found"
               description={
-                searchQuery || activeFilterCount > 0
+                isFiltered
                   ? "No staff members match your search or filter settings."
                   : "No registered users exist in this workspace."
               }
@@ -171,13 +114,6 @@ export default function UserManagementScreen() {
           )
         }
       />
-
-      {/* User Detail Modal Sheet */}
-      <UserDetailModal
-        visible={selectedUser !== null}
-        onClose={() => setSelectedUser(null)}
-        user={selectedUser}
-      />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
