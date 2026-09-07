@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "737419279228",
+    "project_id": "ezyorder-eb742",
+    "storage_bucket": "ezyorder-eb742.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737419279228:android:c5a5949b99a9334d1682f9",
+        "android_client_info": {
+          "package_name": "com.essencecon.ezyorder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgXsnObeDaPVoOe73rQ2nMs3xaZmscyYo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

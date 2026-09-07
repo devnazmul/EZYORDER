@@ -7,7 +7,8 @@ import {
   useFonts,
 } from "@expo-google-fonts/roboto";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import * as NavigationBar from "expo-navigation-bar";
+import { NavigationBar } from "expo-navigation-bar";
+import * as SystemUI from "expo-system-ui";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -65,8 +66,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync("#FFFFFF");
-      NavigationBar.setButtonStyleAsync("dark");
+      SystemUI.setBackgroundColorAsync("#FFFFFF");
     }
   }, []);
 
@@ -81,6 +81,7 @@ export default function RootLayout() {
           <AuthProvider>
             <BottomSheetModalProvider>
               <StatusBar style="dark" />
+              <NavigationBar style="dark" />
               <RootNavigation />
             </BottomSheetModalProvider>
           </AuthProvider>

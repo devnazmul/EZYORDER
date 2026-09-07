@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "EZYORDER",
     "slug": "ezyorder",
@@ -7,21 +7,21 @@
     "icon": "./src/assets/images/icon.png",
     "scheme": "ezyorder",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.essencecon.ezyorder"
+      "bundleIdentifier": "com.essencecon.ezyorder",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.essencecon.ezyorder",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./src/assets/images/android-icon-foreground.png",
         "backgroundImage": "./src/assets/images/android-icon-background.png",
         "monochromeImage": "./src/assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -45,7 +45,11 @@
       ],
       "expo-notifications",
       "expo-secure-store",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-image",
+      "expo-web-browser",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,
