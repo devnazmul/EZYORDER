@@ -1,5 +1,6 @@
 // 3. External libraries / config
 import axiosClient from "@/config/axiosClient";
+import { ROLE } from "@/constants";
 
 // 6. Types
 import type {
@@ -8,8 +9,14 @@ import type {
   IOwnerProfileResponse,
 } from "../types";
 
+const ALLOWED_STAFF_ROLES = new Set<string>([
+  ROLE.ADMIN,
+  ROLE.WAITER,
+  ROLE.DRIVER,
+]);
+
 /**
- * Fetch all users with optional query parameters/filters
+ * Fetch all users with optional query parameters/filters and filter response for staff members.
  */
 export const getUsers = async (
   params: IGetUsersQueryParams = {},
@@ -18,6 +25,18 @@ export const getUsers = async (
     params,
     validateStatus: (status) => status < 400,
   });
+
+  if (response.data && Array.isArray(response.data.data)) {
+    const filteredData = response.data.data.filter((user) => {
+      const roleName = (user.role?.name || user.type)?.toLowerCase();
+      return roleName ? ALLOWED_STAFF_ROLES.has(roleName) : false;
+    });
+
+    return {
+      ...response.data,
+      data: filteredData,
+    };
+  }
 
   return response.data;
 };

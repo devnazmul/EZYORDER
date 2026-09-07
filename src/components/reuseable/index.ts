@@ -16,9 +16,10 @@ export { default as BrandPopupModal } from "./BrandPopupModal";
 export { default as Button } from "./Button";
 export {
   default as CustomText,
+  type FontWeight,
   type ICustomTextProps,
-  type IFontWeight,
-  type ITextVariant,
+  type TextType,
+  type TextVariant,
 } from "./CustomText";
 export { default as DatePickerModal } from "./DatePickerModal";
 export { default as DetailItem, type IDetailItemProps } from "./DetailItem";

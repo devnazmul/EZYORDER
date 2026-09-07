@@ -26,10 +26,6 @@ export default defineConfig([
         {
           selector: "typeAlias",
           format: ["PascalCase"],
-          custom: {
-            regex: "^I[A-Z]",
-            match: true,
-          },
         },
       ],
     },

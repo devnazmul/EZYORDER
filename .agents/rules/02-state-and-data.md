@@ -17,7 +17,7 @@ TanStack Query is the source of truth for server state — don't duplicate it in
 
 ## 8. Types & Validation
 
-- Prefer descriptive PascalCase, `I`-prefixed for interfaces/types (matches this project's existing convention): `IUser`, `IUserStatus`, `ILoginFormData` — including Zod-inferred types (`type ILoginFormData = z.infer<typeof loginSchema>`).
+- Interfaces must use descriptive PascalCase with an `I` prefix (e.g. `interface IUser`, `interface IUserCardProps`). Type aliases use standard PascalCase without enforcing an `I` prefix (e.g. `type TextVariant`, `type LoginFormData = z.infer<typeof loginSchema>`).
 - No `any` unless truly unavoidable — prefer `unknown` with type guards.
 - Type API responses, mutation variables/context, and query keys (via factories). Don't redefine the same domain type in multiple components.
 - Zod schemas live in `features/<domain>/schema/`, named `[name].schema.ts`, exported through that folder's `index.ts`. Use Zod at external/API boundaries — don't assume TS types alone validate runtime data.
