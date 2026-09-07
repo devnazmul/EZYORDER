@@ -129,7 +129,7 @@ Business-critical services should be unit-testable without React Native. Priorit
 - [ ] Query keys use factories; mutations invalidate the narrowest correct key
 - [ ] Optimistic updates used only where appropriate
 - [ ] Composition preferred for structurally configurable components
-- [ ] Types are `I`-prefixed and consistent; Zod schemas colocated in `schema/`
+- [ ] Interfaces are `I`-prefixed and type aliases use PascalCase; Zod schemas colocated in `schema/`
 - [ ] Forms use `CustomForm`; navigation stays out of services
 - [ ] Expo Router `ErrorBoundary`/`SuspenseFallback` match the installed SDK
 - [ ] Reanimated used for animation; no Framer Motion
