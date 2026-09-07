@@ -9,11 +9,13 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.essencecon.ezyorder"
+      "bundleIdentifier": "com.essencecon.ezyorder",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.essencecon.ezyorder",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./src/assets/images/android-icon-foreground.png",
