@@ -1,27 +1,17 @@
-import { getResponsiveFontSize } from "@/utils/getResponsiveSizes";
-import { MaterialIcons } from "@expo/vector-icons";
-import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+
+import { CustomText } from "@/components/reuseable";
 
 export function AuthHeader() {
   return (
     <View className="items-center my-4">
-      <View className="w-16 h-16 bg-primary rounded-lg items-center justify-center shadow-lg mb-4">
-        <MaterialIcons name="restaurant" size={36} color="white" />
-      </View>
-      <Text
-        style={{ fontSize: getResponsiveFontSize("2xl") }}
-        className="text-2xl font-bold text-neutral"
-      >
+      <CustomText size="3xl" weight="bold" variant="primary">
         EZYORDER
-      </Text>
+      </CustomText>
 
-      <Text
-        style={{ fontSize: getResponsiveFontSize("lg") }}
-        className="font-medium tracking-wide text-center"
-      >
+      <CustomText size="lg" weight="medium" className="text-center">
         Manage your restaurant, anywhere
-      </Text>
+      </CustomText>
     </View>
   );
 }
