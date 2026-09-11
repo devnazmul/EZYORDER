@@ -13,9 +13,9 @@ export interface ICampaignDishPivot {
   dish_id: number;
 }
 
-export type ICampaignDish = Partial<IDish> & {
+export interface ICampaignDish extends Partial<IDish> {
   pivot?: ICampaignDishPivot;
-};
+}
 
 export interface ICampaign {
   id: number;
@@ -36,5 +36,5 @@ export interface ICampaign {
   updated_at: string;
   dishes?: ICampaignDish[];
   free_dishes?: ICampaignDish[];
-  menus?: any[];
+  menus?: unknown[];
 }
