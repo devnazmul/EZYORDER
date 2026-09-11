@@ -15,4 +15,5 @@ export * from "./types/couponApi.types";
 
 // ==================== UTILS ====================
 export * from "./utils/copyCouponCode";
+export * from "./utils/getCampaignCategoryConfig";
 export * from "./utils/shareCoupon";

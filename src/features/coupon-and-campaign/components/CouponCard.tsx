@@ -5,7 +5,7 @@ import { TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 // 3. Shared components
-import { Badge, CustomText } from "@/components/reuseable";
+import { CustomText, StatusBadge } from "@/components/reuseable";
 
 // 4. Feature components
 import CouponCopyButton from "./CouponCopyButton";
@@ -15,7 +15,7 @@ import type { ICoupon } from "../types/coupon.types";
 
 // 6. Constants/utils
 import { COLORS } from "@/constants";
-import { formatAmount, formatDate, getGeneralStatusConfig } from "@/utils";
+import { formatAmount, formatDate, WP } from "@/utils";
 import { shareCoupon } from "../utils/shareCoupon";
 
 interface ICouponCardProps {
@@ -32,10 +32,6 @@ export default function CouponCard({
       ? `${coupon.discount_amount || 0}% Off`
       : `${formatAmount(coupon.discount_amount, currencySymbol)} Off`;
 
-  const statusConfig = getGeneralStatusConfig(
-    coupon.is_active ? "active" : "inactive",
-  );
-
   const handleShare = () => {
     shareCoupon(coupon, discountDisplay);
   };
@@ -46,7 +42,10 @@ export default function CouponCard({
       style={{ overflow: "hidden" }}
     >
       {/* Left Ticket Part: Value & Type */}
-      <View className="bg-primary/5 items-center justify-center p-3 sm:p-4 w-[100px] sm:w-[120px] border-r border-dashed border-base-200 relative overflow-hidden rounded-l-xl">
+      <View
+        className="bg-primary/5 items-center justify-center border-r border-dashed border-base-200 relative overflow-hidden rounded-l-xl"
+        style={{ padding: WP(3), width: WP(28) }}
+      >
         <CustomText
           variant="brand-primary"
           size="sm"
@@ -69,8 +68,8 @@ export default function CouponCard({
 
       {/* Right Ticket Part: Coupon Details */}
       <View
-        className="flex-1 p-3 sm:p-4 justify-between"
-        style={{ overflow: "visible" }}
+        className="flex-1 justify-between"
+        style={{ padding: WP(3.5), overflow: "visible" }}
       >
         <View>
           {/* Top Row: Title & Share Button on Top Right */}
@@ -89,31 +88,17 @@ export default function CouponCard({
               onPress={handleShare}
               className="p-1 rounded bg-base-100 active:bg-base-200 shrink-0"
             >
-              <MaterialIcons name="share" size={14} color={COLORS.accent} />
+              <MaterialIcons
+                name="share"
+                size={WP(3.5)}
+                color={COLORS.accent}
+              />
             </TouchableOpacity>
           </View>
 
           {/* Row 2: Active / Inactive Status Badge */}
           <View className="flex-row items-center mb-1.5 flex-wrap">
-            <Badge
-              text={statusConfig.label}
-              icon={
-                <MaterialIcons
-                  name={statusConfig.iconName}
-                  size={10}
-                  color={statusConfig.iconColor}
-                  style={{ marginRight: 2 }}
-                />
-              }
-              containerStyle={{
-                backgroundColor: statusConfig.backgroundColor,
-                borderColor: statusConfig.borderColor,
-                borderWidth: 1,
-              }}
-              textStyle={{
-                color: statusConfig.textColor,
-              }}
-            />
+            <StatusBadge status={coupon.is_active ? "active" : "inactive"} />
           </View>
 
           {/* Row 3: Used Coupons */}
@@ -121,7 +106,7 @@ export default function CouponCard({
             <View className="flex-row items-center gap-1 mb-1.5 flex-wrap">
               <MaterialIcons
                 name="confirmation-number"
-                size={12}
+                size={WP(3.5)}
                 color={COLORS.accent}
               />
               <CustomText variant="tertiary" size="xs" weight="semibold">
@@ -133,7 +118,11 @@ export default function CouponCard({
           {/* Row 4: Dates below Used Coupons */}
           {(!!coupon.coupon_start_date || !!coupon.coupon_end_date) && (
             <View className="flex-row items-center gap-1 mb-1.5 flex-wrap">
-              <MaterialIcons name="event" size={12} color={COLORS.accent} />
+              <MaterialIcons
+                name="event"
+                size={WP(3.5)}
+                color={COLORS.accent}
+              />
               {!!coupon.coupon_start_date && (
                 <CustomText variant="tertiary" size="xs" weight="semibold">
                   {formatDate(coupon.coupon_start_date, "DD-MM-YYYY")}
@@ -141,7 +130,7 @@ export default function CouponCard({
               )}
               {!!coupon.coupon_start_date && !!coupon.coupon_end_date && (
                 <CustomText variant="tertiary" size="xs" weight="semibold">
-                  -
+                  to
                 </CustomText>
               )}
               {!!coupon.coupon_end_date && (
@@ -160,7 +149,11 @@ export default function CouponCard({
         >
           {coupon.is_auto_apply ? (
             <View className="flex-row items-center gap-1">
-              <MaterialIcons name="flash-on" size={12} color={COLORS.primary} />
+              <MaterialIcons
+                name="flash-on"
+                size={WP(3.5)}
+                color={COLORS.primary}
+              />
               <CustomText variant="brand-primary" size="xs" weight="bold">
                 Auto Applies
               </CustomText>
