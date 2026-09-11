@@ -18,6 +18,11 @@ export {
   type IGetCustomerFullAddressOptions,
 } from "./getCustomerFullAddress";
 export { default as getDateRange, type IDateRangeResult } from "./getDateRange";
+export {
+  default as getGeneralStatusConfig,
+  type IGeneralStatusConfig,
+  type IGeneralStatusKey,
+} from "./getGeneralStatusConfig";
 export { default as getInitials } from "./getInitials";
 export * from "./getOrderStatusConfig";
 export * from "./getOrderTypeConfig";
