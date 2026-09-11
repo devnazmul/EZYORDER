@@ -1,41 +1,44 @@
-import ENV from "@/config/env";
-import axios from "axios";
+// 1. External libraries / config
+import axiosClient from "@/config/axiosClient";
 
-const API_BASE_URL = ENV.API_BASE_URL;
+// 2. Types
+import type {
+  GetCampaignsResponse,
+  IGetCampaignsQueryParams,
+} from "../types/campaignApi.types";
+import type {
+  GetCouponsResponse,
+  IGetCouponsQueryParams,
+} from "../types/couponApi.types";
 
-const getHeaders = (token: string) => ({
-  Authorization: `Bearer ${token}`,
-  Accept: "application/json",
-});
-
-// GET ALL COUPONS FOR A BUSINESS
 export const getCoupons = async (
-  token: string,
   businessId: number | string,
   perPage: number = 50,
-  params: Record<string, any> = {},
-) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/coupons/${businessId}/${perPage}`, {
-    headers: getHeaders(token),
-    params,
-    validateStatus: () => true,
-  });
-  console.log("Coupons data fetched", response.data);
-  return response.status === 200 && response.data ? response.data : null;
+  params: IGetCouponsQueryParams = {},
+): Promise<GetCouponsResponse> => {
+  const response = await axiosClient.get<GetCouponsResponse>(
+    `/v1.0/coupons/${businessId}/${perPage}`,
+    {
+      params,
+      validateStatus: (status) => status < 400,
+    },
+  );
+
+  return response.data;
 };
 
-// GET ALL CAMPAIGNS FOR A RESTAURANT
 export const getCampaigns = async (
-  token: string,
-  restaurantId: number | string,
+  businessId: number | string,
   perPage: number = 50,
-  params: Record<string, any> = {},
-) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/campaigns/${restaurantId}/${perPage}`, {
-    headers: getHeaders(token),
-    params,
-    validateStatus: () => true,
-  });
-  console.log("Campaigns data fetched", response.data);
-  return response.status === 200 && response.data ? response.data : null;
+  params: IGetCampaignsQueryParams = {},
+): Promise<GetCampaignsResponse> => {
+  const response = await axiosClient.get<GetCampaignsResponse>(
+    `/v1.0/campaigns/${businessId}/${perPage}`,
+    {
+      params,
+      validateStatus: (status) => status < 400,
+    },
+  );
+
+  return response.data;
 };

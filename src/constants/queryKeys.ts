@@ -1,8 +1,12 @@
 import type {
+  IGetCampaignsQueryParams,
+  IGetCouponsQueryParams,
+} from "@/features/coupon-and-campaign";
+import type {
   IExpenseListParams,
   IExpenseMatrixParams,
-  IExpenseTypesParams,
   IExpenseTrendParams,
+  IExpenseTypesParams,
   IPaymentMethodBreakdownParams,
 } from "@/features/expenses/types";
 import type {
@@ -211,4 +215,24 @@ export const USER_KEYS = {
   owner: (id: string | number | null) => [...USER_KEYS.owners(), id] as const,
   details: () => [...USER_KEYS.all, "detail"] as const,
   detail: (id: string | number | null) => [...USER_KEYS.details(), id] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Coupons.
+ */
+export const COUPON_KEYS = {
+  all: ["coupons"] as const,
+  lists: () => [...COUPON_KEYS.all, "list"] as const,
+  list: (params?: IGetCouponsQueryParams) =>
+    [...COUPON_KEYS.lists(), params] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Campaigns.
+ */
+export const CAMPAIGN_KEYS = {
+  all: ["campaigns"] as const,
+  lists: () => [...CAMPAIGN_KEYS.all, "list"] as const,
+  list: (params?: IGetCampaignsQueryParams) =>
+    [...CAMPAIGN_KEYS.lists(), params] as const,
 } as const;
