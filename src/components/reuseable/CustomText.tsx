@@ -20,7 +20,8 @@ import {
   type ResponsiveSize,
 } from "@/utils/getResponsiveSizes";
 
-export type TextVariant = "primary" | "secondary" | "tertiary" | "currency";
+export type TextVariant =
+  "brand-primary" | "primary" | "secondary" | "tertiary" | "currency";
 export type TextType = "currency" | "email" | "phone";
 export type FontWeight =
   "normal" | "medium" | "semibold" | "bold" | "extrabold";
@@ -51,6 +52,7 @@ const VARIANT_CLASSES: Record<TextVariant, string> = {
   secondary: "text-neutral/80",
   tertiary: "text-neutral/60",
   currency: "text-primary",
+  "brand-primary": "text-primary",
 };
 
 const VARIANT_STYLES: Record<TextVariant, TextStyle> = {
@@ -58,6 +60,7 @@ const VARIANT_STYLES: Record<TextVariant, TextStyle> = {
   secondary: { color: "rgba(0, 0, 0, 0.75)" },
   tertiary: { color: COLORS.accent },
   currency: { color: COLORS.primary },
+  "brand-primary": { color: COLORS.primary },
 };
 
 const WEIGHT_CLASSES: Record<FontWeight, string> = {

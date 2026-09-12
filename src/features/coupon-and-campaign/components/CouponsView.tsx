@@ -1,57 +1,85 @@
+// 1. React / React Native
+import { useState } from "react";
+import { FlatList, RefreshControl, View } from "react-native";
+
+// 2. External libraries
+import { useQueryClient } from "@tanstack/react-query";
+
+// 3. Shared components / context / hooks
 import { EmptyState, SearchBar } from "@/components/reuseable";
+import { COLORS } from "@/constants";
+import { COUPON_KEYS } from "@/constants/queryKeys";
+import { useAuth } from "@/context/AuthContext";
+import { useDebounce } from "@/hooks";
+import { getCurrencySymbol } from "@/utils";
+
+// 4. Feature components / hooks
+import { useCouponsQuery } from "../hooks/queries/useDiscountQueries";
 import CouponCard from "./CouponCard";
+import CouponCardSkeleton from "./skeletons/CouponCardSkeleton";
 
-import React from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+export default function CouponsView() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const restaurantId = user?.restaurant?.[0]?.id;
+  const currencySymbol = getCurrencySymbol(user?.restaurant?.[0]?.currency);
 
-interface CouponsViewProps {
-  coupons: any[];
-  isLoading: boolean;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-}
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-export default function CouponsView({
-  coupons,
-  isLoading,
-  searchQuery,
-  setSearchQuery,
-}: Readonly<CouponsViewProps>) {
+  const {
+    data: couponsResponse,
+    isLoading,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useCouponsQuery(restaurantId || "", 20, {
+    search_key: debouncedSearchQuery.trim() || undefined,
+  });
+
+  const coupons =
+    couponsResponse?.pages?.flatMap((page) => page?.data ?? []) ?? [];
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: COUPON_KEYS.lists() });
+  };
+
+  const handleEndReached = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const renderFooter = () => {
+    if (!isFetchingNextPage) return null;
+    return (
+      <View className="mt-3">
+        <CouponCardSkeleton count={2} />
+      </View>
+    );
+  };
+
   return (
     <FlatList
-      data={coupons}
+      data={isLoading && !isRefetching ? [] : coupons}
       keyExtractor={(item) => String(item.id)}
+      contentContainerClassName="gap-y-3"
       contentContainerStyle={{ paddingBottom: 80 }}
-      scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
       ListHeaderComponent={
-        <View className="mb-4">
-          {/* Search bar */}
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Search coupons name or code..."
-            containerClassName="mb-3"
-          />
-
-          {/* Active Filter Indicators */}
-          {searchQuery.trim() !== "" && (
-            <View className="flex-row items-center justify-between mt-2 mb-1 px-1">
-              <Text className="text-[10px] font-bold text-accent uppercase tracking-wider">
-                Matching {coupons.length} Coupons
-              </Text>
-            </View>
-          )}
-        </View>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search by coupon name or code..."
+        />
       }
-      renderItem={({ item }) => <CouponCard coupon={item} />}
+      renderItem={({ item }) => (
+        <CouponCard coupon={item} currencySymbol={currencySymbol} />
+      )}
       ListEmptyComponent={
-        isLoading ? (
-          <View className="py-20 items-center justify-center">
-            <ActivityIndicator size="large" color="#DC2D2A" />
-            <Text className="mt-3 text-xs font-semibold text-accent">
-              Loading coupons...
-            </Text>
-          </View>
+        isLoading && !isRefetching ? (
+          <CouponCardSkeleton count={3} />
         ) : (
           <EmptyState
             icon="card-membership"
@@ -63,6 +91,17 @@ export default function CouponsView({
             }
           />
         )
+      }
+      ListFooterComponent={renderFooter}
+      onEndReached={handleEndReached}
+      onEndReachedThreshold={0.5}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={handleRefresh}
+          colors={[COLORS.primary]}
+          tintColor={COLORS.primary}
+        />
       }
     />
   );

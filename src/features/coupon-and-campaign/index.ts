@@ -12,3 +12,8 @@ export * from "./types/campaign.types";
 export * from "./types/campaignApi.types";
 export * from "./types/coupon.types";
 export * from "./types/couponApi.types";
+
+// ==================== UTILS ====================
+export * from "./utils/copyCouponCode";
+export * from "./utils/getCampaignCategoryConfig";
+export * from "./utils/shareCoupon";

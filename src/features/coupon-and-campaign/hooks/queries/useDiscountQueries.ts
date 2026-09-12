@@ -25,7 +25,7 @@ import { CAMPAIGN_KEYS, COUPON_KEYS } from "@/constants/queryKeys";
 
 export const useCouponsQuery = (
   businessId: number | string,
-  perPage: number = 50,
+  perPage: number = 20,
   params: IGetCouponsQueryParams = {},
 ) => {
   const { token } = useAuth();
@@ -51,7 +51,7 @@ export const useCouponsQuery = (
 
 export const useCampaignsQuery = (
   businessId: number | string,
-  perPage: number = 50,
+  perPage: number = 20,
   params: IGetCampaignsQueryParams = {},
 ) => {
   const { token } = useAuth();

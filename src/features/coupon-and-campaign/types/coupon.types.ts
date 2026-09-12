@@ -7,9 +7,9 @@ export interface ICouponDishPivot {
   dish_id: number;
 }
 
-export type ICouponDish = Partial<IDish> & {
+export interface ICouponDish extends Partial<IDish> {
   pivot?: ICouponDishPivot;
-};
+}
 
 export interface ICoupon {
   id: number;
