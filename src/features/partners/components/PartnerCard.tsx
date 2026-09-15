@@ -40,7 +40,7 @@ export default function PartnerCard({
     >
       <View className="flex-row items-center gap-3">
         <View
-          className="bg-primary/10 rounded-xl"
+          className="bg-primary/10 rounded-xl self-start"
           style={{ padding: WP("2.5%") }}
         >
           <MaterialIcons

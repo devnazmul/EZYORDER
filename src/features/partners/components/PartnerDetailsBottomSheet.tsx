@@ -1,44 +1,26 @@
 // 1. React / React Native
 import { View } from "react-native";
 
-// 2. Expo / Navigation
-import { MaterialIcons } from "@expo/vector-icons";
-
 // 3. External libraries
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 // 4. Shared components
-import { BottomSheet, CustomText } from "@/components/reuseable";
+import {
+  BottomSheet,
+  BottomSheetCard,
+  CustomText,
+} from "@/components/reuseable";
 
-// 6. Types
+// 5. Feature types
 import type { IRestaurantPartner } from "../types/partners.types";
 
 // 7. Constants/utils
-import { COLORS } from "@/constants";
 import { getOrderTypeConfig, HP, WP } from "@/utils";
 
 export interface IPartnerDetailsBottomSheetProps {
   visible: boolean;
   onClose: () => void;
   partner: IRestaurantPartner | null;
-}
-
-interface ISectionHeaderProps {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  title: string;
-}
-
-function SectionHeader({ icon, title }: Readonly<ISectionHeaderProps>) {
-  return (
-    <View className="flex-row items-center gap-2.5">
-      <View className="p-2 rounded-xl bg-primary/10">
-        <MaterialIcons name={icon} size={WP("5%")} color={COLORS.primary} />
-      </View>
-      <CustomText variant="primary" size="sm" weight="bold">
-        {title}
-      </CustomText>
-    </View>
-  );
 }
 
 export default function PartnerDetailsBottomSheet({
@@ -122,13 +104,11 @@ export default function PartnerDetailsBottomSheet({
           {channels
             .filter((channel) => channel.enabled)
             .map((channel) => (
-              <View
+              <BottomSheetCard
                 key={channel.key}
-                className="rounded-2xl border border-base-300 bg-base-200 p-4 gap-y-3"
+                icon={channel.icon}
+                title={channel.title}
               >
-                {/* Card Header: Icon & Channel Name */}
-                <SectionHeader icon={channel.icon} title={channel.title} />
-
                 {/* Commission Details */}
                 <View className="flex-row items-center justify-between">
                   <CustomText variant="secondary" size="xs" weight="semibold">
@@ -155,13 +135,12 @@ export default function PartnerDetailsBottomSheet({
                     </CustomText>
                   </View>
                 ) : null}
-              </View>
+              </BottomSheetCard>
             ))}
 
           {/* Payment Terms Section */}
           {partner.payment_terms ? (
-            <View className="rounded-2xl border border-base-300 bg-base-200 p-4 gap-y-2">
-              <SectionHeader icon="payments" title="Payment Terms" />
+            <BottomSheetCard icon="payments" title="Payment Terms">
               <CustomText
                 variant="secondary"
                 size="xs"
@@ -170,7 +149,7 @@ export default function PartnerDetailsBottomSheet({
               >
                 {partner.payment_terms}
               </CustomText>
-            </View>
+            </BottomSheetCard>
           ) : null}
         </View>
       </BottomSheetScrollView>

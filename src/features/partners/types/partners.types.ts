@@ -37,18 +37,18 @@ export interface IRestaurantPartner {
 
 export interface IDailyOrderPartnerSale {
   id: number;
-  restaurant_id: number;
-  restaurant_partner_id: string | null;
   eat_in_orders: number;
-  eat_in_orders_amount: string | number;
+  eat_in_orders_amount: string;
   takeaway_orders: number;
-  takeaway_orders_amount: string | number;
+  takeaway_orders_amount: string;
   delivery_orders: number;
-  delivery_orders_amount?: string | number;
-  bank_payment?: string | number | null;
-  cash_payment?: string | number | null;
-  notes?: string | null;
-  created_at?: string;
-  updated_at?: string;
-  restaurant_partner?: IRestaurantPartnerDetails | null;
+  delivery_orders_amount: string;
+  bank_payment: string | null;
+  cash_payment: string | null;
+  notes: string | null;
+  restaurant_id: number;
+  restaurant_partner_id: number | null;
+  created_at: string;
+  updated_at: string;
+  restaurant_partner?: IRestaurantPartnerDetails;
 }
