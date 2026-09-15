@@ -1,27 +1,42 @@
-import { QUERY_KEYS } from "@/constants/queryKeys";
+// 3. External libraries
+import { useQuery } from "@tanstack/react-query";
+
+// 4. Shared context & constants
+import { PARTNER_KEYS } from "@/constants/queryKeys";
+import { useAuth } from "@/context/AuthContext";
+
+// 5. Feature APIs
 import {
   getDailyOrderPartnerSales,
   getRestaurantPartners,
-} from "@/features/partners/apis/partners";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/src/context/AuthContext";
+} from "../../apis/partners";
 
-export const useRestaurantPartnersQuery = (restaurantId: number | string) => {
+// 6. Types
+import type {
+  GetDailyOrderPartnerSalesResponse,
+  GetRestaurantPartnersResponse,
+  IGetDailyOrderPartnerSalesParams,
+  IGetRestaurantPartnersParams,
+} from "../../types/partnersAPI.types";
+
+export const useRestaurantPartnersQuery = (
+  params: IGetRestaurantPartnersParams,
+) => {
   const { token } = useAuth();
-  return useQuery({
-    queryKey: [QUERY_KEYS.PARTNERS, restaurantId],
-    queryFn: () => getRestaurantPartners(token!, restaurantId),
-    enabled: !!token && !!restaurantId,
+  return useQuery<GetRestaurantPartnersResponse>({
+    queryKey: PARTNER_KEYS.list(params),
+    queryFn: () => getRestaurantPartners(params),
+    enabled: !!token && !!params.restaurant_id,
   });
 };
 
 export const useDailyOrderPartnerSalesQuery = (
-  restaurantId: number | string,
+  params: IGetDailyOrderPartnerSalesParams,
 ) => {
   const { token } = useAuth();
-  return useQuery({
-    queryKey: [QUERY_KEYS.DAILY_ORDER_PARTNER_SALES, restaurantId],
-    queryFn: () => getDailyOrderPartnerSales(token!, restaurantId),
-    enabled: !!token && !!restaurantId,
+  return useQuery<GetDailyOrderPartnerSalesResponse>({
+    queryKey: PARTNER_KEYS.saleList(params),
+    queryFn: () => getDailyOrderPartnerSales(params),
+    enabled: !!token && !!params.restaurant_id,
   });
 };
