@@ -1,46 +1,72 @@
-import EmptyState from "@/components/reuseable/EmptyState";
-import RefreshableScrollView from "@/components/reuseable/RefreshableScrollView";
-import { useAuth } from "@/src/context/AuthContext";
-import { useRestaurantPartnersQuery } from "@/features/partners/hooks/queries/usePartnerQueries";
-import React, { useMemo } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+// 1. React / React Native
+import { useState } from "react";
+import { FlatList, RefreshControl } from "react-native";
+
+// 3. External libraries
+import { useQueryClient } from "@tanstack/react-query";
+
+// 4. Shared components & context
+import { EmptyState, ErrorState } from "@/components/reuseable";
+import { useAuth } from "@/context/AuthContext";
+
+// 5. Feature components / hooks
+import { useRestaurantPartnersQuery } from "../hooks/queries/usePartnerQueries";
 import PartnerCard from "./PartnerCard";
+import PartnerDetailsBottomSheet from "./PartnerDetailsBottomSheet";
+import PartnerCardSkeleton from "./skeletons/PartnerCardSkeleton";
+
+// 6. Types
+import type { IRestaurantPartner } from "../types/partners.types";
+
+// 7. Constants/utils
+import { COLORS } from "@/constants";
+import { PARTNER_KEYS } from "@/constants/queryKeys";
 
 export default function PartnersView() {
   const { user } = useAuth();
   const restaurantId = user?.restaurant?.[0]?.id;
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedPartner, setSelectedPartner] =
+    useState<IRestaurantPartner | null>(null);
 
   const {
     data: partnersData,
     isLoading,
+    isError,
+    error,
     refetch,
-  } = useRestaurantPartnersQuery(restaurantId || "");
-
-  const partners = useMemo(() => {
-    if (!partnersData) return [];
-    if (Array.isArray(partnersData)) return partnersData;
-    return [];
-  }, [partnersData]);
+  } = useRestaurantPartnersQuery({ restaurant_id: restaurantId || "" });
 
   const handleRefresh = async () => {
-    await refetch();
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({
+      queryKey: PARTNER_KEYS.list({ restaurant_id: restaurantId || "" }),
+    });
+    setIsRefreshing(false);
   };
 
-  if (isLoading) {
+  if (isLoading || isRefreshing) {
+    return <PartnerCardSkeleton count={5} />;
+  }
+
+  if (isError) {
     return (
-      <View key="loading" className="flex-1 items-center justify-center py-20">
-        <ActivityIndicator size="large" color="#DC2D2A" />
-        <Text className="mt-3 text-xs font-semibold text-accent">
-          Loading partners...
-        </Text>
-      </View>
+      <ErrorState
+        title="Failed to Load Partners"
+        message={
+          error instanceof Error
+            ? error.message
+            : "Failed to load restaurant partners."
+        }
+        onRetry={refetch}
+      />
     );
   }
 
-  if (partners.length === 0) {
+  if (!partnersData || partnersData.length === 0) {
     return (
       <EmptyState
-        key="empty"
         icon="handshake"
         title="No Partners Configured"
         description="There are no partners configured for this restaurant."
@@ -49,25 +75,30 @@ export default function PartnersView() {
   }
 
   return (
-    <RefreshableScrollView
-      key="loaded"
-      onRefresh={handleRefresh}
-      className="flex-1"
-      contentContainerStyle={{ paddingBottom: 80 }}
-    >
-      <View className="mb-4">
-        <Text className="text-[10px] font-bold text-accent tracking-wide px-1">
-          Total {partners?.length || 0} Restaurant partners found
-        </Text>
-      </View>
-
+    <>
       <FlatList
-        data={partners}
+        data={partnersData}
         keyExtractor={(item) => String(item.id)}
-        scrollEnabled={false}
-        contentContainerStyle={{ gap: 16 }}
-        renderItem={({ item }) => <PartnerCard item={item} />}
+        className="flex-1"
+        contentContainerStyle={{ gap: 16, paddingBottom: 80 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
+        renderItem={({ item }) => (
+          <PartnerCard item={item} onPress={() => setSelectedPartner(item)} />
+        )}
       />
-    </RefreshableScrollView>
+
+      <PartnerDetailsBottomSheet
+        visible={!!selectedPartner}
+        onClose={() => setSelectedPartner(null)}
+        partner={selectedPartner}
+      />
+    </>
   );
 }

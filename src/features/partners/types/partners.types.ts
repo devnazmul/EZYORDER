@@ -1,5 +1,16 @@
 export interface IRestaurantPartnerDetails {
+  id?: number;
   name: string;
+  description?: string | null;
+  webpage_link?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  is_active?: number;
+}
+
+export interface IPartnerContactDetails {
+  contact_person?: string | null;
+  contact_number?: string | null;
 }
 
 export interface IRestaurantPartner {
@@ -13,7 +24,7 @@ export interface IRestaurantPartner {
   takeaway: number;
   takeaway_order_commission: string;
   takeaway_link: string | null;
-  contact_details: string | null;
+  contact_details: IPartnerContactDetails;
   restaurant_id: number;
   created_at: string;
   updated_at: string;
@@ -21,7 +32,7 @@ export interface IRestaurantPartner {
   payment_terms: string | null;
   is_active: number;
   restaurant_partner_id: number | null;
-  restaurant_partner: IRestaurantPartnerDetails | null;
+  restaurant_partner: IRestaurantPartnerDetails;
 }
 
 export interface IDailyOrderPartnerSale {

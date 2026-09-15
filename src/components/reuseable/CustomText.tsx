@@ -14,7 +14,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 // 7. Constants/utils
 import { COLORS } from "@/constants/colors";
-import { handleCallPhone, handleSendEmail } from "@/utils";
+import { handleCallPhone, handleOpenUrl, handleSendEmail } from "@/utils";
 import {
   getResponsiveFontSize,
   type ResponsiveSize,
@@ -22,7 +22,7 @@ import {
 
 export type TextVariant =
   "brand-primary" | "primary" | "secondary" | "tertiary" | "currency";
-export type TextType = "currency" | "email" | "phone";
+export type TextType = "currency" | "email" | "phone" | "link";
 export type FontWeight =
   "normal" | "medium" | "semibold" | "bold" | "extrabold";
 
@@ -40,11 +40,12 @@ export interface ICustomTextProps extends TextProps {
 }
 
 const TYPE_ICONS: Record<
-  Extract<TextType, "email" | "phone">,
+  Extract<TextType, "email" | "phone" | "link">,
   keyof typeof MaterialIcons.glyphMap
 > = {
   email: "mail-outline",
   phone: "phone-iphone",
+  link: "link",
 };
 
 const VARIANT_CLASSES: Record<TextVariant, string> = {
@@ -125,6 +126,8 @@ const handleTypePress = (children: React.ReactNode, type?: TextType) => {
     handleSendEmail(val);
   } else if (type === "phone") {
     handleCallPhone(val);
+  } else if (type === "link") {
+    handleOpenUrl(val);
   }
 };
 
@@ -141,7 +144,7 @@ export default function CustomText({
   children,
   ...props
 }: Readonly<ICustomTextProps>) {
-  const isPrimaryType = type === "email" || type === "phone";
+  const isPrimaryType = type === "email" || type === "phone" || type === "link";
   const variantClass = isPrimaryType
     ? "text-primary"
     : VARIANT_CLASSES[variant] || VARIANT_CLASSES.primary;
@@ -194,17 +197,19 @@ export default function CustomText({
     <ContainerComponent
       onPress={isClickable ? () => handleTypePress(children, type) : undefined}
       activeOpacity={0.7}
-      className="flex-row items-center gap-1.5"
+      className="flex-row items-center gap-0.5"
     >
       {iconName ? (
-        <MaterialIcons
-          name={iconName}
-          size={iconSize}
-          color={COLORS.primary}
-          className="-mb-1.5"
-        />
+        <MaterialIcons name={iconName} size={iconSize} color={COLORS.primary} />
       ) : null}
       {textElement}
+      {showIcon && type === "link" ? (
+        <MaterialIcons
+          name="open-in-new"
+          size={iconSize}
+          color={COLORS.primary}
+        />
+      ) : null}
     </ContainerComponent>
   );
 }
