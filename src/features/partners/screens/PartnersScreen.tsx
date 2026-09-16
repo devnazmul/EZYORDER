@@ -1,9 +1,12 @@
-import { PageTitle, ToggleBar } from "@/components/reuseable";
-import { PartnersSaleView, PartnersView } from "../components";
-
-import React, { useState } from "react";
+// 1. React / React Native
+import { useState } from "react";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+
+// 4. Shared components
+import { PageTitle, ScreenContainer, ToggleBar } from "@/components/reuseable";
+
+// 5. Feature components
+import { PartnersSaleView, PartnersView } from "../components";
 
 const TOGGLE_OPTIONS = [
   { id: "partners", label: "Partners", icon: "handshake" as const },
@@ -15,25 +18,26 @@ export default function PartnersScreen() {
   const isPartnersTab = activeTab === "partners";
 
   return (
-    <SafeAreaView
-      edges={["left", "right", "bottom"]}
-      className="flex-1 bg-base-100"
-    >
-      <View className="flex-1 px-4 py-4">
-        {/* Page Title */}
-        <PageTitle title="Partners Hub" icon="handshake" />
+    <ScreenContainer scrollable={false}>
+      {/* Page Title */}
+      <PageTitle
+        title="Restaurant Partners"
+        icon="handshake"
+        description="Details of Partners and their sales"
+      />
 
-        {/* Toggle Bar */}
-        <ToggleBar
-          options={TOGGLE_OPTIONS}
-          activeId={activeTab}
-          onSelect={setActiveTab}
-          containerClassName="mb-6"
-        />
+      {/* Toggle Bar */}
+      <ToggleBar
+        options={TOGGLE_OPTIONS}
+        activeId={activeTab}
+        onSelect={setActiveTab}
+        containerClassName="mb-6"
+      />
 
-        {/* Conditional Content */}
+      {/* Conditional Content */}
+      <View className="flex-1">
         {isPartnersTab ? <PartnersView /> : <PartnersSaleView />}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }

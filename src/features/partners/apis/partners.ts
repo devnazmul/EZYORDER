@@ -1,32 +1,36 @@
-import ENV from "@/config/env";
-import axios from "axios";
+// 3. External libraries / config
+import axiosClient from "@/config/axiosClient";
 
-const API_BASE_URL = ENV.API_BASE_URL;
-
-const getHeaders = (token: string) => ({
-  Authorization: `Bearer ${token}`,
-  Accept: "application/json",
-});
+// 6. Types
+import type {
+  GetDailyOrderPartnerSalesResponse,
+  GetRestaurantPartnersResponse,
+  IGetDailyOrderPartnerSalesParams,
+  IGetRestaurantPartnersParams,
+} from "../types/partnersAPI.types";
 
 // GET ALL RESTAURANT PARTNERS
-export const getRestaurantPartners = async (token: string, restaurantId: number | string) => {
-  const response = await axios.get(`${API_BASE_URL}/order/restaurant-partner/get-all/${restaurantId}`, {
-    headers: getHeaders(token),
-    validateStatus: () => true,
-  });
-  console.log("Restaurant Partners Response:", response.data);
-  return response.status === 200 && response.data ? response.data : [];
+export const getRestaurantPartners = async (
+  params: IGetRestaurantPartnersParams,
+): Promise<GetRestaurantPartnersResponse> => {
+  const response = await axiosClient.get<GetRestaurantPartnersResponse>(
+    `/order/restaurant-partner/get-all/${params.restaurant_id}`,
+    {
+      validateStatus: (status) => status < 400,
+    },
+  );
+  return response.data;
 };
 
 // GET ALL DAILY ORDER PARTNER SALES
-export const getDailyOrderPartnerSales = async (token: string, restaurantId: number | string) => {
-  const response = await axios.get(
-    `${API_BASE_URL}/order/daily-order-partner-sale/get-all/${restaurantId}`,
+export const getDailyOrderPartnerSales = async (
+  params: IGetDailyOrderPartnerSalesParams,
+): Promise<GetDailyOrderPartnerSalesResponse> => {
+  const response = await axiosClient.get<GetDailyOrderPartnerSalesResponse>(
+    `/order/daily-order-partner-sale/get-all/${params.restaurant_id}`,
     {
-      headers: getHeaders(token),
-      validateStatus: () => true,
-    }
+      validateStatus: (status) => status < 400,
+    },
   );
-  console.log("Daily Order Partner Sales Response:", response.data);
-  return response.status === 200 && response.data ? response.data : [];
+  return response.data;
 };

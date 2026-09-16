@@ -66,6 +66,10 @@ export {
   default as ActionCard,
   type IActionCardProps,
 } from "./cards/ActionCard";
+export {
+  default as BottomSheetCard,
+  type IBottomSheetCardProps,
+} from "./cards/BottomSheetCard";
 
 // Dashboard
 export { default as KpiCard } from "./dashboard/KpiCard";

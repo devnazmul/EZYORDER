@@ -17,6 +17,10 @@ import type {
 } from "@/features/reports/types";
 import type { IGetUsersQueryParams } from "@/features/user-management/types";
 import type {
+  IGetDailyOrderPartnerSalesParams,
+  IGetRestaurantPartnersParams,
+} from "@/features/partners";
+import type {
   IBusinessTimingQueryParams,
   IMenuQueryParams,
   IRestaurantQueryParams,
@@ -235,4 +239,17 @@ export const CAMPAIGN_KEYS = {
   lists: () => [...CAMPAIGN_KEYS.all, "list"] as const,
   list: (params?: IGetCampaignsQueryParams) =>
     [...CAMPAIGN_KEYS.lists(), params] as const,
+} as const;
+
+/**
+ * Domain-Shaped Query Key Factory for Partners & Partner Sales.
+ */
+export const PARTNER_KEYS = {
+  all: ["partners"] as const,
+  lists: () => [...PARTNER_KEYS.all, "list"] as const,
+  list: (params?: IGetRestaurantPartnersParams) =>
+    [...PARTNER_KEYS.lists(), params] as const,
+  sales: () => [...PARTNER_KEYS.all, "sales"] as const,
+  saleList: (params?: IGetDailyOrderPartnerSalesParams) =>
+    [...PARTNER_KEYS.sales(), params] as const,
 } as const;
