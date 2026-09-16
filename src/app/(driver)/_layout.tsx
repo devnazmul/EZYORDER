@@ -1,35 +1,11 @@
-import { Text } from "react-native";
-
 import { MaterialIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AUTH_ROUTES, COLORS, OWNER_ROUTES } from "@/constants";
+import { TabBarLabel } from "@/components/reuseable";
+import { AUTH_ROUTES, OWNER_ROUTES } from "@/constants";
 import { useAuth } from "@/src/context/AuthContext";
-
-interface ITabBarLabelProps {
-  title: string;
-  color: string;
-}
-
-function TabBarLabel({ title, color }: Readonly<ITabBarLabelProps>) {
-  return (
-    <Text
-      style={{
-        color,
-        fontSize: 10.5,
-        fontWeight: "600",
-        marginTop: 2,
-        textAlign: "center",
-      }}
-      numberOfLines={1}
-      adjustsFontSizeToFit
-    >
-      {title}
-    </Text>
-  );
-}
+import { getTabBarScreenOptions } from "@/utils";
 
 interface ITabConfig {
   name: string;
@@ -56,28 +32,7 @@ export default function DriverLayout() {
   }
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.accent,
-        tabBarStyle: {
-          height: 60 + (insets.bottom > 0 ? insets.bottom + 8 : 12),
-          backgroundColor: COLORS.base300,
-          borderTopWidth: 1,
-          borderTopColor: "#e2e2e2",
-          borderTopLeftRadius: 16,
-          borderTopRightRadius: 16,
-          elevation: 8,
-          shadowColor: "#000000",
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.05,
-          shadowRadius: 10,
-          paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 12,
-          paddingTop: 12,
-        },
-      }}
-    >
+    <Tabs screenOptions={getTabBarScreenOptions(insets)}>
       {DRIVER_TABS_CONFIG.map((tab) => (
         <Tabs.Screen
           key={tab.name}

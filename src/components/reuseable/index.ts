@@ -59,6 +59,7 @@ export {
 export { default as SearchBar } from "./SearchBar";
 export { default as ServiceCard, type IServiceCardProps } from "./ServiceCard";
 export { default as StatusBadge } from "./StatusBadge";
+export { default as TabBarLabel } from "./TabBarLabel";
 export { default as ToggleBar } from "./ToggleBar";
 
 // Cards
