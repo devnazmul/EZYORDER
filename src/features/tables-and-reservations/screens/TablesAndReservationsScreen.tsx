@@ -1,10 +1,11 @@
-import { PageTitle, ToggleBar } from "@/components/reuseable";
-import { ReservationsView, TablesView } from "../components";
+// 1. React / React Native
+import { useState } from "react";
 
-import { WP } from "@/utils/getResponsiveSizes";
-import React, { useState } from "react";
-import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// 4. Shared components
+import { PageTitle, ScreenContainer, ToggleBar } from "@/components/reuseable";
+
+// 5. Feature components
+import { ReservationsView, TablesView } from "../components";
 
 const TOGGLE_OPTIONS = [
   { id: "tables", label: "Tables", icon: "table-restaurant" as const },
@@ -15,13 +16,12 @@ export default function TablesAndReservations() {
   const [activeTab, setActiveTab] = useState("tables");
   const isTablesTab = activeTab === "tables";
 
-  const header = (
-    <View className="pt-4">
-      {/* Reusable Page Title */}
+  return (
+    <ScreenContainer scrollable={false}>
       <PageTitle
         title="Tables & Reservations"
         icon="table-restaurant"
-        description={`See details of ${activeTab == "tables" ? "Tables" : "Reservations"}`}
+        description={`See details of ${activeTab === "tables" ? "Tables" : "Reservations"}`}
       />
 
       {/* Toggle Bar */}
@@ -29,21 +29,9 @@ export default function TablesAndReservations() {
         options={TOGGLE_OPTIONS}
         activeId={activeTab}
         onSelect={setActiveTab}
-        containerClassName="mb-6"
       />
-    </View>
-  );
 
-  return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-base-100">
-      <View style={{ paddingHorizontal: WP("4%") }} className="flex-1">
-        {/* Conditional Content */}
-        {isTablesTab ? (
-          <TablesView header={header} />
-        ) : (
-          <ReservationsView header={header} />
-        )}
-      </View>
-    </SafeAreaView>
+      {isTablesTab ? <TablesView /> : <ReservationsView />}
+    </ScreenContainer>
   );
 }

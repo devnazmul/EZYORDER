@@ -1,4 +1,7 @@
-export type TableStatus = "free" | "occupied" | "reserved";
+import type { ReservationArea } from "./reservation.types";
+
+export type TableStatus = "free" | "available" | "occupied" | "reserved";
+export type TableArea = ReservationArea;
 
 export interface ITable {
   id: number;
@@ -7,7 +10,7 @@ export interface ITable {
   table_no?: number;
   table_number?: string;
   capacity?: number;
-  area?: string | null;
+  area?: TableArea;
   is_active?: boolean;
   order_id?: number | null;
   waiter_id?: number | null;
