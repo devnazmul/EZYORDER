@@ -1,3 +1,23 @@
+/**
+ * ============================================================================
+ * ROUTE CONSTANTS PATTERN & GUIDELINES FOR DEVELOPERS:
+ * ============================================================================
+ * Centralized, strongly-typed route definitions for Expo Router navigation.
+ *
+ * Usage:
+ * Prefer importing route constants over hardcoded route paths to ensure type safety:
+ * ```ts
+ * import { AUTH_ROUTES, OWNER_ROUTES, DRIVER_ROUTES } from "@/constants";
+ *
+ * router.push(OWNER_ROUTES.HOME);
+ * <Redirect href={AUTH_ROUTES.LOGIN} />
+ * ```
+ *
+ * Each route map uses `as const satisfies Record<string, Href>` to guarantee compatibility
+ * with Expo Router's `Href` type while preserving literal type autocompletion.
+ * ============================================================================
+ */
+
 import type { Href } from "expo-router";
 
 // ==================== AUTH ROUTES ====================

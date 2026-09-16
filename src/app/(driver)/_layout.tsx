@@ -5,15 +5,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBarLabel } from "@/components/reuseable";
 import { AUTH_ROUTES, OWNER_ROUTES } from "@/constants";
 import { useAuth } from "@/src/context/AuthContext";
+import type { ITabItemConfig } from "@/types";
 import { getTabBarScreenOptions } from "@/utils";
 
-interface ITabConfig {
-  name: string;
-  title: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
-}
-
-const DRIVER_TABS_CONFIG: ITabConfig[] = [
+const DRIVER_TABS_CONFIG: ITabItemConfig[] = [
   { name: "index", title: "Dashboard", icon: "dashboard" },
   { name: "my-orders", title: "My Orders", icon: "receipt" },
 ];

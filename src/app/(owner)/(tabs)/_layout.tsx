@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBarLabel } from "@/components/reuseable";
 import { COLORS } from "@/constants";
 import { useNotificationsQuery } from "@/features/notifications";
+import type { ITabItemConfig } from "@/types";
 import { getTabBarScreenOptions } from "@/utils";
 
 interface INotificationBadgeProps {
@@ -50,14 +51,7 @@ function NotificationBadge({ count }: Readonly<INotificationBadgeProps>) {
   );
 }
 
-interface ITabConfig {
-  name: string;
-  title: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  hasBadge?: boolean;
-}
-
-const OWNER_TABS_CONFIG: ITabConfig[] = [
+const OWNER_TABS_CONFIG: ITabItemConfig[] = [
   { name: "home", title: "Dashboard", icon: "dashboard" },
   { name: "orders", title: "Orders", icon: "receipt" },
   { name: "reports", title: "Reports", icon: "bar-chart" },
