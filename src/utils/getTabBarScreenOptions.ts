@@ -1,11 +1,18 @@
-import type { ComponentProps } from "react";
 import type { Tabs } from "expo-router";
+import type { ComponentProps } from "react";
 import type { EdgeInsets } from "react-native-safe-area-context";
 
 import { COLORS } from "@/constants";
 
 type TabsScreenOptions = ComponentProps<typeof Tabs>["screenOptions"];
 
+/**
+ * Returns standardized screenOptions for Expo Router tab layouts (`<Tabs screenOptions={...}>`),
+ * dynamically accounting for safe-area bottom insets and adhering to theme design tokens.
+ *
+ * @param insets - Safe area insets from `useSafeAreaInsets()`.
+ * @returns Tab bar options configuration object.
+ */
 export function getTabBarScreenOptions(insets: EdgeInsets): TabsScreenOptions {
   return {
     headerShown: false,
