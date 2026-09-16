@@ -1,7 +1,13 @@
-import { ALLOWED_ROLES, ROLE } from "@/constants";
-import { useAuth } from "@/src/context/AuthContext";
 import { Redirect, Stack, usePathname } from "expo-router";
-import React from "react";
+
+import {
+  ALLOWED_ROLES,
+  AUTH_ROUTES,
+  DRIVER_ROUTES,
+  OWNER_ROUTES,
+  ROLE,
+} from "@/constants";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function AuthLayout() {
   const { token, user } = useAuth();
@@ -12,16 +18,16 @@ export default function AuthLayout() {
     const isAllowed = ALLOWED_ROLES.includes(userRole);
 
     if (!isAllowed) {
-      return <Redirect href="/(auth)/unauthorized" />;
+      return <Redirect href={AUTH_ROUTES.UNAUTHORIZED} />;
     }
 
     if (userRole === ROLE.DRIVER) {
-      return <Redirect href="/(driver)" />;
+      return <Redirect href={DRIVER_ROUTES.DASHBOARD} />;
     }
     if (userRole === ROLE.OWNER) {
-      return <Redirect href="/(owner)/home" />;
+      return <Redirect href={OWNER_ROUTES.HOME} />;
     }
-    return <Redirect href="/(auth)/unauthorized" />;
+    return <Redirect href={AUTH_ROUTES.UNAUTHORIZED} />;
   }
 
   return (
