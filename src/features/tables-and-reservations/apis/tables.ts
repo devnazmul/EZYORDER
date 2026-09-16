@@ -1,38 +1,40 @@
-import ENV from "@/config/env";
-import axios from "axios";
+// 3. External libraries / config
+import axiosClient from "@/config/axiosClient";
 
-const API_BASE_URL = ENV.API_BASE_URL;
+// 6. Types
+import type {
+  GetTableMatrixResponse,
+  GetTablesResponse,
+  IGetTablesQueryParams,
+} from "../types/tableApi.types";
 
-const getHeaders = (token: string) => ({
-  Authorization: `Bearer ${token}`,
-  Accept: "application/json",
-});
+/**
+ * Fetch all tables with optional query parameters.
+ */
+export const getAllTables = async (
+  params: IGetTablesQueryParams = {},
+): Promise<GetTablesResponse> => {
+  const response = await axiosClient.get<GetTablesResponse>(
+    "/v1.0/restaurant-tables",
+    {
+      params,
+      validateStatus: (status) => status < 400,
+    },
+  );
 
-// GET ALL TABLES
-export const getAllTables = async (token: string, params: Record<string, any> = {}) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/restaurant-tables`, {
-    headers: getHeaders(token),
-    params,
-    validateStatus: () => true,
-  });
-  console.log(response.data);
-  return response.status === 200 && response.data?.success ? response.data.data : [];
+  return response.data;
 };
 
-// GET TABLE MATRIX
-export const getTableMatrix = async (token: string) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/restaurant-tables/matrix`, {
-    headers: getHeaders(token),
-    validateStatus: () => true,
-  });
-  return response.status === 200 && response.data?.success ? response.data.data : null;
-};
+/**
+ * Fetch table matrix summary.
+ */
+export const getTableMatrix = async (): Promise<GetTableMatrixResponse> => {
+  const response = await axiosClient.get<GetTableMatrixResponse>(
+    "/v1.0/restaurant-tables/matrix",
+    {
+      validateStatus: (status) => status < 400,
+    },
+  );
 
-// GET SINGLE TABLE
-export const getSingleTable = async (token: string, id: number | string) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/restaurant-tables/${id}`, {
-    headers: getHeaders(token),
-    validateStatus: () => true,
-  });
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+  return response.data;
 };

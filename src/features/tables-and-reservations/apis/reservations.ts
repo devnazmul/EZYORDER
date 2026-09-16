@@ -1,33 +1,22 @@
-import ENV from "@/config/env";
-import axios from "axios";
+// 3. External libraries / config
+import axiosClient from "@/config/axiosClient";
 
-const API_BASE_URL = ENV.API_BASE_URL;
+// 6. Types
+import type {
+  GetReservationsResponse,
+  IGetReservationsQueryParams,
+} from "../types/reservationApi.types";
 
-const getHeaders = (token: string) => ({
-  Authorization: `Bearer ${token}`,
-  Accept: "application/json",
-});
-
-// GET ALL RESERVATIONS
-export const getReservations = async (token: string, params: Record<string, any> = {}) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/reservations`, {
-    headers: getHeaders(token),
-    params: {
-      order_by: "reservation_date",
-      sort_order: "desc",
-      ...params,
+export const getReservations = async (
+  params: IGetReservationsQueryParams = {},
+): Promise<GetReservationsResponse> => {
+  const response = await axiosClient.get<GetReservationsResponse>(
+    "/v1.0/reservations",
+    {
+      params,
+      validateStatus: (status) => status < 400,
     },
-    validateStatus: () => true,
-  });
-  console.log(response);
-  return response.status === 200 && response.data?.success ? response.data : null;
-};
+  );
 
-// GET SINGLE RESERVATION
-export const getSingleReservation = async (token: string, id: number | string) => {
-  const response = await axios.get(`${API_BASE_URL}/v1.0/reservations/single/${id}`, {
-    headers: getHeaders(token),
-    validateStatus: () => true,
-  });
-  return response.status === 200 && response.data?.success ? response.data.data : null;
+  return response.data;
 };
