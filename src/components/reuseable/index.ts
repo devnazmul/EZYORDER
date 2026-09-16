@@ -1,5 +1,5 @@
 export { default as Avatar, type IAvatarProps } from "./Avatar";
-export { default as Badge } from "./Badge";
+export { default as Badge, type IBadgeProps } from "./Badge";
 export {
   default as BarChart,
   type IBarChartDataItem,
