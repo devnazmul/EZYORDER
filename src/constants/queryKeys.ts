@@ -10,16 +10,20 @@ import type {
   IPaymentMethodBreakdownParams,
 } from "@/features/expenses/types";
 import type {
+  IGetDailyOrderPartnerSalesParams,
+  IGetRestaurantPartnersParams,
+} from "@/features/partners";
+import type {
   ICustomerParams,
   IOrderTypeReportParams,
   IOrdersReportParams,
   ISalesParams,
 } from "@/features/reports/types";
-import type { IGetUsersQueryParams } from "@/features/user-management/types";
 import type {
-  IGetDailyOrderPartnerSalesParams,
-  IGetRestaurantPartnersParams,
-} from "@/features/partners";
+  IGetReservationsQueryParams,
+  IGetTablesQueryParams,
+} from "@/features/tables-and-reservations";
+import type { IGetUsersQueryParams } from "@/features/user-management/types";
 import type {
   IBusinessTimingQueryParams,
   IMenuQueryParams,
@@ -252,4 +256,20 @@ export const PARTNER_KEYS = {
   sales: () => [...PARTNER_KEYS.all, "sales"] as const,
   saleList: (params?: IGetDailyOrderPartnerSalesParams) =>
     [...PARTNER_KEYS.sales(), params] as const,
+} as const;
+
+export const TABLE_KEYS = {
+  all: ["tables"] as const,
+  lists: () => [...TABLE_KEYS.all, "list"] as const,
+  list: (params?: IGetTablesQueryParams) =>
+    [...TABLE_KEYS.lists(), params] as const,
+  matrices: () => [...TABLE_KEYS.all, "matrix"] as const,
+  matrix: () => [...TABLE_KEYS.matrices()] as const,
+} as const;
+
+export const RESERVATION_KEYS = {
+  all: ["reservations"] as const,
+  lists: () => [...RESERVATION_KEYS.all, "list"] as const,
+  list: (params?: IGetReservationsQueryParams) =>
+    [...RESERVATION_KEYS.lists(), params] as const,
 } as const;
