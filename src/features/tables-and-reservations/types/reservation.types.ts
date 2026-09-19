@@ -3,6 +3,8 @@ import type { ITable } from "./table.types";
 export type ReservationStatus =
   "pending" | "accepted" | "declined" | "cancelled";
 
+export type ReservationArea = "indoor" | "outdoor" | "rooftop";
+
 export interface IReservation {
   id: number;
   restaurant_id?: number;
@@ -14,6 +16,7 @@ export interface IReservation {
   reservation_time?: string;
   table_id?: number | null;
   status?: ReservationStatus;
+  area?: ReservationArea;
   source?: string;
   special_request?: string | null;
   order_id?: number | null;
