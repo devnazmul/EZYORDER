@@ -1,5 +1,7 @@
+import { AUTH_ROUTES } from "@/constants";
 import { authStore } from "@/utils";
 import axios from "axios";
+import { router } from "expo-router";
 import ENV from "./env";
 
 const axiosClient = axios.create({
@@ -13,7 +15,7 @@ const axiosClient = axios.create({
 // Request Interceptor
 axiosClient.interceptors.request.use(
   async (config) => {
-    // Dynamically inject the token using your existing authStore utility
+    // Dynamically inject the token using authStore utility
     const token = await authStore.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -27,12 +29,31 @@ axiosClient.interceptors.request.use(
 
 // Response Interceptor
 axiosClient.interceptors.response.use(
-  (response) => {
-    // You can handle global response transformations or token refresh logic here
+  async (response) => {
+    // Check if the backend auto-refreshed the token and sent a new one
+    const newAccessToken = response.headers["x-access-token"];
+
+    if (newAccessToken) {
+      // Automatically update stored token with the new access token
+      await authStore.setToken(newAccessToken);
+    }
+
     return response;
   },
-  (error) => {
-    return Promise.reject(error);
+  async (error) => {
+    // 401 means BOTH access token AND refresh token are expired or invalid
+    if (error.response?.status === 401) {
+      await authStore.clearSession();
+
+      // Redirect to login screen
+      try {
+        router.replace(AUTH_ROUTES.LOGIN);
+      } catch (navError) {
+        console.warn("Failed to redirect to login on 401:", navError);
+      }
+    }
+
+    throw error;
   },
 );
 

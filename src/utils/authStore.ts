@@ -18,6 +18,14 @@ export const authStore = {
     }
   },
 
+  async setToken(token: string): Promise<void> {
+    try {
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+    } catch (error) {
+      console.error("Error saving auth token:", error);
+    }
+  },
+
   async getToken(): Promise<string | null> {
     try {
       return await SecureStore.getItemAsync(TOKEN_KEY);
@@ -34,6 +42,14 @@ export const authStore = {
     } catch (error) {
       console.error("Error getting user data:", error);
       return null;
+    }
+  },
+
+  async removeToken(): Promise<void> {
+    try {
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+    } catch (error) {
+      console.error("Error removing auth token:", error);
     }
   },
 
