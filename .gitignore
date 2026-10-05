@@ -45,7 +45,15 @@ app-example
 
 /agent_input
 /agent_output
-
 /.scannerwork
 /sonar-project.properties
-config.bat
+
+# environment variables
+.env
+.env.*
+.env*.local
+!.env.example
+
+# IDE / Editor
+.vscode/
+.idea/
